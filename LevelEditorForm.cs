@@ -967,9 +967,6 @@ namespace SM64DSe
 
         private uint[] m_PickingFrameBuffer;
 
-        //private int m_BBShader;
-        //private int m_BBShaderCamPos;
-
         private bool m_ShowCommonLayer;
         private int m_AuxLayerNum;
         private int m_EditMode;
@@ -1100,95 +1097,92 @@ namespace SM64DSe
 
             // Pass 1 - picking mode rendering (render stuff with fake colors that identify objects)
 
-            //GL.ClearColor(1.0f, 1.0f, 1.0f, 1.0f);
-            GL.ClearColor(Color.Black);
+            GL.ClearColor(1.0f, 1.0f, 1.0f, 1.0f);
             GL.Clear(ClearBufferMask.ColorBufferBit | ClearBufferMask.DepthBufferBit | ClearBufferMask.StencilBufferBit);
 
             GL.MatrixMode(MatrixMode.Modelview);
             GL.LoadMatrix(ref m_CamMatrix);
 
-            if (false)
+            GL.Disable(EnableCap.AlphaTest);
+            GL.Disable(EnableCap.Blend);
+            GL.Disable(EnableCap.Dither);
+            GL.Disable(EnableCap.LineSmooth);
+            GL.Disable(EnableCap.PolygonSmooth);
+            GL.BindTexture(TextureTarget.Texture2D, 0);
+            GL.Disable(EnableCap.Lighting);
+
+            for (int a = 0; a < m_LevelModelDLs.GetLength(0); a++)
             {
-                GL.Disable(EnableCap.AlphaTest);
-                GL.Disable(EnableCap.Blend);
-                GL.Disable(EnableCap.Dither);
-                GL.Disable(EnableCap.LineSmooth);
-                GL.Disable(EnableCap.PolygonSmooth);
-                GL.BindTexture(TextureTarget.Texture2D, 0);
-                GL.Disable(EnableCap.Lighting);
-
-                for (int a = 0; a < m_LevelModelDLs.GetLength(0); a++)
-                {
-                    GL.Color4(Color.FromArgb(a));
-                    GL.CallList(m_LevelModelDLs[a, 2]);
-                }
-
-                if (m_ShowCommonLayer) GL.CallList(m_ObjectDLs[0, 2]);
-                if (m_AuxLayerNum > 0) GL.CallList(m_ObjectDLs[m_AuxLayerNum, 2]);
-
-                GL.Flush();
-                GL.ReadPixels(m_MouseCoords.X - 1, glLevelView.Height - m_MouseCoords.Y + 1, 3, 3, PixelFormat.Bgra, PixelType.UnsignedByte, m_PickingFrameBuffer);
-
-                //float lol = 0f;
-                //GL.ReadPixels(m_MouseCoords.X, glLevelView.Height - m_MouseCoords.Y, 1, 1, PixelFormat.DepthComponent, PixelType.Float, ref lol);
-                //lol = (float)-Math.Log(1f - lol);
-                //slStatusLabel.Text = lol.ToString();
-
-                // Pass 2 - real rendering
-
-                GL.DepthMask(true);
-                GL.ClearColor(0.0f, 0.0f, 0.125f, 1.0f);
-                GL.Clear(ClearBufferMask.ColorBufferBit | ClearBufferMask.DepthBufferBit | ClearBufferMask.StencilBufferBit);
-
-                GL.Enable(EnableCap.AlphaTest);
-                GL.Enable(EnableCap.Blend);
-                GL.Enable(EnableCap.Dither);
-                GL.Enable(EnableCap.LineSmooth);
-                GL.Enable(EnableCap.PolygonSmooth);
-
-                GL.LoadMatrix(ref m_SkyboxMatrix);
-                GL.CallList(m_SkyboxDL);
-
-                GL.LoadMatrix(ref m_CamMatrix);
-
-                //GL.PolygonMode(MaterialFace.FrontAndBack, PolygonMode.Line);
-
-                // opaque polygons
-                for (int a = 0; a < m_LevelModelDLs.GetLength(0); a++)
-                    GL.CallList(m_LevelModelDLs[a, 0]);
-
-                if (m_ShowCommonLayer) GL.CallList(m_ObjectDLs[0, 0]);
-                if (m_AuxLayerNum > 0) GL.CallList(m_ObjectDLs[m_AuxLayerNum, 0]);
-
-                // translucent polygons
-                for (int a = 0; a < m_LevelModelDLs.GetLength(0); a++)
-                    GL.CallList(m_LevelModelDLs[a, 1]);
-
-                if (m_ShowCommonLayer) GL.CallList(m_ObjectDLs[0, 1]);
-                if (m_AuxLayerNum > 0) GL.CallList(m_ObjectDLs[m_AuxLayerNum, 1]);
-
-                // highlight outlines
-                if (m_SelectedObject != null && m_SelectedObject != m_HoveredObject) GL.CallList(m_SelectHiliteDL);
-                if (m_HoveredObject != null) GL.CallList(m_HoverHiliteDL);
-
-                //GL.PolygonMode(MaterialFace.FrontAndBack, PolygonMode.Fill);
-
-                // axes (temp)
-                /*GL.BindTexture(TextureTarget.Texture2D, 0);
-                GL.LineWidth(2.0f);
-                GL.Begin(BeginMode.Lines);
-                GL.Color3(1f, 0f, 0f);
-                GL.Vertex3(0f, 0f, 0f);
-                GL.Vertex3(500f, 0f, 0f);
-                GL.Color3(0f, 1f, 0f);
-                GL.Vertex3(0f, 0f, 0f);
-                GL.Vertex3(0f, 500f, 0f);
-                GL.Color3(0f, 0f, 1f);
-                GL.Vertex3(0f, 0f, 0f);
-                GL.Vertex3(0f, 0f, 500f);
-                GL.End();*/
+                GL.Color4(Color.FromArgb(a));
+                GL.CallList(m_LevelModelDLs[a, 2]);
             }
 
+            if (m_ShowCommonLayer) GL.CallList(m_ObjectDLs[0, 2]);
+            if (m_AuxLayerNum > 0) GL.CallList(m_ObjectDLs[m_AuxLayerNum, 2]);
+
+            GL.Flush();
+            GL.ReadPixels(m_MouseCoords.X - 1, glLevelView.Height - m_MouseCoords.Y + 1, 3, 3, PixelFormat.Bgra, PixelType.UnsignedByte, m_PickingFrameBuffer);
+
+            //float lol = 0f;
+            //GL.ReadPixels(m_MouseCoords.X, glLevelView.Height - m_MouseCoords.Y, 1, 1, PixelFormat.DepthComponent, PixelType.Float, ref lol);
+            //lol = (float)-Math.Log(1f - lol);
+            //slStatusLabel.Text = lol.ToString();
+
+            // Pass 2 - real rendering
+
+            GL.DepthMask(true);
+            GL.ClearColor(0.0f, 0.0f, 0.125f, 1.0f);
+            GL.Clear(ClearBufferMask.ColorBufferBit | ClearBufferMask.DepthBufferBit | ClearBufferMask.StencilBufferBit);
+
+            GL.Enable(EnableCap.AlphaTest);
+            GL.Enable(EnableCap.Blend);
+            GL.Enable(EnableCap.Dither);
+            GL.Enable(EnableCap.LineSmooth);
+            GL.Enable(EnableCap.PolygonSmooth);
+
+            GL.LoadMatrix(ref m_SkyboxMatrix);
+            GL.CallList(m_SkyboxDL);
+
+            GL.LoadMatrix(ref m_CamMatrix);
+
+            //GL.PolygonMode(MaterialFace.FrontAndBack, PolygonMode.Line);
+
+            // opaque polygons
+            for (int a = 0; a < m_LevelModelDLs.GetLength(0); a++)
+                GL.CallList(m_LevelModelDLs[a, 0]);
+
+            if (m_ShowCommonLayer) GL.CallList(m_ObjectDLs[0, 0]);
+            if (m_AuxLayerNum > 0) GL.CallList(m_ObjectDLs[m_AuxLayerNum, 0]);
+
+            // translucent polygons
+            for (int a = 0; a < m_LevelModelDLs.GetLength(0); a++)
+                GL.CallList(m_LevelModelDLs[a, 1]);
+
+            if (m_ShowCommonLayer) GL.CallList(m_ObjectDLs[0, 1]);
+            if (m_AuxLayerNum > 0) GL.CallList(m_ObjectDLs[m_AuxLayerNum, 1]);
+
+            // highlight outlines
+            if (m_SelectedObject != null && m_SelectedObject != m_HoveredObject) GL.CallList(m_SelectHiliteDL);
+            if (m_HoveredObject != null) GL.CallList(m_HoverHiliteDL);
+
+            //GL.PolygonMode(MaterialFace.FrontAndBack, PolygonMode.Fill);
+
+            // axes (temp)
+            /*GL.BindTexture(TextureTarget.Texture2D, 0);
+            GL.LineWidth(2.0f);
+            GL.Begin(BeginMode.Lines);
+            GL.Color3(1f, 0f, 0f);
+            GL.Vertex3(0f, 0f, 0f);
+            GL.Vertex3(500f, 0f, 0f);
+            GL.Color3(0f, 1f, 0f);
+            GL.Vertex3(0f, 0f, 0f);
+            GL.Vertex3(0f, 500f, 0f);
+            GL.Color3(0f, 0f, 1f);
+            GL.Vertex3(0f, 0f, 0f);
+            GL.Vertex3(0f, 0f, 500f);
+            GL.End();*/
+
+#if false
             GL.BindTexture(TextureTarget.Texture2D, 0);
             GL.LineWidth(1f);
            // GL.PolygonMode(MaterialFace.FrontAndBack, PolygonMode.Line);
@@ -1292,6 +1286,7 @@ namespace SM64DSe
                     GL.End();
                 }
             }*/
+#endif
 
             glLevelView.SwapBuffers();
         }
