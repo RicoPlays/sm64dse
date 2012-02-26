@@ -2156,6 +2156,21 @@ namespace SM64DSe
                     if (face.m_VtxIndices.Length < 3)
                         continue;
 
+                    List<Vector3> facepoly = new List<Vector3>();
+                    foreach(int i in face.m_VtxIndices)
+                    {
+                        Vector3 v = scaledvtxs[i].Xyz;
+                        Helper.RoundVector(ref v, 64000f);
+                        if(!m_ZMirror)
+                            facepoly.Insert(0, v);
+                        else
+                            facepoly.Add(v);
+                    }
+
+                    triangulate(planes, facepoly, Vector3.Zero);
+
+                    continue;
+                    //Yeap, all below this isn't run at all.
                     for (int i = 0; i < (face.m_VtxIndices.Length - 2); i++)
                     {
                         Vector3 a = scaledvtxs[face.m_VtxIndices[0]].Xyz;
@@ -2168,9 +2183,11 @@ namespace SM64DSe
                             [01:33:09]	dirbaio >	round them all the same the DS would round them
                             [01:33:20]	dirbaio >	and do all the plane-cube calculations using the rounded values :P
                          */
+                        
                         Helper.RoundVector(ref a, 64000f);
                         Helper.RoundVector(ref b, 64000f);
                         Helper.RoundVector(ref c, 64000f);
+                        
 
                         CollisionPlane plane;
                         if (!m_ZMirror)
@@ -2226,6 +2243,9 @@ namespace SM64DSe
                     }
                 }
             }
+
+            simplifyCollisionPlanes(planes);
+
             //lolpolys = polygons;
             lolplanes = planes;
 
@@ -2313,6 +2333,280 @@ namespace SM64DSe
             lolplanes = planes;
         }
 
+        private void simplifyCollisionPlanes(List<CollisionPlane> planes)
+        {
+            //First get all vertexs in the model.
+            //Remove duplicate ones for efficiency.
+            List<Vector3> vertexs = new List<Vector3>();
+
+            foreach (CollisionPlane p in planes)
+            {
+                addToList(vertexs, p.m_Point);
+                addToList(vertexs, p.m_PointB);
+                addToList(vertexs, p.m_PointC);
+            }
+
+            //Now iterate through all the vertexs.
+            //Try to remove them :)
+            //Repeat until we can't simplify anymore.
+
+            bool simplified = true;
+
+            while (simplified)
+            {
+                simplified = false;
+                foreach (Vector3 vtx in vertexs)
+                {
+                    if (trySimplifyVertex(vtx, planes))
+                    {
+                        simplified = true;
+                        break;
+                    }
+                }
+            }
+        }
+
+        private bool trySimplifyVertex(Vector3 v, List<CollisionPlane> planes)
+        {
+            
+            List<CollisionPlane> polygonPlanes = findPlanesWithVertex(v, planes);
+//            Console.Out.WriteLine("LOL " + polygonPlanes.Count + " triangles!");
+
+            //No use in simplifying quads into quads. Let alone simple triangles.
+            if (polygonPlanes.Count < 3)
+                return false;
+
+            //Check that the normal is equal for all polys 
+            //TODO: Add some tolerance for float errors, so that nearly-equal normals are equal.
+            Vector3 normal = polygonPlanes[0].m_Normal;
+
+            foreach (CollisionPlane p in polygonPlanes)
+                if(!Helper.VectorsEqual(normal, p.m_Normal))
+                    return false;
+            Console.Out.WriteLine("Detected "+polygonPlanes.Count+" flat triangles!");
+
+            //Now try to reconstruct the polygon edges.
+            //If we fail, don't try harder and return false.
+            
+            //First store all the edges in a graph.
+            //If a triangle has vertexs V, A, B, store the edge A->B
+            //These edges will be the edges of the polygon to be triangulated.
+
+            List<Vector3> indexes = new List<Vector3>();
+            Dictionary<int, List<int>> edges = new Dictionary<int,List<int>>();
+
+            foreach (CollisionPlane p in polygonPlanes)
+            {
+                Vector3 a, b;
+                if(Helper.VectorsEqual(p.m_Point, v))
+                {
+                    a = p.m_PointB;
+                    b = p.m_PointC;
+                }
+                else if(Helper.VectorsEqual(p.m_PointB, v))
+                {
+                    a = p.m_PointC;
+                    b = p.m_Point;
+                }
+                else if(Helper.VectorsEqual(p.m_PointC, v))
+                {
+                    a = p.m_Point;
+                    b = p.m_PointB;
+                }
+                else throw new Exception("http://www.youtube.com/watch?v=2Z4m4lnjxkY");
+                
+                int indexa = addToList(indexes, a);
+                int indexb = addToList(indexes, b);
+
+                if(!edges.ContainsKey(indexa))
+                    edges[indexa] = new List<int>();
+
+                edges[indexa].Add(indexb);
+            }
+           
+            //Now check the edges make a well-formed polygon.
+            //If it's well-formed we can start in any vertex and go all the way round.
+            int ind = 0;
+            List<Vector3> polygon = new List<Vector3>();
+            while(!vectorInList(polygon, indexes[ind]))
+            {
+                //Add vtx to the polygon
+                Vector3 vtx = indexes[ind];
+                polygon.Add(vtx);
+                
+                //Every edge should connect with another one. No more, no less.
+                if(!edges.ContainsKey(ind) ||edges[ind].Count != 1)
+                    return false;
+
+                //Go to next vertex
+                ind = edges[ind][0];
+            }
+
+            //We have now gone round.
+            //We should have gone through all the triangles.
+            //If not, something weird's going on, we should stop.
+            if(polygon.Count != polygonPlanes.Count)
+                return false;
+
+            Console.Out.WriteLine("...and they form a nice polygon!!");
+
+            //Remove all the polys
+            foreach (CollisionPlane p in polygonPlanes)
+                planes.Remove(p);
+
+            /*
+            //Do dumb triangulation.
+            //Will screw concave polys up.
+            Vector3 center = polygon[0];
+            for (int i = 2; i < polygon.Count; i++)
+                planes.Add(new CollisionPlane(center, polygon[i - 1], polygon[i], 0, false));
+            */  
+
+            //Dumb triangulation is dumb. Let's do something better.
+            triangulate(planes, polygon, normal);
+            return true;
+        }
+
+        private void triangulate(List<CollisionPlane> planes, List<Vector3> polygon, Vector3 normal)
+        {
+            //Clone the poly list because we're going to modify it.
+            polygon = new List<Vector3>(polygon);
+
+            //Lines? No thanks.
+            if (polygon.Count < 3)
+            {
+                Console.WriteLine("Bad poly.");
+                return;
+            }
+
+            int ct;
+
+            //Try to simplify the polygon.
+            bool simplified = true;
+            while (simplified && polygon.Count >= 3)
+            {
+                simplified = false;
+                ct = polygon.Count;
+
+                for (int i = 0; i < ct; i++)
+                {
+                    Vector3 a = polygon[i];
+                    Vector3 b = polygon[(i + 1) % ct];
+                    Vector3 c = polygon[(i + 2) % ct];
+                    Vector3 side1 = Vector3.Subtract(b, a);
+                    Vector3 side2 = Vector3.Subtract(c, a);
+
+                    //Two parallel or coninciding edges.
+                    if (Helper.VectorsEqual(Vector3.Cross(side2, side1), Vector3.Zero))
+                    {
+                        //Just remove it.
+                        polygon.RemoveAt((i + 1) % ct);
+                        Console.WriteLine("Simplified 1 vertex out of " + ct);
+                        simplified = true;
+                        break;
+                    }
+                }
+            }
+
+            //Lines? No thanks. Check again.
+            if (polygon.Count < 3)
+            {
+                Console.WriteLine("Bad poly after simplifying");
+                return;
+            }
+
+            while (polygon.Count > 3)
+            {
+                //Find an "ear"
+                ct = polygon.Count;
+
+                int earidx = -1;
+
+                for (int i = 0; i < ct; i++)
+                {
+                    Vector3 a = polygon[i];
+                    Vector3 b = polygon[(i + 1) % ct];
+                    Vector3 c = polygon[(i + 2) % ct];
+
+                    //First check that the triangle is convex.
+                    //If it isn't, the normal would be the other way =D
+
+                    Vector3 side1 = Vector3.Subtract(b, a);
+                    Vector3 side2 = Vector3.Subtract(c, a);
+
+                    Vector3 normal2 = Vector3.Normalize(Vector3.Cross(side2, side1));
+
+                    //If both normals point the same way
+                    if (Helper.VectorsEqual(Vector3.Zero, normal) || Vector3.Dot(normal2, normal) > 0)
+                    {
+                        earidx = i;
+                        break;
+                    }
+
+                    //TODO check that there are no points in the ear.
+                }
+
+                //We should always find ears. If not, yell it at Dirbaio.
+                if (earidx == -1)
+                {
+                    //                    throw new Exception("No ear found?!");
+                    break;
+                }
+
+                //Add the ear to the collision planes :D
+                Vector3 sa = polygon[earidx];
+                Vector3 sb = polygon[(earidx + 1) % ct];
+                Vector3 sc = polygon[(earidx + 2) % ct];
+
+                planes.Add(new CollisionPlane(sa, sb, sc, 0, false));
+
+                //Remove it from the poly.
+                polygon.RemoveAt((earidx + 1) % ct);
+            }
+
+            //Now add the remaining triangle.
+            Vector3 da = polygon[0];
+            Vector3 db = polygon[1];
+            Vector3 dc = polygon[2];
+
+            planes.Add(new CollisionPlane(da, db, dc, 0, false));
+        }
+
+        private List<CollisionPlane> findPlanesWithVertex(Vector3 v, List<CollisionPlane> planes)
+        {
+            List<CollisionPlane> result = new List<CollisionPlane>();
+            foreach (CollisionPlane p in planes)
+            {
+                if (Helper.VectorsEqual(p.m_Point, v) ||
+                    Helper.VectorsEqual(p.m_PointB, v) ||
+                    Helper.VectorsEqual(p.m_PointC, v))
+                    result.Add(p);
+            }
+
+            return result;
+        }
+
+        private bool vectorInList(List<Vector3> l, Vector3 p)
+        {
+            foreach (Vector3 v in l)
+                if (Helper.VectorsEqual(v, p))
+                    return true;
+            return false;
+        }
+        
+        private int addToList(List<Vector3> l, Vector3 p)
+        {
+            int i = 0;
+            foreach (Vector3 v in l)
+            {
+                if (Helper.VectorsEqual(v, p))
+                    return i;
+                i++;
+            }
+
+            l.Add(p);
+            return l.Count - 1; 
+        }
 
         private void glModelView_Load(object sender, EventArgs e)
         {
