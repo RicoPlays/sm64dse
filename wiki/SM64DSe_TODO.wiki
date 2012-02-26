@@ -6,7 +6,7 @@ There's no particular priority order unless stated otherwise.
 
 == Linux ==
 
-  * fix the issues with GLControl (those little bastards overlap everything and ruin the active form's rendering)
+  * fix the issues with GLControl (those little bastards overlap everything and ruin the active form's rendering, like [http://i.imgur.com/afL9E.png this])
   * make a Linux build with Monodevelop (will perhaps fix the aforementioned issue)
 
 == Model importer ==
