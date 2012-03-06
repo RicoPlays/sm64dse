@@ -1,4 +1,22 @@
-﻿using System;
+﻿/*
+    Copyright 2012 Kuribo64
+
+    This file is part of SM64DSe.
+
+    SM64DSe is free software: you can redistribute it and/or modify it under
+    the terms of the GNU General Public License as published by the Free
+    Software Foundation, either version 3 of the License, or (at your option)
+    any later version.
+
+    SM64DSe is distributed in the hope that it will be useful, but WITHOUT ANY 
+    WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS 
+    FOR A PARTICULAR PURPOSE. See the GNU General Public License for more details.
+
+    You should have received a copy of the GNU General Public License along 
+    with SM64DSe. If not, see http://www.gnu.org/licenses/.
+*/
+
+using System;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Data;
@@ -956,6 +974,11 @@ namespace SM64DSe
 
         private bool m_GLLoaded;
 
+        // 3D view settings
+        private const float k_zNear = 0.01f;
+        private const float k_zFar = 1000f;
+        private const float k_FOV = (float)(70f * Math.PI) / 180f;
+
         private Vector2 m_CamRotation;
         private Vector3 m_CamTarget;
         private float m_CamDistance;
@@ -966,6 +989,7 @@ namespace SM64DSe
         private Matrix4 m_CamMatrix, m_SkyboxMatrix;
 
         private uint[] m_PickingFrameBuffer;
+        private float m_PickingDepth;
 
         private bool m_ShowCommonLayer;
         private int m_AuxLayerNum;
@@ -993,20 +1017,20 @@ namespace SM64DSe
         private int m_SelectHiliteDL;
         private int m_HoverHiliteDL;
 
-
         private void glLevelView_Load(object sender, EventArgs e)
         {
             // initialize OpenGL
             glLevelView.Context.MakeCurrent(glLevelView.WindowInfo);
 
             m_PickingFrameBuffer = new uint[9];
+            m_PickingDepth = 0f;
             
             GL.Viewport(glLevelView.ClientRectangle);
 
             m_AspectRatio = (float)glLevelView.Width / (float)glLevelView.Height;
             GL.MatrixMode(MatrixMode.Projection);
             GL.LoadIdentity();
-            Matrix4 projmtx = Matrix4.CreatePerspectiveFieldOfView((float)((70f * Math.PI) / 180f), m_AspectRatio, 0.01f, 1000f);
+            Matrix4 projmtx = Matrix4.CreatePerspectiveFieldOfView(k_FOV, m_AspectRatio, k_zNear, k_zFar);
             GL.MultMatrix(ref projmtx);
 
             GL.Enable(EnableCap.DepthTest);
@@ -1031,8 +1055,8 @@ namespace SM64DSe
 		    m_CamDistance = 1.0f;//6.5f;
 			UpdateCamera();
 
-			m_PixelFactorX = ((2.0f * (float)Math.Tan((35.0f*Math.PI)/180.0f) * m_AspectRatio) / (float)(glLevelView.Width));
-			m_PixelFactorY = ((2.0f * (float)Math.Tan((35.0f*Math.PI)/180.0f)) / (float)(glLevelView.Height));
+			m_PixelFactorX = ((2f * (float)Math.Tan(k_FOV / 2f) * m_AspectRatio) / (float)(glLevelView.Width));
+			m_PixelFactorY = ((2f * (float)Math.Tan(k_FOV / 2f)) / (float)(glLevelView.Height));
 
 			GL.Enable(EnableCap.Blend);
 			GL.BlendFunc(BlendingFactorSrc.SrcAlpha, BlendingFactorDest.OneMinusSrcAlpha);
@@ -1080,12 +1104,12 @@ namespace SM64DSe
 
             m_AspectRatio = (float)glLevelView.Width / (float)glLevelView.Height;
             GL.MatrixMode(MatrixMode.Projection);
-            Matrix4 projmtx = Matrix4.CreatePerspectiveFieldOfView((float)(70f * Math.PI / 180f), m_AspectRatio, 0.01f, 1000f);
+            Matrix4 projmtx = Matrix4.CreatePerspectiveFieldOfView(k_FOV, m_AspectRatio, k_zNear, k_zFar);
             //Matrix4 projmtx = Matrix4.CreateOrthographic(2f, 2f, 0.01f, 1000f);
             GL.LoadMatrix(ref projmtx);
 
-            m_PixelFactorX = ((2f * (float)Math.Tan((35f * Math.PI) / 180f) * m_AspectRatio) / (float)(glLevelView.Width));
-            m_PixelFactorY = ((2f * (float)Math.Tan((35f * Math.PI) / 180f)) / (float)(glLevelView.Height));
+            m_PixelFactorX = ((2f * (float)Math.Tan(k_FOV / 2f) * m_AspectRatio) / (float)(glLevelView.Width));
+            m_PixelFactorY = ((2f * (float)Math.Tan(k_FOV / 2f)) / (float)(glLevelView.Height));
         }
 
         int lol = 0;
@@ -1094,6 +1118,11 @@ namespace SM64DSe
         {
             if (!m_GLLoaded) return;
             glLevelView.Context.MakeCurrent(glLevelView.WindowInfo);
+
+            // lol temporary
+            GL.MatrixMode(MatrixMode.Projection);
+            Matrix4 projmtx = Matrix4.CreatePerspectiveFieldOfView(k_FOV, m_AspectRatio, k_zNear, k_zFar);
+            GL.LoadMatrix(ref projmtx);
 
             // Pass 1 - picking mode rendering (render stuff with fake colors that identify objects)
 
@@ -1123,10 +1152,9 @@ namespace SM64DSe
             GL.Flush();
             GL.ReadPixels(m_MouseCoords.X - 1, glLevelView.Height - m_MouseCoords.Y + 1, 3, 3, PixelFormat.Bgra, PixelType.UnsignedByte, m_PickingFrameBuffer);
 
-            //float lol = 0f;
-            //GL.ReadPixels(m_MouseCoords.X, glLevelView.Height - m_MouseCoords.Y, 1, 1, PixelFormat.DepthComponent, PixelType.Float, ref lol);
-            //lol = (float)-Math.Log(1f - lol);
-            //slStatusLabel.Text = lol.ToString();
+            // depth math from http://www.opengl.org/resources/faq/technical/depthbuffer.htm
+            GL.ReadPixels(m_MouseCoords.X, glLevelView.Height - m_MouseCoords.Y, 1, 1, PixelFormat.DepthComponent, PixelType.Float, ref m_PickingDepth);
+            m_PickingDepth = -(k_zFar * k_zNear / (m_PickingDepth * (k_zFar - k_zNear) - k_zFar));
 
             // Pass 2 - real rendering
 
@@ -1288,6 +1316,67 @@ namespace SM64DSe
             }*/
 #endif
 
+#if false
+            /*Bitmap test = new Bitmap(glLevelView.Width, glLevelView.Height);
+            Graphics g = Graphics.FromImage(test);
+            g.Clear(Color.FromArgb(0, 0, 0, 0));
+            Pen plol = new Pen(Color.FromArgb(255, 255, 0, 0));
+            Brush rofl = new SolidBrush(Color.FromArgb(128, 0, 0, 255));
+            g.DrawRectangle(plol, 20, 30, 50, 50);
+            g.FillRectangle(rofl, 21, 31, 48, 48);*/
+
+            GL.MatrixMode(MatrixMode.Projection);
+            GL.LoadIdentity();
+            GL.Ortho(0, glLevelView.Width, glLevelView.Height, 0, 0, 1);
+            GL.MatrixMode(MatrixMode.Modelview);
+            GL.LoadIdentity();
+            GL.Disable(EnableCap.DepthTest);
+
+            /*byte[] loldata = new byte[glLevelView.Width * glLevelView.Height * 4];
+            for (int y = 0; y < glLevelView.Height; y++)
+            {
+                for (int x = 0; x < glLevelView.Width; x++)
+                {
+                    Color c = test.GetPixel(x, y);
+                    loldata[(y * glLevelView.Width + x) * 4    ] = c.B;
+                    loldata[(y * glLevelView.Width + x) * 4 + 1] = c.G;
+                    loldata[(y * glLevelView.Width + x) * 4 + 2] = c.R;
+                    loldata[(y * glLevelView.Width + x) * 4 + 3] = c.A;
+                }
+            }*/
+
+           // System.Drawing.Imaging.BitmapData lolbmp = test.LockBits(glLevelView.ClientRectangle, System.Drawing.Imaging.ImageLockMode.ReadOnly, System.Drawing.Imaging.PixelFormat.Format32bppPArgb);
+          //  GL.BindTexture(TextureTarget.Texture2D, warp);
+           // GL.TexImage2D(TextureTarget.Texture2D, 0, PixelInternalFormat.Four, glLevelView.Width, glLevelView.Height, 0, PixelFormat.Bgra, PixelType.UnsignedByte, loldata);
+           // test.UnlockBits(lolbmp);
+
+          /*  GL.TexParameter(TextureTarget.Texture2D, TextureParameterName.TextureMinFilter, (int)TextureMinFilter.Nearest);
+            GL.TexParameter(TextureTarget.Texture2D, TextureParameterName.TextureMagFilter, (int)TextureMagFilter.Nearest);
+            GL.TexParameter(TextureTarget.Texture2D, TextureParameterName.TextureWrapS, (int)TextureWrapMode.Clamp);
+            GL.TexParameter(TextureTarget.Texture2D, TextureParameterName.TextureWrapT, (int)TextureWrapMode.Clamp);*/
+
+           // GL.Enable(EnableCap.Texture2D);
+           // GL.Color4(Color.FromArgb(255, 255, 0, 255));
+            GL.Color4(Color.FromArgb(128, 0, 0, 255));
+
+            GL.Begin(BeginMode.Quads);
+           /* GL.TexCoord2(0, 0);
+            GL.Vertex2(0, 0);
+            GL.TexCoord2(0, 1);
+            GL.Vertex2(0, glLevelView.Height);
+            GL.TexCoord2(1, 1);
+            GL.Vertex2(glLevelView.Width, glLevelView.Height);
+            GL.TexCoord2(1, 0);
+            GL.Vertex2(glLevelView.Width, 0);*/
+            GL.Vertex2(20, 30);
+            GL.Vertex2(20, 30 + 50);
+            GL.Vertex2(20 + 50, 30 + 50);
+            GL.Vertex2(20 + 50, 30);
+            GL.End();
+
+            GL.Enable(EnableCap.DepthTest);
+#endif
+
             glLevelView.SwapBuffers();
         }
 
@@ -1422,16 +1511,20 @@ namespace SM64DSe
                         if (m_UpsideDown)
                             xdelta = -xdelta;
 
-                        m_CamRotation.X -= xdelta * 0.002f;
-                        m_CamRotation.Y -= ydelta * 0.002f;
+                        //m_CamRotation.X -= xdelta * 0.002f;
+                       // m_CamRotation.Y -= ydelta * 0.002f;
+                        m_CamRotation.X -= (float)Math.Tan((xdelta * m_PixelFactorX) / m_PickingDepth);//xdelta * m_PixelFactorX * m_PickingDepth;
+                        m_CamRotation.Y -= ydelta * m_PixelFactorY * m_PickingDepth;
 
                         ClampRotation(ref m_CamRotation.X, (float)Math.PI * 2.0f);
                         ClampRotation(ref m_CamRotation.Y, (float)Math.PI * 2.0f);
                     }
                     else if (m_MouseDown == MouseButtons.Left)
                     {
-                        xdelta *= 0.005f;
-                        ydelta *= 0.005f;
+                        //xdelta *= 0.005f;
+                        //ydelta *= 0.005f;
+                        xdelta *= m_PixelFactorX * m_PickingDepth;
+                        ydelta *= m_PixelFactorY * m_PickingDepth;
 
                         m_CamTarget.X -= xdelta * (float)Math.Sin(m_CamRotation.X);
                         m_CamTarget.X -= ydelta * (float)Math.Cos(m_CamRotation.X) * (float)Math.Sin(m_CamRotation.Y);
@@ -1470,7 +1563,7 @@ namespace SM64DSe
                         Vector3.Subtract(ref m_CamPosition, ref m_SelectedObject.Position, out between);
 
                         float objz = (((between.X * (float)Math.Cos(m_CamRotation.X)) + (between.Z * (float)Math.Sin(m_CamRotation.X))) * (float)Math.Cos(m_CamRotation.Y)) + (between.Y * (float)Math.Sin(m_CamRotation.Y));
-
+                        //float objz = m_PickingDepth;
                         xdelta *= m_PixelFactorX * objz;
                         ydelta *= -m_PixelFactorY * objz;
 
