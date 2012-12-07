@@ -34,6 +34,8 @@ namespace SM64DSe
         public const uint ROM_PATCH_VERSION = 3;
         public const uint LEVEL_OVERLAY_SIZE = 32768;
 
+        public static bool patchAnimationFlag;
+
         private uint ARM_BL(uint src, uint dst) { return (0xEB000000 | (((dst - src - 8) >> 2) & 0x00FFFFFF)); }
 
         private ushort CalcCRC16(uint offset, uint len)
@@ -386,83 +388,90 @@ namespace SM64DSe
                             else
                                 ovl.Write32(tlists_new_addr, 0);
 
-                            if (texanm_addr != 0xFFFFFFFF)
+                            if (texanm_addr != 0xFFFFFFFF)//If not null
                             {
-                                ovl.WritePointer(tlists_new_addr + 0x4, curoffset);
-
-                                uint texanm_new_addr = curoffset;
-                                curoffset += 0x18;
-
-                                uint textures_addr = oldovl.ReadPointer(texanm_addr + 0x14);
-                                uint numscale = 0, numrot = 0, numtrans = 0;
-                                uint numtextures = oldovl.Read32(texanm_addr + 0x10);
-
-                                ovl.Write32(texanm_new_addr, oldovl.Read32(texanm_addr));
-                                ovl.Write32(texanm_new_addr + 0x10, numtextures);
-
-                                uint textures_new_addr = curoffset;
-                                curoffset += (numtextures * 0x1C);
-
-                                ovl.WritePointer(texanm_new_addr + 0x14, textures_new_addr);
-                                for (uint t = 0; t < numtextures; t++)
+                                if (patchAnimationFlag)//If they've chosen to remove texture animation data,
                                 {
-                                    uint tex_old_addr = textures_addr + (t * 0x1C);
-                                    uint tex_new_addr = textures_new_addr + (t * 0x1C);
-
-                                    ushort tex_scalenum = oldovl.Read16(tex_old_addr + 0x0C);
-                                    ushort tex_scalestart = oldovl.Read16(tex_old_addr + 0x0E);
-                                    ushort tex_rotnum = oldovl.Read16(tex_old_addr + 0x10);
-                                    ushort tex_rotstart = oldovl.Read16(tex_old_addr + 0x12);
-                                    ushort tex_transnum = oldovl.Read16(tex_old_addr + 0x14);
-                                    ushort tex_transstart = oldovl.Read16(tex_old_addr + 0x16);
-
-                                    if ((tex_scalestart + tex_scalenum) > numscale) 
-                                        numscale = (uint)(tex_scalestart + tex_scalenum);
-                                    if ((tex_rotstart + tex_rotnum) > numrot)
-                                        numrot = (uint)(tex_rotstart + tex_rotnum);
-                                    if ((tex_transstart + tex_transnum) > numtrans)
-                                        numtrans = (uint)(tex_transstart + tex_transnum);
-
-                                    ovl.Write32(tex_new_addr, oldovl.Read32(tex_old_addr));
-                                    ovl.WritePointer(tex_new_addr + 0x4, curoffset);
-                                    ovl.Write32(tex_new_addr + 0x8, oldovl.Read32(tex_old_addr + 0x8));
-                                    ovl.Write16(tex_new_addr + 0xC, tex_scalenum);
-                                    ovl.Write16(tex_new_addr + 0xE, tex_scalestart);
-                                    ovl.Write16(tex_new_addr + 0x10, tex_rotnum);
-                                    ovl.Write16(tex_new_addr + 0x12, tex_rotstart);
-                                    ovl.Write16(tex_new_addr + 0x14, tex_transnum);
-                                    ovl.Write16(tex_new_addr + 0x16, tex_transstart);
-                                    ovl.Write32(tex_new_addr + 0x18, oldovl.Read32(tex_old_addr + 0x18));
-
-                                    string tex_matname = oldovl.ReadString(oldovl.ReadPointer(tex_old_addr + 0x4), 0);
-                                    ovl.WriteString(curoffset, tex_matname, 0);
-                                    curoffset += (uint)((tex_matname.Length + 3) & ~3);
+                                    ovl.Write32(tlists_new_addr + 0x4, 0);//Set texture animation address pointer to null
                                 }
-
-                                uint scale_addr = oldovl.ReadPointer(texanm_addr + 0x4);
-                                ovl.WritePointer(texanm_new_addr + 0x4, curoffset);
-                                for (uint v = 0; v < numscale; v++)
+                                else if (!patchAnimationFlag)//Else if they've chosen to keep original texture animation data, copy it from original overlays
                                 {
-                                    ovl.Write32(curoffset, oldovl.Read32(scale_addr + (v * 4)));
-                                    curoffset += 4;
-                                }
+                                    ovl.WritePointer(tlists_new_addr + 0x4, curoffset);
 
-                                uint rot_addr = oldovl.ReadPointer(texanm_addr + 0x8);
-                                ovl.WritePointer(texanm_new_addr + 0x8, curoffset);
-                                for (uint v = 0; v < numrot; v++)
-                                {
-                                    ovl.Write16(curoffset, oldovl.Read16(rot_addr + (v * 2)));
-                                    curoffset += 2;
-                                }
-                                curoffset = (uint)((curoffset + 3) & ~3);
+                                    uint texanm_new_addr = curoffset;
+                                    curoffset += 0x18;
 
-                                uint trans_addr = oldovl.ReadPointer(texanm_addr + 0xC);
-                                ovl.WritePointer(texanm_new_addr + 0xC, curoffset);
-                                for (uint v = 0; v < numtrans; v++)
-                                {
-                                    ovl.Write32(curoffset, oldovl.Read32(trans_addr + (v * 4)));
-                                    curoffset += 4;
-                                }
+                                    uint textures_addr = oldovl.ReadPointer(texanm_addr + 0x14);
+                                    uint numscale = 0, numrot = 0, numtrans = 0;
+                                    uint numtextures = oldovl.Read32(texanm_addr + 0x10);
+
+                                    ovl.Write32(texanm_new_addr, oldovl.Read32(texanm_addr));
+                                    ovl.Write32(texanm_new_addr + 0x10, numtextures);
+
+                                    uint textures_new_addr = curoffset;
+                                    curoffset += (numtextures * 0x1C);
+
+                                    ovl.WritePointer(texanm_new_addr + 0x14, textures_new_addr);
+                                    for (uint t = 0; t < numtextures; t++)
+                                    {
+                                        uint tex_old_addr = textures_addr + (t * 0x1C);
+                                        uint tex_new_addr = textures_new_addr + (t * 0x1C);
+
+                                        ushort tex_scalenum = oldovl.Read16(tex_old_addr + 0x0C);
+                                        ushort tex_scalestart = oldovl.Read16(tex_old_addr + 0x0E);
+                                        ushort tex_rotnum = oldovl.Read16(tex_old_addr + 0x10);
+                                        ushort tex_rotstart = oldovl.Read16(tex_old_addr + 0x12);
+                                        ushort tex_transnum = oldovl.Read16(tex_old_addr + 0x14);
+                                        ushort tex_transstart = oldovl.Read16(tex_old_addr + 0x16);
+
+                                        if ((tex_scalestart + tex_scalenum) > numscale)
+                                            numscale = (uint)(tex_scalestart + tex_scalenum);
+                                        if ((tex_rotstart + tex_rotnum) > numrot)
+                                            numrot = (uint)(tex_rotstart + tex_rotnum);
+                                        if ((tex_transstart + tex_transnum) > numtrans)
+                                            numtrans = (uint)(tex_transstart + tex_transnum);
+
+                                        ovl.Write32(tex_new_addr, oldovl.Read32(tex_old_addr));
+                                        ovl.WritePointer(tex_new_addr + 0x4, curoffset);
+                                        ovl.Write32(tex_new_addr + 0x8, oldovl.Read32(tex_old_addr + 0x8));
+                                        ovl.Write16(tex_new_addr + 0xC, tex_scalenum);
+                                        ovl.Write16(tex_new_addr + 0xE, tex_scalestart);
+                                        ovl.Write16(tex_new_addr + 0x10, tex_rotnum);
+                                        ovl.Write16(tex_new_addr + 0x12, tex_rotstart);
+                                        ovl.Write16(tex_new_addr + 0x14, tex_transnum);
+                                        ovl.Write16(tex_new_addr + 0x16, tex_transstart);
+                                        ovl.Write32(tex_new_addr + 0x18, oldovl.Read32(tex_old_addr + 0x18));
+
+                                        string tex_matname = oldovl.ReadString(oldovl.ReadPointer(tex_old_addr + 0x4), 0);
+                                        ovl.WriteString(curoffset, tex_matname, 0);
+                                        curoffset += (uint)((tex_matname.Length + 3) & ~3);
+                                    }
+
+                                    uint scale_addr = oldovl.ReadPointer(texanm_addr + 0x4);
+                                    ovl.WritePointer(texanm_new_addr + 0x4, curoffset);
+                                    for (uint v = 0; v < numscale; v++)
+                                    {
+                                        ovl.Write32(curoffset, oldovl.Read32(scale_addr + (v * 4)));
+                                        curoffset += 4;
+                                    }
+
+                                    uint rot_addr = oldovl.ReadPointer(texanm_addr + 0x8);
+                                    ovl.WritePointer(texanm_new_addr + 0x8, curoffset);
+                                    for (uint v = 0; v < numrot; v++)
+                                    {
+                                        ovl.Write16(curoffset, oldovl.Read16(rot_addr + (v * 2)));
+                                        curoffset += 2;
+                                    }
+                                    curoffset = (uint)((curoffset + 3) & ~3);
+
+                                    uint trans_addr = oldovl.ReadPointer(texanm_addr + 0xC);
+                                    ovl.WritePointer(texanm_new_addr + 0xC, curoffset);
+                                    for (uint v = 0; v < numtrans; v++)
+                                    {
+                                        ovl.Write32(curoffset, oldovl.Read32(trans_addr + (v * 4)));
+                                        curoffset += 4;
+                                    }
+                                }//End If
                             }
                             else
                                 ovl.Write32(tlists_new_addr + 0x4, 0);

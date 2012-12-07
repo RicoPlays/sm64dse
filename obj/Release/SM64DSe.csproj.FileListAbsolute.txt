@@ -62,3 +62,24 @@ C:\Documents\sources\SM64DSe\trunk\obj\Release\SM64DSe.SettingsForm.resources
 C:\Documents\sources\SM64DSe\trunk\obj\Release\SM64DSe.TempHaxForm.resources
 C:\Documents\sources\SM64DSe\trunk\obj\Release\SM64DSe.TextEditorForm.resources
 C:\Documents\sources\SM64DSe\trunk\obj\Release\SM64DSe.csproj.GenerateResource.Cache
+C:\Users\Fiachra Murray\Documents\Visual Studio 2008\Projects\SM64DSe\bin\Release\SM64DSe.exe.config
+C:\Users\Fiachra Murray\Documents\Visual Studio 2008\Projects\SM64DSe\obj\Release\SM64DSe.exe
+C:\Users\Fiachra Murray\Documents\Visual Studio 2008\Projects\SM64DSe\obj\Release\SM64DSe.pdb
+C:\Users\Fiachra Murray\Documents\Visual Studio 2008\Projects\SM64DSe\bin\Release\SM64DSe.exe
+C:\Users\Fiachra Murray\Documents\Visual Studio 2008\Projects\SM64DSe\bin\Release\SM64DSe.pdb
+C:\Users\Fiachra Murray\Documents\Visual Studio 2008\Projects\SM64DSe\bin\Release\HaxxGLControl.dll
+C:\Users\Fiachra Murray\Documents\Visual Studio 2008\Projects\SM64DSe\bin\Release\HaxxGLControl.pdb
+C:\Users\Fiachra Murray\Documents\Visual Studio 2008\Projects\SM64DSe\obj\Release\ResolveAssemblyReference.cache
+C:\Users\Fiachra Murray\Documents\Visual Studio 2008\Projects\SM64DSe\obj\Release\SM64DSe.AnimationEditorForm.resources
+C:\Users\Fiachra Murray\Documents\Visual Studio 2008\Projects\SM64DSe\obj\Release\SM64DSe.LevelEditorForm.resources
+C:\Users\Fiachra Murray\Documents\Visual Studio 2008\Projects\SM64DSe\obj\Release\SM64DSe.LevelSettingsForm.resources
+C:\Users\Fiachra Murray\Documents\Visual Studio 2008\Projects\SM64DSe\obj\Release\SM64DSe.MainForm.resources
+C:\Users\Fiachra Murray\Documents\Visual Studio 2008\Projects\SM64DSe\obj\Release\SM64DSe.MinimapEditor.resources
+C:\Users\Fiachra Murray\Documents\Visual Studio 2008\Projects\SM64DSe\obj\Release\SM64DSe.ModelImporter.resources
+C:\Users\Fiachra Murray\Documents\Visual Studio 2008\Projects\SM64DSe\obj\Release\SM64DSe.ObjectListForm.resources
+C:\Users\Fiachra Murray\Documents\Visual Studio 2008\Projects\SM64DSe\obj\Release\SM64DSe.ProgressDialog.resources
+C:\Users\Fiachra Murray\Documents\Visual Studio 2008\Projects\SM64DSe\obj\Release\SM64DSe.Properties.Resources.resources
+C:\Users\Fiachra Murray\Documents\Visual Studio 2008\Projects\SM64DSe\obj\Release\SM64DSe.SettingsForm.resources
+C:\Users\Fiachra Murray\Documents\Visual Studio 2008\Projects\SM64DSe\obj\Release\SM64DSe.TempHaxForm.resources
+C:\Users\Fiachra Murray\Documents\Visual Studio 2008\Projects\SM64DSe\obj\Release\SM64DSe.TextEditorForm.resources
+C:\Users\Fiachra Murray\Documents\Visual Studio 2008\Projects\SM64DSe\obj\Release\SM64DSe.csproj.GenerateResource.Cache

@@ -35,12 +35,15 @@ namespace SM64DSe
         }
 
         string[] m_MsgData;
+        NitroFile file;
+        int currentIndex;
+        uint inf1size;
 
         private void TextEditorForm_Load(object sender, EventArgs e)
         {
-            NitroFile file = Program.m_ROM.GetFileFromName("data/message/msg_data_eng.bin");
+            file = Program.m_ROM.GetFileFromName("data/message/msg_data_eng.bin");
 
-            uint inf1size = file.Read32(0x24);
+            inf1size = file.Read32(0x24);
             ushort numentries = file.Read16(0x28);
             m_MsgData = new string[numentries];
 
@@ -106,6 +109,64 @@ namespace SM64DSe
         private void lbxMsgList_SelectedIndexChanged(object sender, EventArgs e)
         {
             tbxMsgPreview.Text = m_MsgData[lbxMsgList.SelectedIndex];
+        }
+
+        private void btnSave_Click(object sender, EventArgs e)
+        {
+            string newText = txtEdit.Text;
+            char[] newTextByte = newText.ToCharArray();
+            
+            uint straddr = file.Read32((uint)(0x30 + currentIndex * 8));
+            straddr += 0x20 + inf1size + 0x8;
+
+            //increase straddr each time and write8 the current char
+            for (int i = 0; i < newTextByte.Length; i++)
+            {
+                byte byteToWrite = 0;
+
+                //Upper
+                //nintendo encoding = ('A' + cur - 0x0A);
+                //ascii = A + ne - 0x0A
+                //ascii - A + 0x0A = ne
+                if (Char.IsNumber(newTextByte[i]))//Numeric
+                    byteToWrite = (byte)(newTextByte[i] - '0');
+                else if (Char.IsUpper(newTextByte[i]))//Uppercase
+                    byteToWrite = (byte)(newTextByte[i] - 'A' + 0x0A);
+                else if (Char.IsLower(newTextByte[i]))//Lowercase
+                    byteToWrite = (byte)(newTextByte[i] - 'a' + 0x2D);
+                else if (newTextByte[i].Equals('\r'))//New Line character is \r\n however this gets split into 2 chars
+                    continue;//next character will be \n - go check it
+                else if (newTextByte[i].Equals('\n'))
+                    byteToWrite = 0xFD;
+
+                else//Punctuation and other characters
+                {
+                    switch (newTextByte[i])
+                    {
+                        case '?': byteToWrite = 0x26; break;
+                        case '!': byteToWrite = 0x27; break;
+                        case '~': byteToWrite = 0x28; break;
+                        case ',': byteToWrite = 0x29; break;
+                        case '“': byteToWrite = 0x2A; break;
+                        case '”': byteToWrite = 0x2B; break;
+
+                        case '-': byteToWrite = 0x47; break;
+                        case '.': byteToWrite = 0x48; break;
+                        case '\'': byteToWrite = 0x49; break;
+                        case ':': byteToWrite = 0x4A; break;
+                        case ';': byteToWrite = 0x4B; break;
+                        case '&': byteToWrite = 0x4C; break;
+                        case ' ': byteToWrite = 0x4D; break;
+                        case '/': byteToWrite = 0x4E; break;
+                    }
+                }
+
+                file.Write8(straddr, byteToWrite);//Write the current byte
+                straddr++;
+            }
+            file.Write8(straddr, 0xFF);//End of message
+
+            file.SaveChanges();
         }
     }
 }
