@@ -233,6 +233,29 @@
   </ItemGroup>
   <ItemGroup>
     <Content Include="app.ico" />
+    <None Include="Images\Small\StarFull.png" />
+    <None Include="Images\Small\StarEmpty.png" />
+    <None Include="Images\Small\DPad.png" />
+    <None Include="Images\Small\Coins.png" />
+    <None Include="Images\Small\btnY.png" />
+    <None Include="Images\Small\btnX.png" />
+    <None Include="Images\Small\btnR.png" />
+    <None Include="Images\Small\btnL.png" />
+    <None Include="Images\Small\btnB.png" />
+    <None Include="Images\Small\btnA.png" />
+    <None Include="Images\StarFull.png" />
+    <None Include="Images\StarEmpty.png" />
+    <None Include="Images\DS_Glyphs.png" />
+    <None Include="Images\DPad.png" />
+    <None Include="Images\Coins.png" />
+    <None Include="Images\btnY.png" />
+    <None Include="Images\btnX.png" />
+    <None Include="Images\btnR.png" />
+    <None Include="Images\btnL.png" />
+    <None Include="Images\btnB.png" />
+    <None Include="Images\btnA.png" />
+    <None Include="Images\ae17ki.png" />
+    <None Include="Images\1zm1hxc.png" />
   </ItemGroup>
   <ItemGroup>
     <BootstrapperPackage Include="Microsoft.Net.Client.3.5">
