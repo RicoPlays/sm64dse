@@ -1831,6 +1831,7 @@ namespace SM64DSe
             tvObjectList.Refresh();
         }
 
+        public static bool isImported = false;//For determing if we need to set texture animation address to NULL
         private void btnSave_Click(object sender, EventArgs e)
         {
             bool bankwarning = false;
@@ -1861,6 +1862,27 @@ namespace SM64DSe
                 m_Overlay.Write16(curoffset, id);
                 curoffset += 2;
             }
+
+            if (isImported)
+            {
+                uint numAreas = m_Overlay.Read8(0x74);
+                uint objlistptr = m_Overlay.ReadPointer(0x70);
+
+                for (byte a = 0; a < m_NumAreas; a++)//For each area in current overlay
+                {
+                    uint addr = (uint)(objlistptr + (a * 12));//Each level data header is 12 bytes - get the address of current one
+
+                    //Texture animation addresses have an offset of 4 bytes within each level data header
+                    addr += 4;
+                    if (m_Overlay.Read32(addr) != 0)//If texture animation data pointer is not NULL
+                    {
+                        m_Overlay.Write32(addr, 0);//Make it NULL
+                    }
+                }
+
+                isImported = false;//Set back to default
+            }
+            
 
             m_Overlay.SaveChanges();
             slStatusLabel.Text = "Changes saved.";

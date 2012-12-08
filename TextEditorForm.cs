@@ -58,34 +58,34 @@ namespace SM64DSe
 				    byte cur = file.Read8(straddr);
                     straddr++;
 				    char thechar = '\0';
-    				
-				    if ((cur >= 0x00) && (cur <= 0x09))
-					    thechar = (char)('0' + cur);
-				    else if ((cur >= 0x0A) && (cur <= 0x23))
-					    thechar = (char)('A' + cur - 0x0A);
-				    else if ((cur >= 0x2D) && (cur <= 0x46))
-					    thechar = (char)('a' + cur - 0x2D);
-				    else
-				    {
-					    switch (cur)
-					    {
-					    case 0x26: thechar = '?'; break;
-					    case 0x27: thechar = '!'; break;
-					    case 0x28: thechar = '~'; break;
-					    case 0x29: thechar = ','; break;
-					    case 0x2A: thechar = '“'; break;
-					    case 0x2B: thechar = '”'; break;
 
-					    case 0x47: thechar = '-'; break;
-					    case 0x48: thechar = '.'; break;
-					    case 0x49: thechar = '\''; break;
-					    case 0x4A: thechar = ':'; break;
-					    case 0x4B: thechar = ';'; break;
-					    case 0x4C: thechar = '&'; break;
-					    case 0x4D: thechar = ' '; break;
-					    case 0x4E: thechar = '/'; break;
-					    }
-				    }
+                    if ((cur >= 0x00) && (cur <= 0x09))
+                        thechar = (char)('0' + cur);
+                    else if ((cur >= 0x0A) && (cur <= 0x23))
+                        thechar = (char)('A' + cur - 0x0A);
+                    else if ((cur >= 0x2D) && (cur <= 0x46))
+                        thechar = (char)('a' + cur - 0x2D);
+                    else
+                    {
+                        switch (cur)
+                        {
+                            case 0x26: thechar = '?'; break;
+                            case 0x27: thechar = '!'; break;
+                            case 0x28: thechar = '~'; break;
+                            case 0x29: thechar = ','; break;
+                            case 0x2A: thechar = '“'; break;
+                            case 0x2B: thechar = '”'; break;
+
+                            case 0x47: thechar = '-'; break;
+                            case 0x48: thechar = '.'; break;
+                            case 0x49: thechar = '\''; break;
+                            case 0x4A: thechar = ':'; break;
+                            case 0x4B: thechar = ';'; break;
+                            case 0x4C: thechar = '&'; break;
+                            case 0x4D: thechar = ' '; break;
+                            case 0x4E: thechar = '/'; break;
+                        }
+                    }
 
                     if (thechar != '\0')
                         thetext += thechar;
@@ -115,50 +115,106 @@ namespace SM64DSe
         {
             string newText = txtEdit.Text;
             char[] newTextByte = newText.ToCharArray();
-            
-            uint straddr = file.Read32((uint)(0x30 + currentIndex * 8));
+
+            uint straddr = file.Read32((uint)(0x30 + lbxMsgList.SelectedIndex * 8));//Header entry address
             straddr += 0x20 + inf1size + 0x8;
+
+            ushort numentries = file.Read16(0x28);//Number of strings (2 bytes)
+            uint headerAddress = straddr - 0x10;//Location of offset to string data (4 bytes)
+            uint strOffset = file.Read32(headerAddress);
+            uint sizeAddress = straddr - 0x04;//Location of size of string entry (4 bytes)
+            uint oldSize = file.Read32(sizeAddress);
+            uint fileSizeAddress = 0x08;
+            uint sizeOfFile = file.Read32(fileSizeAddress);//Total size of the file
+            uint newStrSize;//Will hold the updated size of the string entry
+
+            /* NOT WORKING
+            newStrSize = (uint)newTextByte.Length*8 - oldSize;//Times 8 to get bytes
+            if (newStrSize < 0)
+            {
+                int temp = (int)newStrSize * (-1);
+                newStrSize = (uint)temp;//If negative, make it positive
+                file.Write32(sizeAddress, newStrSize);//Write the new size to file
+            }
+            else
+                file.Write32(sizeAddress, newStrSize);
+
+            file.Write32(fileSizeAddress, (sizeOfFile + newStrSize));//Update new file size
+
+            //Update all string entries after the current one and update their offsets
+            for (int i = 0; i < numentries; i++)
+            {
+                uint nextHeaderAddr = headerAddress + 8;//Point to next string header
+                uint theStrOff = file.Read32(nextHeaderAddr);
+                file.Write32(nextHeaderAddr, (theStrOff + newStrSize));
+            }
+            */
+
+            bool flagSpecialChar = false;//For inserting New Line and special DS-specific characters
 
             //increase straddr each time and write8 the current char
             for (int i = 0; i < newTextByte.Length; i++)
             {
                 byte byteToWrite = 0;
 
-                //Upper
-                //nintendo encoding = ('A' + cur - 0x0A);
-                //ascii = A + ne - 0x0A
-                //ascii - A + 0x0A = ne
-                if (Char.IsNumber(newTextByte[i]))//Numeric
-                    byteToWrite = (byte)(newTextByte[i] - '0');
-                else if (Char.IsUpper(newTextByte[i]))//Uppercase
-                    byteToWrite = (byte)(newTextByte[i] - 'A' + 0x0A);
-                else if (Char.IsLower(newTextByte[i]))//Lowercase
-                    byteToWrite = (byte)(newTextByte[i] - 'a' + 0x2D);
-                else if (newTextByte[i].Equals('\r'))//New Line character is \r\n however this gets split into 2 chars
-                    continue;//next character will be \n - go check it
-                else if (newTextByte[i].Equals('\n'))
-                    byteToWrite = 0xFD;
-
-                else//Punctuation and other characters
+                if (!flagSpecialChar)
                 {
-                    switch (newTextByte[i])
+                    //Upper
+                    //nintendo encoding = ('A' + cur - 0x0A);
+                    //ascii = A + ne - 0x0A
+                    //ascii - A + 0x0A = ne
+                    if (Char.IsNumber(newTextByte[i]))//Numeric
+                        byteToWrite = (byte)(newTextByte[i] - '0');
+                    else if (newTextByte[i] >= 0x41 && newTextByte[i] <= 0x5A)//Uppercase
+                        byteToWrite = (byte)(newTextByte[i] - 'A' + 0x0A);
+                    else if (newTextByte[i] >= 0x61 && newTextByte[i] <= 0x7A)//Lowercase
+                        byteToWrite = (byte)(newTextByte[i] - 'a' + 0x2D);
+                    else if (newTextByte[i] >= 0x80 && newTextByte[i] < (0xFF + 0x01))//Extended characters 128 to 255
+                        byteToWrite = (byte)(newTextByte[i] - 0x30);//Character - offset of 0x30 to get Nintendo character
+                    else if (newTextByte[i].Equals('\r'))//New Line is \r\n and also using \r for special DS-only characters like D-Pad icon
                     {
-                        case '?': byteToWrite = 0x26; break;
-                        case '!': byteToWrite = 0x27; break;
-                        case '~': byteToWrite = 0x28; break;
-                        case ',': byteToWrite = 0x29; break;
-                        case '“': byteToWrite = 0x2A; break;
-                        case '”': byteToWrite = 0x2B; break;
-
-                        case '-': byteToWrite = 0x47; break;
-                        case '.': byteToWrite = 0x48; break;
-                        case '\'': byteToWrite = 0x49; break;
-                        case ':': byteToWrite = 0x4A; break;
-                        case ';': byteToWrite = 0x4B; break;
-                        case '&': byteToWrite = 0x4C; break;
-                        case ' ': byteToWrite = 0x4D; break;
-                        case '/': byteToWrite = 0x4E; break;
+                        flagSpecialChar = true;
+                        continue;//Now go check the next character
                     }
+
+                    else//Punctuation and other characters
+                    {
+                        switch (newTextByte[i])
+                        {
+                            case '?': byteToWrite = 0x26; break;
+                            case '!': byteToWrite = 0x27; break;
+                            case '~': byteToWrite = 0x28; break;
+                            case ',': byteToWrite = 0x29; break;
+                            case '“': byteToWrite = 0x2A; break;
+                            case '”': byteToWrite = 0x2B; break;
+
+                            case '-': byteToWrite = 0x47; break;
+                            case '.': byteToWrite = 0x48; break;
+                            case '\'': byteToWrite = 0x49; break;
+                            case ':': byteToWrite = 0x4A; break;
+                            case ';': byteToWrite = 0x4B; break;
+                            case '&': byteToWrite = 0x4C; break;
+                            case ' ': byteToWrite = 0x4D; break;
+                            case '/': byteToWrite = 0x4E; break;
+                        }
+                    }
+                }
+                else if (flagSpecialChar)
+                {
+                    if (newTextByte[i] == '\n')
+                    {
+                        byteToWrite = 0xFD;
+                    }
+                    //'\r' followed by a number refers to the DS-only characters
+                    //Some of these characters are actually 2 characters long
+                    else
+                    {
+                        int specialCharOffset = 0x42;
+                        //Difficulty dealing with the characters past '?' - Rom crashes
+                        
+                        byteToWrite = (byte)(newTextByte[i] - specialCharOffset);
+                    }
+                    flagSpecialChar = false;//Back to normal text
                 }
 
                 file.Write8(straddr, byteToWrite);//Write the current byte
@@ -168,5 +224,56 @@ namespace SM64DSe
 
             file.SaveChanges();
         }
+
+        private void btnCoins_Click(object sender, EventArgs e)
+        {
+            txtEdit.Text = txtEdit.Text + '\r' + '0' + '\r' + '1';
+        }
+
+        private void btnStarFull_Click(object sender, EventArgs e)
+        {
+            txtEdit.Text = txtEdit.Text + '\r' + '2';
+        }
+
+        private void btnStarEmpty_Click(object sender, EventArgs e)
+        {
+            txtEdit.Text = txtEdit.Text + '\r' + '3';
+        }
+
+        private void btnDPad_Click(object sender, EventArgs e)
+        {
+            txtEdit.Text = txtEdit.Text + '\r' + '4' + '\r' + '5';
+        }
+
+        private void btnA_Click(object sender, EventArgs e)
+        {
+            txtEdit.Text = txtEdit.Text + '\r' + '6' + '\r' + '7';
+        }
+
+        private void btnB_Click(object sender, EventArgs e)
+        {
+            txtEdit.Text = txtEdit.Text + '\r' + '8' + '\r' + '9';
+        }
+
+        private void btnX_Click(object sender, EventArgs e)
+        {
+            txtEdit.Text = txtEdit.Text + '\r' + ':' + '\r' + ';';
+        }
+
+        private void btnY_Click(object sender, EventArgs e)
+        {
+            txtEdit.Text = txtEdit.Text + '\r' + '<' + '\r' + '=';
+        }
+
+        private void btnL_Click(object sender, EventArgs e)
+        {
+            txtEdit.Text = txtEdit.Text + '\r' + '>' + '\r' + '?' + '\r' + '@';
+        }
+
+        private void btnR_Click(object sender, EventArgs e)
+        {
+            txtEdit.Text = txtEdit.Text + '\r' + 'A' + '\r' + 'B' + '\r' + 'C';
+        }
+
     }
 }

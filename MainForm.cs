@@ -96,20 +96,6 @@ namespace SM64DSe
                     return;
                 }
 
-                DialogResult animPatch = MessageBox.Show(
-                    "Would you like to keep the original level overlay texture animation data?\n\n" +
-                    "If you are planning on importing your own levels, it's recomended you select No.",
-                    Program.AppTitle, MessageBoxButtons.YesNo, MessageBoxIcon.Question);
-
-                if (res == DialogResult.Yes)
-                {
-                    NitroROM.patchAnimationFlag = false;
-                }
-                else if (res == DialogResult.No)
-                {
-                    NitroROM.patchAnimationFlag = true;
-                }
-
                 // switch to buffered RW mode (faster for patching)
                 Program.m_ROM.EndRW();
                 Program.m_ROM.BeginRW(true);

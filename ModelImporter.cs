@@ -2909,6 +2909,7 @@ namespace SM64DSe
             ImportModel();
             if (cbMakeAcmlmboard.Checked) ImportCollisionMap();
             ((LevelEditorForm)Owner).UpdateLevelModel();
+            LevelEditorForm.isImported = true;//Set this flag to true so that texture animation address set to NULL (needed for custom models)
         }
 
         private void glModelView_MouseDown(object sender, MouseEventArgs e)
