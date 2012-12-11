@@ -31,6 +31,11 @@
             System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(TextEditorForm));
             this.splitContainer1 = new System.Windows.Forms.SplitContainer();
             this.lbxMsgList = new System.Windows.Forms.ListBox();
+            this.btnHelp = new System.Windows.Forms.Button();
+            this.label3 = new System.Windows.Forms.Label();
+            this.cmbLanguages = new System.Windows.Forms.ComboBox();
+            this.lblVer = new System.Windows.Forms.Label();
+            this.label2 = new System.Windows.Forms.Label();
             this.btnCoins = new System.Windows.Forms.Button();
             this.btnR = new System.Windows.Forms.Button();
             this.btnL = new System.Windows.Forms.Button();
@@ -62,6 +67,11 @@
             // 
             // splitContainer1.Panel2
             // 
+            this.splitContainer1.Panel2.Controls.Add(this.btnHelp);
+            this.splitContainer1.Panel2.Controls.Add(this.label3);
+            this.splitContainer1.Panel2.Controls.Add(this.cmbLanguages);
+            this.splitContainer1.Panel2.Controls.Add(this.lblVer);
+            this.splitContainer1.Panel2.Controls.Add(this.label2);
             this.splitContainer1.Panel2.Controls.Add(this.btnCoins);
             this.splitContainer1.Panel2.Controls.Add(this.btnR);
             this.splitContainer1.Panel2.Controls.Add(this.btnL);
@@ -89,6 +99,53 @@
             this.lbxMsgList.Size = new System.Drawing.Size(226, 511);
             this.lbxMsgList.TabIndex = 0;
             this.lbxMsgList.SelectedIndexChanged += new System.EventHandler(this.lbxMsgList_SelectedIndexChanged);
+            // 
+            // btnHelp
+            // 
+            this.btnHelp.Location = new System.Drawing.Point(380, -1);
+            this.btnHelp.Name = "btnHelp";
+            this.btnHelp.Size = new System.Drawing.Size(56, 23);
+            this.btnHelp.TabIndex = 19;
+            this.btnHelp.Text = "Help";
+            this.btnHelp.UseVisualStyleBackColor = true;
+            this.btnHelp.Click += new System.EventHandler(this.btnHelp_Click);
+            // 
+            // label3
+            // 
+            this.label3.AutoSize = true;
+            this.label3.Location = new System.Drawing.Point(150, 3);
+            this.label3.Name = "label3";
+            this.label3.Size = new System.Drawing.Size(58, 13);
+            this.label3.TabIndex = 18;
+            this.label3.Text = "Language:";
+            // 
+            // cmbLanguages
+            // 
+            this.cmbLanguages.FormattingEnabled = true;
+            this.cmbLanguages.Location = new System.Drawing.Point(214, 1);
+            this.cmbLanguages.Name = "cmbLanguages";
+            this.cmbLanguages.Size = new System.Drawing.Size(150, 21);
+            this.cmbLanguages.TabIndex = 17;
+            this.cmbLanguages.Text = "Select a Language";
+            this.cmbLanguages.SelectedIndexChanged += new System.EventHandler(this.cmbLanguages_SelectedIndexChanged);
+            // 
+            // lblVer
+            // 
+            this.lblVer.AutoSize = true;
+            this.lblVer.Location = new System.Drawing.Point(83, 3);
+            this.lblVer.Name = "lblVer";
+            this.lblVer.Size = new System.Drawing.Size(23, 13);
+            this.lblVer.TabIndex = 16;
+            this.lblVer.Text = "Ver";
+            // 
+            // label2
+            // 
+            this.label2.AutoSize = true;
+            this.label2.Location = new System.Drawing.Point(3, 3);
+            this.label2.Name = "label2";
+            this.label2.Size = new System.Drawing.Size(70, 13);
+            this.label2.TabIndex = 15;
+            this.label2.Text = "Rom Version:";
             // 
             // btnCoins
             // 
@@ -224,7 +281,7 @@
             // 
             // tbxMsgPreview
             // 
-            this.tbxMsgPreview.Location = new System.Drawing.Point(0, 0);
+            this.tbxMsgPreview.Location = new System.Drawing.Point(0, 26);
             this.tbxMsgPreview.Multiline = true;
             this.tbxMsgPreview.Name = "tbxMsgPreview";
             this.tbxMsgPreview.ReadOnly = true;
@@ -268,5 +325,10 @@
         private System.Windows.Forms.Button btnR;
         private System.Windows.Forms.Button btnL;
         private System.Windows.Forms.Button btnCoins;
+        private System.Windows.Forms.Label label2;
+        private System.Windows.Forms.Label lblVer;
+        private System.Windows.Forms.Label label3;
+        private System.Windows.Forms.ComboBox cmbLanguages;
+        private System.Windows.Forms.Button btnHelp;
     }
 }
