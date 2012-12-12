@@ -175,46 +175,49 @@ namespace SM64DSe
             //Work out the difference in message size between new and old text
             newStrSize = (int)((newTextByte.Length + 1) - oldSize);//Plus one for the end of message character
 
-            //Move all data after current entry foward by the difference in size
-            if (lbxMsgList.SelectedIndex != numentries - 1)
+            if (newStrSize >= 0)//When data is shifted back, the longer data is still there, it needs removed - not yet working?
             {
-                uint nextStrStart = file.Read32((uint)(0x30 + (lbxMsgList.SelectedIndex + 1) * 8)) + 0x20 + inf1size + 0x8;
-                uint firstStrAddr = (uint)(file.Read32((uint)(0x30 + (0) * 8)) + 0x20 + inf1size + 0x8);
-                uint addrSizeDAT1 = (uint)(firstStrAddr - 0x04);//Read the size of the DAT1 header (starts 8 bytes before first string data)
-                uint sizeDAT1 = file.Read32(addrSizeDAT1);
-                file.Write32(addrSizeDAT1, (uint)(file.Read32(addrSizeDAT1) + newStrSize));//Write the new data section size
-                //Number of characters after current entry by looping through each entry and getting length of message
-                uint charsAfter = 0;
-                for (int i = lbxMsgList.SelectedIndex + 1; i < stringLengths.Length; i++)
+                //Move all data after current entry foward by the difference in size
+                if (lbxMsgList.SelectedIndex != numentries - 1)
                 {
-                    charsAfter += (uint)(stringLengths[i]);
+                    uint nextStrStart = file.Read32((uint)(0x30 + (lbxMsgList.SelectedIndex + 1) * 8)) + 0x20 + inf1size + 0x8;
+                    uint firstStrAddr = (uint)(file.Read32((uint)(0x30 + (0) * 8)) + 0x20 + inf1size + 0x8);
+                    uint addrSizeDAT1 = (uint)(firstStrAddr - 0x04);//Read the size of the DAT1 header (starts 8 bytes before first string data)
+                    uint sizeDAT1 = file.Read32(addrSizeDAT1);
+                    file.Write32(addrSizeDAT1, (uint)(file.Read32(addrSizeDAT1) + newStrSize));//Write the new data section size
+                    //Number of characters after current entry by looping through each entry and getting length of message
+                    uint charsAfter = 0;
+                    for (int i = lbxMsgList.SelectedIndex + 1; i < stringLengths.Length; i++)
+                    {
+                        charsAfter += (uint)(stringLengths[i]);
+                    }
+                    byte[] theNextChars = new byte[charsAfter];//Hold every char after the current entry.
+                    for (int i = 0; i < theNextChars.Length; i++)
+                    {
+                        theNextChars[i] = (byte)file.Read8((uint)(nextStrStart + i));//Add the next character to array
+                    }
+                    nextStrStart = (uint)(file.Read32((uint)(0x30 + (lbxMsgList.SelectedIndex + 1) * 8)) + 0x20 + inf1size + 0x8 + newStrSize);//Next string starts (its old position + difference in previous string length)
+                    for (int i = 0; i < theNextChars.Length; i++)
+                    {
+                        file.Write8((uint)(nextStrStart + i), theNextChars[i]);//Write the character back to file with new position
+                    }
                 }
-                byte[] theNextChars = new byte[charsAfter];//Hold every char after the current entry.
-                for (int i = 0; i < theNextChars.Length; i++)
-                {
-                    theNextChars[i] = (byte)file.Read8((uint)(nextStrStart + i));//Add the next character to array
-                }
-                nextStrStart = file.Read32((uint)(0x30 + (lbxMsgList.SelectedIndex + 1) * 8)) + 0x20 + inf1size + 0x8 + (uint)newStrSize;//Next string starts (its old position + difference in previous string length)
-                for (int i = 0; i < theNextChars.Length; i++)
-                {
-                    file.Write8((uint)(nextStrStart + i), theNextChars[i]);//Write the character back to file with new position
-                }
-            }
-            //If it's the last entry (no headers need updated or data shifted
+                //If it's the last entry (no headers need updated or data shifted
 
 
-            file.Write32(fileSizeAddress, (uint)(sizeOfFile + newStrSize));//Update new file size
+                file.Write32(fileSizeAddress, (uint)(sizeOfFile + newStrSize));//Update new file size
 
-            if (lbxMsgList.SelectedIndex != numentries - 1)
-            {
-                //Update all string entries after the current one and update their offsets
-                for (int i = lbxMsgList.SelectedIndex + 1; i < numentries; i++)
+                if (lbxMsgList.SelectedIndex != numentries - 1)
                 {
-                    uint nextHeaderAddr = (uint)(0x30 + i * 8);//Point to next string header
-                    uint theStrOff = file.Read32(nextHeaderAddr);
-                    file.Write32(nextHeaderAddr, (uint)(theStrOff + newStrSize));
+                    //Update all string entries after the current one and update their offsets
+                    for (int i = lbxMsgList.SelectedIndex + 1; i < numentries; i++)
+                    {
+                        uint nextHeaderAddr = (uint)(0x30 + i * 8);//Point to next string header
+                        uint theStrOff = file.Read32(nextHeaderAddr);
+                        file.Write32(nextHeaderAddr, (uint)(theStrOff + newStrSize));
+                    }
                 }
-            }
+            }//End newStrSize If
 
 
             bool flagSpecialChar = false;//For inserting New Line and special DS-specific characters
