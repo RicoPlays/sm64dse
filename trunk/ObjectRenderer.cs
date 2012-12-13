@@ -28,6 +28,9 @@ namespace SM64DSe
 {
     public class ObjectRenderer
     {
+        public static string currentObjFilename;
+        public static float currentObjScale;
+        
         public static ObjectRenderer FromLevelObject(LevelObject obj)
         {
             ObjectRenderer ret = null;
@@ -550,8 +553,14 @@ namespace SM64DSe
 
     class NormalBMDRenderer : ObjectRenderer
     {
+        public string objFilename;//Need to access this elsewhere
         public NormalBMDRenderer() { }
-        public NormalBMDRenderer(string filename, float scale) { Construct(filename, scale); }
+        public NormalBMDRenderer(string filename, float scale) 
+        { 
+            Construct(filename, scale); 
+            ObjectRenderer.currentObjFilename = filename;
+            ObjectRenderer.currentObjScale = scale;
+        }
 
         public override void Release()
         {

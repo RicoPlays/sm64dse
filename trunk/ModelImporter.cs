@@ -1678,6 +1678,11 @@ namespace SM64DSe
             GXDisplayListPacker dlpacker = new GXDisplayListPacker();
 
             NitroFile bmd = Program.m_ROM.GetFileFromInternalID(m_LevelSettings.BMDFileID);
+
+            if (!m_LevelSettings.editLevelBMDKCL)//If set to import an object model instead
+            {
+                bmd = Program.m_ROM.GetFileFromName(m_LevelSettings.objBMD);
+            }
             bmd.Clear();
 
             Vector4[] scaledvtxs = new Vector4[m_Vertices.Count];
@@ -1750,7 +1755,6 @@ namespace SM64DSe
                     Program.AppTitle, MessageBoxButtons.YesNo, MessageBoxIcon.Warning, MessageBoxDefaultButton.Button2) == DialogResult.No)
                     return;
             }
-
 
             bmd.Write32(0x00, scaleval);
 
@@ -2117,7 +2121,20 @@ namespace SM64DSe
         // code inspired from Chadsoft's KclTool
         private void ImportCollisionMap()
         {
-            NitroFile kcl = Program.m_ROM.GetFileFromInternalID(m_LevelSettings.KCLFileID);
+            NitroFile kcl = Program.m_ROM.GetFileFromInternalID(m_LevelSettings.KCLFileID);;
+
+            if (!m_LevelSettings.editLevelBMDKCL)
+            {
+                try
+                {
+                    kcl = Program.m_ROM.GetFileFromName(m_LevelSettings.objKCL);
+                }
+                catch (Exception e)
+                {
+                    MessageBox.Show(e.ToString() + "\n\nThis object does not contain collision data, however the \n" +
+                        "model will still be imported");
+                }
+            }
             kcl.Clear();
 
             Vector4[] scaledvtxs = new Vector4[m_Vertices.Count];
@@ -2906,7 +2923,22 @@ namespace SM64DSe
 
         private void btnImport_Click(object sender, EventArgs e)
         {
+            Vector3 originalScale = new Vector3(0, 0, 0);
+            if (!m_LevelSettings.editLevelBMDKCL)//If it's an object it'll be scaled down - need to get back to original value
+            {
+                originalScale = m_Scale;
+                m_Scale = m_Scale * (1 / ObjectRenderer.currentObjScale);
+                PrerenderModel();
+                glModelView.Refresh();
+            }
             ImportModel();
+            if (!m_LevelSettings.editLevelBMDKCL)
+            {
+                m_Scale = originalScale;//Back to previous scale for collision as it's not affected like model's scale
+                PrerenderModel();
+                glModelView.Refresh();
+            }
+
             if (cbMakeAcmlmboard.Checked) ImportCollisionMap();
             ((LevelEditorForm)Owner).UpdateLevelModel();
             LevelEditorForm.isImported = true;//Set this flag to true so that texture animation address set to NULL (needed for custom models)

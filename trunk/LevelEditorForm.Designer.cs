@@ -48,6 +48,7 @@
             this.btnAddPath = new System.Windows.Forms.ToolStripButton();
             this.btnAddView = new System.Windows.Forms.ToolStripButton();
             this.btnRemoveSel = new System.Windows.Forms.ToolStripButton();
+            this.btnReplaceObjModel = new System.Windows.Forms.ToolStripButton();
             this.glLevelView = new SM64DSe.HaxxGLControl();
             this.tsViewActions = new System.Windows.Forms.ToolStrip();
             this.toolStripLabel3 = new System.Windows.Forms.ToolStripLabel();
@@ -117,7 +118,7 @@
             // 
             this.spcLeftPanel.Dock = System.Windows.Forms.DockStyle.Fill;
             this.spcLeftPanel.FixedPanel = System.Windows.Forms.FixedPanel.Panel2;
-            this.spcLeftPanel.Location = new System.Drawing.Point(0, 88);
+            this.spcLeftPanel.Location = new System.Drawing.Point(0, 107);
             this.spcLeftPanel.Name = "spcLeftPanel";
             this.spcLeftPanel.Orientation = System.Windows.Forms.Orientation.Horizontal;
             // 
@@ -128,8 +129,8 @@
             // spcLeftPanel.Panel2
             // 
             this.spcLeftPanel.Panel2.Controls.Add(this.pgObjectProperties);
-            this.spcLeftPanel.Size = new System.Drawing.Size(264, 398);
-            this.spcLeftPanel.SplitterDistance = 139;
+            this.spcLeftPanel.Size = new System.Drawing.Size(264, 379);
+            this.spcLeftPanel.SplitterDistance = 120;
             this.spcLeftPanel.TabIndex = 1;
             // 
             // tvObjectList
@@ -139,7 +140,7 @@
             this.tvObjectList.HideSelection = false;
             this.tvObjectList.Location = new System.Drawing.Point(0, 0);
             this.tvObjectList.Name = "tvObjectList";
-            this.tvObjectList.Size = new System.Drawing.Size(264, 139);
+            this.tvObjectList.Size = new System.Drawing.Size(264, 120);
             this.tvObjectList.TabIndex = 0;
             this.tvObjectList.TabStop = false;
             this.tvObjectList.DrawNode += new System.Windows.Forms.DrawTreeNodeEventHandler(this.tvObjectList_DrawNode);
@@ -167,11 +168,12 @@
             this.btnAddPathNodes,
             this.btnAddPath,
             this.btnAddView,
-            this.btnRemoveSel});
+            this.btnRemoveSel,
+            this.btnReplaceObjModel});
             this.tsEditActions.LayoutStyle = System.Windows.Forms.ToolStripLayoutStyle.Flow;
             this.tsEditActions.Location = new System.Drawing.Point(0, 0);
             this.tsEditActions.Name = "tsEditActions";
-            this.tsEditActions.Size = new System.Drawing.Size(264, 88);
+            this.tsEditActions.Size = new System.Drawing.Size(264, 107);
             this.tsEditActions.TabIndex = 0;
             this.tsEditActions.Text = "toolStrip1";
             // 
@@ -316,6 +318,15 @@
             this.btnRemoveSel.Text = "Remove object";
             this.btnRemoveSel.ToolTipText = "Remove an object.";
             this.btnRemoveSel.Click += new System.EventHandler(this.btnRemoveSel_Click);
+            // 
+            // btnReplaceObjModel
+            // 
+            this.btnReplaceObjModel.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Text;
+            this.btnReplaceObjModel.ImageTransparentColor = System.Drawing.Color.Magenta;
+            this.btnReplaceObjModel.Name = "btnReplaceObjModel";
+            this.btnReplaceObjModel.Size = new System.Drawing.Size(89, 19);
+            this.btnReplaceObjModel.Text = "Replace Model";
+            this.btnReplaceObjModel.Click += new System.EventHandler(this.btnReplaceObjModel_Click);
             // 
             // glLevelView
             // 
@@ -739,6 +750,7 @@
         private System.Windows.Forms.ToolStripButton btnLOL;
         private HaxxGLControl glLevelView;
         private System.Windows.Forms.ToolStripButton btnEditMinimap;
+        private System.Windows.Forms.ToolStripButton btnReplaceObjModel;
 
 
     }

@@ -579,6 +579,7 @@ namespace SM64DSe
                     {
                         btnAddObject.Visible = true;
                         btnRemoveSel.Visible = true;
+                        btnReplaceObjModel.Visible = true;
 
                         TreeNode node0 = tvObjectList.Nodes.Add("parent0", "Objects");
 
@@ -1787,6 +1788,7 @@ namespace SM64DSe
             ModelImporter form = new ModelImporter();
             if (form != null && !form.m_EarlyClosure)
                 form.Show(this);
+            m_LevelSettings.editLevelBMDKCL = true;//Tell the model importer it's a level we're importing
         }
 
         private void tvObjectList_DrawNode(object sender, DrawTreeNodeEventArgs e)
@@ -2077,6 +2079,31 @@ namespace SM64DSe
         private void btnEditMinimap_Click(object sender, EventArgs e)
         {
             new MinimapEditor().Show(this);
+        }
+
+        private void btnReplaceObjModel_Click(object sender, EventArgs e)
+        {
+            if (m_SelectedObject == null)
+            {
+                slStatusLabel.Text = "Click the object whose model you want to replace.";
+                
+                return;
+            } 
+            
+            LevelObject obj = m_SelectedObject;
+            ObjectRenderer selObjBMD = ObjectRenderer.FromLevelObject(obj);
+            //Get the name of the selected object's BMD (model) file
+            string selObjBMDName = ObjectRenderer.currentObjFilename;
+            //Get the name of the selected object's KCL (collision data) file
+            string selObjKCLName = selObjBMDName.Substring(0, selObjBMDName.Length - 4) + ".kcl";
+
+            m_LevelSettings.objBMD = selObjBMDName;
+            m_LevelSettings.objKCL = selObjKCLName;
+            m_LevelSettings.editLevelBMDKCL = false;//Tell the importer we're replacing an object, not a level
+
+            ModelImporter form = new ModelImporter();
+            if (form != null && !form.m_EarlyClosure)
+                form.Show(this);
         }
     }
 }

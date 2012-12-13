@@ -100,7 +100,15 @@ namespace SM64DSe
                 string thetext = "";
                 for (; ; )
                 {
-                    byte cur = file.Read8(straddr);
+                    byte cur;
+                    try
+                    {
+                        cur = file.Read8(straddr);
+                    }
+                    catch
+                    {
+                        break;
+                    }
                     straddr++;
                     length++;
                     char thechar = '\0';
@@ -175,49 +183,62 @@ namespace SM64DSe
             //Work out the difference in message size between new and old text
             newStrSize = (int)((newTextByte.Length + 1) - oldSize);//Plus one for the end of message character
 
-            if (newStrSize >= 0)//When data is shifted back, the longer data is still there, it needs removed - not yet working?
+            //Move all data after current entry foward by the difference in size
+            if (lbxMsgList.SelectedIndex != numentries - 1 || lbxMsgList.SelectedIndex == 0)
             {
-                //Move all data after current entry foward by the difference in size
-                if (lbxMsgList.SelectedIndex != numentries - 1)
+                uint nextStrStart = file.Read32((uint)(0x30 + (lbxMsgList.SelectedIndex + 1) * 8)) + 0x20 + inf1size + 0x8;
+                uint firstStrAddr = (uint)(file.Read32((uint)(0x30 + (0) * 8)) + 0x20 + inf1size + 0x8);
+                uint addrSizeDAT1 = (uint)(firstStrAddr - 0x04);//Read the size of the DAT1 header (starts 8 bytes before first string data)
+                uint sizeDAT1 = file.Read32(addrSizeDAT1);
+                file.Write32(addrSizeDAT1, (uint)(file.Read32(addrSizeDAT1) + newStrSize));//Write the new data section size
+                //Number of bytes before the current string
+                uint numBefore = (uint)(file.Read32((uint)(0x30 + (lbxMsgList.SelectedIndex) * 8)) + 0x20 + inf1size + 0x8);
+                byte[] thePrevChars = new byte[numBefore];
+                //Store all bytes before the current string
+                for (int i = 0; i < numBefore; i++)
                 {
-                    uint nextStrStart = file.Read32((uint)(0x30 + (lbxMsgList.SelectedIndex + 1) * 8)) + 0x20 + inf1size + 0x8;
-                    uint firstStrAddr = (uint)(file.Read32((uint)(0x30 + (0) * 8)) + 0x20 + inf1size + 0x8);
-                    uint addrSizeDAT1 = (uint)(firstStrAddr - 0x04);//Read the size of the DAT1 header (starts 8 bytes before first string data)
-                    uint sizeDAT1 = file.Read32(addrSizeDAT1);
-                    file.Write32(addrSizeDAT1, (uint)(file.Read32(addrSizeDAT1) + newStrSize));//Write the new data section size
-                    //Number of characters after current entry by looping through each entry and getting length of message
-                    uint charsAfter = 0;
-                    for (int i = lbxMsgList.SelectedIndex + 1; i < stringLengths.Length; i++)
-                    {
-                        charsAfter += (uint)(stringLengths[i]);
-                    }
-                    byte[] theNextChars = new byte[charsAfter];//Hold every char after the current entry.
-                    for (int i = 0; i < theNextChars.Length; i++)
-                    {
-                        theNextChars[i] = (byte)file.Read8((uint)(nextStrStart + i));//Add the next character to array
-                    }
-                    nextStrStart = (uint)(file.Read32((uint)(0x30 + (lbxMsgList.SelectedIndex + 1) * 8)) + 0x20 + inf1size + 0x8 + newStrSize);//Next string starts (its old position + difference in previous string length)
-                    for (int i = 0; i < theNextChars.Length; i++)
-                    {
-                        file.Write8((uint)(nextStrStart + i), theNextChars[i]);//Write the character back to file with new position
-                    }
+                    thePrevChars[i] = file.Read8((uint)(i));
                 }
-                //If it's the last entry (no headers need updated or data shifted
-
-
-                file.Write32(fileSizeAddress, (uint)(sizeOfFile + newStrSize));//Update new file size
-
-                if (lbxMsgList.SelectedIndex != numentries - 1)
+                //Number of characters after current entry by looping through each entry and getting length of message
+                uint charsAfter = 0;
+                for (int i = lbxMsgList.SelectedIndex + 1; i < stringLengths.Length; i++)
                 {
-                    //Update all string entries after the current one and update their offsets
-                    for (int i = lbxMsgList.SelectedIndex + 1; i < numentries; i++)
-                    {
-                        uint nextHeaderAddr = (uint)(0x30 + i * 8);//Point to next string header
-                        uint theStrOff = file.Read32(nextHeaderAddr);
-                        file.Write32(nextHeaderAddr, (uint)(theStrOff + newStrSize));
-                    }
+                    charsAfter += (uint)(stringLengths[i]);
                 }
-            }//End newStrSize If
+                byte[] theNextChars = new byte[charsAfter];//Hold every char after the current entry.
+                for (int i = 0; i < theNextChars.Length; i++)
+                {
+                    theNextChars[i] = (byte)file.Read8((uint)(nextStrStart + i));//Add the next character to array
+                }
+                file.Clear();//Delete the file's contents
+                //Write back the bytes before the current string
+                for (int i = 0; i < numBefore; i++)
+                {
+                    file.Write8((uint)i, thePrevChars[i]);
+                }
+                //Next string starts (its old position + difference in previous string length)
+                nextStrStart = (uint)(file.Read32((uint)(0x30 + (lbxMsgList.SelectedIndex + 1) * 8)) + 0x20 + inf1size + 0x8 + newStrSize);
+                //Write the character back to file with new position
+                for (int i = 0; i < theNextChars.Length; i++)
+                {
+                    file.Write8((uint)(nextStrStart + i), theNextChars[i]);
+                }
+            }
+            //If it's the last entry (no headers need updated or data shifted
+
+
+            file.Write32(fileSizeAddress, (uint)(sizeOfFile + newStrSize));//Update new file size
+
+            if (lbxMsgList.SelectedIndex != numentries - 1)
+            {
+                //Update all string entries after the current one and update their offsets
+                for (int i = lbxMsgList.SelectedIndex + 1; i < numentries; i++)
+                {
+                    uint nextHeaderAddr = (uint)(0x30 + i * 8);//Point to next string header
+                    uint theStrOff = file.Read32(nextHeaderAddr);
+                    file.Write32(nextHeaderAddr, (uint)(theStrOff + newStrSize));
+                }
+            }
 
 
             bool flagSpecialChar = false;//For inserting New Line and special DS-specific characters
@@ -304,13 +325,10 @@ namespace SM64DSe
 
         private void btnSave_Click(object sender, EventArgs e)
         {
-            if (lbxMsgList.SelectedIndex >= 0 && lbxMsgList.SelectedIndex <= file.Read16(0x28) && m_MsgData[lbxMsgList.SelectedIndex] != "")
+            if (lbxMsgList.SelectedIndex >= 0 && lbxMsgList.SelectedIndex <= file.Read16(0x28))
                 WriteStrings();
             else if (lbxMsgList.SelectedIndex < 0 || lbxMsgList.SelectedIndex >= file.Read16(0x28))
                 MessageBox.Show("Please select a string entry to edit.");
-            else if (m_MsgData[lbxMsgList.SelectedIndex] == "")
-                MessageBox.Show("It is not currently possible to write over a blank entry.");
-            
             
         }
 
@@ -376,8 +394,8 @@ namespace SM64DSe
                             "Next, click on the string you want to edit on the left-hand side.\n" +
                             "The full text will then be displayed in the upper-right box.\n\n" +
                             "Type your new text in the text box on the right-hand side.\n" +
-                            "When done, press 'Save'.\n\nPlease note that you cannot currently enter \n" +
-                            "text into a blank entry.\n\n" +
+                            "When done, press 'Save'.\n\nPlease note that the text editor is not perfect, \n" +
+                            "there may still be issues when saving, for example the last string often corrupts.\n\n" +
                             "Use the buttons under the text editing box to insert the special characters.\n" +
                             "When reading, their codes are as follows:\n\n" +
                             "[0xEE][0xEF] \t Coins\n[0xF0] \t\t Star Full\n[0xF1] \t\t Star Empty\n" +
