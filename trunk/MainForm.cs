@@ -291,8 +291,9 @@ namespace SM64DSe
                 "Provided to you by Kuribo64, the SM64DS hacking department.\n" +
                 "\n" +
                 "Credits:\n" +
-                "- Treeki for the overlay decopression (Jap77), the object list, and other help\n" +
+                "- Treeki for the overlay decompression (Jap77), the object list, and other help\n" +
                 "- Dirbaio for other help\n" +
+                "- Fiachra Murray for text editing, custom object models and other help\n" + 
                 "\n" +
                 Program.AppTitle + " is free software. If you paid for it, notify Mega-Mario about it.\n" +
                 "\n" +
@@ -313,6 +314,20 @@ namespace SM64DSe
         private void animationeditortest(object sender, EventArgs e)
         {
             new AnimationEditorForm().Show();
+        }
+
+        private void mnitDumpAllOvls_Click(object sender, EventArgs e)
+        {
+            for (int i = 0; i < 155; i++)
+            {
+                NitroOverlay overlay = new NitroOverlay(Program.m_ROM, (uint)i);
+                string filename = "DecompressedOverlays/overlay_" + i.ToString("0000") + ".bin";
+                string dir = "DecompressedOverlays";
+                if (!Directory.Exists(dir))
+                    Directory.CreateDirectory(dir);
+                System.IO.File.WriteAllBytes(filename, overlay.m_Data);
+            }
+            MessageBox.Show("All overlays have been successfully dumped.");
         }
     }
 }

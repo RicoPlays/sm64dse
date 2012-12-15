@@ -553,7 +553,6 @@ namespace SM64DSe
 
     class NormalBMDRenderer : ObjectRenderer
     {
-        public string objFilename;//Need to access this elsewhere
         public NormalBMDRenderer() { }
         public NormalBMDRenderer(string filename, float scale) 
         { 
