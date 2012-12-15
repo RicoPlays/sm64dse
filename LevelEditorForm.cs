@@ -27,6 +27,7 @@ using System.Timers;
 using System.Windows.Forms;
 using OpenTK;
 using OpenTK.Graphics.OpenGL;
+using System.IO;
 
 
 namespace SM64DSe
@@ -2104,6 +2105,102 @@ namespace SM64DSe
             ModelImporter form = new ModelImporter();
             if (form != null && !form.m_EarlyClosure)
                 form.Show(this);
+        }
+
+        private void btnExportLevelModel_Click(object sender, EventArgs e)
+        {
+            exportOBJ();
+        }//End Method
+
+        private void exportOBJ()
+        {
+            BMD levelModelToExport = new BMD(m_ROM.GetFileFromInternalID(m_LevelSettings.BMDFileID));
+            string output = "";
+            StreamWriter outfile = new StreamWriter("LevelModel_" + LevelID + ".obj");
+            List<Vector3> vertices = new List<Vector3>();
+            List<Vector2> texCoords = new List<Vector2>();
+            for (int i = 0; i < levelModelToExport.m_ModelChunks.Length; i++)
+            {
+                for (int j = 0; j < levelModelToExport.m_ModelChunks[i].m_MatGroups.Length; j++)
+                {
+                    for (int k = 0; k < levelModelToExport.m_ModelChunks[i].m_MatGroups[j].m_Geometry.Count; k++)
+                    {
+                        for (int m = 0; m < levelModelToExport.m_ModelChunks[i].m_MatGroups[j].m_Geometry[k].m_VertexList.Count; m++)
+                        {
+                            Vector3 currentPos =
+                                levelModelToExport.m_ModelChunks[i].m_MatGroups[j].m_Geometry[k].m_VertexList[m].m_Position;
+                            //Print out the current vertex co-ordinates
+                            if (currentPos.X.ToString() != "" && currentPos.Y.ToString() != "" && currentPos.Z.ToString() != "")
+                            {
+                                output = output + "v " + currentPos.X.ToString() + " " +
+                                currentPos.Y.ToString() + " " +
+                                currentPos.Z.ToString() + "\n";
+                                vertices.Add(currentPos);
+                            }
+                            //Vector3 currentNormal =
+                            //    levelModelToExport.m_ModelChunks[i].m_MatGroups[j].m_Geometry[k].m_VertexList[m].m_Normal;
+                            ////Print out the current Normal co-ordinates
+                            //if (currentNormal.X.ToString() != "" && currentNormal.Y.ToString() != "" && currentNormal.Z.ToString() != "")
+                            //{
+                            //    output = output + "vn " + currentNormal.X.ToString() + " " +
+                            //    currentNormal.Y.ToString() + " " +
+                            //    currentNormal.Z.ToString() + "\n";
+                            //}
+                            Vector2 currentTexCoord =
+                                levelModelToExport.m_ModelChunks[i].m_MatGroups[j].m_Geometry[k].m_VertexList[m].m_TexCoord;
+                            //Print out the current vertex co-ordinates
+                            if (currentTexCoord.X.ToString() != "" && currentTexCoord.Y.ToString() != "")
+                            {
+                                output = output + "vt " + currentTexCoord.X.ToString() + " " +
+                                currentTexCoord.Y.ToString() + "\n";
+                                texCoords.Add(currentTexCoord);
+                            }
+                        }
+                    }
+                }
+            }
+            for (int i = 0; i < levelModelToExport.m_ModelChunks.Length; i++)
+            {
+                for (int j = 0; j < levelModelToExport.m_ModelChunks[i].m_MatGroups.Length; j++)
+                {
+                    for (int k = 0; k < levelModelToExport.m_ModelChunks[i].m_MatGroups[j].m_Geometry.Count; k++)
+                    {
+                        //Faces (only partially working, two triangles overlap instead of forming a square but all vertices export correctly)
+                        output = output + "f ";
+                        string faces = "";
+                        for (int m = 0; m < levelModelToExport.m_ModelChunks[i].m_MatGroups[j].m_Geometry[k].m_VertexList.Count; m++)
+                        {
+                            faces = faces + (lastIndexOfV3(vertices, levelModelToExport.m_ModelChunks[i].m_MatGroups[j].m_Geometry[k].m_VertexList[m].m_Position) + 1) +
+                                   "/" + (lastIndexOfV2(texCoords, levelModelToExport.m_ModelChunks[i].m_MatGroups[j].m_Geometry[k].m_VertexList[m].m_TexCoord) + 1) + " ";
+                        }
+                        output = output + faces.Substring(0, faces.Length - 1) + "\n";
+                    }
+                }
+            }
+            outfile.Write(output);
+            slStatusLabel.Text = "Finished exporting level model.";
+        }//End Method
+
+        private int lastIndexOfV3(List<Vector3> listIn, Vector3 vectorIn)
+        {
+            int index = 0;
+            for (int i = 0; i < listIn.Count; i++)
+            {
+                if (listIn[i] == vectorIn)
+                    index = i;
+            }
+            return index;
+        }
+
+        private int lastIndexOfV2(List<Vector2> listIn, Vector2 vectorIn)
+        {
+            int index = 0;
+            for (int i = 0; i < listIn.Count; i++)
+            {
+                if (listIn[i] == vectorIn)
+                    index = i;
+            }
+            return index;
         }
     }
 }
