@@ -28,6 +28,7 @@ using System.Windows.Forms;
 using OpenTK;
 using OpenTK.Graphics.OpenGL;
 using System.IO;
+using System.Globalization;
 
 
 namespace SM64DSe
@@ -2116,6 +2117,7 @@ namespace SM64DSe
         {
             BMD levelModelToExport = new BMD(m_ROM.GetFileFromInternalID(m_LevelSettings.BMDFileID));
             string output = "";
+            CultureInfo usa = new CultureInfo("en-US");//Need to ensure 1.23 not 1,23 when floatVar.ToString() used - use floatVar.ToString(usa)
             StreamWriter outfile = new StreamWriter("LevelModel_" + LevelID + ".obj");
             List<Vector3> vertices = new List<Vector3>();
             List<Vector2> texCoords = new List<Vector2>();
@@ -2132,9 +2134,9 @@ namespace SM64DSe
                             //Print out the current vertex co-ordinates
                             if (currentPos.X.ToString() != "" && currentPos.Y.ToString() != "" && currentPos.Z.ToString() != "")
                             {
-                                output = output + "v " + currentPos.X.ToString() + " " +
-                                currentPos.Y.ToString() + " " +
-                                currentPos.Z.ToString() + "\n";
+                                output = output + "v " + currentPos.X.ToString(usa) + " " +
+                                currentPos.Y.ToString(usa) + " " +
+                                currentPos.Z.ToString(usa) + "\n";
                                 vertices.Add(currentPos);
                             }
                             Vector2 currentTexCoord =
@@ -2142,8 +2144,8 @@ namespace SM64DSe
                             //Print out the current texture co-ordinates
                             if (currentTexCoord.X.ToString() != "" && currentTexCoord.Y.ToString() != "")
                             {
-                                output = output + "vt " + currentTexCoord.X.ToString() + " " +
-                                currentTexCoord.Y.ToString() + "\n";
+                                output = output + "vt " + currentTexCoord.X.ToString(usa) + " " +
+                                currentTexCoord.Y.ToString(usa) + "\n";
                                 texCoords.Add(currentTexCoord);
                             }
                         }
