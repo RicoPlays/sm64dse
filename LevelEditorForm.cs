@@ -2137,15 +2137,6 @@ namespace SM64DSe
                                 currentPos.Z.ToString() + "\n";
                                 vertices.Add(currentPos);
                             }
-                            //Vector3 currentNormal =
-                            //    levelModelToExport.m_ModelChunks[i].m_MatGroups[j].m_Geometry[k].m_VertexList[m].m_Normal;
-                            ////Print out the current Normal co-ordinates
-                            //if (currentNormal.X.ToString() != "" && currentNormal.Y.ToString() != "" && currentNormal.Z.ToString() != "")
-                            //{
-                            //    output = output + "vn " + currentNormal.X.ToString() + " " +
-                            //    currentNormal.Y.ToString() + " " +
-                            //    currentNormal.Z.ToString() + "\n";
-                            //}
                             Vector2 currentTexCoord =
                                 levelModelToExport.m_ModelChunks[i].m_MatGroups[j].m_Geometry[k].m_VertexList[m].m_TexCoord;
                             //Print out the current vertex co-ordinates
@@ -2165,19 +2156,31 @@ namespace SM64DSe
                 {
                     for (int k = 0; k < levelModelToExport.m_ModelChunks[i].m_MatGroups[j].m_Geometry.Count; k++)
                     {
-                        //Faces (only partially working, two triangles overlap instead of forming a square but all vertices export correctly)
-                        output = output + "f ";
-                        string faces = "";
+                        //Faces
+                        string[] v_vt = new string[levelModelToExport.m_ModelChunks[i].m_MatGroups[j].m_Geometry[k].m_VertexList.Count];
                         for (int m = 0; m < levelModelToExport.m_ModelChunks[i].m_MatGroups[j].m_Geometry[k].m_VertexList.Count; m++)
                         {
-                            faces = faces + (lastIndexOfV3(vertices, levelModelToExport.m_ModelChunks[i].m_MatGroups[j].m_Geometry[k].m_VertexList[m].m_Position) + 1) +
-                                   "/" + (lastIndexOfV2(texCoords, levelModelToExport.m_ModelChunks[i].m_MatGroups[j].m_Geometry[k].m_VertexList[m].m_TexCoord) + 1) + " ";
+                            v_vt[m] = (lastIndexOfV3(vertices, levelModelToExport.m_ModelChunks[i].m_MatGroups[j].m_Geometry[k].m_VertexList[m].m_Position) + 1) +
+                                   "/" + (lastIndexOfV2(texCoords, levelModelToExport.m_ModelChunks[i].m_MatGroups[j].m_Geometry[k].m_VertexList[m].m_TexCoord) + 1);
                         }
-                        output = output + faces.Substring(0, faces.Length - 1) + "\n";
+                        int numFaces;
+                        if (v_vt.Length % 3 == 0 && v_vt.Length > 3)
+                            numFaces = (v_vt.Length / 3) - 1;
+                        numFaces = v_vt.Length % 3;
+                        //Convert all faces with more than 3 vertices to ones with only 3
+                        for (int n = 0; n <= numFaces; n++)
+                        {
+                            if (n%2 == 0)
+                                output += "f " + v_vt[n] + " " + v_vt[n + 1] + " " + v_vt[n + 2] + "\n";
+                            else
+                                output += "f " + v_vt[n + 2] + " " + v_vt[n + 1] + " " + v_vt[n] + "\n";
+                            //Because of how normals are defined in .obj clockwise or anti-clockwise
+                        }
                     }
                 }
             }
             outfile.Write(output);
+            outfile.Close();
             slStatusLabel.Text = "Finished exporting level model.";
         }//End Method
 
