@@ -54,6 +54,7 @@
             this.toolStripLabel3 = new System.Windows.Forms.ToolStripLabel();
             this.btnDumpOverlay = new System.Windows.Forms.ToolStripButton();
             this.btnLOL = new System.Windows.Forms.ToolStripButton();
+            this.btnExportLevelModel = new System.Windows.Forms.ToolStripButton();
             this.tsToolBar = new System.Windows.Forms.ToolStrip();
             this.btnSave = new System.Windows.Forms.ToolStripButton();
             this.toolStripSeparator1 = new System.Windows.Forms.ToolStripSeparator();
@@ -79,7 +80,6 @@
             this.btnStarAll = new System.Windows.Forms.ToolStripButton();
             this.ssStatusBar = new System.Windows.Forms.StatusStrip();
             this.slStatusLabel = new System.Windows.Forms.ToolStripStatusLabel();
-            this.btnExportLevelModel = new System.Windows.Forms.ToolStripButton();
             this.spcMainContainer.Panel1.SuspendLayout();
             this.spcMainContainer.Panel2.SuspendLayout();
             this.spcMainContainer.SuspendLayout();
@@ -393,6 +393,15 @@
             this.btnLOL.Visible = false;
             this.btnLOL.Click += new System.EventHandler(this.btnLOL_Click);
             // 
+            // btnExportLevelModel
+            // 
+            this.btnExportLevelModel.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Text;
+            this.btnExportLevelModel.ImageTransparentColor = System.Drawing.Color.Magenta;
+            this.btnExportLevelModel.Name = "btnExportLevelModel";
+            this.btnExportLevelModel.Size = new System.Drawing.Size(129, 22);
+            this.btnExportLevelModel.Text = "Export Level Geometry";
+            this.btnExportLevelModel.Click += new System.EventHandler(this.btnExportLevelModel_Click);
+            // 
             // tsToolBar
             // 
             this.tsToolBar.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {
@@ -667,15 +676,6 @@
             this.slStatusLabel.TextAlign = System.Drawing.ContentAlignment.MiddleLeft;
             this.slStatusLabel.Paint += new System.Windows.Forms.PaintEventHandler(this.slStatusLabel_Paint);
             this.slStatusLabel.TextChanged += new System.EventHandler(this.slStatusLabel_TextChanged);
-            // 
-            // btnExportLevelModel
-            // 
-            this.btnExportLevelModel.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Text;
-            this.btnExportLevelModel.ImageTransparentColor = System.Drawing.Color.Magenta;
-            this.btnExportLevelModel.Name = "btnExportLevelModel";
-            this.btnExportLevelModel.Size = new System.Drawing.Size(111, 22);
-            this.btnExportLevelModel.Text = "Export Level Model";
-            this.btnExportLevelModel.Click += new System.EventHandler(this.btnExportLevelModel_Click);
             // 
             // LevelEditorForm
             // 
