@@ -2139,7 +2139,7 @@ namespace SM64DSe
                             }
                             Vector2 currentTexCoord =
                                 levelModelToExport.m_ModelChunks[i].m_MatGroups[j].m_Geometry[k].m_VertexList[m].m_TexCoord;
-                            //Print out the current vertex co-ordinates
+                            //Print out the current texture co-ordinates
                             if (currentTexCoord.X.ToString() != "" && currentTexCoord.Y.ToString() != "")
                             {
                                 output = output + "vt " + currentTexCoord.X.ToString() + " " +
@@ -2158,24 +2158,81 @@ namespace SM64DSe
                     {
                         //Faces
                         string[] v_vt = new string[levelModelToExport.m_ModelChunks[i].m_MatGroups[j].m_Geometry[k].m_VertexList.Count];
+                        //Type of face - 0  Separate Triangle(s), 1  Separate Quadliteral(s), 2  Triangle Strips, 3  Quadliteral Strips
+                        uint polyType = levelModelToExport.m_ModelChunks[i].m_MatGroups[j].m_Geometry[k].m_PolyType;
+                        //Get all vertices in face
                         for (int m = 0; m < levelModelToExport.m_ModelChunks[i].m_MatGroups[j].m_Geometry[k].m_VertexList.Count; m++)
                         {
                             v_vt[m] = (lastIndexOfV3(vertices, levelModelToExport.m_ModelChunks[i].m_MatGroups[j].m_Geometry[k].m_VertexList[m].m_Position) + 1) +
                                    "/" + (lastIndexOfV2(texCoords, levelModelToExport.m_ModelChunks[i].m_MatGroups[j].m_Geometry[k].m_VertexList[m].m_TexCoord) + 1);
                         }
-                        int numFaces;
-                        if (v_vt.Length % 3 == 0 && v_vt.Length > 3)
-                            numFaces = (v_vt.Length / 3) - 1;
-                        numFaces = v_vt.Length % 3;
-                        //Convert all faces with more than 3 vertices to ones with only 3
-                        for (int n = 0; n <= numFaces; n++)
+                        switch (polyType)
                         {
-                            if (n%2 == 0)
-                                output += "f " + v_vt[n] + " " + v_vt[n + 1] + " " + v_vt[n + 2] + "\n";
-                            else
-                                output += "f " + v_vt[n + 2] + " " + v_vt[n + 1] + " " + v_vt[n] + "\n";
-                            //Because of how normals are defined in .obj clockwise or anti-clockwise
-                        }
+                            case 0://Separate Triangles
+                                {
+                                    if (v_vt.Length <= 3)//Just 1 triangle
+                                    {
+                                        output += "f " + v_vt[0] + " " + v_vt[1] + " " + v_vt[2] + "\n";
+                                    }
+                                    else if (v_vt.Length > 3 && (float)v_vt.Length % 3 == 0.0f)//Eg. 9 vertices in 3 triangles
+                                    {
+                                        int numFaces = v_vt.Length / 3;
+                                        for (int a = 0, b = 0; a < numFaces; a++, b = b + 3)
+                                        {
+                                            output += "f " + v_vt[b] + " " + v_vt[b + 1] + " " + v_vt[b + 2] + "\n";
+                                        }
+                                    }
+                                    break;
+                                }
+                            case 1://Separate Quadrilaterals
+                                {
+                                    if (v_vt.Length <= 4)//Just 1 quadrilateral
+                                    {
+                                        output += "f " + v_vt[0] + " " + v_vt[1] + " " + v_vt[2] + " " + v_vt[3] + "\n";
+                                    }
+                                    else if (v_vt.Length > 4 && (float)v_vt.Length % 4 == 0.0f)//Eg. 8 vertices in 2 quadrilaterals
+                                    {
+                                        int numFaces = v_vt.Length / 4;
+                                        for (int a = 0, b = 0; a < numFaces; a++, b = b + 4)
+                                        {
+                                            output += "f " + v_vt[b] + " " + v_vt[b + 1] + " " + v_vt[b + 2] + " " + v_vt[b + 3] + "\n";
+                                        }
+                                    }
+                                    break;
+                                }
+                            case 2://Triangle Strips
+                                {
+                                    //3+(N-1) vertices per N triangles
+                                    //(N-3)+1 Triangles per N Vertices
+                                    int numFaces = v_vt.Length - 2;
+                                    if (v_vt.Length < 3)//Should never be
+                                        break;
+                                    //Convert all faces with more than 3 vertices to ones with only 3
+                                    for (int n = 0; n < numFaces; n++)
+                                    {
+                                        if (n % 2 == 0)
+                                            output += "f " + v_vt[n] + " " + v_vt[n + 1] + " " + v_vt[n + 2] + "\n";
+                                        else
+                                            output += "f " + v_vt[n + 2] + " " + v_vt[n + 1] + " " + v_vt[n] + "\n";
+                                        //Because of how normals are defined in triangle strips, every 2nd triangle is clockwise, whereas all others are anti-clockwise
+                                    }
+                                    break;
+                                }
+                            case 3://Quadrilateral Strips
+                                {
+                                    //4+(N-1)*2 vertices per N quads
+                                    //((N/2)-4)+1 Quads. per N Vertices
+                                    int numFaces = ((v_vt.Length / 2) - 4) + 1;
+                                    if (v_vt.Length < 4)//Should never be
+                                        break;
+                                    for (int n = 0, p = 0; n < numFaces; n++, p = p + 2)
+                                    {
+                                        output += "f " + v_vt[p] + " " + v_vt[p + 1] + " " + v_vt[p + 3] + " " + v_vt[p + 2] + "\n";
+                                    }
+                                    break;
+                                }
+                            default: MessageBox.Show("Unknown polygon type."); break;
+                        }//End polyType switch
                     }
                 }
             }
