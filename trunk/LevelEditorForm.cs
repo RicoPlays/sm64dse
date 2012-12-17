@@ -582,6 +582,7 @@ namespace SM64DSe
                         btnAddObject.Visible = true;
                         btnRemoveSel.Visible = true;
                         btnReplaceObjModel.Visible = true;
+                        btnExportObjectModel.Visible = true;
 
                         TreeNode node0 = tvObjectList.Nodes.Add("parent0", "Objects");
 
@@ -2110,21 +2111,77 @@ namespace SM64DSe
 
         private void btnExportLevelModel_Click(object sender, EventArgs e)
         {
-            exportOBJ();
+            exportOBJ(new BMD(m_ROM.GetFileFromInternalID(m_LevelSettings.BMDFileID)));
         }//End Method
 
-        private void exportOBJ()
+        private void exportOBJ(BMD levelModelToExport)
         {
-            BMD levelModelToExport = new BMD(m_ROM.GetFileFromInternalID(m_LevelSettings.BMDFileID));
+            //BMD levelModelToExport = new BMD(m_ROM.GetFileFromInternalID(m_LevelSettings.BMDFileID));
             string output = "";
+            string mtllib = "";
             CultureInfo usa = new CultureInfo("en-US");//Need to ensure 1.23 not 1,23 when floatVar.ToString() used - use floatVar.ToString(usa)
-            StreamWriter outfile = new StreamWriter("LevelModel_" + LevelID + ".obj");
+            SaveFileDialog saveOBJ = new SaveFileDialog();
+            saveOBJ.FileName = "LevelModel_" + LevelID;//Default name
+            saveOBJ.DefaultExt = ".obj";//Default file extension
+            saveOBJ.Filter = "Wavefront OBJ (.obj)|*.obj";//Filter by .obj
+            if (saveOBJ.ShowDialog() == DialogResult.Cancel)
+                return;
+            StreamWriter outfile = new StreamWriter(saveOBJ.FileName);
+            StreamWriter outMTL = new StreamWriter(saveOBJ.FileName.Substring(0, saveOBJ.FileName.Length - 4) + ".mtl");
+            string dir = Path.GetDirectoryName(saveOBJ.FileName);
             List<Vector3> vertices = new List<Vector3>();
             List<Vector2> texCoords = new List<Vector2>();
+            List<BMD.Texture> textures = new List<BMD.Texture>();
+            output += "mtllib " + "Level_" + LevelID + ".mtl" + "\n";//Specify name of material library
             for (int i = 0; i < levelModelToExport.m_ModelChunks.Length; i++)
             {
                 for (int j = 0; j < levelModelToExport.m_ModelChunks[i].m_MatGroups.Length; j++)
                 {
+                    //For every texture,
+                    BMD.Texture currentTexture = levelModelToExport.m_ModelChunks[i].m_MatGroups[j].m_Texture;
+                    if (currentTexture != null)
+                    {
+                        textures.Add(currentTexture);
+                        //Create new material
+                        mtllib += "newmtl material_" + ((i * 2) + j) + "\n";
+                        //Specify ambient colour - RGB 0-1
+                        mtllib += "Ka " + (levelModelToExport.m_ModelChunks[i].m_MatGroups[j].m_AmbientColor.R / 255.0f).ToString(usa) +
+                            " " + (levelModelToExport.m_ModelChunks[i].m_MatGroups[j].m_AmbientColor.G / 255.0f).ToString(usa) +
+                            " " + (levelModelToExport.m_ModelChunks[i].m_MatGroups[j].m_AmbientColor.B / 255.0f).ToString(usa) + "\n";
+                        //Specify diffuse colour - RGB 0-1
+                        mtllib += "Kd " + (levelModelToExport.m_ModelChunks[i].m_MatGroups[j].m_DiffuseColor.R / 255.0f).ToString(usa) +
+                            " " + (levelModelToExport.m_ModelChunks[i].m_MatGroups[j].m_DiffuseColor.G / 255.0f).ToString(usa) +
+                            " " + (levelModelToExport.m_ModelChunks[i].m_MatGroups[j].m_DiffuseColor.B / 255.0f).ToString(usa) + "\n";
+                        //Specify specular colour - RGB 0-1
+                        mtllib += "Ks " + (levelModelToExport.m_ModelChunks[i].m_MatGroups[j].m_SpecularColor.R / 255.0f).ToString(usa) +
+                            " " + (levelModelToExport.m_ModelChunks[i].m_MatGroups[j].m_SpecularColor.G / 255.0f).ToString(usa) +
+                            " " + (levelModelToExport.m_ModelChunks[i].m_MatGroups[j].m_SpecularColor.B / 255.0f).ToString(usa) + "\n";
+                        //Specify specular colour co-efficient - RGB 0-1
+                        mtllib += "Ns " + levelModelToExport.m_ModelChunks[i].m_MatGroups[j].m_SpeEmiColors.ToString(usa) + "\n";
+                        //Specify transparency - RGB Alpha channel 0-1
+                        mtllib += "Tr " + (levelModelToExport.m_ModelChunks[i].m_MatGroups[j].m_AmbientColor.A / 255.0f).ToString(usa) + "\n";
+                        //Specify texture type 0 - 10
+                        uint textype = (currentTexture.m_Params >> 26) & 0x7;
+                        mtllib += "illum " + textype + "\n";
+                        //Specify name of texture image
+                        mtllib += "map_Kd " + currentTexture.m_TexName + ".png" + "\n\n";
+                        //Export the current texture to .PNG
+                        Bitmap lol = new Bitmap((int)currentTexture.m_Width, (int)currentTexture.m_Height);
+
+                        for (int y = 0; y < (int)currentTexture.m_Height; y++)
+                        {
+                            for (int x = 0; x < (int)currentTexture.m_Width; x++)
+                            {
+                                lol.SetPixel(x, y, Color.FromArgb(currentTexture.m_Data[((y * currentTexture.m_Width) + x) * 4 + 3],
+                                 currentTexture.m_Data[((y * currentTexture.m_Width) + x) * 4 + 2],
+                                 currentTexture.m_Data[((y * currentTexture.m_Width) + x) * 4 + 1],
+                                 currentTexture.m_Data[((y * currentTexture.m_Width) + x) * 4]));
+                            }
+                        }
+                        lol.RotateFlip(RotateFlipType.RotateNoneFlipY);//Textures are rotated 180 degrees
+                        lol.Save(dir + "/" + currentTexture.m_TexName + ".png", System.Drawing.Imaging.ImageFormat.Png);
+                    }
+                        
                     for (int k = 0; k < levelModelToExport.m_ModelChunks[i].m_MatGroups[j].m_Geometry.Count; k++)
                     {
                         for (int m = 0; m < levelModelToExport.m_ModelChunks[i].m_MatGroups[j].m_Geometry[k].m_VertexList.Count; m++)
@@ -2156,13 +2213,15 @@ namespace SM64DSe
             {
                 for (int j = 0; j < levelModelToExport.m_ModelChunks[i].m_MatGroups.Length; j++)
                 {
+                    //Specify which material as defined in the material lib each set of face(s) is to use
+                    output += "usemtl material_" + textures.IndexOf(levelModelToExport.m_ModelChunks[i].m_MatGroups[j].m_Texture) + "\n";
                     for (int k = 0; k < levelModelToExport.m_ModelChunks[i].m_MatGroups[j].m_Geometry.Count; k++)
                     {
                         //Faces
                         string[] v_vt = new string[levelModelToExport.m_ModelChunks[i].m_MatGroups[j].m_Geometry[k].m_VertexList.Count];
                         //Type of face - 0  Separate Triangle(s), 1  Separate Quadliteral(s), 2  Triangle Strips, 3  Quadliteral Strips
                         uint polyType = levelModelToExport.m_ModelChunks[i].m_MatGroups[j].m_Geometry[k].m_PolyType;
-                        //Get all vertices in face
+                        //Get indices of all vertices and texture vertices in face (index starts at 1)
                         for (int m = 0; m < levelModelToExport.m_ModelChunks[i].m_MatGroups[j].m_Geometry[k].m_VertexList.Count; m++)
                         {
                             v_vt[m] = (lastIndexOfV3(vertices, levelModelToExport.m_ModelChunks[i].m_MatGroups[j].m_Geometry[k].m_VertexList[m].m_Position) + 1) +
@@ -2240,6 +2299,8 @@ namespace SM64DSe
             }
             outfile.Write(output);
             outfile.Close();
+            outMTL.Write(mtllib);
+            outMTL.Close();
             slStatusLabel.Text = "Finished exporting level model.";
         }//End Method
 
@@ -2263,6 +2324,24 @@ namespace SM64DSe
                     index = i;
             }
             return index;
+        }
+
+        private void btnExportObjectModel_Click(object sender, EventArgs e)
+        {
+            if (m_SelectedObject == null)
+            {
+                slStatusLabel.Text = "Click the object whose model you want to export.";
+
+                return;
+            }
+            
+            LevelObject obj = m_SelectedObject;
+            ObjectRenderer selObjBMD = ObjectRenderer.FromLevelObject(obj);
+            //Get the name of the selected object's BMD (model) file
+            string selObjBMDName = ObjectRenderer.currentObjFilename;
+
+            BMD objectBMD = new BMD(m_ROM.GetFileFromName(selObjBMDName));
+            exportOBJ(objectBMD);
         }
     }
 }

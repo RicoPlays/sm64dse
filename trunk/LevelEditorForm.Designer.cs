@@ -80,6 +80,7 @@
             this.btnStarAll = new System.Windows.Forms.ToolStripButton();
             this.ssStatusBar = new System.Windows.Forms.StatusStrip();
             this.slStatusLabel = new System.Windows.Forms.ToolStripStatusLabel();
+            this.btnExportObjectModel = new System.Windows.Forms.ToolStripButton();
             this.spcMainContainer.Panel1.SuspendLayout();
             this.spcMainContainer.Panel2.SuspendLayout();
             this.spcMainContainer.SuspendLayout();
@@ -119,7 +120,7 @@
             // 
             this.spcLeftPanel.Dock = System.Windows.Forms.DockStyle.Fill;
             this.spcLeftPanel.FixedPanel = System.Windows.Forms.FixedPanel.Panel2;
-            this.spcLeftPanel.Location = new System.Drawing.Point(0, 88);
+            this.spcLeftPanel.Location = new System.Drawing.Point(0, 110);
             this.spcLeftPanel.Name = "spcLeftPanel";
             this.spcLeftPanel.Orientation = System.Windows.Forms.Orientation.Horizontal;
             // 
@@ -130,8 +131,8 @@
             // spcLeftPanel.Panel2
             // 
             this.spcLeftPanel.Panel2.Controls.Add(this.pgObjectProperties);
-            this.spcLeftPanel.Size = new System.Drawing.Size(264, 398);
-            this.spcLeftPanel.SplitterDistance = 139;
+            this.spcLeftPanel.Size = new System.Drawing.Size(264, 376);
+            this.spcLeftPanel.SplitterDistance = 117;
             this.spcLeftPanel.TabIndex = 1;
             // 
             // tvObjectList
@@ -141,7 +142,7 @@
             this.tvObjectList.HideSelection = false;
             this.tvObjectList.Location = new System.Drawing.Point(0, 0);
             this.tvObjectList.Name = "tvObjectList";
-            this.tvObjectList.Size = new System.Drawing.Size(264, 139);
+            this.tvObjectList.Size = new System.Drawing.Size(264, 117);
             this.tvObjectList.TabIndex = 0;
             this.tvObjectList.TabStop = false;
             this.tvObjectList.DrawNode += new System.Windows.Forms.DrawTreeNodeEventHandler(this.tvObjectList_DrawNode);
@@ -170,11 +171,12 @@
             this.btnAddPath,
             this.btnAddView,
             this.btnRemoveSel,
-            this.btnReplaceObjModel});
+            this.btnReplaceObjModel,
+            this.btnExportObjectModel});
             this.tsEditActions.LayoutStyle = System.Windows.Forms.ToolStripLayoutStyle.Flow;
             this.tsEditActions.Location = new System.Drawing.Point(0, 0);
             this.tsEditActions.Name = "tsEditActions";
-            this.tsEditActions.Size = new System.Drawing.Size(264, 88);
+            this.tsEditActions.Size = new System.Drawing.Size(264, 110);
             this.tsEditActions.TabIndex = 0;
             this.tsEditActions.Text = "toolStrip1";
             // 
@@ -398,8 +400,8 @@
             this.btnExportLevelModel.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Text;
             this.btnExportLevelModel.ImageTransparentColor = System.Drawing.Color.Magenta;
             this.btnExportLevelModel.Name = "btnExportLevelModel";
-            this.btnExportLevelModel.Size = new System.Drawing.Size(129, 22);
-            this.btnExportLevelModel.Text = "Export Level Geometry";
+            this.btnExportLevelModel.Size = new System.Drawing.Size(111, 22);
+            this.btnExportLevelModel.Text = "Export Level Model";
             this.btnExportLevelModel.Click += new System.EventHandler(this.btnExportLevelModel_Click);
             // 
             // tsToolBar
@@ -677,6 +679,15 @@
             this.slStatusLabel.Paint += new System.Windows.Forms.PaintEventHandler(this.slStatusLabel_Paint);
             this.slStatusLabel.TextChanged += new System.EventHandler(this.slStatusLabel_TextChanged);
             // 
+            // btnExportObjectModel
+            // 
+            this.btnExportObjectModel.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Text;
+            this.btnExportObjectModel.ImageTransparentColor = System.Drawing.Color.Magenta;
+            this.btnExportObjectModel.Name = "btnExportObjectModel";
+            this.btnExportObjectModel.Size = new System.Drawing.Size(119, 19);
+            this.btnExportObjectModel.Text = "Export Object Model";
+            this.btnExportObjectModel.Click += new System.EventHandler(this.btnExportObjectModel_Click);
+            // 
             // LevelEditorForm
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
@@ -763,6 +774,7 @@
         private System.Windows.Forms.ToolStripButton btnEditMinimap;
         private System.Windows.Forms.ToolStripButton btnReplaceObjModel;
         private System.Windows.Forms.ToolStripButton btnExportLevelModel;
+        private System.Windows.Forms.ToolStripButton btnExportObjectModel;
 
 
     }
