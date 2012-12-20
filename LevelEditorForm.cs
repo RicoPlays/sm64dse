@@ -64,16 +64,16 @@ namespace SM64DSe
 
         private void ClampRotation(ref float val, float twopi)
         {
-	        if (val > twopi)
-	        {
-		        while (val > twopi)
-			        val -= twopi;
-	        }
-	        else if (val < -twopi)
-	        {
-		        while (val < -twopi)
-			        val += twopi;
-	        }
+            if (val > twopi)
+            {
+                while (val > twopi)
+                    val -= twopi;
+            }
+            else if (val < -twopi)
+            {
+                while (val < -twopi)
+                    val += twopi;
+            }
         }
 
         private bool IsSimpleObject(ushort id)
@@ -216,23 +216,23 @@ namespace SM64DSe
                     case 12:
                         // per-area minimap scale factors todo
                         {
-                           /* string lol = "OBJECT 12:  ";
-                            for (byte e = 0; e < entries_num; e++)
-                            {
-                                lol += string.Format("{0:X4} | ", m_Overlay.Read16((uint)(entries_offset + (e * 2))));
-                                m_Overlay.Write16((uint)(entries_offset + (e * 2)), 0x0898);
-                            }
-                            MessageBox.Show(lol.Substring(0, lol.Length - 3));*/
+                            /* string lol = "OBJECT 12:  ";
+                             for (byte e = 0; e < entries_num; e++)
+                             {
+                                 lol += string.Format("{0:X4} | ", m_Overlay.Read16((uint)(entries_offset + (e * 2))));
+                                 m_Overlay.Write16((uint)(entries_offset + (e * 2)), 0x0898);
+                             }
+                             MessageBox.Show(lol.Substring(0, lol.Length - 3));*/
                         }
                         break;
 
                     case 14:
                         // ??? todo
                         {
-                         /*   string lol = "OBJECT 14:  ";
-                            for (byte e = 0; e < entries_num; e++)
-                                lol += string.Format("{0:X8} | ", m_Overlay.Read32((uint)(entries_offset + (e * 4))));
-                            MessageBox.Show(lol.Substring(0, lol.Length - 3));*/
+                            /*   string lol = "OBJECT 14:  ";
+                               for (byte e = 0; e < entries_num; e++)
+                                   lol += string.Format("{0:X8} | ", m_Overlay.Read32((uint)(entries_offset + (e * 4))));
+                               MessageBox.Show(lol.Substring(0, lol.Length - 3));*/
                             //m_Overlay.Write32(entries_offset, 0x03030304);
                             //m_Overlay.Write32(entries_offset, 0xFFFFFFFF);
                         }
@@ -345,7 +345,7 @@ namespace SM64DSe
             btnEditObjects.Checked = true;
             m_EditMode = 1;
 
-            m_Hovered = 0xFFFFFFFF; 
+            m_Hovered = 0xFFFFFFFF;
             m_LastHovered = 0xFFFFFFFF;
             m_HoveredObject = null;
             m_Selected = 0xFFFFFFFF;
@@ -425,30 +425,30 @@ namespace SM64DSe
         {
             Vector3 up;
 
-			if (Math.Cos(m_CamRotation.Y) < 0)
-			{
-				m_UpsideDown = true;
-				up = new Vector3(0.0f, -1.0f, 0.0f);
-			}
-			else
-			{
-				m_UpsideDown = false;
-				up = new Vector3(0.0f, 1.0f, 0.0f);
-			}
-				
-			m_CamPosition.X = m_CamDistance * (float)Math.Cos(m_CamRotation.X) * (float)Math.Cos(m_CamRotation.Y);
-			m_CamPosition.Y = m_CamDistance * (float)Math.Sin(m_CamRotation.Y);
-			m_CamPosition.Z = m_CamDistance * (float)Math.Sin(m_CamRotation.X) * (float)Math.Cos(m_CamRotation.Y);
+            if (Math.Cos(m_CamRotation.Y) < 0)
+            {
+                m_UpsideDown = true;
+                up = new Vector3(0.0f, -1.0f, 0.0f);
+            }
+            else
+            {
+                m_UpsideDown = false;
+                up = new Vector3(0.0f, 1.0f, 0.0f);
+            }
 
-			Vector3 skybox_target;
-			skybox_target.X = -(float)Math.Cos(m_CamRotation.X) * (float)Math.Cos(m_CamRotation.Y);
-			skybox_target.Y = -(float)Math.Sin(m_CamRotation.Y);
-			skybox_target.Z = -(float)Math.Sin(m_CamRotation.X) * (float)Math.Cos(m_CamRotation.Y);
+            m_CamPosition.X = m_CamDistance * (float)Math.Cos(m_CamRotation.X) * (float)Math.Cos(m_CamRotation.Y);
+            m_CamPosition.Y = m_CamDistance * (float)Math.Sin(m_CamRotation.Y);
+            m_CamPosition.Z = m_CamDistance * (float)Math.Sin(m_CamRotation.X) * (float)Math.Cos(m_CamRotation.Y);
 
-			Vector3.Add(ref m_CamPosition, ref m_CamTarget, out m_CamPosition);
-            
-			m_CamMatrix = Matrix4.LookAt(m_CamPosition, m_CamTarget, up);
-			m_SkyboxMatrix = Matrix4.LookAt(Vector3.Zero, skybox_target, up);
+            Vector3 skybox_target;
+            skybox_target.X = -(float)Math.Cos(m_CamRotation.X) * (float)Math.Cos(m_CamRotation.Y);
+            skybox_target.Y = -(float)Math.Sin(m_CamRotation.Y);
+            skybox_target.Z = -(float)Math.Sin(m_CamRotation.X) * (float)Math.Cos(m_CamRotation.Y);
+
+            Vector3.Add(ref m_CamPosition, ref m_CamTarget, out m_CamPosition);
+
+            m_CamMatrix = Matrix4.LookAt(m_CamPosition, m_CamTarget, up);
+            m_SkyboxMatrix = Matrix4.LookAt(Vector3.Zero, skybox_target, up);
         }
 
         private void RenderObjectLists(RenderMode mode, int layer)
@@ -460,7 +460,7 @@ namespace SM64DSe
                 case RenderMode.Translucent: t = 1; break;
                 case RenderMode.Picking: t = 2; break;
             }
-            
+
             if (m_ObjectDLs[layer, t] == 0)
                 m_ObjectDLs[layer, t] = GL.GenLists(1);
 
@@ -586,7 +586,7 @@ namespace SM64DSe
 
                         TreeNode node0 = tvObjectList.Nodes.Add("parent0", "Objects");
 
-                        IEnumerable<LevelObject> objects = m_LevelObjects.Values.Where(obj => 
+                        IEnumerable<LevelObject> objects = m_LevelObjects.Values.Where(obj =>
                             ((m_ShowCommonLayer && obj.m_Layer == 0) || (m_AuxLayerNum != 0 && obj.m_Layer == m_AuxLayerNum)) &&
                             (obj.m_UniqueID >> 28) == 1);
                         foreach (LevelObject obj in objects)
@@ -689,7 +689,7 @@ namespace SM64DSe
 
         private void RemovePointer(uint _ref)
         {
-            for (int i = 0; i < m_PointerList.Count;)
+            for (int i = 0; i < m_PointerList.Count; )
             {
                 if (m_PointerList[i].m_ReferenceAddr == _ref)
                     m_PointerList.RemoveAt(i);
@@ -774,7 +774,7 @@ namespace SM64DSe
 
         private uint AddObjectSlot(int type, int layer, int area)
         {
-            int[] sizes = {16, 16, 6, 6, 14, 8, 8, 8, 8, 12, 14, 2, 2, 0, 4};
+            int[] sizes = { 16, 16, 6, 6, 14, 8, 8, 8, 8, 12, 14, 2, 2, 0, 4 };
             int size = sizes[type];
 
             uint tableptr;
@@ -830,7 +830,7 @@ namespace SM64DSe
             m_Overlay.Write16(tableendptr + 2, 0);
             m_Overlay.WritePointer(tableendptr + 4, objaddr);
             AddPointer(tableendptr + 4);
-            
+
             return objaddr;
         }
 
@@ -1028,7 +1028,7 @@ namespace SM64DSe
 
             m_PickingFrameBuffer = new uint[9];
             m_PickingDepth = 0f;
-            
+
             GL.Viewport(glLevelView.ClientRectangle);
 
             m_AspectRatio = (float)glLevelView.Width / (float)glLevelView.Height;
@@ -1054,19 +1054,19 @@ namespace SM64DSe
             GL.Enable(EnableCap.Normalize);
 
             m_CamRotation = new Vector2(0.0f, (float)Math.PI / 8.0f);
-			// m_CamRotation = new Vector2(0.0f, 0.0f);
-			m_CamTarget = new Vector3(0.0f, 0.0f, 0.0f);
-		    m_CamDistance = 1.0f;//6.5f;
-			UpdateCamera();
+            // m_CamRotation = new Vector2(0.0f, 0.0f);
+            m_CamTarget = new Vector3(0.0f, 0.0f, 0.0f);
+            m_CamDistance = 1.0f;//6.5f;
+            UpdateCamera();
 
-			m_PixelFactorX = ((2f * (float)Math.Tan(k_FOV / 2f) * m_AspectRatio) / (float)(glLevelView.Width));
-			m_PixelFactorY = ((2f * (float)Math.Tan(k_FOV / 2f)) / (float)(glLevelView.Height));
+            m_PixelFactorX = ((2f * (float)Math.Tan(k_FOV / 2f) * m_AspectRatio) / (float)(glLevelView.Width));
+            m_PixelFactorY = ((2f * (float)Math.Tan(k_FOV / 2f)) / (float)(glLevelView.Height));
 
-			GL.Enable(EnableCap.Blend);
-			GL.BlendFunc(BlendingFactorSrc.SrcAlpha, BlendingFactorDest.OneMinusSrcAlpha);
+            GL.Enable(EnableCap.Blend);
+            GL.BlendFunc(BlendingFactorSrc.SrcAlpha, BlendingFactorDest.OneMinusSrcAlpha);
 
-			GL.Enable(EnableCap.AlphaTest);
-			GL.AlphaFunc(AlphaFunction.Greater, 0.0f);
+            GL.Enable(EnableCap.AlphaTest);
+            GL.AlphaFunc(AlphaFunction.Greater, 0.0f);
 
             GL.Enable(EnableCap.Texture2D);
 
@@ -1085,7 +1085,7 @@ namespace SM64DSe
             UpdateLevelModel();
 
             // prerender the objects
-            m_ObjectDLs = new int[8,3];
+            m_ObjectDLs = new int[8, 3];
             for (int l = 0; l < 8; l++)
             {
                 RenderObjectLists(RenderMode.Opaque, l);
@@ -1399,7 +1399,7 @@ namespace SM64DSe
                 obj.Position = Get3DCoords(e.Location, 2f);
                 obj.GenerateProperties();
                 pgObjectProperties.SelectedObject = obj.m_Properties;
-                
+
                 m_Selected = obj.m_UniqueID;
                 m_SelectedObject = obj;
                 m_LastSelected = obj.m_UniqueID;
@@ -1459,7 +1459,7 @@ namespace SM64DSe
             {
                 uint sel = m_PickingFrameBuffer[4];
                 uint type = (sel >> 28);
-                
+
                 if (type == m_EditMode && type != 0 && type != 5)
                 {
                     m_Selected = sel;
@@ -1492,10 +1492,10 @@ namespace SM64DSe
         private void glLevelView_MouseMove(object sender, MouseEventArgs e)
         {
             float xdelta = (float)(e.X - m_LastMouseMove.X);
-			float ydelta = (float)(e.Y - m_LastMouseMove.Y);
-			 
-			m_MouseCoords = e.Location;
-			m_LastMouseMove = e.Location;
+            float ydelta = (float)(e.Y - m_LastMouseMove.Y);
+
+            m_MouseCoords = e.Location;
+            m_LastMouseMove = e.Location;
 
             //if (m_SelectedObject != null)
             //    m_SelectedObject.m_TestMatrix.M11 *= 1.001f;
@@ -1516,7 +1516,7 @@ namespace SM64DSe
                             xdelta = -xdelta;
 
                         //m_CamRotation.X -= xdelta * 0.002f;
-                       // m_CamRotation.Y -= ydelta * 0.002f;
+                        // m_CamRotation.Y -= ydelta * 0.002f;
                         m_CamRotation.X -= (float)Math.Tan((xdelta * m_PixelFactorX) / m_PickingDepth);//xdelta * m_PixelFactorX * m_PickingDepth;
                         m_CamRotation.Y -= ydelta * m_PixelFactorY * m_PickingDepth;
 
@@ -1601,13 +1601,13 @@ namespace SM64DSe
                             m_HoveredObject = null;
                         }
                         else
-                        if (m_LastHovered != m_Hovered)
-                        {
-                            LevelObject obj = m_LevelObjects[sel];
-                            RenderObjectHilite(obj, k_HoverColor, m_HoverHiliteDL);
-                            m_LastHovered = m_Hovered;
-                            m_HoveredObject = obj;
-                        }
+                            if (m_LastHovered != m_Hovered)
+                            {
+                                LevelObject obj = m_LevelObjects[sel];
+                                RenderObjectHilite(obj, k_HoverColor, m_HoverHiliteDL);
+                                m_LastHovered = m_Hovered;
+                                m_HoveredObject = obj;
+                            }
                     }
                     else
                     {
@@ -1625,30 +1625,30 @@ namespace SM64DSe
         {
             if ((m_MouseDown == MouseButtons.Left) && ((m_Selected >> 28) != 0xF) && (m_LastClicked == m_Selected))
             {
-                float delta = -(e.Delta/120f);
-				delta = ((delta < 0f) ? -1f:1f) * (float)Math.Pow(delta, 2f) * 0.05f;
+                float delta = -(e.Delta / 120f);
+                delta = ((delta < 0f) ? -1f : 1f) * (float)Math.Pow(delta, 2f) * 0.05f;
 
-				m_SelectedObject.Position.X += delta * (float)Math.Cos(m_CamRotation.X) * (float)Math.Cos(m_CamRotation.Y);
-				m_SelectedObject.Position.Y += delta * (float)Math.Sin(m_CamRotation.Y);
-				m_SelectedObject.Position.Z += delta * (float)Math.Sin(m_CamRotation.X) * (float)Math.Cos(m_CamRotation.Y);
+                m_SelectedObject.Position.X += delta * (float)Math.Cos(m_CamRotation.X) * (float)Math.Cos(m_CamRotation.Y);
+                m_SelectedObject.Position.Y += delta * (float)Math.Sin(m_CamRotation.Y);
+                m_SelectedObject.Position.Z += delta * (float)Math.Sin(m_CamRotation.X) * (float)Math.Cos(m_CamRotation.Y);
 
-				float xdist = delta * (m_MouseCoords.X - (glLevelView.Width / 2f)) * m_PixelFactorX;
-				float ydist = delta * (m_MouseCoords.Y - (glLevelView.Height / 2f)) * m_PixelFactorY;
+                float xdist = delta * (m_MouseCoords.X - (glLevelView.Width / 2f)) * m_PixelFactorX;
+                float ydist = delta * (m_MouseCoords.Y - (glLevelView.Height / 2f)) * m_PixelFactorY;
 
-				m_SelectedObject.Position.X -= (xdist * (float)Math.Sin(m_CamRotation.X)) + (ydist * (float)Math.Sin(m_CamRotation.Y) * (float)Math.Cos(m_CamRotation.X));
-				m_SelectedObject.Position.Y += ydist * (float)Math.Cos(m_CamRotation.Y);
-				m_SelectedObject.Position.Z += (xdist * (float)Math.Cos(m_CamRotation.X)) - (ydist * (float)Math.Sin(m_CamRotation.Y) * (float)Math.Sin(m_CamRotation.X));
+                m_SelectedObject.Position.X -= (xdist * (float)Math.Sin(m_CamRotation.X)) + (ydist * (float)Math.Sin(m_CamRotation.Y) * (float)Math.Cos(m_CamRotation.X));
+                m_SelectedObject.Position.Y += ydist * (float)Math.Cos(m_CamRotation.Y);
+                m_SelectedObject.Position.Z += (xdist * (float)Math.Cos(m_CamRotation.X)) - (ydist * (float)Math.Sin(m_CamRotation.Y) * (float)Math.Sin(m_CamRotation.X));
 
                 UpdateSelection();
             }
             else
             {
                 float delta = -((e.Delta / 120.0f) * 0.1f);
-			    m_CamTarget.X += delta * (float)Math.Cos(m_CamRotation.X) * (float)Math.Cos(m_CamRotation.Y);
-		        m_CamTarget.Y += delta * (float)Math.Sin(m_CamRotation.Y);
-			    m_CamTarget.Z += delta * (float)Math.Sin(m_CamRotation.X) * (float)Math.Cos(m_CamRotation.Y);
+                m_CamTarget.X += delta * (float)Math.Cos(m_CamRotation.X) * (float)Math.Cos(m_CamRotation.Y);
+                m_CamTarget.Y += delta * (float)Math.Sin(m_CamRotation.Y);
+                m_CamTarget.Z += delta * (float)Math.Sin(m_CamRotation.X) * (float)Math.Cos(m_CamRotation.Y);
 
-			    UpdateCamera();
+                UpdateCamera();
             }
 
             glLevelView.Refresh();
@@ -1797,10 +1797,10 @@ namespace SM64DSe
         private void tvObjectList_DrawNode(object sender, DrawTreeNodeEventArgs e)
         {
             Color fgcolor, bgcolor;
-            
-			Font font = e.Node.NodeFont;
-			if (font == null) font = tvObjectList.Font;
-            
+
+            Font font = e.Node.NodeFont;
+            if (font == null) font = tvObjectList.Font;
+
             bool red = false;
             if (e.Node.Tag is uint && m_LevelObjects.ContainsKey((uint)e.Node.Tag))
             {
@@ -1809,22 +1809,22 @@ namespace SM64DSe
                     red = !m_ObjAvailable[m_LevelObjects[uniqueid].ID];
             }
 
-			if ((e.State & TreeNodeStates.Selected) != 0)
-			{
-				fgcolor = red ? Color.LightPink : SystemColors.HighlightText;
-				bgcolor = SystemColors.Highlight;
-			}
-			else
-			{
-				fgcolor = red ? Color.Red : SystemColors.ControlText;
-				bgcolor = SystemColors.ControlLightLight;
-			}
+            if ((e.State & TreeNodeStates.Selected) != 0)
+            {
+                fgcolor = red ? Color.LightPink : SystemColors.HighlightText;
+                bgcolor = SystemColors.Highlight;
+            }
+            else
+            {
+                fgcolor = red ? Color.Red : SystemColors.ControlText;
+                bgcolor = SystemColors.ControlLightLight;
+            }
 
             // apparently we can't rely on e.Bounds, we have to calculate the size of the string ourselves
             Rectangle txtbounds = e.Bounds;
             SizeF txtsize = e.Graphics.MeasureString(e.Node.Text, font);
             txtbounds.Width = (int)txtsize.Width;
-            
+
             e.Graphics.FillRectangle(new SolidBrush(bgcolor), txtbounds);
             e.Graphics.DrawString(e.Node.Text, font, new SolidBrush(fgcolor), (float)e.Bounds.X, (float)e.Bounds.Y + 1f);
         }
@@ -1887,7 +1887,7 @@ namespace SM64DSe
 
                 isImported = false;//Set back to default
             }
-            
+
 
             m_Overlay.SaveChanges();
             slStatusLabel.Text = "Changes saved.";
@@ -1896,7 +1896,7 @@ namespace SM64DSe
         private void tvObjectList_AfterSelect(object sender, TreeViewEventArgs e)
         {
             if (e.Node.Tag == null) return;
-            
+
             uint objid = (uint)e.Node.Tag;
             m_Selected = m_LastSelected = objid;
             m_SelectedObject = m_LevelObjects[objid];
@@ -1999,7 +1999,7 @@ namespace SM64DSe
                 case 10: obj = "exit"; break;
             }
 
-            slStatusLabel.Text = "Click anywhere in the level to place your new "+obj+". Hold Shift while clicking to place multiple "+obj+"s. Hit Escape to abort.";
+            slStatusLabel.Text = "Click anywhere in the level to place your new " + obj + ". Hold Shift while clicking to place multiple " + obj + "s. Hit Escape to abort.";
         }
 
         private void btnRemoveSel_Click(object sender, EventArgs e)
@@ -2089,10 +2089,10 @@ namespace SM64DSe
             if (m_SelectedObject == null)
             {
                 slStatusLabel.Text = "Click the object whose model you want to replace.";
-                
+
                 return;
-            } 
-            
+            }
+
             LevelObject obj = m_SelectedObject;
             ObjectRenderer selObjBMD = ObjectRenderer.FromLevelObject(obj);
             //Get the name of the selected object's BMD (model) file
@@ -2129,10 +2129,11 @@ namespace SM64DSe
             StreamWriter outfile = new StreamWriter(saveOBJ.FileName);
             StreamWriter outMTL = new StreamWriter(saveOBJ.FileName.Substring(0, saveOBJ.FileName.Length - 4) + ".mtl");
             string dir = Path.GetDirectoryName(saveOBJ.FileName);
+            string filename = Path.GetFileNameWithoutExtension(saveOBJ.FileName);
             List<Vector3> vertices = new List<Vector3>();
             List<Vector2> texCoords = new List<Vector2>();
             List<BMD.Texture> textures = new List<BMD.Texture>();
-            output += "mtllib " + "Level_" + LevelID + ".mtl" + "\n";//Specify name of material library
+            output += "mtllib " + filename + ".mtl" + "\n";//Specify name of material library
             for (int i = 0; i < levelModelToExport.m_ModelChunks.Length; i++)
             {
                 for (int j = 0; j < levelModelToExport.m_ModelChunks[i].m_MatGroups.Length; j++)
@@ -2181,7 +2182,7 @@ namespace SM64DSe
                         lol.RotateFlip(RotateFlipType.RotateNoneFlipY);//Textures are rotated 180 degrees
                         lol.Save(dir + "/" + currentTexture.m_TexName + ".png", System.Drawing.Imaging.ImageFormat.Png);
                     }
-                        
+
                     for (int k = 0; k < levelModelToExport.m_ModelChunks[i].m_MatGroups[j].m_Geometry.Count; k++)
                     {
                         for (int m = 0; m < levelModelToExport.m_ModelChunks[i].m_MatGroups[j].m_Geometry[k].m_VertexList.Count; m++)
@@ -2334,7 +2335,7 @@ namespace SM64DSe
 
                 return;
             }
-            
+
             LevelObject obj = m_SelectedObject;
             ObjectRenderer selObjBMD = ObjectRenderer.FromLevelObject(obj);
             //Get the name of the selected object's BMD (model) file
