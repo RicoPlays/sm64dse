@@ -124,7 +124,7 @@ namespace SM64DSe
             {
                 uint posColType = (uint)(planeStart + (i * 16) + 0x0E);//Get the address of this plane's Collision Type variable
 
-                kclFile.Write32(posColType, (uint)planes[i].type);//Write the new value to file
+                kclFile.Write16(posColType, (ushort)planes[i].type);//Write the new value to file
             }
 
             kclFile.SaveChanges();

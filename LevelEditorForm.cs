@@ -302,7 +302,7 @@ namespace SM64DSe
             }
 
             m_LevelModel = null;
-            //m_LevelCollMap = new KCL(m_ROM.GetFileFromInternalID(m_LevelSettings.KCLFileID));
+            m_LevelCollMap = new KCL(m_ROM.GetFileFromInternalID(m_LevelSettings.KCLFileID));
             //MessageBox.Show(KCL.OctreeNode.maxkids.ToString());
 
             m_SkyboxModel = null;
