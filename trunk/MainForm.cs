@@ -214,6 +214,7 @@ namespace SM64DSe
         {
             btnEditLevel.Enabled = false;
             btnEditTexts.Enabled = false;
+            btnKCLEditor.Enabled = false;
 
             if (ofdOpenFile.ShowDialog(this) == DialogResult.OK)
                 LoadROM(ofdOpenFile.FileName);
@@ -260,6 +261,7 @@ namespace SM64DSe
         private void lbxLevels_SelectedIndexChanged(object sender, EventArgs e)
         {
             btnEditLevel.Enabled = (lbxLevels.SelectedIndex != -1);
+            btnKCLEditor.Enabled = (lbxLevels.SelectedIndex != -1);
         }
 
         private void btnDumpObjInfo_Click(object sender, EventArgs e)
@@ -329,5 +331,15 @@ namespace SM64DSe
             }
             MessageBox.Show("All overlays have been successfully dumped.");
         }
+
+        private void btnKCLEditor_Click(object sender, EventArgs e)
+        {
+            uint ovlID = Program.m_ROM.GetLevelOverlayID(lbxLevels.SelectedIndex);
+            NitroOverlay curOvl = new NitroOverlay(Program.m_ROM, ovlID);
+            NitroFile curKCL = Program.m_ROM.GetFileFromInternalID(curOvl.Read16((uint)(0x6A)));
+            KCLEditorForm kclForm = new KCLEditorForm(curKCL);
+            kclForm.Show();
+        }
+
     }
 }

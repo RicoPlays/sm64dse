@@ -37,6 +37,8 @@
             this.btnSecretShit = new System.Windows.Forms.ToolStripDropDownButton();
             this.btnDumpObjInfo = new System.Windows.Forms.ToolStripMenuItem();
             this.btnObjFinder = new System.Windows.Forms.ToolStripMenuItem();
+            this.mnitDumpAllOvls = new System.Windows.Forms.ToolStripMenuItem();
+            this.btnKCLEditor = new System.Windows.Forms.ToolStripButton();
             this.toolStripSeparator2 = new System.Windows.Forms.ToolStripSeparator();
             this.btnOptions = new System.Windows.Forms.ToolStripDropDownButton();
             this.btnUpdateODB = new System.Windows.Forms.ToolStripMenuItem();
@@ -48,7 +50,6 @@
             this.ssStatusBar = new System.Windows.Forms.StatusStrip();
             this.slStatusLabel = new System.Windows.Forms.ToolStripStatusLabel();
             this.spbStatusProgress = new System.Windows.Forms.ToolStripProgressBar();
-            this.mnitDumpAllOvls = new System.Windows.Forms.ToolStripMenuItem();
             this.tsToolBar.SuspendLayout();
             this.ssStatusBar.SuspendLayout();
             this.SuspendLayout();
@@ -61,6 +62,7 @@
             this.btnEditLevel,
             this.btnEditTexts,
             this.btnSecretShit,
+            this.btnKCLEditor,
             this.toolStripSeparator2,
             this.btnOptions,
             this.btnHalp});
@@ -140,6 +142,23 @@
             this.btnObjFinder.Name = "btnObjFinder";
             this.btnObjFinder.Size = new System.Drawing.Size(172, 22);
             this.btnObjFinder.Text = "Object finder";
+            // 
+            // mnitDumpAllOvls
+            // 
+            this.mnitDumpAllOvls.Name = "mnitDumpAllOvls";
+            this.mnitDumpAllOvls.Size = new System.Drawing.Size(172, 22);
+            this.mnitDumpAllOvls.Text = "Dump All Overlays";
+            this.mnitDumpAllOvls.Click += new System.EventHandler(this.mnitDumpAllOvls_Click);
+            // 
+            // btnKCLEditor
+            // 
+            this.btnKCLEditor.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Text;
+            this.btnKCLEditor.Enabled = false;
+            this.btnKCLEditor.ImageTransparentColor = System.Drawing.Color.Magenta;
+            this.btnKCLEditor.Name = "btnKCLEditor";
+            this.btnKCLEditor.Size = new System.Drawing.Size(55, 22);
+            this.btnKCLEditor.Text = "Edit KCL";
+            this.btnKCLEditor.Click += new System.EventHandler(this.btnKCLEditor_Click);
             // 
             // toolStripSeparator2
             // 
@@ -237,13 +256,6 @@
             this.spbStatusProgress.Style = System.Windows.Forms.ProgressBarStyle.Continuous;
             this.spbStatusProgress.Visible = false;
             // 
-            // mnitDumpAllOvls
-            // 
-            this.mnitDumpAllOvls.Name = "mnitDumpAllOvls";
-            this.mnitDumpAllOvls.Size = new System.Drawing.Size(172, 22);
-            this.mnitDumpAllOvls.Text = "Dump All Overlays";
-            this.mnitDumpAllOvls.Click += new System.EventHandler(this.mnitDumpAllOvls_Click);
-            // 
             // MainForm
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
@@ -287,6 +299,7 @@
         private System.Windows.Forms.ToolStripMenuItem btnEditorSettings;
         private System.Windows.Forms.ToolStripButton btnHalp;
         private System.Windows.Forms.ToolStripMenuItem mnitDumpAllOvls;
+        private System.Windows.Forms.ToolStripButton btnKCLEditor;
     }
 }
 
