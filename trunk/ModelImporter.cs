@@ -2938,8 +2938,11 @@ namespace SM64DSe
                 PrerenderModel();
                 glModelView.Refresh();
             }
-
-            if (cbMakeAcmlmboard.Checked) ImportCollisionMap();
+            
+            NitroFile kcl = Program.m_ROM.GetFileFromInternalID(m_LevelSettings.KCLFileID);
+            ObjToKcl.ConvertToKcl(m_ModelFileName, ref kcl, m_Scale.X);
+            
+            //if (cbMakeAcmlmboard.Checked) ImportCollisionMap();//Old method
             ((LevelEditorForm)Owner).UpdateLevelModel();
             LevelEditorForm.isImported = true;//Set this flag to true so that texture animation address set to NULL (needed for custom models)
         }
