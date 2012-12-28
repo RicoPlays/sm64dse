@@ -46,10 +46,10 @@ namespace SM64DSe
             vectors = new List<Vector3>();
             planes = new List<ColFace>();
 
-            uint pointStart = kcl.Read32(0);//Address of first point
-            uint vectorStart = kcl.Read32(4);//Address of first normal
+            uint pointStart = (uint)kcl.Read32(0);//Address of first point
+            uint vectorStart = (uint)kcl.Read32(4);//Address of first normal
             uint planeStart = (uint)(kcl.Read32(8));//Address of first plane
-            uint gridStart = kcl.Read32((uint)(0x0C));//Address of grid section
+            uint gridStart = (uint)kcl.Read32((uint)(0x0C));//Address of grid section
             int numPoints = (int)(vectorStart - pointStart) / 12;//Size of section / size of point header
             int numVectors = (int)((planeStart + 0x10 - vectorStart) / 6);
             int numPlanes = (int)(gridStart - planeStart) / 16;//Size of section / size of plane header
@@ -396,6 +396,10 @@ namespace SM64DSe
             txtV2.Text = planes[selPos].point2.ToString();
             txtV3.Text = planes[selPos].point3.ToString();
             txtColType.Text = planes[selPos].type.ToString();
+            txtNormal.Text = planes[selPos].normal.ToString();
+            txtD1.Text = planes[selPos].dir1.ToString();
+            txtD2.Text = planes[selPos].dir2.ToString();
+            txtD3.Text = planes[selPos].dir3.ToString();
 
             glModelView.Refresh();
         }
@@ -422,6 +426,9 @@ namespace SM64DSe
         public Vector3 point3;
         public Vector3 normal;
         public int type;
+        public Vector3 dir1;
+        public Vector3 dir2;
+        public Vector3 dir3;
 
         public ColFace(float lengthIn, Vector3 originPoint, Vector3 normalIn, Vector3 dir1, Vector3 dir2, Vector3 dir3, int typeIn)
         {
@@ -438,6 +445,9 @@ namespace SM64DSe
             point3 = point1 + Vector3.Cross(normal, dir1) * length / Vector3.Dot(Vector3.Cross(normal, dir1), dir3);
 
             type = typeIn;
+            this.dir1 = dir1;
+            this.dir2 = dir2;
+            this.dir3 = dir3;
         }
     }
 }

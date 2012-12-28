@@ -104,6 +104,7 @@
     <Compile Include="NARC.cs" />
     <Compile Include="NARCFile.cs" />
     <Compile Include="NitroFile.cs" />
+    <Compile Include="ObjToKcl.cs" />
     <Compile Include="ObjectDatabase.cs" />
     <Compile Include="ObjectListForm.cs">
       <SubType>Form</SubType>

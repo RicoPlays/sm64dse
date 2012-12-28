@@ -42,13 +42,13 @@
             this.groupBox2 = new System.Windows.Forms.GroupBox();
             this.cbWipeLevel = new System.Windows.Forms.CheckBox();
             this.groupBox1 = new System.Windows.Forms.GroupBox();
+            this.cbDropExtraShit = new System.Windows.Forms.CheckBox();
             this.cbMakeAcmlmboard = new System.Windows.Forms.CheckBox();
             this.lblScale = new System.Windows.Forms.Label();
             this.cbSwapYZ = new System.Windows.Forms.CheckBox();
             this.tbScale = new System.Windows.Forms.TextBox();
             this.cbZMirror = new System.Windows.Forms.CheckBox();
             this.ofdLoadModel = new System.Windows.Forms.OpenFileDialog();
-            this.cbDropExtraShit = new System.Windows.Forms.CheckBox();
             this.tsToolBar.SuspendLayout();
             this.ssStatusBar.SuspendLayout();
             this.spcMainContainer.Panel1.SuspendLayout();
@@ -208,6 +208,16 @@
             this.groupBox1.TabStop = false;
             this.groupBox1.Text = "Model settings";
             // 
+            // cbDropExtraShit
+            // 
+            this.cbDropExtraShit.AutoSize = true;
+            this.cbDropExtraShit.Location = new System.Drawing.Point(29, 118);
+            this.cbDropExtraShit.Name = "cbDropExtraShit";
+            this.cbDropExtraShit.Size = new System.Drawing.Size(184, 17);
+            this.cbDropExtraShit.TabIndex = 7;
+            this.cbDropExtraShit.Text = "Drop excedentary collision planes";
+            this.cbDropExtraShit.UseVisualStyleBackColor = true;
+            // 
             // cbMakeAcmlmboard
             // 
             this.cbMakeAcmlmboard.AutoSize = true;
@@ -267,16 +277,6 @@
             // 
             this.ofdLoadModel.Filter = "Wavefront (*.obj)|*.obj";
             this.ofdLoadModel.Title = "Load model file...";
-            // 
-            // cbDropExtraShit
-            // 
-            this.cbDropExtraShit.AutoSize = true;
-            this.cbDropExtraShit.Location = new System.Drawing.Point(29, 118);
-            this.cbDropExtraShit.Name = "cbDropExtraShit";
-            this.cbDropExtraShit.Size = new System.Drawing.Size(184, 17);
-            this.cbDropExtraShit.TabIndex = 7;
-            this.cbDropExtraShit.Text = "Drop excedentary collision planes";
-            this.cbDropExtraShit.UseVisualStyleBackColor = true;
             // 
             // ModelImporter
             // 
