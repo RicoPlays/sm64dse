@@ -2924,23 +2924,28 @@ namespace SM64DSe
         private void btnImport_Click(object sender, EventArgs e)
         {
             Vector3 originalScale = new Vector3(0, 0, 0);
-            if (!m_LevelSettings.editLevelBMDKCL)//If it's an object it'll be scaled down - need to get back to original value
+            NitroFile kcl;//This'll hold the KCL file that is to be replaced, either a level's or an object's
+            if (!m_LevelSettings.editLevelBMDKCL)//If we're importing an object's model
             {
+                //If it's an object it'll be scaled down - need to get back to original value
                 originalScale = m_Scale;
                 m_Scale = m_Scale * (1 / ObjectRenderer.currentObjScale);
                 PrerenderModel();
                 glModelView.Refresh();
-            }
-            ImportModel();
-            if (!m_LevelSettings.editLevelBMDKCL)
-            {
+                ImportModel();
+
                 m_Scale = originalScale;//Back to previous scale for collision as it's not affected like model's scale
                 PrerenderModel();
                 glModelView.Refresh();
+                kcl = Program.m_ROM.GetFileFromName(m_LevelSettings.objKCL);
+                ObjToKcl.ConvertToKcl(m_ModelFileName, ref kcl, m_Scale.X);
             }
-            
-            NitroFile kcl = Program.m_ROM.GetFileFromInternalID(m_LevelSettings.KCLFileID);
-            ObjToKcl.ConvertToKcl(m_ModelFileName, ref kcl, m_Scale.X);
+            else//If it's a level model
+            {
+                ImportModel();
+                kcl = Program.m_ROM.GetFileFromInternalID(m_LevelSettings.KCLFileID);
+                ObjToKcl.ConvertToKcl(m_ModelFileName, ref kcl, m_Scale.X);
+            }
             
             //if (cbMakeAcmlmboard.Checked) ImportCollisionMap();//Old method
             ((LevelEditorForm)Owner).UpdateLevelModel();

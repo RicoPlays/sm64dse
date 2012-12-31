@@ -211,6 +211,7 @@
             // cbDropExtraShit
             // 
             this.cbDropExtraShit.AutoSize = true;
+            this.cbDropExtraShit.Enabled = false;
             this.cbDropExtraShit.Location = new System.Drawing.Point(29, 118);
             this.cbDropExtraShit.Name = "cbDropExtraShit";
             this.cbDropExtraShit.Size = new System.Drawing.Size(184, 17);
@@ -243,6 +244,7 @@
             // cbSwapYZ
             // 
             this.cbSwapYZ.AutoSize = true;
+            this.cbSwapYZ.Enabled = false;
             this.cbSwapYZ.Location = new System.Drawing.Point(12, 72);
             this.cbSwapYZ.Name = "cbSwapYZ";
             this.cbSwapYZ.Size = new System.Drawing.Size(94, 17);
@@ -265,6 +267,7 @@
             // cbZMirror
             // 
             this.cbZMirror.AutoSize = true;
+            this.cbZMirror.Enabled = false;
             this.cbZMirror.Location = new System.Drawing.Point(12, 49);
             this.cbZMirror.Name = "cbZMirror";
             this.cbZMirror.Size = new System.Drawing.Size(97, 17);
