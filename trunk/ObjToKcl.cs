@@ -108,7 +108,8 @@ namespace SM64DSe
                             Vertex v = vertices[int.Parse(parts[2].Split('/')[0]) - 1];
                             Vertex w = vertices[int.Parse(parts[3].Split('/')[0]) - 1];
 
-                            if (cross(v.sub(u), w.sub(u)).norm_sq() < 0.001) { continue; } //#TODO: find a better solution
+                            //Below line gets rid of faces that are too small, but causes problems with small models so include all faces
+                            //if (cross(v.sub(u), w.sub(u)).norm_sq() < 0.001) { continue; } //#TODO: find a better solution
                             triangles.Add(new Triangle(u, v, w, curr_group));
                         }
                         break;
@@ -132,122 +133,6 @@ namespace SM64DSe
             }
 
             uint pos = 0;
-
-            #region Vertices, Vectors and Triangles - Less efficient method
-            //Below code works fine but is less efficient
-            ////# vertex section
-            //pos = (uint)0x38;
-            //kcl.Write32((uint)0x00, pos);//# vertex offset
-            //List<Vertex> vertices = new List<Vertex>();
-            //List<int> vIndex = new List<int>();
-
-            //foreach (Triangle c in triangles)
-            //{
-            //    int d = vertices.IndexOf(c.u);
-            //    if (d == -1)
-            //    {
-            //        //If it doesn't already exist, add it to the list of vertices and 
-            //        //add the current position of the vertex to the vertices index (starts at 0)
-            //        vertices.Add(c.u);
-            //        vIndex.Add(vertices.Count - 1);
-            //    }
-            //    else
-            //    {
-            //        //If it exists, make a note of its position
-            //        vIndex.Add(d);
-            //    }
-            //}
-            ////Write the vertices to file
-            //foreach (Vertex v in vertices)
-            //{
-            //    kcl.Write32(pos, (uint)v.x.valToWrite());
-            //    kcl.Write32(pos + 4, (uint)v.y.valToWrite());
-            //    kcl.Write32(pos + 8, (uint)v.z.valToWrite());
-
-            //    pos += 12;
-            //}
-
-            //// # vector section
-            //kcl.Write32((uint)0x04, pos);
-
-            //List<Vector> vectors = new List<Vector>();
-            //List<int> vcIndex = new List<int>();
-
-            //foreach (Triangle t in triangles)
-            //{
-            //    Vector a = unit(cross(t.w.sub(t.u), t.n));
-            //    Vector b = unit(cross(t.v.sub(t.u), t.n));
-            //    Vector c = unit(cross(t.w.sub(t.v), t.n));
-            //    int d = vectors.IndexOf(t.n);
-            //    if (d == -1)
-            //    {
-            //        vectors.Add(t.n);
-            //        vcIndex.Add(vectors.Count - 1);
-            //    }
-            //    else
-            //    {
-            //        vcIndex.Add(d);
-            //    }
-            //    d = vectors.IndexOf(a);
-            //    if (d == -1)
-            //    {
-            //        vectors.Add(a);
-            //        vcIndex.Add(vectors.Count - 1);
-            //    }
-            //    else
-            //    {
-            //        vcIndex.Add(d);
-            //    }
-            //    d = vectors.IndexOf(b);
-            //    if (d == -1)
-            //    {
-            //        vectors.Add(b);
-            //        vcIndex.Add(vectors.Count - 1);
-            //    }
-            //    else
-            //    {
-            //        vcIndex.Add(d);
-            //    }
-            //    d = vectors.IndexOf(c);
-            //    if (d == -1)
-            //    {
-            //        vectors.Add(c);
-            //        vcIndex.Add(vectors.Count - 1);
-            //    }
-            //    else
-            //    {
-            //        vcIndex.Add(d);
-            //    }
-            //}
-
-            //foreach (Vector vc in vectors)
-            //{
-            //    kcl.Write16(pos, (ushort)vc.x.valToWrite());
-            //    kcl.Write16(pos + 2, (ushort)vc.y.valToWrite());
-            //    kcl.Write16(pos + 4, (ushort)vc.z.valToWrite());
-
-            //    pos += 6;
-            //}
-
-            //pos = (uint)((pos + 3) & ~3);
-
-            //// # triangle section
-            //kcl.Write32((uint)0x08, (uint)pos - 0x10); // # triangle offset
-            //for (int i = 0; i < triangles.Count; i++)
-            //{
-            //    Vector c = unit(cross(triangles[i].w.sub(triangles[i].v), triangles[i].n));
-            //    FixedPoint length = new FixedPoint(dot(triangles[i].w.sub(triangles[i].u), c), 1/65536f);
-            //    kcl.Write32((uint)pos, (uint)length.valToWrite());// # length
-            //    kcl.Write16((uint)pos + 4, (ushort)vIndex[i]);       //# vertex index
-            //    kcl.Write16((uint)pos + 6, (ushort)vcIndex[4 * i]);     //# normal index
-            //    kcl.Write16((uint)pos + 8, (ushort)vcIndex[4 * i + 1]); //# a index
-            //    kcl.Write16((uint)pos + 10, (ushort)vcIndex[4 * i + 2]); //# b index
-            //    kcl.Write16((uint)pos + 12, (ushort)vcIndex[4 * i + 3]); //# c index
-            //    kcl.Write16((uint)pos + 14, (ushort)0);       //Surface type, set to 0 by default, can be changed in KCL Editor
-
-            //    pos += 16;
-            //}
-            #endregion
 
             List<Face> faces = new List<Face>();
             VertexWelder vertex_welder = new VertexWelder(1 / 64f, (int)(Math.Floor((double)(triangles.Count / 256))));
@@ -745,7 +630,9 @@ namespace SM64DSe
         public VertexWelder(float threshold, int num_buckets)
         {
             this.threshold = threshold;
-            this.cell_width = 16*threshold;
+            this.cell_width = 16 * threshold;
+            if (num_buckets == 0)
+                num_buckets += 1;
             this.num_buckets = num_buckets;
             this.buckets = new List<int>[num_buckets];
             for (int i = 0; i < num_buckets; i++)//Initialise the List<int> 's in the array
