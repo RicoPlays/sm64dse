@@ -46,6 +46,16 @@ namespace SM64DSe
             LZ77.Decompress(ref m_Data, false);
         }
 
+        public void Compress()
+        {
+            LZ77.LZ77_Compress(ref m_Data, true);
+        }
+
+        public void ForceCompression()
+        {
+            LZ77.LZ77_Compress(ref m_Data, false);
+        }
+
         public virtual void SaveChanges()
         {
             // TODO: LZ77 recompression!
