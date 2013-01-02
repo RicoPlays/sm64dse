@@ -84,6 +84,113 @@ namespace SM64DSe
             Array.Resize(ref data, dest.Length);
             dest.CopyTo(data, 0);
         }
+
+        public static unsafe void LZ77_Compress(ref byte[] source, bool header)//Function taken from Nintenlord's compressor. All credits for this code goes to Nintenlord!
+        {
+            byte[] compressed;
+            fixed (byte* pointer = &source[0])
+            {
+                compressed = Compress(pointer, source.Length, header);
+            }
+            Array.Resize(ref source, compressed.Length);
+            compressed.CopyTo(source, 0);
+        }
+
+        public static unsafe byte[] Compress(byte* source, int lenght, bool header) //Function taken from Nintenlord's compressor. All credits for this code goes to Nintenlord!
+        {
+            int position = 0;
+            int BlockSize = 8;
+
+            List<byte> CompressedData = new List<byte>();
+            if (header) //0x37375A4C
+            {
+                CompressedData.Add(0x4C);
+                CompressedData.Add(0x5A);
+                CompressedData.Add(0x37);
+                CompressedData.Add(0x37);
+            }
+            CompressedData.Add(0x10);
+
+            {
+                byte* pointer = (byte*)&lenght;
+                for (int i = 0; i < 3; i++)
+                    CompressedData.Add(*(pointer++));
+            }
+
+            while (position < lenght)
+            {
+                byte isCompressed = 0;
+                List<byte> tempList = new List<byte>();
+
+                for (int i = 0; i < BlockSize; i++)
+                {
+                    int[] searchResult = Search(source, position, lenght);
+
+                    if (searchResult[0] > 2)
+                    {
+                        byte add = (byte)((((searchResult[0] - 3) & 0xF) << 4) + (((searchResult[1] - 1) >> 8) & 0xF));
+                        tempList.Add(add);
+                        add = (byte)((searchResult[1] - 1) & 0xFF);
+                        tempList.Add(add);
+                        position += searchResult[0];
+                        isCompressed |= (byte)(1 << (BlockSize - (i + 1)));
+                    }
+                    else if (searchResult[0] >= 0)
+                        tempList.Add(source[position++]);
+                    else
+                        break;
+                }
+                CompressedData.Add(isCompressed);
+                CompressedData.AddRange(tempList);
+            }
+            while (CompressedData.Count % 4 != 0)
+                CompressedData.Add(0);
+
+            return CompressedData.ToArray();
+        }
+
+        private static unsafe int[] Search(byte* source, int position, int lenght) //Function taken from Nintenlord's compressor. All credits for this code goes to Nintenlord!
+        {
+            int SlidingWindowSize = 4096;
+            int ReadAheadBufferSize = 18;
+
+            if (position >= lenght)
+                return new int[2] { -1, 0 };
+            if ((position < 2) || ((lenght - position) < 2))
+                return new int[2] { 0, 0 };
+
+            List<int> results = new List<int>();
+
+            for (int i = 1; (i < SlidingWindowSize) && (i < position); i++)
+            {
+                if (source[position - (i + 1)] == source[position])
+                {
+                    results.Add(i + 1);
+                }
+            }
+            if (results.Count == 0)
+                return new int[2] { 0, 0 };
+
+            int amountOfBytes = 0;
+
+            bool Continue = true;
+            while (amountOfBytes < ReadAheadBufferSize && Continue)
+            {
+                amountOfBytes++;
+                for (int i = results.Count - 1; i >= 0; i--)
+                {
+                    if (source[position + amountOfBytes] != source[position - results[i] + (amountOfBytes % results[i])])
+                    {
+                        if (results.Count > 1)
+                            results.RemoveAt(i);
+                        else
+                            Continue = false;
+                    }
+                }
+            }
+            return new int[2] { amountOfBytes, results[0] }; //lenght of data is first, then position
+        }
+
     }
 
 
