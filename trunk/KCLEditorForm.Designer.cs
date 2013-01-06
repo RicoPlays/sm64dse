@@ -29,6 +29,14 @@
         private void InitializeComponent()
         {
             this.splitContainer1 = new System.Windows.Forms.SplitContainer();
+            this.txtD3 = new System.Windows.Forms.TextBox();
+            this.lblD3 = new System.Windows.Forms.Label();
+            this.txtD2 = new System.Windows.Forms.TextBox();
+            this.txtD1 = new System.Windows.Forms.TextBox();
+            this.txtNormal = new System.Windows.Forms.TextBox();
+            this.lblD2 = new System.Windows.Forms.Label();
+            this.lblD1 = new System.Windows.Forms.Label();
+            this.lblNormal = new System.Windows.Forms.Label();
             this.txtV3 = new System.Windows.Forms.TextBox();
             this.txtV2 = new System.Windows.Forms.TextBox();
             this.txtV1 = new System.Windows.Forms.TextBox();
@@ -42,14 +50,6 @@
             this.toolStrip1 = new System.Windows.Forms.ToolStrip();
             this.btnSave = new System.Windows.Forms.ToolStripButton();
             this.cmbPolygonMode = new System.Windows.Forms.ComboBox();
-            this.txtD2 = new System.Windows.Forms.TextBox();
-            this.txtD1 = new System.Windows.Forms.TextBox();
-            this.txtNormal = new System.Windows.Forms.TextBox();
-            this.lblD2 = new System.Windows.Forms.Label();
-            this.lblD1 = new System.Windows.Forms.Label();
-            this.lblNormal = new System.Windows.Forms.Label();
-            this.txtD3 = new System.Windows.Forms.TextBox();
-            this.lblD3 = new System.Windows.Forms.Label();
             this.splitContainer1.Panel1.SuspendLayout();
             this.splitContainer1.Panel2.SuspendLayout();
             this.splitContainer1.SuspendLayout();
@@ -92,6 +92,82 @@
             this.splitContainer1.Size = new System.Drawing.Size(683, 431);
             this.splitContainer1.SplitterDistance = 227;
             this.splitContainer1.TabIndex = 0;
+            // 
+            // txtD3
+            // 
+            this.txtD3.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)));
+            this.txtD3.Location = new System.Drawing.Point(73, 381);
+            this.txtD3.Name = "txtD3";
+            this.txtD3.ReadOnly = true;
+            this.txtD3.Size = new System.Drawing.Size(151, 20);
+            this.txtD3.TabIndex = 16;
+            // 
+            // lblD3
+            // 
+            this.lblD3.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)));
+            this.lblD3.AutoSize = true;
+            this.lblD3.Location = new System.Drawing.Point(3, 384);
+            this.lblD3.Name = "lblD3";
+            this.lblD3.Size = new System.Drawing.Size(29, 13);
+            this.lblD3.TabIndex = 15;
+            this.lblD3.Text = "Dir 3";
+            // 
+            // txtD2
+            // 
+            this.txtD2.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)));
+            this.txtD2.Location = new System.Drawing.Point(73, 358);
+            this.txtD2.Name = "txtD2";
+            this.txtD2.ReadOnly = true;
+            this.txtD2.Size = new System.Drawing.Size(151, 20);
+            this.txtD2.TabIndex = 14;
+            // 
+            // txtD1
+            // 
+            this.txtD1.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)));
+            this.txtD1.Location = new System.Drawing.Point(73, 336);
+            this.txtD1.Name = "txtD1";
+            this.txtD1.ReadOnly = true;
+            this.txtD1.Size = new System.Drawing.Size(151, 20);
+            this.txtD1.TabIndex = 13;
+            // 
+            // txtNormal
+            // 
+            this.txtNormal.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)));
+            this.txtNormal.Location = new System.Drawing.Point(73, 314);
+            this.txtNormal.Name = "txtNormal";
+            this.txtNormal.ReadOnly = true;
+            this.txtNormal.Size = new System.Drawing.Size(151, 20);
+            this.txtNormal.TabIndex = 12;
+            // 
+            // lblD2
+            // 
+            this.lblD2.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)));
+            this.lblD2.AutoSize = true;
+            this.lblD2.Location = new System.Drawing.Point(3, 361);
+            this.lblD2.Name = "lblD2";
+            this.lblD2.Size = new System.Drawing.Size(29, 13);
+            this.lblD2.TabIndex = 11;
+            this.lblD2.Text = "Dir 2";
+            // 
+            // lblD1
+            // 
+            this.lblD1.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)));
+            this.lblD1.AutoSize = true;
+            this.lblD1.Location = new System.Drawing.Point(3, 339);
+            this.lblD1.Name = "lblD1";
+            this.lblD1.Size = new System.Drawing.Size(29, 13);
+            this.lblD1.TabIndex = 10;
+            this.lblD1.Text = "Dir 1";
+            // 
+            // lblNormal
+            // 
+            this.lblNormal.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)));
+            this.lblNormal.AutoSize = true;
+            this.lblNormal.Location = new System.Drawing.Point(3, 317);
+            this.lblNormal.Name = "lblNormal";
+            this.lblNormal.Size = new System.Drawing.Size(40, 13);
+            this.lblNormal.TabIndex = 9;
+            this.lblNormal.Text = "Normal";
             // 
             // txtV3
             // 
@@ -174,6 +250,7 @@
             this.lbxPlanes.FormattingEnabled = true;
             this.lbxPlanes.Location = new System.Drawing.Point(4, 4);
             this.lbxPlanes.Name = "lbxPlanes";
+            this.lbxPlanes.SelectionMode = System.Windows.Forms.SelectionMode.MultiExtended;
             this.lbxPlanes.Size = new System.Drawing.Size(220, 238);
             this.lbxPlanes.TabIndex = 0;
             this.lbxPlanes.SelectedIndexChanged += new System.EventHandler(this.lbxPlanes_SelectedIndexChanged);
@@ -223,82 +300,6 @@
             this.cmbPolygonMode.Size = new System.Drawing.Size(121, 21);
             this.cmbPolygonMode.TabIndex = 2;
             this.cmbPolygonMode.SelectedIndexChanged += new System.EventHandler(this.cmbPolygonMode_SelectedIndexChanged);
-            // 
-            // txtD2
-            // 
-            this.txtD2.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)));
-            this.txtD2.Location = new System.Drawing.Point(73, 358);
-            this.txtD2.Name = "txtD2";
-            this.txtD2.ReadOnly = true;
-            this.txtD2.Size = new System.Drawing.Size(151, 20);
-            this.txtD2.TabIndex = 14;
-            // 
-            // txtD1
-            // 
-            this.txtD1.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)));
-            this.txtD1.Location = new System.Drawing.Point(73, 336);
-            this.txtD1.Name = "txtD1";
-            this.txtD1.ReadOnly = true;
-            this.txtD1.Size = new System.Drawing.Size(151, 20);
-            this.txtD1.TabIndex = 13;
-            // 
-            // txtNormal
-            // 
-            this.txtNormal.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)));
-            this.txtNormal.Location = new System.Drawing.Point(73, 314);
-            this.txtNormal.Name = "txtNormal";
-            this.txtNormal.ReadOnly = true;
-            this.txtNormal.Size = new System.Drawing.Size(151, 20);
-            this.txtNormal.TabIndex = 12;
-            // 
-            // lblD2
-            // 
-            this.lblD2.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)));
-            this.lblD2.AutoSize = true;
-            this.lblD2.Location = new System.Drawing.Point(3, 361);
-            this.lblD2.Name = "lblD2";
-            this.lblD2.Size = new System.Drawing.Size(29, 13);
-            this.lblD2.TabIndex = 11;
-            this.lblD2.Text = "Dir 2";
-            // 
-            // lblD1
-            // 
-            this.lblD1.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)));
-            this.lblD1.AutoSize = true;
-            this.lblD1.Location = new System.Drawing.Point(3, 339);
-            this.lblD1.Name = "lblD1";
-            this.lblD1.Size = new System.Drawing.Size(29, 13);
-            this.lblD1.TabIndex = 10;
-            this.lblD1.Text = "Dir 1";
-            // 
-            // lblNormal
-            // 
-            this.lblNormal.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)));
-            this.lblNormal.AutoSize = true;
-            this.lblNormal.Location = new System.Drawing.Point(3, 317);
-            this.lblNormal.Name = "lblNormal";
-            this.lblNormal.Size = new System.Drawing.Size(40, 13);
-            this.lblNormal.TabIndex = 9;
-            this.lblNormal.Text = "Normal";
-            // 
-            // txtD3
-            // 
-            this.txtD3.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)));
-            this.txtD3.Location = new System.Drawing.Point(73, 381);
-            this.txtD3.Name = "txtD3";
-            this.txtD3.ReadOnly = true;
-            this.txtD3.Size = new System.Drawing.Size(151, 20);
-            this.txtD3.TabIndex = 16;
-            // 
-            // lblD3
-            // 
-            this.lblD3.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)));
-            this.lblD3.AutoSize = true;
-            this.lblD3.Location = new System.Drawing.Point(3, 384);
-            this.lblD3.Name = "lblD3";
-            this.lblD3.Size = new System.Drawing.Size(29, 13);
-            this.lblD3.TabIndex = 15;
-            this.lblD3.Text = "Dir 3";
             // 
             // KCLEditorForm
             // 

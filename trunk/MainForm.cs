@@ -295,7 +295,8 @@ namespace SM64DSe
                 "Credits:\n" +
                 "- Treeki for the overlay decompression (Jap77), the object list, and other help\n" +
                 "- Dirbaio for other help\n" +
-                "- Fiachra Murray for text editing, custom object models and other help\n" + 
+                "- blank for helping with generating collision\n" + 
+                "- Fiachra Murray for helping with text editing, collision and other help\n" + 
                 "\n" +
                 Program.AppTitle + " is free software. If you paid for it, notify Mega-Mario about it.\n" +
                 "\n" +
