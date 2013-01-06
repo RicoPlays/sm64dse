@@ -222,15 +222,15 @@ namespace SM64DSe
                 GL.Vertex3(planes[i].point3 / 5);
             }
 
-            if (lbxPlanes.SelectedIndex != (-1))
+            foreach (int idx in lbxPlanes.SelectedIndices)
             {
                 GL.Begin(BeginMode.Triangles);
                 GL.Color3(Color.Orange);
-                GL.Vertex3(planes[lbxPlanes.SelectedIndex].point1 / 5);
+                GL.Vertex3(planes[idx].point1 / 5);
                 GL.Color3(Color.Orange);
-                GL.Vertex3(planes[lbxPlanes.SelectedIndex].point2 / 5);
+                GL.Vertex3(planes[idx].point2 / 5);
                 GL.Color3(Color.Orange);
-                GL.Vertex3(planes[lbxPlanes.SelectedIndex].point3 / 5);
+                GL.Vertex3(planes[idx].point3 / 5);
             }
 
             GL.End();
@@ -385,21 +385,27 @@ namespace SM64DSe
         {
             int newColType;
             int.TryParse(txtColType.Text, out newColType);
-            planes[lbxPlanes.SelectedIndex].type = newColType;
+            foreach (int idx in lbxPlanes.SelectedIndices)
+            {
+                planes[idx].type = newColType;
+            }
         }
 
         private void lbxPlanes_SelectedIndexChanged(object sender, EventArgs e)
         {
-            int selPos = lbxPlanes.SelectedIndex;
+            if (lbxPlanes.SelectedIndices.Count == 1)
+            {
+                int selPos = lbxPlanes.SelectedIndex;
 
-            txtV1.Text = planes[selPos].point1.ToString();
-            txtV2.Text = planes[selPos].point2.ToString();
-            txtV3.Text = planes[selPos].point3.ToString();
-            txtColType.Text = planes[selPos].type.ToString();
-            txtNormal.Text = planes[selPos].normal.ToString();
-            txtD1.Text = planes[selPos].dir1.ToString();
-            txtD2.Text = planes[selPos].dir2.ToString();
-            txtD3.Text = planes[selPos].dir3.ToString();
+                txtV1.Text = planes[selPos].point1.ToString();
+                txtV2.Text = planes[selPos].point2.ToString();
+                txtV3.Text = planes[selPos].point3.ToString();
+                txtColType.Text = planes[selPos].type.ToString();
+                txtNormal.Text = planes[selPos].normal.ToString();
+                txtD1.Text = planes[selPos].dir1.ToString();
+                txtD2.Text = planes[selPos].dir2.ToString();
+                txtD3.Text = planes[selPos].dir3.ToString();
+            }
 
             glModelView.Refresh();
         }

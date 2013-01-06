@@ -2938,13 +2938,25 @@ namespace SM64DSe
                 PrerenderModel();
                 glModelView.Refresh();
                 kcl = Program.m_ROM.GetFileFromName(m_LevelSettings.objKCL);
-                ObjToKcl.ConvertToKcl(m_ModelFileName, ref kcl, m_Scale.X);
+                if (cbGenerateKCL.Checked)//If "Import collision map" checked
+                {
+                    if (cbOldMethod.Checked)//If old method (ImportCollisionMap() is selected - NOT recommended)
+                        ImportCollisionMap();
+                    else//Else use the new method ObjToKcl.cs
+                        ObjToKcl.ConvertToKcl(m_ModelFileName, ref kcl, m_Scale.X);
+                }
             }
             else//If it's a level model
             {
                 ImportModel();
                 kcl = Program.m_ROM.GetFileFromInternalID(m_LevelSettings.KCLFileID);
-                ObjToKcl.ConvertToKcl(m_ModelFileName, ref kcl, m_Scale.X);
+                if (cbGenerateKCL.Checked)//If "Import collision map" checked
+                {
+                    if (cbOldMethod.Checked)//If old method (ImportCollisionMap() is selected - NOT recommended)
+                        ImportCollisionMap();
+                    else//Else use the new method ObjToKcl.cs
+                        ObjToKcl.ConvertToKcl(m_ModelFileName, ref kcl, m_Scale.X);
+                }
             }
             
             //if (cbMakeAcmlmboard.Checked) ImportCollisionMap();//Old method
@@ -3139,9 +3151,11 @@ namespace SM64DSe
             groupBox2.Visible = false;
         }
 
-        private void cbMakeAcmlmboard_CheckedChanged(object sender, EventArgs e)
+        private void cbGenerateKCL_CheckedChanged(object sender, EventArgs e)
         {
-            cbDropExtraShit.Enabled = cbMakeAcmlmboard.Checked;
+            cbOldMethod.Enabled = cbGenerateKCL.Checked;
+            if (!cbGenerateKCL.Checked)
+                cbOldMethod.Checked = cbGenerateKCL.Checked;
         }
 
         private void cbSwapYZ_CheckedChanged(object sender, EventArgs e)
@@ -3149,6 +3163,19 @@ namespace SM64DSe
             m_SwapYZ = cbSwapYZ.Checked;
             PrerenderModel();
             glModelView.Refresh();
+        }
+
+        private void cbOldMethod_CheckedChanged(object sender, EventArgs e)
+        {
+            if (!cbOldMethod.Checked)
+            {
+                cbSwapYZ.Checked = cbOldMethod.Checked;
+                cbZMirror.Checked = cbOldMethod.Checked;
+                cbDropExtraShit.Checked = cbOldMethod.Checked;
+            }
+            cbSwapYZ.Enabled = cbOldMethod.Checked;
+            cbZMirror.Enabled = cbOldMethod.Checked;
+            cbDropExtraShit.Enabled = cbOldMethod.Checked;
         }
     }
 }

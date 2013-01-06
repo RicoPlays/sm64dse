@@ -1575,9 +1575,18 @@ namespace SM64DSe
                         float _ydelta = ydelta * (float)Math.Cos(m_CamRotation.Y);
                         float _zdelta = (xdelta * (float)Math.Cos(m_CamRotation.X)) + (ydelta * (float)Math.Sin(m_CamRotation.Y) * (float)Math.Sin(m_CamRotation.X));
 
-                        m_SelectedObject.Position.X += _xdelta;
-                        m_SelectedObject.Position.Y += _ydelta;
-                        m_SelectedObject.Position.Z -= _zdelta;
+                        if (xDown)
+                            m_SelectedObject.Position.X += _xdelta;
+                        else if (yDown)
+                            m_SelectedObject.Position.Y += _ydelta;
+                        else if (zDown)
+                            m_SelectedObject.Position.Z -= _zdelta;
+                        else
+                        {
+                            m_SelectedObject.Position.X += _xdelta;
+                            m_SelectedObject.Position.Y += _ydelta;
+                            m_SelectedObject.Position.Z -= _zdelta;
+                        }
                     }
 
                     UpdateSelection();
@@ -2025,6 +2034,7 @@ namespace SM64DSe
             slStatusLabel.Text = "Object removed.";
         }
 
+        bool xDown, yDown, zDown;
         private void glLevelView_KeyDown(object sender, KeyEventArgs e)
         {
             if (e.KeyCode == Keys.ShiftKey || e.KeyCode == Keys.RShiftKey)
@@ -2041,6 +2051,13 @@ namespace SM64DSe
                     btnRemoveSel.PerformClick(); // quick cheat
             }
 
+            if (e.KeyCode == Keys.X)
+                xDown = true;
+            if (e.KeyCode == Keys.Y)
+                yDown = true;
+            if (e.KeyCode == Keys.Z)
+                zDown = true;
+
             if (e.KeyCode == Keys.Q)
                 btnLOL.PerformClick();
         }
@@ -2049,6 +2066,13 @@ namespace SM64DSe
         {
             if (e.KeyCode == Keys.ShiftKey || e.KeyCode == Keys.RShiftKey)
                 m_ShiftPressed = false;
+
+            if (e.KeyCode == Keys.X)
+                xDown = false;
+            if (e.KeyCode == Keys.Y)
+                yDown = false;
+            if (e.KeyCode == Keys.Z)
+                zDown = false;
         }
 
         private void btnStarAll_DoubleClick(object sender, EventArgs e)
