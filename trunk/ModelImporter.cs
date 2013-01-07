@@ -273,7 +273,7 @@ namespace SM64DSe
 
                     maxdiff++;
                 }
-                
+
                 m_Palette = pal;
                 m_Referenced = new bool[m_Palette.Count];
                 for (int i = 0; i < m_Palette.Count; i++)
@@ -503,7 +503,7 @@ namespace SM64DSe
                     pal[(i * 2) + 1] = (byte)(paldata[i] >> 8);
                 }
             }
-            
+
             string texname = filename.Substring(filename.LastIndexOf('\\') + 1).Replace('.', '_');
             string palname = (pal == null) ? null : texname + "_pl";
 
@@ -589,12 +589,12 @@ namespace SM64DSe
 
                 // wouldn't happen if the code below wasn't shitty
                 //if (b.m_Points.Length < 3)
-               //     return true;
+                //     return true;
 
                 bool merged_anything = false;
                 int eaten = 0;
                 List<uint> connections = new List<uint>();
-                
+
                 for (int i = 0; i < m_Points.Length; )
                 {
                     for (int j = 0; j < b.m_Points.Length; )
@@ -802,7 +802,7 @@ namespace SM64DSe
                 m_Points = temp.ToArray();*/
             }
         }
-        
+
         class CollisionPlane
         {
             public float m_Length;
@@ -814,7 +814,7 @@ namespace SM64DSe
             public int m_Dir1Index, m_Dir2Index, m_Dir3Index;
             public ushort m_Type;
             public bool m_Fake;
-            
+
             public Vector3 roflhax = Vector3.Zero;
             public Vector3 lolcrap = Vector3.Zero;
             public static int _planeid = 0;
@@ -843,27 +843,27 @@ namespace SM64DSe
             public bool TryMergeWith(CollisionPlane p)
             {
                 // find out which points are colliding
-                Vector3[] a_pts = {m_Point, m_PointB, m_PointC};
-                Vector3[] b_pts = {p.m_Point, p.m_PointB, p.m_PointC};
+                Vector3[] a_pts = { m_Point, m_PointB, m_PointC };
+                Vector3[] b_pts = { p.m_Point, p.m_PointB, p.m_PointC };
                 int a_pt1, a_pt2, a_pt3;
                 int b_pt3;
-                if (Helper.VectorsEqual(a_pts[0], b_pts[0]) && Helper.VectorsEqual(a_pts[2], b_pts[1])) 
+                if (Helper.VectorsEqual(a_pts[0], b_pts[0]) && Helper.VectorsEqual(a_pts[2], b_pts[1]))
                 { a_pt1 = 0; a_pt2 = 2; a_pt3 = 1; b_pt3 = 2; }
-                else if (Helper.VectorsEqual(a_pts[0], b_pts[1]) && Helper.VectorsEqual(a_pts[2], b_pts[2])) 
+                else if (Helper.VectorsEqual(a_pts[0], b_pts[1]) && Helper.VectorsEqual(a_pts[2], b_pts[2]))
                 { a_pt1 = 0; a_pt2 = 2; a_pt3 = 1; b_pt3 = 0; }
-                else if (Helper.VectorsEqual(a_pts[0], b_pts[2]) && Helper.VectorsEqual(a_pts[2], b_pts[0])) 
+                else if (Helper.VectorsEqual(a_pts[0], b_pts[2]) && Helper.VectorsEqual(a_pts[2], b_pts[0]))
                 { a_pt1 = 0; a_pt2 = 2; a_pt3 = 1; b_pt3 = 1; }
-                else if (Helper.VectorsEqual(a_pts[1], b_pts[0]) && Helper.VectorsEqual(a_pts[0], b_pts[1])) 
+                else if (Helper.VectorsEqual(a_pts[1], b_pts[0]) && Helper.VectorsEqual(a_pts[0], b_pts[1]))
                 { a_pt1 = 1; a_pt2 = 0; a_pt3 = 2; b_pt3 = 2; }
-                else if (Helper.VectorsEqual(a_pts[1], b_pts[1]) && Helper.VectorsEqual(a_pts[0], b_pts[2])) 
+                else if (Helper.VectorsEqual(a_pts[1], b_pts[1]) && Helper.VectorsEqual(a_pts[0], b_pts[2]))
                 { a_pt1 = 1; a_pt2 = 0; a_pt3 = 2; b_pt3 = 0; }
-                else if (Helper.VectorsEqual(a_pts[1], b_pts[2]) && Helper.VectorsEqual(a_pts[0], b_pts[0])) 
+                else if (Helper.VectorsEqual(a_pts[1], b_pts[2]) && Helper.VectorsEqual(a_pts[0], b_pts[0]))
                 { a_pt1 = 1; a_pt2 = 0; a_pt3 = 2; b_pt3 = 1; }
-                else if (Helper.VectorsEqual(a_pts[2], b_pts[0]) && Helper.VectorsEqual(a_pts[1], b_pts[1])) 
+                else if (Helper.VectorsEqual(a_pts[2], b_pts[0]) && Helper.VectorsEqual(a_pts[1], b_pts[1]))
                 { a_pt1 = 2; a_pt2 = 1; a_pt3 = 0; b_pt3 = 2; }
-                else if (Helper.VectorsEqual(a_pts[2], b_pts[1]) && Helper.VectorsEqual(a_pts[1], b_pts[2])) 
+                else if (Helper.VectorsEqual(a_pts[2], b_pts[1]) && Helper.VectorsEqual(a_pts[1], b_pts[2]))
                 { a_pt1 = 2; a_pt2 = 1; a_pt3 = 0; b_pt3 = 0; }
-                else if (Helper.VectorsEqual(a_pts[2], b_pts[2]) && Helper.VectorsEqual(a_pts[1], b_pts[0])) 
+                else if (Helper.VectorsEqual(a_pts[2], b_pts[2]) && Helper.VectorsEqual(a_pts[1], b_pts[0]))
                 { a_pt1 = 2; a_pt2 = 1; a_pt3 = 0; b_pt3 = 1; }
                 else return false;
 
@@ -911,7 +911,7 @@ namespace SM64DSe
                 Vector3 bc = Vector3.Subtract(m_PointC, m_PointB);
                 Vector3 ca = Vector3.Subtract(m_Point, m_PointC);
                 Vector3 normal = Vector3.Cross(ac, ab);
-                
+
                 // calculate the distance from the cube center to the plane
                 float dist2plane = Vector3.Dot(a2center, normal) / normal.Length;
                 Vector3 center2plane = Vector3.Multiply(normal, -dist2plane / normal.Length);
@@ -930,7 +930,7 @@ namespace SM64DSe
                 float dot3 = Vector3.Dot(Vector3.Cross(bc, Vector3.Subtract(centeronplane, m_PointB)), normal);
                 if (dot1 < 0f && dot2 < 0f && dot3 < 0f)
                     return true;
-                
+
                 // otherwise, well...
                 // calculate the distances from the cube center to each of the triangle's sides
                 // if the smallest distance is within the cube, consider it good
@@ -1316,7 +1316,7 @@ namespace SM64DSe
                                     Color pixel = tex.GetPixel(x, y);
                                     int pos = ((y * tex.Width) + x) * 4;
 
-                                    map[pos    ] = pixel.B;
+                                    map[pos] = pixel.B;
                                     map[pos + 1] = pixel.G;
                                     map[pos + 2] = pixel.R;
                                     map[pos + 3] = pixel.A;
@@ -1340,7 +1340,7 @@ namespace SM64DSe
 
                             mat.m_DiffuseMapSize.X = tex.Width;
                             mat.m_DiffuseMapSize.Y = tex.Height;
-                            
+
                             mat.m_DiffuseMapID = GL.GenTexture();
                             GL.BindTexture(TextureTarget.Texture2D, mat.m_DiffuseMapID);
                             GL.TexImage2D(TextureTarget.Texture2D, 0, PixelInternalFormat.Four, tex.Width, tex.Height,
@@ -1446,9 +1446,9 @@ namespace SM64DSe
                                 string[] idxs = vtx.Split(new char[] { '/' });
 
                                 face.m_VtxIndices[i] = int.Parse(idxs[0]) - 1;
-                                face.m_TxcIndices[i] = (mat.m_HasTextures && idxs.Length >= 2 && idxs[1].Length > 0) 
-                                    ? (int.Parse(idxs[1])-1) : -1;
-                                face.m_NrmIndices[i] = (idxs.Length >= 3) ? (int.Parse(idxs[2])-1) : -1;
+                                face.m_TxcIndices[i] = (mat.m_HasTextures && idxs.Length >= 2 && idxs[1].Length > 0)
+                                    ? (int.Parse(idxs[1]) - 1) : -1;
+                                face.m_NrmIndices[i] = (idxs.Length >= 3) ? (int.Parse(idxs[2]) - 1) : -1;
                             }
 
                             mat.m_Faces.Add(face);
@@ -1707,7 +1707,7 @@ namespace SM64DSe
             }
 
             float scale = 1f; uint scaleval = 0;
-            while (largest > (32767f/4096f))
+            while (largest > (32767f / 4096f))
             {
                 scaleval++;
                 scale /= 2f;
@@ -1748,7 +1748,7 @@ namespace SM64DSe
                     }
                 }
             }
-           
+
             if (texsize >= 49152)
             {
                 if (MessageBox.Show("Your textures would occupy more than 48k of VRAM.\nThis could cause glitches or freezes.\n\nImport anyway?",
@@ -2030,7 +2030,7 @@ namespace SM64DSe
 
                 uint alpha = (uint)(mat.m_Opacity >> 3);
                 uint polyattr = 0x00000080 | (alpha << 16);
-               // if (alpha < 0x1F) polyattr |= 0x40;
+                // if (alpha < 0x1F) polyattr |= 0x40;
 
                 bmd.Write32(curoffset + 0x04, texid);
                 bmd.Write32(curoffset + 0x08, palid);
@@ -2121,7 +2121,7 @@ namespace SM64DSe
         // code inspired from Chadsoft's KclTool
         private void ImportCollisionMap()
         {
-            NitroFile kcl = Program.m_ROM.GetFileFromInternalID(m_LevelSettings.KCLFileID);;
+            NitroFile kcl = Program.m_ROM.GetFileFromInternalID(m_LevelSettings.KCLFileID); ;
 
             if (!m_LevelSettings.editLevelBMDKCL)
             {
@@ -2192,11 +2192,11 @@ namespace SM64DSe
                         continue;
 
                     List<Vector3> facepoly = new List<Vector3>();
-                    foreach(int i in face.m_VtxIndices)
+                    foreach (int i in face.m_VtxIndices)
                     {
                         Vector3 v = scaledvtxs[i].Xyz;
                         Helper.RoundVector(ref v, 64000f);
-                        if(!m_ZMirror)
+                        if (!m_ZMirror)
                             facepoly.Insert(0, v);
                         else
                             facepoly.Add(v);
@@ -2218,11 +2218,11 @@ namespace SM64DSe
                             [01:33:09]	dirbaio >	round them all the same the DS would round them
                             [01:33:20]	dirbaio >	and do all the plane-cube calculations using the rounded values :P
                          */
-                        
+
                         Helper.RoundVector(ref a, 64000f);
                         Helper.RoundVector(ref b, 64000f);
                         Helper.RoundVector(ref c, 64000f);
-                        
+
 
                         CollisionPlane plane;
                         if (!m_ZMirror)
@@ -2403,9 +2403,9 @@ namespace SM64DSe
 
         private bool trySimplifyVertex(Vector3 v, List<CollisionPlane> planes)
         {
-            
+
             List<CollisionPlane> polygonPlanes = findPlanesWithVertex(v, planes);
-//            Console.Out.WriteLine("LOL " + polygonPlanes.Count + " triangles!");
+            //            Console.Out.WriteLine("LOL " + polygonPlanes.Count + " triangles!");
 
             //No use in simplifying quads into quads. Let alone simple triangles.
             if (polygonPlanes.Count < 3)
@@ -2416,61 +2416,61 @@ namespace SM64DSe
             Vector3 normal = polygonPlanes[0].m_Normal;
 
             foreach (CollisionPlane p in polygonPlanes)
-                if(!Helper.VectorsEqual(normal, p.m_Normal))
+                if (!Helper.VectorsEqual(normal, p.m_Normal))
                     return false;
-            Console.Out.WriteLine("Detected "+polygonPlanes.Count+" flat triangles!");
+            Console.Out.WriteLine("Detected " + polygonPlanes.Count + " flat triangles!");
 
             //Now try to reconstruct the polygon edges.
             //If we fail, don't try harder and return false.
-            
+
             //First store all the edges in a graph.
             //If a triangle has vertexs V, A, B, store the edge A->B
             //These edges will be the edges of the polygon to be triangulated.
 
             List<Vector3> indexes = new List<Vector3>();
-            Dictionary<int, List<int>> edges = new Dictionary<int,List<int>>();
+            Dictionary<int, List<int>> edges = new Dictionary<int, List<int>>();
 
             foreach (CollisionPlane p in polygonPlanes)
             {
                 Vector3 a, b;
-                if(Helper.VectorsEqual(p.m_Point, v))
+                if (Helper.VectorsEqual(p.m_Point, v))
                 {
                     a = p.m_PointB;
                     b = p.m_PointC;
                 }
-                else if(Helper.VectorsEqual(p.m_PointB, v))
+                else if (Helper.VectorsEqual(p.m_PointB, v))
                 {
                     a = p.m_PointC;
                     b = p.m_Point;
                 }
-                else if(Helper.VectorsEqual(p.m_PointC, v))
+                else if (Helper.VectorsEqual(p.m_PointC, v))
                 {
                     a = p.m_Point;
                     b = p.m_PointB;
                 }
                 else throw new Exception("http://www.youtube.com/watch?v=2Z4m4lnjxkY");
-                
+
                 int indexa = addToList(indexes, a);
                 int indexb = addToList(indexes, b);
 
-                if(!edges.ContainsKey(indexa))
+                if (!edges.ContainsKey(indexa))
                     edges[indexa] = new List<int>();
 
                 edges[indexa].Add(indexb);
             }
-           
+
             //Now check the edges make a well-formed polygon.
             //If it's well-formed we can start in any vertex and go all the way round.
             int ind = 0;
             List<Vector3> polygon = new List<Vector3>();
-            while(!vectorInList(polygon, indexes[ind]))
+            while (!vectorInList(polygon, indexes[ind]))
             {
                 //Add vtx to the polygon
                 Vector3 vtx = indexes[ind];
                 polygon.Add(vtx);
-                
+
                 //Every edge should connect with another one. No more, no less.
-                if(!edges.ContainsKey(ind) ||edges[ind].Count != 1)
+                if (!edges.ContainsKey(ind) || edges[ind].Count != 1)
                     return false;
 
                 //Go to next vertex
@@ -2480,7 +2480,7 @@ namespace SM64DSe
             //We have now gone round.
             //We should have gone through all the triangles.
             //If not, something weird's going on, we should stop.
-            if(polygon.Count != polygonPlanes.Count)
+            if (polygon.Count != polygonPlanes.Count)
                 return false;
 
             Console.Out.WriteLine("...and they form a nice polygon!!");
@@ -2495,7 +2495,7 @@ namespace SM64DSe
             Vector3 center = polygon[0];
             for (int i = 2; i < polygon.Count; i++)
                 planes.Add(new CollisionPlane(center, polygon[i - 1], polygon[i], 0, false));
-            */  
+            */
 
             //Dumb triangulation is dumb. Let's do something better.
             triangulate(planes, polygon, normal);
@@ -2628,7 +2628,7 @@ namespace SM64DSe
                     return true;
             return false;
         }
-        
+
         private int addToList(List<Vector3> l, Vector3 p)
         {
             int i = 0;
@@ -2640,7 +2640,7 @@ namespace SM64DSe
             }
 
             l.Add(p);
-            return l.Count - 1; 
+            return l.Count - 1;
         }
 
         private void glModelView_Load(object sender, EventArgs e)
@@ -2658,8 +2658,8 @@ namespace SM64DSe
             Matrix4 projmtx = Matrix4.CreatePerspectiveFieldOfView((float)((70.0f * Math.PI) / 180.0f), ratio, 0.01f, 1000.0f);
             GL.MultMatrix(ref projmtx);
 
-            m_PixelFactorX = ((2f * (float)Math.Tan((35f*Math.PI)/180f) * ratio) / (float)(glModelView.Width));
-			m_PixelFactorY = ((2f * (float)Math.Tan((35f*Math.PI)/180f)) / (float)(glModelView.Height));
+            m_PixelFactorX = ((2f * (float)Math.Tan((35f * Math.PI) / 180f) * ratio) / (float)(glModelView.Width));
+            m_PixelFactorY = ((2f * (float)Math.Tan((35f * Math.PI) / 180f)) / (float)(glModelView.Height));
 
             GL.Enable(EnableCap.AlphaTest);
             GL.AlphaFunc(AlphaFunction.Greater, 0f);
@@ -2775,20 +2775,20 @@ namespace SM64DSe
                     GL.End();
                     continue;
                     GL.Begin(BeginMode.Lines);
-                   /* if (!lolz) { GL.Color3(1f, 0f, 1f); lolz = true; }
-                    elseGL.Color3(1f, 0f, 0f);
-		            Vector3 lol1 = Vector3.Cross(plane.m_Dir1, plane.m_Normal);
-		            float lol1len = plane.m_Length / (float)Math.Cos(Math.Acos(Vector3.Dot(lol1, plane.m_Dir3)));
-		            GL.Vertex3(plane.m_Point);
-		            GL.Vertex3(Vector3.Add(plane.m_Point, Vector3.Multiply(lol1, lol1len)));
+                    /* if (!lolz) { GL.Color3(1f, 0f, 1f); lolz = true; }
+                     elseGL.Color3(1f, 0f, 0f);
+                     Vector3 lol1 = Vector3.Cross(plane.m_Dir1, plane.m_Normal);
+                     float lol1len = plane.m_Length / (float)Math.Cos(Math.Acos(Vector3.Dot(lol1, plane.m_Dir3)));
+                     GL.Vertex3(plane.m_Point);
+                     GL.Vertex3(Vector3.Add(plane.m_Point, Vector3.Multiply(lol1, lol1len)));
 
-		            GL.Color3(0f, 1f, 0f);
-		            Vector3 lol2 = Vector3.Cross(plane.m_Normal, plane.m_Dir2);
-		            float lol2len = plane.m_Length / (float)Math.Cos(Math.Acos(Vector3.Dot(lol2, plane.m_Dir3)));
-		            GL.Vertex3(plane.m_Point);
-		            GL.Vertex3(Vector3.Add(plane.m_Point, Vector3.Multiply(lol2, lol2len)));*/
+                     GL.Color3(0f, 1f, 0f);
+                     Vector3 lol2 = Vector3.Cross(plane.m_Normal, plane.m_Dir2);
+                     float lol2len = plane.m_Length / (float)Math.Cos(Math.Acos(Vector3.Dot(lol2, plane.m_Dir3)));
+                     GL.Vertex3(plane.m_Point);
+                     GL.Vertex3(Vector3.Add(plane.m_Point, Vector3.Multiply(lol2, lol2len)));*/
 
-                    
+
                     GL.Color3(0f, 0f, 1f);
                     GL.Vertex3(plane.m_Point);
                     GL.Vertex3(Vector3.Add(plane.m_Point, plane.m_Normal));
@@ -2802,37 +2802,37 @@ namespace SM64DSe
                 }
             }
 
-                /*GL.PolygonMode(MaterialFace.FrontAndBack, PolygonMode.Fill);
-                GL.Begin(BeginMode.Triangles);
-                GL.Color3(Color.Red);
-                GL.Vertex3(lolplanes[288].m_Point);
-                GL.Vertex3(lolplanes[288].m_PointB);
-                GL.Vertex3(lolplanes[288].m_PointC);
-                GL.Color3(Color.Green);
-                GL.Vertex3(lolplanes[289].m_Point);
-                GL.Vertex3(lolplanes[289].m_PointB);
-                GL.Vertex3(lolplanes[289].m_PointC);
+            /*GL.PolygonMode(MaterialFace.FrontAndBack, PolygonMode.Fill);
+            GL.Begin(BeginMode.Triangles);
+            GL.Color3(Color.Red);
+            GL.Vertex3(lolplanes[288].m_Point);
+            GL.Vertex3(lolplanes[288].m_PointB);
+            GL.Vertex3(lolplanes[288].m_PointC);
+            GL.Color3(Color.Green);
+            GL.Vertex3(lolplanes[289].m_Point);
+            GL.Vertex3(lolplanes[289].m_PointB);
+            GL.Vertex3(lolplanes[289].m_PointC);
+            GL.End();
+
+            GL.PolygonMode(MaterialFace.FrontAndBack, PolygonMode.Line);
+            foreach (OctreeNode node in OctreeNode.lollist)
+            {
+                if (node.m_Depth < 10) continue;
+                if (node.m_PlaneData.Count <= 8) continue;
+
+                GL.Color3(Color.Magenta);
+                GL.Begin(BeginMode.LineLoop);
+                GL.Vertex3(node._start);
+                GL.Vertex3(node._start + new Vector3(node._size.X, 0, 0));
+                GL.Vertex3(node._start + new Vector3(node._size.X, node._size.Y, 0));
+                GL.Vertex3(node._start + new Vector3(0, node._size.Y, 0));
+                GL.Vertex3(node._start + new Vector3(0, node._size.Y, node._size.Z));
+                GL.Vertex3(node._start + new Vector3(node._size.X, node._size.Y, node._size.Z));
+                GL.Vertex3(node._start + new Vector3(node._size.X, 0, node._size.Z));
+                GL.Vertex3(node._start + new Vector3(0, 0, node._size.Z));
                 GL.End();
-
-                GL.PolygonMode(MaterialFace.FrontAndBack, PolygonMode.Line);
-                foreach (OctreeNode node in OctreeNode.lollist)
-                {
-                    if (node.m_Depth < 10) continue;
-                    if (node.m_PlaneData.Count <= 8) continue;
-
-                    GL.Color3(Color.Magenta);
-                    GL.Begin(BeginMode.LineLoop);
-                    GL.Vertex3(node._start);
-                    GL.Vertex3(node._start + new Vector3(node._size.X, 0, 0));
-                    GL.Vertex3(node._start + new Vector3(node._size.X, node._size.Y, 0));
-                    GL.Vertex3(node._start + new Vector3(0, node._size.Y, 0));
-                    GL.Vertex3(node._start + new Vector3(0, node._size.Y, node._size.Z));
-                    GL.Vertex3(node._start + new Vector3(node._size.X, node._size.Y, node._size.Z));
-                    GL.Vertex3(node._start + new Vector3(node._size.X, 0, node._size.Z));
-                    GL.Vertex3(node._start + new Vector3(0, 0, node._size.Z));
-                    GL.End();
-                }
-            }*/
+            }
+        }*/
 
 
             /*GL.PolygonMode(MaterialFace.FrontAndBack, PolygonMode.Line);
@@ -2924,6 +2924,15 @@ namespace SM64DSe
         private void btnImport_Click(object sender, EventArgs e)
         {
             Vector3 originalScale = new Vector3(0, 0, 0);
+            float faceSizeThreshold = 0.001f;
+            if (txtThreshold.Text == "")
+                faceSizeThreshold = 0.001f;//Default value
+            else
+            {
+                try
+                { faceSizeThreshold = Convert.ToSingle(txtThreshold.Text); }
+                catch { MessageBox.Show(txtThreshold.Text + "\nis not a valid float value. Please enter a value in format 0.123"); return; }
+            }
             NitroFile kcl;//This'll hold the KCL file that is to be replaced, either a level's or an object's
             if (!m_LevelSettings.editLevelBMDKCL)//If we're importing an object's model
             {
@@ -2938,27 +2947,15 @@ namespace SM64DSe
                 PrerenderModel();
                 glModelView.Refresh();
                 kcl = Program.m_ROM.GetFileFromName(m_LevelSettings.objKCL);
-                if (cbGenerateKCL.Checked)//If "Import collision map" checked
-                {
-                    if (cbOldMethod.Checked)//If old method (ImportCollisionMap() is selected - NOT recommended)
-                        ImportCollisionMap();
-                    else//Else use the new method ObjToKcl.cs
-                        ObjToKcl.ConvertToKcl(m_ModelFileName, ref kcl, m_Scale.X);
-                }
+                ObjToKcl.ConvertToKcl(m_ModelFileName, ref kcl, m_Scale.X, faceSizeThreshold);
             }
             else//If it's a level model
             {
                 ImportModel();
                 kcl = Program.m_ROM.GetFileFromInternalID(m_LevelSettings.KCLFileID);
-                if (cbGenerateKCL.Checked)//If "Import collision map" checked
-                {
-                    if (cbOldMethod.Checked)//If old method (ImportCollisionMap() is selected - NOT recommended)
-                        ImportCollisionMap();
-                    else//Else use the new method ObjToKcl.cs
-                        ObjToKcl.ConvertToKcl(m_ModelFileName, ref kcl, m_Scale.X);
-                }
+                ObjToKcl.ConvertToKcl(m_ModelFileName, ref kcl, m_Scale.X, faceSizeThreshold);
             }
-            
+
             //if (cbMakeAcmlmboard.Checked) ImportCollisionMap();//Old method
             ((LevelEditorForm)Owner).UpdateLevelModel();
             LevelEditorForm.isImported = true;//Set this flag to true so that texture animation address set to NULL (needed for custom models)
@@ -3000,40 +2997,40 @@ namespace SM64DSe
                 if (m_UnderCursor == 0x66666666)
                 {
                     if (m_MouseDown == MouseButtons.Right)
-					{
-						if (m_UpsideDown)
-							xdelta = -xdelta;
+                    {
+                        if (m_UpsideDown)
+                            xdelta = -xdelta;
 
-					    // TODO take obj/camera rotation into account?
-					    m_MarioRotation += xdelta * 0.5f;
-						 
-						if (m_MarioRotation >= 180f)
-						{
-							m_MarioRotation = (float)(-360f + m_MarioRotation);
-						}
-						else if (m_MarioRotation < -180f)
-						{
-							m_MarioRotation = (float)(360f + m_MarioRotation);
+                        // TODO take obj/camera rotation into account?
+                        m_MarioRotation += xdelta * 0.5f;
+
+                        if (m_MarioRotation >= 180f)
+                        {
+                            m_MarioRotation = (float)(-360f + m_MarioRotation);
                         }
-					}
-					else if (m_MouseDown == MouseButtons.Left)
-					{
-						Vector3 between;
-						Vector3.Subtract(ref m_CamPosition, ref m_MarioPosition, out between);
+                        else if (m_MarioRotation < -180f)
+                        {
+                            m_MarioRotation = (float)(360f + m_MarioRotation);
+                        }
+                    }
+                    else if (m_MouseDown == MouseButtons.Left)
+                    {
+                        Vector3 between;
+                        Vector3.Subtract(ref m_CamPosition, ref m_MarioPosition, out between);
 
-						float objz = (((between.X * (float)Math.Cos(m_CamRotation.X)) + (between.Z * (float)Math.Sin(m_CamRotation.X))) * (float)Math.Cos(m_CamRotation.Y)) + (between.Y * (float)Math.Sin(m_CamRotation.Y));
+                        float objz = (((between.X * (float)Math.Cos(m_CamRotation.X)) + (between.Z * (float)Math.Sin(m_CamRotation.X))) * (float)Math.Cos(m_CamRotation.Y)) + (between.Y * (float)Math.Sin(m_CamRotation.Y));
                         objz /= m_Scale.X;
 
-						xdelta *= m_PixelFactorX * objz;
-						ydelta *= -m_PixelFactorY * objz;
+                        xdelta *= m_PixelFactorX * objz;
+                        ydelta *= -m_PixelFactorY * objz;
 
-						float _xdelta = (xdelta * (float)Math.Sin(m_CamRotation.X)) - (ydelta * (float)Math.Sin(m_CamRotation.Y) * (float)Math.Cos(m_CamRotation.X));
-						float _ydelta = ydelta * (float)Math.Cos(m_CamRotation.Y);
-						float _zdelta = (xdelta * (float)Math.Cos(m_CamRotation.X)) + (ydelta * (float)Math.Sin(m_CamRotation.Y) * (float)Math.Sin(m_CamRotation.X));
+                        float _xdelta = (xdelta * (float)Math.Sin(m_CamRotation.X)) - (ydelta * (float)Math.Sin(m_CamRotation.Y) * (float)Math.Cos(m_CamRotation.X));
+                        float _ydelta = ydelta * (float)Math.Cos(m_CamRotation.Y);
+                        float _zdelta = (xdelta * (float)Math.Cos(m_CamRotation.X)) + (ydelta * (float)Math.Sin(m_CamRotation.Y) * (float)Math.Sin(m_CamRotation.X));
 
                         Vector3 offset = new Vector3(_xdelta, _ydelta, -_zdelta);
                         Vector3.Add(ref m_MarioPosition, ref offset, out m_MarioPosition);
-					}
+                    }
 
                     PrerenderModel();
                 }
@@ -3151,11 +3148,9 @@ namespace SM64DSe
             groupBox2.Visible = false;
         }
 
-        private void cbGenerateKCL_CheckedChanged(object sender, EventArgs e)
+        private void cbMakeAcmlmboard_CheckedChanged(object sender, EventArgs e)
         {
-            cbOldMethod.Enabled = cbGenerateKCL.Checked;
-            if (!cbGenerateKCL.Checked)
-                cbOldMethod.Checked = cbGenerateKCL.Checked;
+            cbDropExtraShit.Enabled = cbMakeAcmlmboard.Checked;
         }
 
         private void cbSwapYZ_CheckedChanged(object sender, EventArgs e)
@@ -3163,19 +3158,6 @@ namespace SM64DSe
             m_SwapYZ = cbSwapYZ.Checked;
             PrerenderModel();
             glModelView.Refresh();
-        }
-
-        private void cbOldMethod_CheckedChanged(object sender, EventArgs e)
-        {
-            if (!cbOldMethod.Checked)
-            {
-                cbSwapYZ.Checked = cbOldMethod.Checked;
-                cbZMirror.Checked = cbOldMethod.Checked;
-                cbDropExtraShit.Checked = cbOldMethod.Checked;
-            }
-            cbSwapYZ.Enabled = cbOldMethod.Checked;
-            cbZMirror.Enabled = cbOldMethod.Checked;
-            cbDropExtraShit.Enabled = cbOldMethod.Checked;
         }
     }
 }
