@@ -108,8 +108,8 @@ namespace SM64DSe
                             Vertex v = vertices[int.Parse(parts[2].Split('/')[0]) - 1];
                             Vertex w = vertices[int.Parse(parts[3].Split('/')[0]) - 1];
 
-                            //Below line gets rid of faces that are too small, but causes problems with small models so include all faces
-                            //if (cross(v.sub(u), w.sub(u)).norm_sq() < 0.001) { continue; } //#TODO: find a better solution
+                            //Below line gets rid of faces that are too small, original value 0.001
+                            if (cross(v.sub(u), w.sub(u)).norm_sq() < 0.0005) { continue; } //#TODO: find a better solution
                             triangles.Add(new Triangle(u, v, w, curr_group));
                         }
                         break;
