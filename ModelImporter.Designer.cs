@@ -43,13 +43,15 @@
             this.cbWipeLevel = new System.Windows.Forms.CheckBox();
             this.groupBox1 = new System.Windows.Forms.GroupBox();
             this.cbDropExtraShit = new System.Windows.Forms.CheckBox();
-            this.cbGenerateKCL = new System.Windows.Forms.CheckBox();
+            this.cbMakeAcmlmboard = new System.Windows.Forms.CheckBox();
             this.lblScale = new System.Windows.Forms.Label();
             this.cbSwapYZ = new System.Windows.Forms.CheckBox();
             this.tbScale = new System.Windows.Forms.TextBox();
             this.cbZMirror = new System.Windows.Forms.CheckBox();
             this.ofdLoadModel = new System.Windows.Forms.OpenFileDialog();
-            this.cbOldMethod = new System.Windows.Forms.CheckBox();
+            this.lbl01 = new System.Windows.Forms.Label();
+            this.txtThreshold = new System.Windows.Forms.TextBox();
+            this.lbl02 = new System.Windows.Forms.Label();
             this.tsToolBar.SuspendLayout();
             this.ssStatusBar.SuspendLayout();
             this.spcMainContainer.Panel1.SuspendLayout();
@@ -175,7 +177,7 @@
             this.groupBox2.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left)
                         | System.Windows.Forms.AnchorStyles.Right)));
             this.groupBox2.Controls.Add(this.cbWipeLevel);
-            this.groupBox2.Location = new System.Drawing.Point(3, 198);
+            this.groupBox2.Location = new System.Drawing.Point(3, 200);
             this.groupBox2.Name = "groupBox2";
             this.groupBox2.Size = new System.Drawing.Size(250, 54);
             this.groupBox2.TabIndex = 7;
@@ -196,16 +198,18 @@
             // 
             this.groupBox1.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left)
                         | System.Windows.Forms.AnchorStyles.Right)));
-            this.groupBox1.Controls.Add(this.cbOldMethod);
+            this.groupBox1.Controls.Add(this.lbl02);
+            this.groupBox1.Controls.Add(this.txtThreshold);
+            this.groupBox1.Controls.Add(this.lbl01);
             this.groupBox1.Controls.Add(this.cbDropExtraShit);
-            this.groupBox1.Controls.Add(this.cbGenerateKCL);
+            this.groupBox1.Controls.Add(this.cbMakeAcmlmboard);
             this.groupBox1.Controls.Add(this.lblScale);
             this.groupBox1.Controls.Add(this.cbSwapYZ);
             this.groupBox1.Controls.Add(this.tbScale);
             this.groupBox1.Controls.Add(this.cbZMirror);
             this.groupBox1.Location = new System.Drawing.Point(3, 3);
             this.groupBox1.Name = "groupBox1";
-            this.groupBox1.Size = new System.Drawing.Size(250, 189);
+            this.groupBox1.Size = new System.Drawing.Size(250, 191);
             this.groupBox1.TabIndex = 5;
             this.groupBox1.TabStop = false;
             this.groupBox1.Text = "Model settings";
@@ -214,25 +218,25 @@
             // 
             this.cbDropExtraShit.AutoSize = true;
             this.cbDropExtraShit.Enabled = false;
-            this.cbDropExtraShit.Location = new System.Drawing.Point(29, 163);
+            this.cbDropExtraShit.Location = new System.Drawing.Point(29, 168);
             this.cbDropExtraShit.Name = "cbDropExtraShit";
             this.cbDropExtraShit.Size = new System.Drawing.Size(184, 17);
             this.cbDropExtraShit.TabIndex = 7;
             this.cbDropExtraShit.Text = "Drop excedentary collision planes";
             this.cbDropExtraShit.UseVisualStyleBackColor = true;
             // 
-            // cbGenerateKCL
+            // cbMakeAcmlmboard
             // 
-            this.cbGenerateKCL.AutoSize = true;
-            this.cbGenerateKCL.Checked = true;
-            this.cbGenerateKCL.CheckState = System.Windows.Forms.CheckState.Checked;
-            this.cbGenerateKCL.Location = new System.Drawing.Point(12, 49);
-            this.cbGenerateKCL.Name = "cbGenerateKCL";
-            this.cbGenerateKCL.Size = new System.Drawing.Size(133, 17);
-            this.cbGenerateKCL.TabIndex = 6;
-            this.cbGenerateKCL.Text = "Generate collision map";
-            this.cbGenerateKCL.UseVisualStyleBackColor = true;
-            this.cbGenerateKCL.CheckedChanged += new System.EventHandler(this.cbGenerateKCL_CheckedChanged);
+            this.cbMakeAcmlmboard.AutoSize = true;
+            this.cbMakeAcmlmboard.Checked = true;
+            this.cbMakeAcmlmboard.CheckState = System.Windows.Forms.CheckState.Checked;
+            this.cbMakeAcmlmboard.Location = new System.Drawing.Point(12, 49);
+            this.cbMakeAcmlmboard.Name = "cbMakeAcmlmboard";
+            this.cbMakeAcmlmboard.Size = new System.Drawing.Size(133, 17);
+            this.cbMakeAcmlmboard.TabIndex = 6;
+            this.cbMakeAcmlmboard.Text = "Generate collision map";
+            this.cbMakeAcmlmboard.UseVisualStyleBackColor = true;
+            this.cbMakeAcmlmboard.CheckedChanged += new System.EventHandler(this.cbMakeAcmlmboard_CheckedChanged);
             // 
             // lblScale
             // 
@@ -247,7 +251,7 @@
             // 
             this.cbSwapYZ.AutoSize = true;
             this.cbSwapYZ.Enabled = false;
-            this.cbSwapYZ.Location = new System.Drawing.Point(12, 117);
+            this.cbSwapYZ.Location = new System.Drawing.Point(12, 145);
             this.cbSwapYZ.Name = "cbSwapYZ";
             this.cbSwapYZ.Size = new System.Drawing.Size(94, 17);
             this.cbSwapYZ.TabIndex = 4;
@@ -270,7 +274,7 @@
             // 
             this.cbZMirror.AutoSize = true;
             this.cbZMirror.Enabled = false;
-            this.cbZMirror.Location = new System.Drawing.Point(12, 140);
+            this.cbZMirror.Location = new System.Drawing.Point(12, 122);
             this.cbZMirror.Name = "cbZMirror";
             this.cbZMirror.Size = new System.Drawing.Size(97, 17);
             this.cbZMirror.TabIndex = 2;
@@ -283,15 +287,31 @@
             this.ofdLoadModel.Filter = "Wavefront (*.obj)|*.obj";
             this.ofdLoadModel.Title = "Load model file...";
             // 
-            // cbOldMethod
+            // lbl01
             // 
-            this.cbOldMethod.Location = new System.Drawing.Point(12, 73);
-            this.cbOldMethod.Name = "cbOldMethod";
-            this.cbOldMethod.Size = new System.Drawing.Size(224, 38);
-            this.cbOldMethod.TabIndex = 8;
-            this.cbOldMethod.Text = "Use old ImportCollisionMap() instead of ObjToKcl.cs (NOT recommended)";
-            this.cbOldMethod.UseVisualStyleBackColor = true;
-            this.cbOldMethod.CheckedChanged += new System.EventHandler(this.cbOldMethod_CheckedChanged);
+            this.lbl01.AutoSize = true;
+            this.lbl01.Location = new System.Drawing.Point(26, 73);
+            this.lbl01.Name = "lbl01";
+            this.lbl01.Size = new System.Drawing.Size(118, 13);
+            this.lbl01.TabIndex = 8;
+            this.lbl01.Text = "Drop faces smaller than";
+            // 
+            // txtThreshold
+            // 
+            this.txtThreshold.Location = new System.Drawing.Point(150, 70);
+            this.txtThreshold.Name = "txtThreshold";
+            this.txtThreshold.Size = new System.Drawing.Size(86, 20);
+            this.txtThreshold.TabIndex = 9;
+            this.txtThreshold.Text = "0.001";
+            // 
+            // lbl02
+            // 
+            this.lbl02.ForeColor = System.Drawing.SystemColors.ControlDark;
+            this.lbl02.Location = new System.Drawing.Point(26, 87);
+            this.lbl02.Name = "lbl02";
+            this.lbl02.Size = new System.Drawing.Size(109, 32);
+            this.lbl02.TabIndex = 10;
+            this.lbl02.Text = "Enter 0 to keep all faces, default 0.001";
             // 
             // ModelImporter
             // 
@@ -341,9 +361,11 @@
         private System.Windows.Forms.CheckBox cbSwapYZ;
         private System.Windows.Forms.GroupBox groupBox1;
         private System.Windows.Forms.GroupBox groupBox2;
-        private System.Windows.Forms.CheckBox cbGenerateKCL;
+        private System.Windows.Forms.CheckBox cbMakeAcmlmboard;
         private System.Windows.Forms.CheckBox cbWipeLevel;
         private System.Windows.Forms.CheckBox cbDropExtraShit;
-        private System.Windows.Forms.CheckBox cbOldMethod;
+        private System.Windows.Forms.TextBox txtThreshold;
+        private System.Windows.Forms.Label lbl01;
+        private System.Windows.Forms.Label lbl02;
     }
 }

@@ -20,13 +20,20 @@ namespace SM64DSe
 {
     public static class ObjToKcl
     {
-        public static void ConvertToKcl(string infile, ref NitroFile kclOut, float scale)
+        //public static void ConvertToKcl(string infile, ref NitroFile kclOut, float scale)
+        //{
+        //    object[] o = read_obj(infile);
+        //    scale *= 1000; //Scale of collision file is 1000 times larger than model file
+        //    write_kcl(kclOut, o[0] as List<Triangle>, 15, 1, scale);
+        //}
+        public static void ConvertToKcl(string infile, ref NitroFile kclOut, float scale, float faceSizeThreshold)
         {
-            object[] o = read_obj(infile);
+            //faceSizeThreshold is used for getting rid of very small faces below a given size, originally 0.001
+            object[] o = read_obj(infile, faceSizeThreshold);
             scale *= 1000; //Scale of collision file is 1000 times larger than model file
             write_kcl(kclOut, o[0] as List<Triangle>, 15, 1, scale);
         }
-        private static object[] read_obj(string filename)
+        private static object[] read_obj(string filename, float faceSizeThreshold)
         {
             List<Vertex> vertices = new List<Vertex>();
             List<Triangle> triangles = new List<Triangle>();
@@ -108,8 +115,8 @@ namespace SM64DSe
                             Vertex v = vertices[int.Parse(parts[2].Split('/')[0]) - 1];
                             Vertex w = vertices[int.Parse(parts[3].Split('/')[0]) - 1];
 
-                            //Below line gets rid of faces that are too small, original value 0.001
-                            if (cross(v.sub(u), w.sub(u)).norm_sq() < 0.0005) { continue; } //#TODO: find a better solution
+                            //Below line gets rid of faces that are too small, original 0.001
+                            if (cross(v.sub(u), w.sub(u)).norm_sq() < faceSizeThreshold) { continue; } //#TODO: find a better solution
                             triangles.Add(new Triangle(u, v, w, curr_group));
                         }
                         break;
