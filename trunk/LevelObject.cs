@@ -947,13 +947,22 @@ namespace SM64DSe
             m_Offset = offset;
             m_UniqueID = (uint)num;
             m_Area = area;
+            m_TexAnimHeaderOffset = tbloffset;
 
             m_ScaleTblOffset = m_Overlay.ReadPointer(tbloffset + 0x4) + (uint)(m_Overlay.Read16(m_Offset + 0xE) * 4);
             m_RotTblOffset = m_Overlay.ReadPointer(tbloffset + 0x8) + (uint)(m_Overlay.Read16(m_Offset + 0x12) * 2);
             m_TransTblOffset = m_Overlay.ReadPointer(tbloffset + 0xC) + (uint)(m_Overlay.Read16(m_Offset + 0x16) * 4);
+            m_NumTexAnims = (int)m_Overlay.Read32(tbloffset + 0x10);
             m_ScaleTblSize = m_Overlay.Read16(m_Offset + 0xC);
+            m_ScaleTblStart = m_Overlay.Read16(m_Offset + 0xE);
             m_RotTblSize = m_Overlay.Read16(m_Offset + 0x10);
+            m_RotTblStart = m_Overlay.Read16(m_Offset + 0x12);
             m_TransTblSize = m_Overlay.Read16(m_Offset + 0x14);
+            m_TransTblStart = m_Overlay.Read16(m_Offset + 0x16);
+
+            m_ScaleTblAddr = m_Overlay.ReadPointer(tbloffset + 0x4);
+            m_RotTblAddr = m_Overlay.ReadPointer(tbloffset + 0x8);
+            m_TransTblAddr = m_Overlay.ReadPointer(tbloffset + 0xC);
 
             m_MatNameOffset = m_Overlay.ReadPointer(m_Offset + 0x4);
             m_MatName = m_Overlay.ReadString(m_MatNameOffset, 0);
@@ -970,8 +979,16 @@ namespace SM64DSe
 
         public NitroOverlay m_Overlay;
         public uint m_Offset;
+        public uint m_TexAnimHeaderOffset;
+
         public int m_Area;
         public uint m_UniqueID;
+
+        public int m_NumTexAnims;
+
+        public uint m_ScaleTblAddr;
+        public uint m_RotTblAddr;
+        public uint m_TransTblAddr;
 
         public uint m_ScaleTblOffset;
         public uint m_RotTblOffset;
@@ -979,6 +996,9 @@ namespace SM64DSe
         public ushort m_ScaleTblSize;
         public ushort m_RotTblSize;
         public ushort m_TransTblSize;
+        public ushort m_ScaleTblStart;
+        public ushort m_RotTblStart;
+        public ushort m_TransTblStart;
 
         public uint m_MatNameOffset;
         public string m_MatName;

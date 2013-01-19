@@ -81,6 +81,7 @@
             this.btnStarAll = new System.Windows.Forms.ToolStripButton();
             this.ssStatusBar = new System.Windows.Forms.StatusStrip();
             this.slStatusLabel = new System.Windows.Forms.ToolStripStatusLabel();
+            this.btnEditTexAnim = new System.Windows.Forms.ToolStripButton();
             this.spcMainContainer.Panel1.SuspendLayout();
             this.spcMainContainer.Panel2.SuspendLayout();
             this.spcMainContainer.SuspendLayout();
@@ -112,7 +113,7 @@
             // 
             this.spcMainContainer.Panel2.Controls.Add(this.glLevelView);
             this.spcMainContainer.Panel2.Controls.Add(this.tsViewActions);
-            this.spcMainContainer.Size = new System.Drawing.Size(795, 486);
+            this.spcMainContainer.Size = new System.Drawing.Size(879, 486);
             this.spcMainContainer.SplitterDistance = 264;
             this.spcMainContainer.TabIndex = 0;
             // 
@@ -346,7 +347,7 @@
             this.glLevelView.Dock = System.Windows.Forms.DockStyle.Fill;
             this.glLevelView.Location = new System.Drawing.Point(0, 25);
             this.glLevelView.Name = "glLevelView";
-            this.glLevelView.Size = new System.Drawing.Size(527, 461);
+            this.glLevelView.Size = new System.Drawing.Size(611, 461);
             this.glLevelView.TabIndex = 1;
             this.glLevelView.VSync = false;
             this.glLevelView.Load += new System.EventHandler(this.glLevelView_Load);
@@ -368,7 +369,7 @@
             this.btnExportLevelModel});
             this.tsViewActions.Location = new System.Drawing.Point(0, 0);
             this.tsViewActions.Name = "tsViewActions";
-            this.tsViewActions.Size = new System.Drawing.Size(527, 25);
+            this.tsViewActions.Size = new System.Drawing.Size(611, 25);
             this.tsViewActions.TabIndex = 0;
             this.tsViewActions.Text = "toolStrip2";
             // 
@@ -420,6 +421,7 @@
             this.toolStripSeparator1,
             this.btnLevelSettings,
             this.btnEditMinimap,
+            this.btnEditTexAnim,
             this.toolStripSeparator2,
             this.toolStripLabel4,
             this.btnEdit3DModel,
@@ -440,7 +442,7 @@
             this.btnStarAll});
             this.tsToolBar.Location = new System.Drawing.Point(0, 0);
             this.tsToolBar.Name = "tsToolBar";
-            this.tsToolBar.Size = new System.Drawing.Size(795, 25);
+            this.tsToolBar.Size = new System.Drawing.Size(879, 25);
             this.tsToolBar.TabIndex = 1;
             this.tsToolBar.TabStop = true;
             this.tsToolBar.Text = "toolStrip1";
@@ -662,7 +664,7 @@
             this.btnStarAll.Image = ((System.Drawing.Image)(resources.GetObject("btnStarAll.Image")));
             this.btnStarAll.ImageTransparentColor = System.Drawing.Color.Magenta;
             this.btnStarAll.Name = "btnStarAll";
-            this.btnStarAll.Size = new System.Drawing.Size(52, 22);
+            this.btnStarAll.Size = new System.Drawing.Size(52, 19);
             this.btnStarAll.Text = "All stars";
             this.btnStarAll.ToolTipText = "Common objects";
             this.btnStarAll.DoubleClick += new System.EventHandler(this.btnStarAll_DoubleClick);
@@ -674,25 +676,34 @@
             this.slStatusLabel});
             this.ssStatusBar.Location = new System.Drawing.Point(0, 511);
             this.ssStatusBar.Name = "ssStatusBar";
-            this.ssStatusBar.Size = new System.Drawing.Size(795, 22);
+            this.ssStatusBar.Size = new System.Drawing.Size(879, 22);
             this.ssStatusBar.TabIndex = 2;
             this.ssStatusBar.Text = "statusStrip1";
             // 
             // slStatusLabel
             // 
             this.slStatusLabel.Name = "slStatusLabel";
-            this.slStatusLabel.Size = new System.Drawing.Size(780, 17);
+            this.slStatusLabel.Size = new System.Drawing.Size(864, 17);
             this.slStatusLabel.Spring = true;
             this.slStatusLabel.Text = "status!";
             this.slStatusLabel.TextAlign = System.Drawing.ContentAlignment.MiddleLeft;
             this.slStatusLabel.Paint += new System.Windows.Forms.PaintEventHandler(this.slStatusLabel_Paint);
             this.slStatusLabel.TextChanged += new System.EventHandler(this.slStatusLabel_TextChanged);
             // 
+            // btnEditTexAnim
+            // 
+            this.btnEditTexAnim.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Text;
+            this.btnEditTexAnim.ImageTransparentColor = System.Drawing.Color.Magenta;
+            this.btnEditTexAnim.Name = "btnEditTexAnim";
+            this.btnEditTexAnim.Size = new System.Drawing.Size(109, 22);
+            this.btnEditTexAnim.Text = "Texture Animation";
+            this.btnEditTexAnim.Click += new System.EventHandler(this.btnEditTexAnim_Click);
+            // 
             // LevelEditorForm
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(795, 533);
+            this.ClientSize = new System.Drawing.Size(879, 533);
             this.Controls.Add(this.ssStatusBar);
             this.Controls.Add(this.tsToolBar);
             this.Controls.Add(this.spcMainContainer);
@@ -775,6 +786,7 @@
         private System.Windows.Forms.ToolStripButton btnReplaceObjModel;
         private System.Windows.Forms.ToolStripButton btnExportLevelModel;
         private System.Windows.Forms.ToolStripButton btnExportObjectModel;
+        private System.Windows.Forms.ToolStripButton btnEditTexAnim;
 
 
     }
