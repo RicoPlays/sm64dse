@@ -30,8 +30,6 @@
         {
             this.pbxMinimapGfx = new System.Windows.Forms.PictureBox();
             this.tsMinimapEditor = new System.Windows.Forms.ToolStrip();
-            this.toolStripLabel1 = new System.Windows.Forms.ToolStripLabel();
-            this.toolStripSeparator1 = new System.Windows.Forms.ToolStripSeparator();
             this.tslBeforeAreaBtns = new System.Windows.Forms.ToolStripLabel();
             this.btnImport = new System.Windows.Forms.ToolStripButton();
             this.lblMapSizeTitle = new System.Windows.Forms.Label();
@@ -39,6 +37,8 @@
             this.gridPalette = new System.Windows.Forms.DataGridView();
             this.lblPaletteTitle = new System.Windows.Forms.Label();
             this.btnSetBackground = new System.Windows.Forms.Button();
+            this.label1 = new System.Windows.Forms.Label();
+            this.txtCoordScale = new System.Windows.Forms.TextBox();
             ((System.ComponentModel.ISupportInitialize)(this.pbxMinimapGfx)).BeginInit();
             this.tsMinimapEditor.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.gridPalette)).BeginInit();
@@ -55,8 +55,6 @@
             // tsMinimapEditor
             // 
             this.tsMinimapEditor.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {
-            this.toolStripLabel1,
-            this.toolStripSeparator1,
             this.tslBeforeAreaBtns,
             this.btnImport});
             this.tsMinimapEditor.Location = new System.Drawing.Point(0, 0);
@@ -64,17 +62,6 @@
             this.tsMinimapEditor.Size = new System.Drawing.Size(816, 25);
             this.tsMinimapEditor.TabIndex = 1;
             this.tsMinimapEditor.Text = "toolStrip1";
-            // 
-            // toolStripLabel1
-            // 
-            this.toolStripLabel1.Name = "toolStripLabel1";
-            this.toolStripLabel1.Size = new System.Drawing.Size(26, 22);
-            this.toolStripLabel1.Text = "test";
-            // 
-            // toolStripSeparator1
-            // 
-            this.toolStripSeparator1.Name = "toolStripSeparator1";
-            this.toolStripSeparator1.Size = new System.Drawing.Size(6, 25);
             // 
             // tslBeforeAreaBtns
             // 
@@ -154,11 +141,30 @@
             this.btnSetBackground.UseVisualStyleBackColor = true;
             this.btnSetBackground.Click += new System.EventHandler(this.btnSetBackground_Click);
             // 
+            // label1
+            // 
+            this.label1.AutoSize = true;
+            this.label1.Location = new System.Drawing.Point(544, 392);
+            this.label1.Name = "label1";
+            this.label1.Size = new System.Drawing.Size(91, 13);
+            this.label1.TabIndex = 7;
+            this.label1.Text = "Co-ordinate Scale";
+            // 
+            // txtCoordScale
+            // 
+            this.txtCoordScale.Location = new System.Drawing.Point(704, 389);
+            this.txtCoordScale.Name = "txtCoordScale";
+            this.txtCoordScale.Size = new System.Drawing.Size(100, 20);
+            this.txtCoordScale.TabIndex = 8;
+            this.txtCoordScale.TextChanged += new System.EventHandler(this.txtCoordScale_TextChanged);
+            // 
             // MinimapEditor
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.ClientSize = new System.Drawing.Size(816, 574);
+            this.Controls.Add(this.txtCoordScale);
+            this.Controls.Add(this.label1);
             this.Controls.Add(this.btnSetBackground);
             this.Controls.Add(this.lblPaletteTitle);
             this.Controls.Add(this.gridPalette);
@@ -182,8 +188,6 @@
 
         private System.Windows.Forms.PictureBox pbxMinimapGfx;
         private System.Windows.Forms.ToolStrip tsMinimapEditor;
-        private System.Windows.Forms.ToolStripLabel toolStripLabel1;
-        private System.Windows.Forms.ToolStripSeparator toolStripSeparator1;
         private System.Windows.Forms.ToolStripLabel tslBeforeAreaBtns;
         private System.Windows.Forms.Label lblMapSizeTitle;
         private System.Windows.Forms.Label lblMapSize;
@@ -191,5 +195,7 @@
         private System.Windows.Forms.DataGridView gridPalette;
         private System.Windows.Forms.Label lblPaletteTitle;
         private System.Windows.Forms.Button btnSetBackground;
+        private System.Windows.Forms.Label label1;
+        private System.Windows.Forms.TextBox txtCoordScale;
     }
 }

@@ -241,7 +241,7 @@ namespace SM64DSe
             }
         }
 
-        private void ReadTextureAnimations(uint offset, int area)
+        public void ReadTextureAnimations(uint offset, int area)
         {
             AddPointer(offset + 0x4);
             AddPointer(offset + 0x8);
@@ -670,18 +670,18 @@ namespace SM64DSe
 
         private NitroROM m_ROM;
         public int LevelID;
-        private NitroOverlay m_Overlay;
+        public NitroOverlay m_Overlay;
 
 
-        private struct PointerReference
+        public struct PointerReference
         {
             public PointerReference(uint _ref, uint _ptr) { m_ReferenceAddr = _ref; m_PointerAddr = _ptr; }
             public uint m_ReferenceAddr; // where the pointer is stored
             public uint m_PointerAddr; // where the pointer points
         }
-        private List<PointerReference> m_PointerList;
+        public List<PointerReference> m_PointerList;
 
-        private void AddPointer(uint _ref)
+        public void AddPointer(uint _ref)
         {
             uint _ptr = m_Overlay.ReadPointer(_ref);
             m_PointerList.Add(new PointerReference(_ref, _ptr));
@@ -698,7 +698,7 @@ namespace SM64DSe
             }
         }
 
-        private void UpdateObjectOffsets(uint start, uint delta)
+        public void UpdateObjectOffsets(uint start, uint delta)
         {
             foreach (LevelObject obj in m_LevelObjects.Values)
                 if (obj.m_Offset >= start) obj.m_Offset += delta;
@@ -1845,7 +1845,6 @@ namespace SM64DSe
             tvObjectList.Refresh();
         }
 
-        public static bool isImported = false;//For determing if we need to set texture animation address to NULL
         private void btnSave_Click(object sender, EventArgs e)
         {
             bool bankwarning = false;
@@ -1877,27 +1876,7 @@ namespace SM64DSe
                 curoffset += 2;
             }
 
-            if (isImported)
-            {
-                uint numAreas = m_Overlay.Read8(0x74);
-                uint objlistptr = m_Overlay.ReadPointer(0x70);
-
-                for (byte a = 0; a < m_NumAreas; a++)//For each area in current overlay
-                {
-                    uint addr = (uint)(objlistptr + (a * 12));//Each level data header is 12 bytes - get the address of current one
-
-                    //Texture animation addresses have an offset of 4 bytes within each level data header
-                    addr += 4;
-                    if (m_Overlay.Read32(addr) != 0)//If texture animation data pointer is not NULL
-                    {
-                        m_Overlay.Write32(addr, 0);//Make it NULL
-                    }
-                }
-
-                isImported = false;//Set back to default
-            }
-
-
+            
             m_Overlay.SaveChanges();
             slStatusLabel.Text = "Changes saved.";
         }
@@ -2367,6 +2346,11 @@ namespace SM64DSe
 
             BMD objectBMD = new BMD(m_ROM.GetFileFromName(selObjBMDName));
             exportOBJ(objectBMD);
+        }
+
+        private void btnEditTexAnim_Click(object sender, EventArgs e)
+        {
+            new TextureAnimationForm(this).Show(this);
         }
     }
 }

@@ -200,6 +200,10 @@
       <DependentUpon>TextEditorForm.cs</DependentUpon>
       <SubType>Designer</SubType>
     </EmbeddedResource>
+    <EmbeddedResource Include="TextureAnimationForm.resx">
+      <DependentUpon>TextureAnimationForm.cs</DependentUpon>
+      <SubType>Designer</SubType>
+    </EmbeddedResource>
     <Compile Include="Properties\Resources.Designer.cs">
       <AutoGen>True</AutoGen>
       <DependentUpon>Resources.resx</DependentUpon>
@@ -238,6 +242,12 @@
     </Compile>
     <Compile Include="TextEditorForm.Designer.cs">
       <DependentUpon>TextEditorForm.cs</DependentUpon>
+    </Compile>
+    <Compile Include="TextureAnimationForm.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="TextureAnimationForm.Designer.cs">
+      <DependentUpon>TextureAnimationForm.cs</DependentUpon>
     </Compile>
   </ItemGroup>
   <ItemGroup>

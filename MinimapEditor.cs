@@ -32,6 +32,8 @@ namespace SM64DSe
         private int m_NumAreas;
         private int m_CurArea;
 
+        LevelEditorForm _owner;
+
         public MinimapEditor()
         {
             InitializeComponent();
@@ -245,9 +247,12 @@ namespace SM64DSe
         private void MinimapEditor_Load(object sender, EventArgs e)
         {
             LevelEditorForm _owner = (LevelEditorForm)Owner;
+            this._owner = _owner;
 
             m_NumAreas = _owner.m_NumAreas;
             m_CurArea = 0;
+
+            txtCoordScale.Text = "" + (_owner.m_Overlay.Read16((uint)0x76) / 1000f);
 
             int i, pos = tsMinimapEditor.Items.IndexOf(tslBeforeAreaBtns) + 1;
             for (i = 0; i < m_NumAreas; i++, pos++)
@@ -287,6 +292,21 @@ namespace SM64DSe
         public void gridPalette_CurrentCellChanged(object sender, System.EventArgs e)
         {
             
+        }
+
+        private void txtCoordScale_TextChanged(object sender, EventArgs e)
+        {
+            if (txtCoordScale.Text != "")
+            {
+                try
+                {
+                    _owner.m_Overlay.Write16((uint)0x76, (ushort)(Convert.ToSingle(txtCoordScale.Text) * 1000));
+                }
+                catch
+                {
+                    MessageBox.Show("Please enter a valid float value in format 1.23");
+                }
+            }
         }
 
     }

@@ -2946,19 +2946,26 @@ namespace SM64DSe
                 m_Scale = originalScale;//Back to previous scale for collision as it's not affected like model's scale
                 PrerenderModel();
                 glModelView.Refresh();
-                kcl = Program.m_ROM.GetFileFromName(m_LevelSettings.objKCL);
-                ObjToKcl.ConvertToKcl(m_ModelFileName, ref kcl, m_Scale.X, faceSizeThreshold);
+                try
+                {
+                    kcl = Program.m_ROM.GetFileFromName(m_LevelSettings.objKCL);
+                    ObjToKcl.ConvertToKcl(m_ModelFileName, ref kcl, m_Scale.X, faceSizeThreshold);
+                }
+                catch
+                {
+                    MessageBox.Show("This object has no collision data, however the model will still be imported.");
+                }
             }
             else//If it's a level model
             {
                 ImportModel();
                 kcl = Program.m_ROM.GetFileFromInternalID(m_LevelSettings.KCLFileID);
-                ObjToKcl.ConvertToKcl(m_ModelFileName, ref kcl, m_Scale.X, faceSizeThreshold);
+                if (cbMakeAcmlmboard.Checked)
+                    ObjToKcl.ConvertToKcl(m_ModelFileName, ref kcl, m_Scale.X, faceSizeThreshold);
             }
 
             //if (cbMakeAcmlmboard.Checked) ImportCollisionMap();//Old method
             ((LevelEditorForm)Owner).UpdateLevelModel();
-            LevelEditorForm.isImported = true;//Set this flag to true so that texture animation address set to NULL (needed for custom models)
         }
 
         private void glModelView_MouseDown(object sender, MouseEventArgs e)
