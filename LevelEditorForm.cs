@@ -2143,30 +2143,30 @@ namespace SM64DSe
                 {
                     //For every texture,
                     BMD.Texture currentTexture = levelModelToExport.m_ModelChunks[i].m_MatGroups[j].m_Texture;
+                    textures.Add(currentTexture);
+                    //Create new material
+                    mtllib += "newmtl material_" /*+ ((i * 2) + j)*/ + levelModelToExport.m_ModelChunks[i].m_MatGroups[j].m_Name + "\n";
+                    //Specify ambient colour - RGB 0-1
+                    mtllib += "Ka " + (levelModelToExport.m_ModelChunks[i].m_MatGroups[j].m_AmbientColor.R / 255.0f).ToString(usa) +
+                        " " + (levelModelToExport.m_ModelChunks[i].m_MatGroups[j].m_AmbientColor.G / 255.0f).ToString(usa) +
+                        " " + (levelModelToExport.m_ModelChunks[i].m_MatGroups[j].m_AmbientColor.B / 255.0f).ToString(usa) + "\n";
+                    //Specify diffuse colour - RGB 0-1
+                    mtllib += "Kd " + (levelModelToExport.m_ModelChunks[i].m_MatGroups[j].m_DiffuseColor.R / 255.0f).ToString(usa) +
+                        " " + (levelModelToExport.m_ModelChunks[i].m_MatGroups[j].m_DiffuseColor.G / 255.0f).ToString(usa) +
+                        " " + (levelModelToExport.m_ModelChunks[i].m_MatGroups[j].m_DiffuseColor.B / 255.0f).ToString(usa) + "\n";
+                    //Specify specular colour - RGB 0-1
+                    mtllib += "Ks " + (levelModelToExport.m_ModelChunks[i].m_MatGroups[j].m_SpecularColor.R / 255.0f).ToString(usa) +
+                        " " + (levelModelToExport.m_ModelChunks[i].m_MatGroups[j].m_SpecularColor.G / 255.0f).ToString(usa) +
+                        " " + (levelModelToExport.m_ModelChunks[i].m_MatGroups[j].m_SpecularColor.B / 255.0f).ToString(usa) + "\n";
+                    //Specify specular colour co-efficient - RGB 0-1
+                    mtllib += "Ns " + levelModelToExport.m_ModelChunks[i].m_MatGroups[j].m_SpeEmiColors.ToString(usa) + "\n";
+                    //Specify transparency - RGB Alpha channel 0-1
+                    mtllib += "Tr " + (levelModelToExport.m_ModelChunks[i].m_MatGroups[j].m_AmbientColor.A / 255.0f).ToString(usa) + "\n";
+                    //Specify texture type 0 - 10
+                    //uint textype = (currentTexture.m_Params >> 26) & 0x7;
+                    mtllib += "illum 2\n";
                     if (currentTexture != null)
                     {
-                        textures.Add(currentTexture);
-                        //Create new material
-                        mtllib += "newmtl material_" + ((i * 2) + j) + "\n";
-                        //Specify ambient colour - RGB 0-1
-                        mtllib += "Ka " + (levelModelToExport.m_ModelChunks[i].m_MatGroups[j].m_AmbientColor.R / 255.0f).ToString(usa) +
-                            " " + (levelModelToExport.m_ModelChunks[i].m_MatGroups[j].m_AmbientColor.G / 255.0f).ToString(usa) +
-                            " " + (levelModelToExport.m_ModelChunks[i].m_MatGroups[j].m_AmbientColor.B / 255.0f).ToString(usa) + "\n";
-                        //Specify diffuse colour - RGB 0-1
-                        mtllib += "Kd " + (levelModelToExport.m_ModelChunks[i].m_MatGroups[j].m_DiffuseColor.R / 255.0f).ToString(usa) +
-                            " " + (levelModelToExport.m_ModelChunks[i].m_MatGroups[j].m_DiffuseColor.G / 255.0f).ToString(usa) +
-                            " " + (levelModelToExport.m_ModelChunks[i].m_MatGroups[j].m_DiffuseColor.B / 255.0f).ToString(usa) + "\n";
-                        //Specify specular colour - RGB 0-1
-                        mtllib += "Ks " + (levelModelToExport.m_ModelChunks[i].m_MatGroups[j].m_SpecularColor.R / 255.0f).ToString(usa) +
-                            " " + (levelModelToExport.m_ModelChunks[i].m_MatGroups[j].m_SpecularColor.G / 255.0f).ToString(usa) +
-                            " " + (levelModelToExport.m_ModelChunks[i].m_MatGroups[j].m_SpecularColor.B / 255.0f).ToString(usa) + "\n";
-                        //Specify specular colour co-efficient - RGB 0-1
-                        mtllib += "Ns " + levelModelToExport.m_ModelChunks[i].m_MatGroups[j].m_SpeEmiColors.ToString(usa) + "\n";
-                        //Specify transparency - RGB Alpha channel 0-1
-                        mtllib += "Tr " + (levelModelToExport.m_ModelChunks[i].m_MatGroups[j].m_AmbientColor.A / 255.0f).ToString(usa) + "\n";
-                        //Specify texture type 0 - 10
-                        uint textype = (currentTexture.m_Params >> 26) & 0x7;
-                        mtllib += "illum " + textype + "\n";
                         //Specify name of texture image
                         mtllib += "map_Kd " + currentTexture.m_TexName + ".png" + "\n\n";
                         //Export the current texture to .PNG
@@ -2182,7 +2182,6 @@ namespace SM64DSe
                                  currentTexture.m_Data[((y * currentTexture.m_Width) + x) * 4]));
                             }
                         }
-                        lol.RotateFlip(RotateFlipType.RotateNoneFlipY);//Textures are rotated 180 degrees
                         lol.Save(dir + "/" + currentTexture.m_TexName + ".png", System.Drawing.Imaging.ImageFormat.Png);
                     }
 
@@ -2193,7 +2192,7 @@ namespace SM64DSe
                             Vector3 currentPos =
                                 levelModelToExport.m_ModelChunks[i].m_MatGroups[j].m_Geometry[k].m_VertexList[m].m_Position;
                             //Print out the current vertex co-ordinates
-                            if (currentPos.X.ToString() != "" && currentPos.Y.ToString() != "" && currentPos.Z.ToString() != "")
+                            if (!vertices.Contains(currentPos) && currentPos.X.ToString() != "" && currentPos.Y.ToString() != "" && currentPos.Z.ToString() != "")
                             {
                                 output = output + "v " + currentPos.X.ToString(usa) + " " +
                                 currentPos.Y.ToString(usa) + " " +
@@ -2203,7 +2202,7 @@ namespace SM64DSe
                             Vector2 currentTexCoord =
                                 levelModelToExport.m_ModelChunks[i].m_MatGroups[j].m_Geometry[k].m_VertexList[m].m_TexCoord;
                             //Print out the current texture co-ordinates
-                            if (currentTexCoord.X.ToString() != "" && currentTexCoord.Y.ToString() != "")
+                            if (!texCoords.Contains(currentTexCoord) && currentTexCoord.X.ToString() != "" && currentTexCoord.Y.ToString() != "")
                             {
                                 output = output + "vt " + currentTexCoord.X.ToString(usa) + " " +
                                 currentTexCoord.Y.ToString(usa) + "\n";
@@ -2218,7 +2217,7 @@ namespace SM64DSe
                 for (int j = 0; j < levelModelToExport.m_ModelChunks[i].m_MatGroups.Length; j++)
                 {
                     //Specify which material as defined in the material lib each set of face(s) is to use
-                    output += "usemtl material_" + textures.IndexOf(levelModelToExport.m_ModelChunks[i].m_MatGroups[j].m_Texture) + "\n";
+                    output += "usemtl material_" + levelModelToExport.m_ModelChunks[i].m_MatGroups[j].m_Name + "\n";
                     for (int k = 0; k < levelModelToExport.m_ModelChunks[i].m_MatGroups[j].m_Geometry.Count; k++)
                     {
                         //Faces
@@ -2286,8 +2285,8 @@ namespace SM64DSe
                             case 3://Quadrilateral Strips
                                 {
                                     //4+(N-1)*2 vertices per N quads
-                                    //((N/2)-4)+1 Quads. per N Vertices
-                                    int numFaces = ((v_vt.Length / 2) - 4) + 1;
+                                    //((N-4)/2) + 1 Quads. per N Vertices
+                                    int numFaces = ((v_vt.Length - 4) / 2) + 1;
                                     if (v_vt.Length < 4)//Should never be
                                         break;
                                     for (int n = 0, p = 0; n < numFaces; n++, p = p + 2)

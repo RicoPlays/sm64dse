@@ -33,12 +33,15 @@
             this.tslBeforeAreaBtns = new System.Windows.Forms.ToolStripLabel();
             this.btnImport = new System.Windows.Forms.ToolStripButton();
             this.lblMapSizeTitle = new System.Windows.Forms.Label();
-            this.lblMapSize = new System.Windows.Forms.Label();
             this.gridPalette = new System.Windows.Forms.DataGridView();
             this.lblPaletteTitle = new System.Windows.Forms.Label();
             this.btnSetBackground = new System.Windows.Forms.Button();
             this.label1 = new System.Windows.Forms.Label();
             this.txtCoordScale = new System.Windows.Forms.TextBox();
+            this.cbSizes = new System.Windows.Forms.ComboBox();
+            this.btnResize = new System.Windows.Forms.Button();
+            this.textBox1 = new System.Windows.Forms.TextBox();
+            this.lblMapsize = new System.Windows.Forms.Label();
             ((System.ComponentModel.ISupportInitialize)(this.pbxMinimapGfx)).BeginInit();
             this.tsMinimapEditor.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.gridPalette)).BeginInit();
@@ -87,15 +90,6 @@
             this.lblMapSizeTitle.Size = new System.Drawing.Size(54, 13);
             this.lblMapSizeTitle.TabIndex = 2;
             this.lblMapSizeTitle.Text = "Map Size:";
-            // 
-            // lblMapSize
-            // 
-            this.lblMapSize.AutoSize = true;
-            this.lblMapSize.Location = new System.Drawing.Point(604, 25);
-            this.lblMapSize.Name = "lblMapSize";
-            this.lblMapSize.Size = new System.Drawing.Size(45, 13);
-            this.lblMapSize.TabIndex = 3;
-            this.lblMapSize.Text = "mapsize";
             // 
             // gridPalette
             // 
@@ -158,17 +152,63 @@
             this.txtCoordScale.TabIndex = 8;
             this.txtCoordScale.TextChanged += new System.EventHandler(this.txtCoordScale_TextChanged);
             // 
+            // cbSizes
+            // 
+            this.cbSizes.Enabled = false;
+            this.cbSizes.FormattingEnabled = true;
+            this.cbSizes.Location = new System.Drawing.Point(547, 42);
+            this.cbSizes.Name = "cbSizes";
+            this.cbSizes.Size = new System.Drawing.Size(121, 21);
+            this.cbSizes.TabIndex = 9;
+            this.cbSizes.Visible = false;
+            // 
+            // btnResize
+            // 
+            this.btnResize.Enabled = false;
+            this.btnResize.Location = new System.Drawing.Point(674, 42);
+            this.btnResize.Name = "btnResize";
+            this.btnResize.Size = new System.Drawing.Size(75, 23);
+            this.btnResize.TabIndex = 10;
+            this.btnResize.Text = "Resize";
+            this.btnResize.UseVisualStyleBackColor = true;
+            this.btnResize.Visible = false;
+            this.btnResize.Click += new System.EventHandler(this.btnResize_Click);
+            // 
+            // textBox1
+            // 
+            this.textBox1.Location = new System.Drawing.Point(547, 446);
+            this.textBox1.Multiline = true;
+            this.textBox1.Name = "textBox1";
+            this.textBox1.ReadOnly = true;
+            this.textBox1.Size = new System.Drawing.Size(257, 66);
+            this.textBox1.TabIndex = 11;
+            this.textBox1.Text = "Note: When using 256x256 maps you can only use one image. If you want different i" +
+                "mages for different areas you\'ll need to use 128x128 maps.";
+            this.textBox1.Visible = false;
+            // 
+            // lblMapsize
+            // 
+            this.lblMapsize.AutoSize = true;
+            this.lblMapsize.Location = new System.Drawing.Point(604, 25);
+            this.lblMapsize.Name = "lblMapsize";
+            this.lblMapsize.Size = new System.Drawing.Size(35, 13);
+            this.lblMapsize.TabIndex = 12;
+            this.lblMapsize.Text = "label2";
+            // 
             // MinimapEditor
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.ClientSize = new System.Drawing.Size(816, 574);
+            this.Controls.Add(this.lblMapsize);
+            this.Controls.Add(this.textBox1);
+            this.Controls.Add(this.btnResize);
+            this.Controls.Add(this.cbSizes);
             this.Controls.Add(this.txtCoordScale);
             this.Controls.Add(this.label1);
             this.Controls.Add(this.btnSetBackground);
             this.Controls.Add(this.lblPaletteTitle);
             this.Controls.Add(this.gridPalette);
-            this.Controls.Add(this.lblMapSize);
             this.Controls.Add(this.lblMapSizeTitle);
             this.Controls.Add(this.tsMinimapEditor);
             this.Controls.Add(this.pbxMinimapGfx);
@@ -190,12 +230,15 @@
         private System.Windows.Forms.ToolStrip tsMinimapEditor;
         private System.Windows.Forms.ToolStripLabel tslBeforeAreaBtns;
         private System.Windows.Forms.Label lblMapSizeTitle;
-        private System.Windows.Forms.Label lblMapSize;
         private System.Windows.Forms.ToolStripButton btnImport;
         private System.Windows.Forms.DataGridView gridPalette;
         private System.Windows.Forms.Label lblPaletteTitle;
         private System.Windows.Forms.Button btnSetBackground;
         private System.Windows.Forms.Label label1;
         private System.Windows.Forms.TextBox txtCoordScale;
+        private System.Windows.Forms.ComboBox cbSizes;
+        private System.Windows.Forms.Button btnResize;
+        private System.Windows.Forms.TextBox textBox1;
+        private System.Windows.Forms.Label lblMapsize;
     }
 }

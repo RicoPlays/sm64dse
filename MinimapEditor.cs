@@ -41,39 +41,52 @@ namespace SM64DSe
 
         NitroFile palfile;
         NitroFile tsetfile;
-        NitroFile tmapfile;
+        NitroFile[] tmapfile;
         int mapsize;
         private void RedrawMinimap(LevelEditorForm _owner)
         {
             palfile = Program.m_ROM.GetFileFromInternalID(_owner.m_LevelSettings.MinimapPalFileID);
             tsetfile = Program.m_ROM.GetFileFromInternalID(_owner.m_LevelSettings.MinimapTsetFileID);
+            for (int i = 0; i < m_NumAreas; i++)
+            {
+                try
+                {
+                    tmapfile[i] = (Program.m_ROM.GetFileFromInternalID(_owner.m_MinimapFileIDs[i]));
+                    tmapfile[i].ForceDecompression();
+                }
+                catch//If the file doesn't exist
+                {
+                    continue;
+                }
+            }
+
+            tsetfile.ForceDecompression();
+
             try
             {
-                tmapfile = Program.m_ROM.GetFileFromInternalID(_owner.m_MinimapFileIDs[m_CurArea]);
+                uint test = tmapfile[m_CurArea].Read16(0);
+                btnImport.Enabled = true;
             }
-            catch//If the file doesn't exist
+            catch
             {
-                MessageBox.Show("Doesn't use separate map");
+                btnImport.Enabled = false;
                 return;
             }
 
-            tmapfile.ForceDecompression();
-            tsetfile.ForceDecompression();
-
             mapsize = 0;
-            switch (tmapfile.m_Data.Length)
+            switch (tmapfile[m_CurArea].m_Data.Length)
             {
-                case 2 * 16 * 16: mapsize = 128; break;
-                case 2 * 32 * 32: mapsize = 256; break;
+                case 2 * 16 * 16: { mapsize = 128; cbSizes.SelectedIndex = 0; } break;
+                case 2 * 32 * 32: { mapsize = 256; cbSizes.SelectedIndex = 1; } break;
                 case 2 * 64 * 64: mapsize = 512; break;       // maps should never get that big
                 case 2 * 128 * 128: mapsize = 1024; break;    // but we never know :P
                 default: {
-                    MessageBox.Show("Doesn't use separate map");
-                    return;
+                    mapsize = (int)(Math.Sqrt(tmapfile[m_CurArea].m_Data.Length / 2) * 8);
+                    break;
                          }
             }
 
-            lblMapSize.Text = "" + mapsize + " x " + mapsize;
+            lblMapsize.Text = mapsize + " x " + mapsize;
 
             Bitmap bmp = new Bitmap(mapsize, mapsize);
 
@@ -82,8 +95,9 @@ namespace SM64DSe
             {
                 for (int mx = 0; mx < mapsize; mx += 8)
                 {
-                    ushort tilecrap = tmapfile.Read16(tileoffset);
+                    ushort tilecrap = tmapfile[m_CurArea].Read16(tileoffset);
                     uint tilenum = (uint)(tilecrap & 0x03FF);
+                    //Console.WriteLine("" + tilecrap);
 
                     for (int ty = 0; ty < 8; ty++)
                     {
@@ -150,18 +164,119 @@ namespace SM64DSe
             }
 
             //Write new palette
+            palfile.Clear();
             for (int i = 0; i < palette.Length; i++)
             {
                 //Colour in BGR15 format (16 bits) written to every even address 0,2,4...
                 palfile.Write16((uint)i * 2, (ushort)(Helper.ColorToBGR15(palette[i])));
             }
 
+            //Get last used tile number (highest) in previous areas so we know where write new data to
+            ushort prevLastTile = 0;
+            if (m_NumAreas > 1)
+            {
+                for (int i = 0; i < m_NumAreas; i++)
+                {
+                    try
+                    {
+                        uint tile = 0;
+                        for (int my = 0; my < mapsize; my += 8)
+                        {
+                            for (int mx = 0; mx < mapsize; mx += 8)
+                            {
+                                ushort tilecrap = tmapfile[i].Read16(tile);
+                                uint tilenum = (uint)(tilecrap & 0x03FF);
+                                if ((ushort)tilenum > prevLastTile)
+                                    prevLastTile = (ushort)tilenum;
+
+                                tile += 2;
+                            }
+                        }
+                    }
+                    catch
+                    {
+                        continue;
+                    }
+                }
+            }
+
+            //Fill current tmapfile to use full mapsize x mapsize
+            tmapfile[m_CurArea].Clear();
+            uint addr = 0;
+            int curTile = 0;
+            if (m_NumAreas == 1 || prevLastTile == 0)//If this is going to be the first tile, keep it at zero
+                curTile = prevLastTile;
+            else//else tiles should start one after the last (highest) one used by previous map
+                curTile = prevLastTile + 1;
+            int row = (int)(mapsize / 8);
+            int count = 0;
+            for (int my = 0; my < mapsize; my += 8)
+            {
+                for (int mx = 0; mx < mapsize; mx += 8)
+                {
+                    if (row == 16)//128x128 0, 1, 2...14, 15, 32, 33...47, 64...
+                    {
+                        if (count == row)
+                        {
+                            curTile += row;
+                            count = 0;
+                        }
+                        //Console.WriteLine("" + curTile);
+                        tmapfile[m_CurArea].Write16(addr, (ushort)curTile);
+                        curTile++;
+                        count++;
+                        addr += 2;
+                    }
+                    else//256x256 0, 1, 2, 3...
+                    {
+                        tmapfile[m_CurArea].Write16(addr, (ushort)curTile);
+                        curTile++;
+                        addr += 2;
+                    }
+                }
+            }
+
+            //Check to see if there's already an identical tile and if so, change the current value to that
+            //Works, but not if you want to keep existing data eg. multiple maps
+
+            //List<List<byte>> tiles = new List<List<byte>>();
+            //List<byte> curTilePal = new List<byte>();
+            //uint tileoffset = 0;
+            //for (int my = 0; my < mapsize; my += 8)
+            //{
+            //    for (int mx = 0; mx < mapsize; mx += 8)
+            //    {
+            //        ushort tilecrap = tmapfile[m_CurArea].Read16(tileoffset);
+            //        uint tilenum = (uint)(tilecrap & 0x03FF);
+
+            //        curTilePal = new List<byte>();
+            //        for (int ty = 0; ty < 8; ty++)
+            //        {
+            //            for (int tx = 0; tx < 8; tx++)
+            //            {
+            //                uint totaloffset = (uint)(tilenum * 64 + ty * 8 + tx);//Position of current pixel's entry
+            //                curTilePal.Add((byte)(Array.IndexOf(palette, bmp.GetPixel(mx + tx, my + ty))));
+            //            }
+            //        }
+
+            //        tiles.Add(curTilePal);
+
+            //        if (posInList(tiles, curTilePal) != -1)
+            //        {
+            //            tmapfile[m_CurArea].Write16(tileoffset, (ushort)(posInList(tiles, curTilePal)));
+            //        }
+
+            //        tileoffset += 2;
+            //    }
+            //}
+
+            //Write the new image to file
             uint tileoffset = 0;
             for (int my = 0; my < mapsize; my += 8)
             {
                 for (int mx = 0; mx < mapsize; mx += 8)
                 {
-                    ushort tilecrap = tmapfile.Read16(tileoffset);
+                    ushort tilecrap = tmapfile[m_CurArea].Read16(tileoffset);
                     uint tilenum = (uint)(tilecrap & 0x03FF);
 
                     for (int ty = 0; ty < 8; ty++)
@@ -179,6 +294,18 @@ namespace SM64DSe
             }
 
             tsetfile.ForceCompression();
+            for (int i = 0; i < tmapfile.Length; i++)
+            {
+                try
+                {
+                    tmapfile[i].ForceCompression();
+                    tmapfile[i].SaveChanges();
+                }
+                catch
+                {
+                    continue;
+                }
+            }
 
             palfile.SaveChanges();
             tsetfile.SaveChanges();
@@ -203,7 +330,7 @@ namespace SM64DSe
             {
                 for (int mx = 0; mx < mapsize; mx += 8)
                 {
-                    ushort tilecrap = tmapfile.Read16(tileoffset);
+                    ushort tilecrap = tmapfile[m_CurArea].Read16(tileoffset);
                     uint tilenum = (uint)(tilecrap & 0x03FF);
 
                     for (int ty = 0; ty < 8; ty++)
@@ -252,7 +379,11 @@ namespace SM64DSe
             m_NumAreas = _owner.m_NumAreas;
             m_CurArea = 0;
 
+            tmapfile = new NitroFile[m_NumAreas];
+
             txtCoordScale.Text = "" + (_owner.m_Overlay.Read16((uint)0x76) / 1000f);
+
+            cbSizes.Items.Add("512: 128x128"); cbSizes.Items.Add("2048: 256x256");
 
             int i, pos = tsMinimapEditor.Items.IndexOf(tslBeforeAreaBtns) + 1;
             for (i = 0; i < m_NumAreas; i++, pos++)
@@ -307,6 +438,102 @@ namespace SM64DSe
                     MessageBox.Show("Please enter a valid float value in format 1.23");
                 }
             }
+        }
+
+        public int posInList(List<List<byte>> bigList, List<byte> indices)
+        {
+            if (bigList.Count == 0)
+                return -1;
+            for (int i = 0; i < bigList.Count; i++)
+            {
+                List<byte> compare = bigList[i];
+                if (compare.Count != indices.Count)
+                    continue;
+                else
+                {
+                    int wrongFlag = 0;
+                    for (int j = 0; j < compare.Count; j++)
+                    {
+                        if (compare[j] != indices[j])
+                            wrongFlag += 1;
+                    }
+                    if (wrongFlag == 0)//No differences
+                        return i;//They're the same, return position
+                }
+            }
+            return -1;//Not found
+        }
+
+        private void btnResize_Click(object sender, EventArgs e)
+        {
+            if (cbSizes.SelectedIndex == 0)
+                resizeMaps(128);
+            else if (cbSizes.SelectedIndex == 1)
+                resizeMaps(256);
+        }
+
+        private void resizeMaps(int newMapSize)
+        {
+            //Fill current tmapfile to use full mapsize x mapsize
+            uint addr = 0;
+            int curTile = 0;
+            int row = (int)(newMapSize / 8);
+            int count = 0;
+            for (int i = 0; i < m_NumAreas; i++)
+            {
+                curTile = 0;
+                addr = 0;
+                count = 0;
+                try
+                {
+                    tmapfile[i].Clear();
+                    for (int my = 0; my < newMapSize; my += 8)
+                    {
+                        for (int mx = 0; mx < newMapSize; mx += 8)
+                        {
+                            if (row == 16)//128x128 0, 1, 2...14, 15, 32, 33...47, 64...
+                            {
+                                if (count == row)
+                                {
+                                    curTile += row;
+                                    count = 0;
+                                }
+                                tmapfile[i].Write16(addr, (ushort)curTile);
+                                //tmapfile[i].Write16(addr, (ushort)0);
+                                curTile++;
+                                count++;
+                                addr += 2;
+                            }
+                            else//256x256 0, 1, 2, 3...
+                            {
+                                tmapfile[i].Write16(addr, (ushort)curTile);
+                                //tmapfile[i].Write16(addr, (ushort)0);
+                                curTile++;
+                                addr += 2;
+                            }
+                        }
+                    }
+                }
+                catch
+                {
+                    continue;
+                }
+            }
+
+            for (int i = 0; i < tmapfile.Length; i++)
+            {
+                try
+                {
+                    tmapfile[i].ForceCompression();
+                    tmapfile[i].SaveChanges();
+                }
+                catch
+                {
+                    continue;
+                }
+            }
+
+            RedrawMinimap((LevelEditorForm)Owner);
         }
 
     }
