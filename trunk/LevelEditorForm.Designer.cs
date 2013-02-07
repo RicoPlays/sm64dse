@@ -52,7 +52,6 @@
             this.btnExportObjectModel = new System.Windows.Forms.ToolStripButton();
             this.glLevelView = new SM64DSe.HaxxGLControl();
             this.tsViewActions = new System.Windows.Forms.ToolStrip();
-            this.toolStripLabel3 = new System.Windows.Forms.ToolStripLabel();
             this.btnDumpOverlay = new System.Windows.Forms.ToolStripButton();
             this.btnLOL = new System.Windows.Forms.ToolStripButton();
             this.btnExportLevelModel = new System.Windows.Forms.ToolStripButton();
@@ -61,6 +60,7 @@
             this.toolStripSeparator1 = new System.Windows.Forms.ToolStripSeparator();
             this.btnLevelSettings = new System.Windows.Forms.ToolStripButton();
             this.btnEditMinimap = new System.Windows.Forms.ToolStripButton();
+            this.btnEditTexAnim = new System.Windows.Forms.ToolStripButton();
             this.toolStripSeparator2 = new System.Windows.Forms.ToolStripSeparator();
             this.toolStripLabel4 = new System.Windows.Forms.ToolStripLabel();
             this.btnEdit3DModel = new System.Windows.Forms.ToolStripButton();
@@ -81,10 +81,11 @@
             this.btnStarAll = new System.Windows.Forms.ToolStripButton();
             this.ssStatusBar = new System.Windows.Forms.StatusStrip();
             this.slStatusLabel = new System.Windows.Forms.ToolStripStatusLabel();
-            this.btnEditTexAnim = new System.Windows.Forms.ToolStripButton();
+            ((System.ComponentModel.ISupportInitialize)(this.spcMainContainer)).BeginInit();
             this.spcMainContainer.Panel1.SuspendLayout();
             this.spcMainContainer.Panel2.SuspendLayout();
             this.spcMainContainer.SuspendLayout();
+            ((System.ComponentModel.ISupportInitialize)(this.spcLeftPanel)).BeginInit();
             this.spcLeftPanel.Panel1.SuspendLayout();
             this.spcLeftPanel.Panel2.SuspendLayout();
             this.spcLeftPanel.SuspendLayout();
@@ -329,7 +330,7 @@
             this.btnReplaceObjModel.ImageTransparentColor = System.Drawing.Color.Magenta;
             this.btnReplaceObjModel.Name = "btnReplaceObjModel";
             this.btnReplaceObjModel.Size = new System.Drawing.Size(89, 19);
-            this.btnReplaceObjModel.Text = "Replace Model";
+            this.btnReplaceObjModel.Text = "Replace model";
             this.btnReplaceObjModel.Click += new System.EventHandler(this.btnReplaceObjModel_Click);
             // 
             // btnExportObjectModel
@@ -337,8 +338,8 @@
             this.btnExportObjectModel.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Text;
             this.btnExportObjectModel.ImageTransparentColor = System.Drawing.Color.Magenta;
             this.btnExportObjectModel.Name = "btnExportObjectModel";
-            this.btnExportObjectModel.Size = new System.Drawing.Size(119, 19);
-            this.btnExportObjectModel.Text = "Export Object Model";
+            this.btnExportObjectModel.Size = new System.Drawing.Size(117, 19);
+            this.btnExportObjectModel.Text = "Export object model";
             this.btnExportObjectModel.Click += new System.EventHandler(this.btnExportObjectModel_Click);
             // 
             // glLevelView
@@ -351,19 +352,18 @@
             this.glLevelView.TabIndex = 1;
             this.glLevelView.VSync = false;
             this.glLevelView.Load += new System.EventHandler(this.glLevelView_Load);
-            this.glLevelView.MouseWheel += new System.Windows.Forms.MouseEventHandler(this.glLevelView_MouseWheel);
             this.glLevelView.Paint += new System.Windows.Forms.PaintEventHandler(this.glLevelView_Paint);
-            this.glLevelView.MouseMove += new System.Windows.Forms.MouseEventHandler(this.glLevelView_MouseMove);
+            this.glLevelView.KeyDown += new System.Windows.Forms.KeyEventHandler(this.glLevelView_KeyDown);
             this.glLevelView.KeyUp += new System.Windows.Forms.KeyEventHandler(this.glLevelView_KeyUp);
             this.glLevelView.MouseDown += new System.Windows.Forms.MouseEventHandler(this.glLevelView_MouseDown);
-            this.glLevelView.Resize += new System.EventHandler(this.glLevelView_Resize);
+            this.glLevelView.MouseMove += new System.Windows.Forms.MouseEventHandler(this.glLevelView_MouseMove);
             this.glLevelView.MouseUp += new System.Windows.Forms.MouseEventHandler(this.glLevelView_MouseUp);
-            this.glLevelView.KeyDown += new System.Windows.Forms.KeyEventHandler(this.glLevelView_KeyDown);
+            this.glLevelView.MouseWheel += new System.Windows.Forms.MouseEventHandler(this.glLevelView_MouseWheel);
+            this.glLevelView.Resize += new System.EventHandler(this.glLevelView_Resize);
             // 
             // tsViewActions
             // 
             this.tsViewActions.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {
-            this.toolStripLabel3,
             this.btnDumpOverlay,
             this.btnLOL,
             this.btnExportLevelModel});
@@ -372,13 +372,6 @@
             this.tsViewActions.Size = new System.Drawing.Size(611, 25);
             this.tsViewActions.TabIndex = 0;
             this.tsViewActions.Text = "toolStrip2";
-            // 
-            // toolStripLabel3
-            // 
-            this.toolStripLabel3.Name = "toolStripLabel3";
-            this.toolStripLabel3.Size = new System.Drawing.Size(69, 22);
-            this.toolStripLabel3.Text = "placeholder";
-            this.toolStripLabel3.Visible = false;
             // 
             // btnDumpOverlay
             // 
@@ -390,6 +383,7 @@
             this.btnDumpOverlay.Size = new System.Drawing.Size(85, 22);
             this.btnDumpOverlay.Text = "Dump overlay";
             this.btnDumpOverlay.ToolTipText = "Debugging feature";
+            this.btnDumpOverlay.Visible = false;
             this.btnDumpOverlay.Click += new System.EventHandler(this.btnDumpOverlay_Click);
             // 
             // btnLOL
@@ -410,8 +404,8 @@
             this.btnExportLevelModel.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Text;
             this.btnExportLevelModel.ImageTransparentColor = System.Drawing.Color.Magenta;
             this.btnExportLevelModel.Name = "btnExportLevelModel";
-            this.btnExportLevelModel.Size = new System.Drawing.Size(111, 22);
-            this.btnExportLevelModel.Text = "Export Level Model";
+            this.btnExportLevelModel.Size = new System.Drawing.Size(108, 22);
+            this.btnExportLevelModel.Text = "Export level model";
             this.btnExportLevelModel.Click += new System.EventHandler(this.btnExportLevelModel_Click);
             // 
             // tsToolBar
@@ -484,6 +478,15 @@
             this.btnEditMinimap.Text = "Minimap";
             this.btnEditMinimap.ToolTipText = "Edit those graphics on the bottom screen";
             this.btnEditMinimap.Click += new System.EventHandler(this.btnEditMinimap_Click);
+            // 
+            // btnEditTexAnim
+            // 
+            this.btnEditTexAnim.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Text;
+            this.btnEditTexAnim.ImageTransparentColor = System.Drawing.Color.Magenta;
+            this.btnEditTexAnim.Name = "btnEditTexAnim";
+            this.btnEditTexAnim.Size = new System.Drawing.Size(107, 22);
+            this.btnEditTexAnim.Text = "Texture animation";
+            this.btnEditTexAnim.Click += new System.EventHandler(this.btnEditTexAnim_Click);
             // 
             // toolStripSeparator2
             // 
@@ -664,11 +667,11 @@
             this.btnStarAll.Image = ((System.Drawing.Image)(resources.GetObject("btnStarAll.Image")));
             this.btnStarAll.ImageTransparentColor = System.Drawing.Color.Magenta;
             this.btnStarAll.Name = "btnStarAll";
-            this.btnStarAll.Size = new System.Drawing.Size(52, 19);
+            this.btnStarAll.Size = new System.Drawing.Size(52, 22);
             this.btnStarAll.Text = "All stars";
             this.btnStarAll.ToolTipText = "Common objects";
-            this.btnStarAll.DoubleClick += new System.EventHandler(this.btnStarAll_DoubleClick);
             this.btnStarAll.Click += new System.EventHandler(this.btnStarAll_Click);
+            this.btnStarAll.DoubleClick += new System.EventHandler(this.btnStarAll_DoubleClick);
             // 
             // ssStatusBar
             // 
@@ -690,15 +693,6 @@
             this.slStatusLabel.Paint += new System.Windows.Forms.PaintEventHandler(this.slStatusLabel_Paint);
             this.slStatusLabel.TextChanged += new System.EventHandler(this.slStatusLabel_TextChanged);
             // 
-            // btnEditTexAnim
-            // 
-            this.btnEditTexAnim.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Text;
-            this.btnEditTexAnim.ImageTransparentColor = System.Drawing.Color.Magenta;
-            this.btnEditTexAnim.Name = "btnEditTexAnim";
-            this.btnEditTexAnim.Size = new System.Drawing.Size(109, 22);
-            this.btnEditTexAnim.Text = "Texture Animation";
-            this.btnEditTexAnim.Click += new System.EventHandler(this.btnEditTexAnim_Click);
-            // 
             // LevelEditorForm
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
@@ -715,9 +709,11 @@
             this.spcMainContainer.Panel1.PerformLayout();
             this.spcMainContainer.Panel2.ResumeLayout(false);
             this.spcMainContainer.Panel2.PerformLayout();
+            ((System.ComponentModel.ISupportInitialize)(this.spcMainContainer)).EndInit();
             this.spcMainContainer.ResumeLayout(false);
             this.spcLeftPanel.Panel1.ResumeLayout(false);
             this.spcLeftPanel.Panel2.ResumeLayout(false);
+            ((System.ComponentModel.ISupportInitialize)(this.spcLeftPanel)).EndInit();
             this.spcLeftPanel.ResumeLayout(false);
             this.tsEditActions.ResumeLayout(false);
             this.tsEditActions.PerformLayout();
@@ -742,7 +738,6 @@
         private System.Windows.Forms.ToolStripButton btnLevelSettings;
         private System.Windows.Forms.ToolStripSeparator toolStripSeparator2;
         private System.Windows.Forms.ToolStrip tsViewActions;
-        private System.Windows.Forms.ToolStripLabel toolStripLabel3;
         private System.Windows.Forms.ToolStripLabel toolStripLabel4;
         private System.Windows.Forms.ToolStripButton btnEditObjects;
         private System.Windows.Forms.ToolStripButton btnEdit3DModel;

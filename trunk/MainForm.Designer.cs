@@ -127,6 +127,7 @@
             this.btnSecretShit.Size = new System.Drawing.Size(28, 22);
             this.btnSecretShit.Text = "D";
             this.btnSecretShit.ToolTipText = "Debug crap. Don\'t touch unless you know what you\'re doing.";
+            this.btnSecretShit.Visible = false;
             // 
             // btnDumpObjInfo
             // 
