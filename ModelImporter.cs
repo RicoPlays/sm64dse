@@ -1217,7 +1217,25 @@ namespace SM64DSe
 
         private void OBJ_LoadMTL(string filename)
         {
-            Stream fs = File.OpenRead(filename);
+            Stream fs;
+            try
+            {
+                fs = File.OpenRead(filename);
+            }
+            catch
+            {
+                MessageBox.Show("Material library not found:\n\n" + filename + "\n\nA default white material will be used instead.");
+                MaterialDef mat = new MaterialDef();
+                mat.m_Faces = new List<FaceDef>();
+                mat.m_DiffuseColor = Color.White;
+                mat.m_Opacity = 255;
+                mat.m_HasTextures = false;
+                mat.m_DiffuseMapName = "";
+                mat.m_DiffuseMapID = 0;
+                mat.m_DiffuseMapSize = new Vector2(0f, 0f);
+                m_Materials.Add("default_white", mat);
+                return;
+            }
             StreamReader sr = new StreamReader(fs);
 
             string curmaterial = "";
@@ -1256,7 +1274,14 @@ namespace SM64DSe
                             mat.m_DiffuseMapName = "";
                             mat.m_DiffuseMapID = 0;
                             mat.m_DiffuseMapSize = new Vector2(0f, 0f);
-                            m_Materials.Add(curmaterial, mat);
+                            try 
+                            { 
+                                m_Materials.Add(curmaterial, mat); 
+                            }
+                            catch
+                            {
+                                //Duplicate material
+                            }
                         }
                         break;
 
@@ -1433,7 +1458,29 @@ namespace SM64DSe
                             if (parts.Length < 4) continue;
                             int nvtx = parts.Length - 1;
 
-                            MaterialDef mat = (MaterialDef)m_Materials[curmaterial];
+                            MaterialDef mat = new MaterialDef();
+                            try
+                            {
+                                mat = (MaterialDef)m_Materials[curmaterial];
+                            }
+                            catch
+                            {
+                                curmaterial = "default_white";
+                                if (m_Materials.Count == 0)
+                                {
+                                    MessageBox.Show("No material library has been specified, yet faces are still set to use \n" +
+                                        "a material. A default white material will be used instead.");
+                                    mat.m_Faces = new List<FaceDef>();
+                                    mat.m_DiffuseColor = Color.White;
+                                    mat.m_Opacity = 255;
+                                    mat.m_HasTextures = false;
+                                    mat.m_DiffuseMapName = "";
+                                    mat.m_DiffuseMapID = 0;
+                                    mat.m_DiffuseMapSize = new Vector2(0f, 0f);
+                                    m_Materials.Add("default_white", mat);
+                                }
+                                mat = (MaterialDef)m_Materials[curmaterial];
+                            }
                             FaceDef face = new FaceDef();
                             face.m_MatName = curmaterial;
                             face.m_VtxIndices = new int[nvtx];
