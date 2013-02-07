@@ -27,7 +27,7 @@ namespace SM64DSe
     {
         public static string AppTitle = "SM64DS Editor";
         // haxx: debugging shit is enabled if this contains 'private beta'
-        public static string AppVersion = "v2.0 PRIVATE BETA";
+        public static string AppVersion = "v2.1";
 
         public static string ServerURL = "http://kuribo64.cjb.net/";
 
