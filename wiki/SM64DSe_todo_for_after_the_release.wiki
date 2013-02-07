@@ -1,3 +1,7 @@
+== Before anything ==
+
+All of this will be done if and only if the oncoming release gives SM64DSe some interest. Otherwise we'll just call this a failure and move on.
+
 == General ==
 
  * Move to Github <br>
