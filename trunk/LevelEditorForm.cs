@@ -1798,8 +1798,8 @@ namespace SM64DSe
         private void btnImportModel_Click(object sender, EventArgs e)
         {
             ModelImporter form = new ModelImporter();
-            if (form != null && !form.m_EarlyClosure)
-                form.Show(this);
+            if (form.ShowDialog(this) == DialogResult.Cancel)
+                return;
             m_LevelSettings.editLevelBMDKCL = true;//Tell the model importer it's a level we're importing
         }
 
@@ -2145,7 +2145,7 @@ namespace SM64DSe
                     BMD.Texture currentTexture = levelModelToExport.m_ModelChunks[i].m_MatGroups[j].m_Texture;
                     textures.Add(currentTexture);
                     //Create new material
-                    mtllib += "newmtl material_" /*+ ((i * 2) + j)*/ + levelModelToExport.m_ModelChunks[i].m_MatGroups[j].m_Name + "\n";
+                    mtllib += "newmtl " /*+ ((i * 2) + j)*/ + levelModelToExport.m_ModelChunks[i].m_MatGroups[j].m_Name + "\n";
                     //Specify ambient colour - RGB 0-1
                     mtllib += "Ka " + (levelModelToExport.m_ModelChunks[i].m_MatGroups[j].m_AmbientColor.R / 255.0f).ToString(usa) +
                         " " + (levelModelToExport.m_ModelChunks[i].m_MatGroups[j].m_AmbientColor.G / 255.0f).ToString(usa) +
@@ -2161,7 +2161,7 @@ namespace SM64DSe
                     //Specify specular colour co-efficient - RGB 0-1
                     mtllib += "Ns " + levelModelToExport.m_ModelChunks[i].m_MatGroups[j].m_SpeEmiColors.ToString(usa) + "\n";
                     //Specify transparency - RGB Alpha channel 0-1
-                    mtllib += "Tr " + (levelModelToExport.m_ModelChunks[i].m_MatGroups[j].m_AmbientColor.A / 255.0f).ToString(usa) + "\n";
+                    mtllib += "d " + (levelModelToExport.m_ModelChunks[i].m_MatGroups[j].m_AmbientColor.A / 255.0f).ToString(usa) + "\n";
                     //Specify texture type 0 - 10
                     //uint textype = (currentTexture.m_Params >> 26) & 0x7;
                     mtllib += "illum 2\n";
@@ -2217,7 +2217,7 @@ namespace SM64DSe
                 for (int j = 0; j < levelModelToExport.m_ModelChunks[i].m_MatGroups.Length; j++)
                 {
                     //Specify which material as defined in the material lib each set of face(s) is to use
-                    output += "usemtl material_" + levelModelToExport.m_ModelChunks[i].m_MatGroups[j].m_Name + "\n";
+                    output += "usemtl " + levelModelToExport.m_ModelChunks[i].m_MatGroups[j].m_Name + "\n";
                     for (int k = 0; k < levelModelToExport.m_ModelChunks[i].m_MatGroups[j].m_Geometry.Count; k++)
                     {
                         //Faces
