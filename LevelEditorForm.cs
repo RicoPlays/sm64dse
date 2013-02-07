@@ -1515,10 +1515,10 @@ namespace SM64DSe
                         if (m_UpsideDown)
                             xdelta = -xdelta;
 
-                        //m_CamRotation.X -= xdelta * 0.002f;
-                        // m_CamRotation.Y -= ydelta * 0.002f;
-                        m_CamRotation.X -= (float)Math.Tan((xdelta * m_PixelFactorX) / m_PickingDepth);//xdelta * m_PixelFactorX * m_PickingDepth;
-                        m_CamRotation.Y -= ydelta * m_PixelFactorY * m_PickingDepth;
+                        m_CamRotation.X -= xdelta * 0.002f;
+                        m_CamRotation.Y -= ydelta * 0.002f;
+                        //m_CamRotation.X -= (float)Math.Tan((xdelta * m_PixelFactorX) / m_PickingDepth);//xdelta * m_PixelFactorX * m_PickingDepth;
+                        //m_CamRotation.Y -= ydelta * m_PixelFactorY * m_PickingDepth;
 
                         ClampRotation(ref m_CamRotation.X, (float)Math.PI * 2.0f);
                         ClampRotation(ref m_CamRotation.Y, (float)Math.PI * 2.0f);
@@ -1527,8 +1527,8 @@ namespace SM64DSe
                     {
                         //xdelta *= 0.005f;
                         //ydelta *= 0.005f;
-                        xdelta *= m_PixelFactorX * m_PickingDepth;
-                        ydelta *= m_PixelFactorY * m_PickingDepth;
+                        xdelta *= Math.Min(0.005f, m_PixelFactorX * m_PickingDepth);
+                        ydelta *= Math.Min(0.005f, m_PixelFactorY * m_PickingDepth);
 
                         m_CamTarget.X -= xdelta * (float)Math.Sin(m_CamRotation.X);
                         m_CamTarget.X -= ydelta * (float)Math.Cos(m_CamRotation.X) * (float)Math.Sin(m_CamRotation.Y);
