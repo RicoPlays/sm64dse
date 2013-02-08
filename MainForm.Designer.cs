@@ -110,7 +110,6 @@
             this.btnEditTexts.Size = new System.Drawing.Size(58, 22);
             this.btnEditTexts.Text = "Edit texts";
             this.btnEditTexts.ToolTipText = "change what signs say";
-            this.btnEditTexts.Visible = false;
             this.btnEditTexts.Click += new System.EventHandler(this.btnEditTexts_Click);
             // 
             // btnSecretShit
