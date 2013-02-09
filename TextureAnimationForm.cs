@@ -242,7 +242,7 @@ namespace SM64DSe
                 if (afterLastname == firstScaleStart)
                 {
                     AddSpace((uint)(_owner.m_TexAnims[lastNamePos[0]][lastNamePos[1]].m_MatNameOffset +
-                    _owner.m_TexAnims[lastNamePos[0]][lastNamePos[1]].m_MatName.Length), 3);//Add 3 nulls just in case
+                    _owner.m_TexAnims[lastNamePos[0]][lastNamePos[1]].m_MatName.Length), 1);
 
                     _owner.m_Overlay.Write8((uint)(_owner.m_TexAnims[lastNamePos[0]][lastNamePos[1]].m_MatNameOffset +
                     _owner.m_TexAnims[lastNamePos[0]][lastNamePos[1]].m_MatName.Length), (byte)0);
@@ -724,8 +724,8 @@ namespace SM64DSe
                     //Crashes if you try to remove up to end of data
                     if (numAreas != 1)
                         RemoveSpace(_owner.m_TexAnims[lbxArea.SelectedIndex][lbxTexAnim.SelectedIndex].m_MatNameOffset,
-                            (int)((_owner.m_TexAnims[lbxArea.SelectedIndex][lbxTexAnim.SelectedIndex].m_TransTblAddr +
-                            (transTblLength[lbxArea.SelectedIndex] * 4)) - _owner.m_TexAnims[lbxArea.SelectedIndex][lbxTexAnim.SelectedIndex].m_MatNameOffset));
+                       (int)((_owner.m_TexAnims[lbxArea.SelectedIndex][lbxTexAnim.SelectedIndex].m_TransTblAddr +
+                       (transTblLength[lbxArea.SelectedIndex] * 4)) - _owner.m_TexAnims[lbxArea.SelectedIndex][lbxTexAnim.SelectedIndex].m_MatNameOffset));
                     //Set current area's texture animation address to NULL
                     uint objlistptr = _owner.m_Overlay.ReadPointer(0x70);
                     uint addr = (uint)(objlistptr + (lbxArea.SelectedIndex * 12));//Each level data header is 12 bytes - get the address of current one
