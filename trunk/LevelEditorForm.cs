@@ -1797,10 +1797,10 @@ namespace SM64DSe
 
         private void btnImportModel_Click(object sender, EventArgs e)
         {
+            m_LevelSettings.editLevelBMDKCL = true;//Tell the model importer it's a level we're importing
             ModelImporter form = new ModelImporter();
             if (form.ShowDialog(this) == DialogResult.Cancel)
                 return;
-            m_LevelSettings.editLevelBMDKCL = true;//Tell the model importer it's a level we're importing
         }
 
         private void tvObjectList_DrawNode(object sender, DrawTreeNodeEventArgs e)
