@@ -81,6 +81,7 @@
             this.btnStarAll = new System.Windows.Forms.ToolStripButton();
             this.ssStatusBar = new System.Windows.Forms.StatusStrip();
             this.slStatusLabel = new System.Windows.Forms.ToolStripStatusLabel();
+            this.btnAddFog = new System.Windows.Forms.ToolStripButton();
             ((System.ComponentModel.ISupportInitialize)(this.spcMainContainer)).BeginInit();
             this.spcMainContainer.Panel1.SuspendLayout();
             this.spcMainContainer.Panel2.SuspendLayout();
@@ -174,7 +175,8 @@
             this.btnAddView,
             this.btnRemoveSel,
             this.btnReplaceObjModel,
-            this.btnExportObjectModel});
+            this.btnExportObjectModel,
+            this.btnAddFog});
             this.tsEditActions.LayoutStyle = System.Windows.Forms.ToolStripLayoutStyle.Flow;
             this.tsEditActions.Location = new System.Drawing.Point(0, 0);
             this.tsEditActions.Name = "tsEditActions";
@@ -693,6 +695,15 @@
             this.slStatusLabel.Paint += new System.Windows.Forms.PaintEventHandler(this.slStatusLabel_Paint);
             this.slStatusLabel.TextChanged += new System.EventHandler(this.slStatusLabel_TextChanged);
             // 
+            // btnAddFog
+            // 
+            this.btnAddFog.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Text;
+            this.btnAddFog.ImageTransparentColor = System.Drawing.Color.Magenta;
+            this.btnAddFog.Name = "btnAddFog";
+            this.btnAddFog.Size = new System.Drawing.Size(56, 19);
+            this.btnAddFog.Text = "Add Fog";
+            this.btnAddFog.Click += new System.EventHandler(this.btnAddFog_Click);
+            // 
             // LevelEditorForm
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
@@ -782,6 +793,7 @@
         private System.Windows.Forms.ToolStripButton btnExportLevelModel;
         private System.Windows.Forms.ToolStripButton btnExportObjectModel;
         private System.Windows.Forms.ToolStripButton btnEditTexAnim;
+        private System.Windows.Forms.ToolStripButton btnAddFog;
 
 
     }

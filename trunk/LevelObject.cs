@@ -938,6 +938,129 @@ namespace SM64DSe
         }
     }
 
+    public class MinimapScaleObject : LevelObject
+    {
+        public MinimapScaleObject(NitroOverlay ovl, uint offset, int num, int layer, int area)
+            : base(ovl, offset, layer)
+        {
+            m_Area = area;
+            m_Type = 12;
+            m_UniqueID = (uint)(0x50000000 | num);
+
+            Parameters = new ushort[1];
+            Parameters[0] = m_Overlay.Read16(m_Offset);
+
+            m_Renderer = new ColorCubeRenderer(Color.FromArgb(255, 255, 0), Color.FromArgb(64, 64, 0), true);
+            m_Properties = new PropertyTable();
+            GenerateProperties();
+        }
+
+        public override string GetDescription()
+        {
+            return "Minimap scale for area " + m_Area;
+        }
+
+        public override void GenerateProperties()
+        {
+            m_Properties.Properties.Clear();
+
+            m_Properties.Properties.Add(new PropertySpec("Scale", typeof(float), "Specific", "Scale at which minimap is to be displayed for this area.", (float)(m_Overlay.Read16(m_Offset) / 1000f), "", typeof(FloatTypeConverter)));
+
+            m_Properties["Scale"] = (float)(m_Overlay.Read16(m_Offset) / 1000f);
+        }
+
+        public override bool SupportsRotation() { return false; }
+
+        public override int SetProperty(string field, object newval)
+        {
+            switch (field)
+            {
+                case "Scale": Parameters[0] = (ushort)((float)(newval) * 1000); break;
+            }
+
+            return 0;
+        }
+
+        public override void SaveChanges()
+        {
+            m_Overlay.Write16(m_Offset, Parameters[0]);
+        }
+    }
+
+    public class FogObject : LevelObject
+    {
+        public FogObject(NitroOverlay ovl, uint offset, int num, int layer, int area)
+            : base(ovl, offset, layer)
+        {
+            m_Area = area;
+            m_Type = 8;
+            m_UniqueID = (uint)(0x50000000 | num);
+
+            Parameters = new ushort[6];
+            Parameters[0] = m_Overlay.Read8(m_Offset);
+            Parameters[1] = m_Overlay.Read8(m_Offset + 1);
+            Parameters[2] = m_Overlay.Read8(m_Offset + 2);
+            Parameters[3] = m_Overlay.Read8(m_Offset + 3);
+            Parameters[4] = m_Overlay.Read16(m_Offset + 4);
+            Parameters[5] = m_Overlay.Read16(m_Offset + 6);
+
+            m_Renderer = new ColorCubeRenderer(Color.FromArgb(255, 255, 0), Color.FromArgb(Parameters[1], Parameters[2], Parameters[3]), true);
+            m_Properties = new PropertyTable();
+            GenerateProperties();
+        }
+
+        public override string GetDescription()
+        {
+            return "Fog for area " + m_Area;
+        }
+
+        public override void GenerateProperties()
+        {
+            m_Properties.Properties.Clear();
+
+            m_Properties.Properties.Add(new PropertySpec("Density", typeof(float), "Specific", "Density of fog. 0 - No fog, 1 - Show Fog", (float)Parameters[0], "", typeof(FloatTypeConverter)));
+            m_Properties.Properties.Add(new PropertySpec("RGB R Value", typeof(float), "Specific", "RGB Red value for fog colour.", (float)Parameters[1], "", typeof(FloatTypeConverter)));
+            m_Properties.Properties.Add(new PropertySpec("RGB G Value", typeof(float), "Specific", "RGB Green value for fog colour.", (float)Parameters[2], "", typeof(FloatTypeConverter)));
+            m_Properties.Properties.Add(new PropertySpec("RGB B Value", typeof(float), "Specific", "RGB Blue value for fog colour.", (float)Parameters[3], "", typeof(FloatTypeConverter)));
+            m_Properties.Properties.Add(new PropertySpec("Start Distance", typeof(float), "Specific", "Distance at which to start drawing fog.", (float)(Parameters[4] / 1000), "", typeof(FloatTypeConverter)));
+            m_Properties.Properties.Add(new PropertySpec("End Distance", typeof(float), "Specific", "Distance at which to stop drawing fog.", (float)(Parameters[5] / 1000), "", typeof(FloatTypeConverter)));
+
+            m_Properties["Density"] = (float)Parameters[0];
+            m_Properties["RGB R Value"] = (float)Parameters[1];
+            m_Properties["RGB G Value"] = (float)Parameters[2];
+            m_Properties["RGB B Value"] = (float)Parameters[3];
+            m_Properties["Start Distance"] = (float)(Parameters[4] / 1000);
+            m_Properties["End Distance"] = (float)(Parameters[5] / 1000);
+        }
+
+        public override bool SupportsRotation() { return false; }
+
+        public override int SetProperty(string field, object newval)
+        {
+            switch (field)
+            {
+                case "Density": Parameters[0] = (ushort)(float)newval; break;
+                case "RGB R Value": Parameters[1] = (ushort)(float)newval; break;
+                case "RGB G Value": Parameters[2] = (ushort)(float)newval; break;
+                case "RGB B Value": Parameters[3] = (ushort)(float)newval; break;
+                case "Start Distance": Parameters[4] = (ushort)((float)newval * 1000f); break;
+                case "End Distance": Parameters[5] = (ushort)((float)newval * 1000f); break;
+            }
+
+            return 0;
+        }
+
+        public override void SaveChanges()
+        {
+            m_Overlay.Write8(m_Offset, (byte)Parameters[0]);
+            m_Overlay.Write8(m_Offset + 1, (byte)Parameters[1]);
+            m_Overlay.Write8(m_Offset + 2, (byte)Parameters[2]);
+            m_Overlay.Write8(m_Offset + 3, (byte)Parameters[3]);
+            m_Overlay.Write16(m_Offset + 4, (ushort)Parameters[4]);
+            m_Overlay.Write16(m_Offset + 6, (ushort)Parameters[5]);
+        }
+    }
+
 
     public class LevelTexAnim
     {

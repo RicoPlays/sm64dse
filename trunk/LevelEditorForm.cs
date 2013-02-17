@@ -186,8 +186,14 @@ namespace SM64DSe
                         break;
 
                     case 8:
-                        // fog todo
-                        //MessageBox.Show(string.Format("{0:X8}{1:X8}", m_Overlay.Read32(entries_offset), m_Overlay.Read32(entries_offset + 4)));
+                        // Fog
+                        {
+                            for (byte e = 0; e < entries_num; e++)
+                            {
+                                LevelObject obj = new FogObject(m_Overlay, (uint)(entries_offset + (e * 8)), m_LevelObjects.Count, layer, area);
+                                m_LevelObjects.Add(obj.m_UniqueID, obj);
+                            }
+                        }
                         break;
 
                     case 9:
@@ -214,15 +220,11 @@ namespace SM64DSe
                         break;
 
                     case 12:
-                        // per-area minimap scale factors todo
+                        // per-area minimap scale factors
+                        for (byte e = 0; e < entries_num; e++)
                         {
-                            /* string lol = "OBJECT 12:  ";
-                             for (byte e = 0; e < entries_num; e++)
-                             {
-                                 lol += string.Format("{0:X4} | ", m_Overlay.Read16((uint)(entries_offset + (e * 2))));
-                                 m_Overlay.Write16((uint)(entries_offset + (e * 2)), 0x0898);
-                             }
-                             MessageBox.Show(lol.Substring(0, lol.Length - 3));*/
+                            LevelObject obj = new MinimapScaleObject(m_Overlay, (uint)(entries_offset + (e * 2)), m_LevelObjects.Count, layer, area);
+                            m_LevelObjects.Add(obj.m_UniqueID, obj);
                         }
                         break;
 
@@ -647,7 +649,24 @@ namespace SM64DSe
                     break;
 
                 case 5:
-                    tvObjectList.Nodes.Add("lol", "(nothing available for now)");
+                    {
+                        btnAddFog.Visible = true;
+                        btnRemoveSel.Visible = true;
+                        
+                        if (!m_ShowCommonLayer) break;
+                        TreeNode node0 = tvObjectList.Nodes.Add("parent0", "Minimap Scales");
+                        TreeNode node1 = tvObjectList.Nodes.Add("parent1", "Fog");
+
+                        IEnumerable<LevelObject> objects = m_LevelObjects.Values.Where(obj => (obj.m_UniqueID >> 28) == 5);
+                        foreach (LevelObject obj in objects)
+                        {
+                            switch (obj.m_Type)
+                            {
+                                case 8: node1.Nodes.Add(obj.m_UniqueID.ToString("X8"), obj.GetDescription()).Tag = obj.m_UniqueID; break;
+                                case 12: node0.Nodes.Add(obj.m_UniqueID.ToString("X8"), obj.GetDescription()).Tag = obj.m_UniqueID; break;
+                            }
+                        }
+                    }
                     break;
             }
 
@@ -923,11 +942,11 @@ namespace SM64DSe
                 case 5: obj = new SimpleObject(m_Overlay, offset, (int)uniqueid, layer, area); break;
                 case 6: parentnode = "parent3"; obj = new TpSrcObject(m_Overlay, offset, (int)uniqueid, layer); break;
                 case 7: parentnode = "parent4"; obj = new TpDstObject(m_Overlay, offset, (int)uniqueid, layer); break;
-                case 8: /* fog */ break;
+                case 8: parentnode = "parent1"; obj = new FogObject(m_Overlay, offset, (int)uniqueid, layer, area); break;
                 case 9: parentnode = "parent2"; obj = new DoorObject(m_Overlay, offset, (int)uniqueid, layer); break;
                 case 10: parentnode = "parent1"; obj = new ExitObject(m_Overlay, offset, (int)uniqueid, layer); break;
                 case 11: /* minimap */ break;
-                case 12: /* unk */ break;
+                case 12: parentnode = "parent0"; obj = new MinimapScaleObject(m_Overlay, offset, (int)uniqueid, layer, area); break;
                 case 14: /* unk */ break;
             }
 
@@ -2006,11 +2025,13 @@ namespace SM64DSe
 
                 return;
             }
-
-            LevelObject obj = m_SelectedObject;
-            RemoveObject(obj);
-            RefreshObjects(obj.m_Layer);
-            slStatusLabel.Text = "Object removed.";
+            if (m_SelectedObject.m_Type != 12)//Game crashes of you remove minimap scales
+            {
+                LevelObject obj = m_SelectedObject;
+                RemoveObject(obj);
+                RefreshObjects(obj.m_Layer);
+                slStatusLabel.Text = "Object removed.";
+            }
         }
 
         bool xDown, yDown, zDown;
@@ -2350,6 +2371,35 @@ namespace SM64DSe
         private void btnEditTexAnim_Click(object sender, EventArgs e)
         {
             new TextureAnimationForm(this).Show(this);
+        }
+
+        private void btnAddFog_Click(object sender, EventArgs e)
+        {
+            uint type0 = 8;
+            m_ObjectBeingPlaced = type0 << 16;
+            
+            int type = (int)(m_ObjectBeingPlaced >> 16);
+            ushort id = (ushort)(m_ObjectBeingPlaced & 0xFFFF);
+
+            LevelObject obj = AddObject(type, id, 0, 0);
+            obj.GenerateProperties();
+            pgObjectProperties.SelectedObject = obj.m_Properties;
+
+            m_Selected = obj.m_UniqueID;
+            m_SelectedObject = obj;
+            m_LastSelected = obj.m_UniqueID;
+            m_Hovered = obj.m_UniqueID;
+            m_HoveredObject = obj;
+            m_LastHovered = obj.m_UniqueID;
+            m_LastClicked = obj.m_UniqueID;
+
+            RefreshObjects(m_SelectedObject.m_Layer);
+
+            if (!m_ShiftPressed)
+            {
+                m_ObjectBeingPlaced = 0xFFFF;
+                slStatusLabel.Text = "Object added.";
+            }
         }
     }
 }
