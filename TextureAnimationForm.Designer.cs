@@ -68,6 +68,8 @@
             this.label13 = new System.Windows.Forms.Label();
             this.textBox1 = new System.Windows.Forms.TextBox();
             this.cbSaveOvl = new System.Windows.Forms.CheckBox();
+            this.label14 = new System.Windows.Forms.Label();
+            this.txtNumFrames = new System.Windows.Forms.TextBox();
             this.SuspendLayout();
             // 
             // lbxArea
@@ -411,7 +413,7 @@
             // 
             this.label13.AutoSize = true;
             this.label13.Enabled = false;
-            this.label13.Location = new System.Drawing.Point(406, 246);
+            this.label13.Location = new System.Drawing.Point(413, 272);
             this.label13.Name = "label13";
             this.label13.Size = new System.Drawing.Size(198, 13);
             this.label13.TabIndex = 39;
@@ -421,7 +423,7 @@
             // textBox1
             // 
             this.textBox1.Enabled = false;
-            this.textBox1.Location = new System.Drawing.Point(409, 263);
+            this.textBox1.Location = new System.Drawing.Point(416, 289);
             this.textBox1.Name = "textBox1";
             this.textBox1.Size = new System.Drawing.Size(195, 20);
             this.textBox1.TabIndex = 40;
@@ -437,11 +439,30 @@
             this.cbSaveOvl.Text = "Permanent (Only if sure)";
             this.cbSaveOvl.UseVisualStyleBackColor = true;
             // 
+            // label14
+            // 
+            this.label14.AutoSize = true;
+            this.label14.Location = new System.Drawing.Point(445, 246);
+            this.label14.Name = "label14";
+            this.label14.Size = new System.Drawing.Size(73, 13);
+            this.label14.TabIndex = 42;
+            this.label14.Text = "No. of Frames";
+            // 
+            // txtNumFrames
+            // 
+            this.txtNumFrames.Location = new System.Drawing.Point(524, 243);
+            this.txtNumFrames.Name = "txtNumFrames";
+            this.txtNumFrames.Size = new System.Drawing.Size(100, 20);
+            this.txtNumFrames.TabIndex = 43;
+            this.txtNumFrames.TextChanged += new System.EventHandler(this.txtNumFrames_TextChanged);
+            // 
             // TextureAnimationForm
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.ClientSize = new System.Drawing.Size(629, 324);
+            this.Controls.Add(this.txtNumFrames);
+            this.Controls.Add(this.label14);
             this.Controls.Add(this.cbSaveOvl);
             this.Controls.Add(this.textBox1);
             this.Controls.Add(this.label13);
@@ -531,5 +552,7 @@
         private System.Windows.Forms.Label label13;
         private System.Windows.Forms.TextBox textBox1;
         private System.Windows.Forms.CheckBox cbSaveOvl;
+        private System.Windows.Forms.Label label14;
+        private System.Windows.Forms.TextBox txtNumFrames;
     }
 }

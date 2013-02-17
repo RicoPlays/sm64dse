@@ -25,6 +25,7 @@ namespace SM64DSe
         public List<int> scaleTblLength = new List<int>();//Stores the length (number of values - not bytes) of the whole scale table
         public List<int> rotTblLength = new List<int>();
         public List<int> transTblLength = new List<int>();
+        public List<uint> numFrames = new List<uint>();//Stores the number of frames in each area
         //Hold the scale, rotation and translation table start indices for each texture animation
         public List<List<ushort>> scaleStartIndices = new List<List<ushort>>();
         public List<List<ushort>> rotStartIndices = new List<List<ushort>>();
@@ -57,6 +58,7 @@ namespace SM64DSe
         private void refreshLbx()
         {
             txtMaterialName.Text = matNames[lbxArea.SelectedIndex][lbxTexAnim.SelectedIndex];
+            txtNumFrames.Text = "" + numFrames[lbxArea.SelectedIndex];
             lbxScale.Items.Clear();
             for (int i = 0; i < scaleVals[lbxArea.SelectedIndex].Count; i++)
             {
@@ -103,19 +105,19 @@ namespace SM64DSe
         private void lbxScale_SelectedIndexChanged(object sender, EventArgs e)
         {
             if (lbxArea.SelectedIndex != -1 && lbxTexAnim.SelectedIndex != -1 && lbxScale.SelectedIndex != -1)
-                txtScale.Text = (scaleVals[lbxArea.SelectedIndex][lbxScale.SelectedIndex] / 20 * 12 / 1000f).ToString(usa);//Is it /1000?
+                txtScale.Text = (scaleVals[lbxArea.SelectedIndex][lbxScale.SelectedIndex] / 4096f).ToString(usa);//20:12 20 bits whole, 12 bits fraction
         }
 
         private void lbxRotation_SelectedIndexChanged(object sender, EventArgs e)
         {
             if (lbxArea.SelectedIndex != -1 && lbxTexAnim.SelectedIndex != -1 && lbxRotation.SelectedIndex != -1)
-                txtRotation.Text = (rotVals[lbxArea.SelectedIndex][lbxRotation.SelectedIndex] / (1024f/90f)).ToString(usa);//1024 = 90 degrees
+                txtRotation.Text = (rotVals[lbxArea.SelectedIndex][lbxRotation.SelectedIndex] / (1024f/90f)).ToString(usa);//1024 = 90 degrees. Stored as radians 1024/4096 = 0.25 (2 * Pi) / 4 = 90 deg
         }
 
         private void lbxTranslation_SelectedIndexChanged(object sender, EventArgs e)
         {
             if (lbxArea.SelectedIndex != -1 && lbxTexAnim.SelectedIndex != -1 && lbxTranslation.SelectedIndex != -1)
-                txtTranslation.Text = (transVals[lbxArea.SelectedIndex][lbxTranslation.SelectedIndex] / 20 * 12 / 1000f).ToString(usa);//Is it /1000?
+                txtTranslation.Text = (transVals[lbxArea.SelectedIndex][lbxTranslation.SelectedIndex] / 4096f).ToString(usa);
         }
 
         private void btnRemoveAll_Click(object sender, EventArgs e)
@@ -136,7 +138,7 @@ namespace SM64DSe
             }
             reloadData();
             lbxScale.Items.Clear(); lbxRotation.Items.Clear(); lbxTranslation.Items.Clear();
-            txtMaterialName.Text = ""; txtScale.Text = ""; txtRotation.Text = ""; txtTranslation.Text = "";
+            txtMaterialName.Text = ""; txtScale.Text = ""; txtRotation.Text = ""; txtTranslation.Text = ""; txtNumFrames.Text = "";
         }
 
         private void reloadData()
@@ -156,6 +158,7 @@ namespace SM64DSe
             scaleTblLength = new List<int>();
             rotTblLength = new List<int>();
             transTblLength = new List<int>();
+            numFrames = new List<uint>();
 
             //The name of the last material goes straight into scale values, need to insert a NULL to avoid corruption
             bool nullFix = false;
@@ -310,6 +313,8 @@ namespace SM64DSe
                 rotStart = _owner.m_TexAnims[i][0].m_RotTblAddr;//Address
                 transStart = _owner.m_TexAnims[i][0].m_TransTblAddr;//Address
 
+                numFrames.Add(_owner.m_Overlay.Read32(_owner.m_TexAnims[i][0].m_TexAnimHeaderOffset));
+
                 for (uint addr = scaleStart; addr < scaleEnd; addr = addr + 4)
                 {
                     scale.Add(_owner.m_Overlay.Read32(addr));
@@ -415,7 +420,7 @@ namespace SM64DSe
         {
             if (txtScale.Text != "" && lbxArea.SelectedIndex != -1 && lbxTexAnim.SelectedIndex != -1 && lbxScale.SelectedIndex != -1)
                 scaleVals[lbxArea.SelectedIndex][lbxScale.SelectedIndex] = 
-                    (uint)(Convert.ToSingle(txtScale.Text) * 1000 / 12f * 20f);
+                    (uint)(Convert.ToSingle(txtScale.Text) * 4096f);
         }
 
         private void txtRotation_TextChanged(object sender, EventArgs e)
@@ -429,7 +434,7 @@ namespace SM64DSe
         {
             if (txtTranslation.Text != "" && lbxArea.SelectedIndex != -1 && lbxTexAnim.SelectedIndex != -1 && lbxTranslation.SelectedIndex != -1)
                 transVals[lbxArea.SelectedIndex][lbxTranslation.SelectedIndex] = 
-                    (uint)(Convert.ToSingle(txtTranslation.Text) * 1000f / 12 * 20);
+                    (uint)(Convert.ToSingle(txtTranslation.Text) * 4096f);
         }
 
         private void btnSaveCurrent_Click(object sender, EventArgs e)
@@ -509,6 +514,9 @@ namespace SM64DSe
                         (uint)(_owner.m_TexAnims[i][0].m_TransTblAddr + (4 * a)),
                         (uint)(transVals[i][a]));
                 }
+
+                _owner.m_Overlay.Write32(
+                        (uint)(_owner.m_TexAnims[i][0].m_TexAnimHeaderOffset), numFrames[i]);
 
                 for (int j = 0; j < _owner.m_TexAnims[i].Count; j++)//Each texture animation within current area
                 {
@@ -829,6 +837,14 @@ namespace SM64DSe
                 _owner.m_Overlay.Write32((uint)(freeSpace + 24 + 28 + 16 + 4 + 2), 0);//First translation value
 
                 reloadData();
+            }
+        }
+
+        private void txtNumFrames_TextChanged(object sender, EventArgs e)
+        {
+            if (lbxArea.SelectedIndex != -1 && lbxTexAnim.SelectedIndex != -1 && txtNumFrames.Text != "")
+            {
+                numFrames[lbxArea.SelectedIndex] = Convert.ToUInt32(txtNumFrames.Text);
             }
         }
 
