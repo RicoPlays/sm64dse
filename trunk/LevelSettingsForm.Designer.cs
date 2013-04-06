@@ -50,8 +50,17 @@
             this.label2 = new System.Windows.Forms.Label();
             this.btnCancel = new System.Windows.Forms.Button();
             this.btnOk = new System.Windows.Forms.Button();
+            this.groupBox3 = new System.Windows.Forms.GroupBox();
+            this.txtMusicByte03 = new System.Windows.Forms.TextBox();
+            this.txtMusicByte02 = new System.Windows.Forms.TextBox();
+            this.txtMusicByte01 = new System.Windows.Forms.TextBox();
+            this.label13 = new System.Windows.Forms.Label();
+            this.label12 = new System.Windows.Forms.Label();
+            this.label11 = new System.Windows.Forms.Label();
+            this.label10 = new System.Windows.Forms.Label();
             this.groupBox1.SuspendLayout();
             this.groupBox2.SuspendLayout();
+            this.groupBox3.SuspendLayout();
             this.SuspendLayout();
             // 
             // cbxBank0
@@ -309,9 +318,9 @@
             // btnCancel
             // 
             this.btnCancel.DialogResult = System.Windows.Forms.DialogResult.Cancel;
-            this.btnCancel.Location = new System.Drawing.Point(318, 316);
+            this.btnCancel.Location = new System.Drawing.Point(318, 462);
             this.btnCancel.Name = "btnCancel";
-            this.btnCancel.Size = new System.Drawing.Size(75, 23);
+            this.btnCancel.Size = new System.Drawing.Size(75, 26);
             this.btnCancel.TabIndex = 3;
             this.btnCancel.Text = "Cancel";
             this.btnCancel.UseVisualStyleBackColor = true;
@@ -319,19 +328,93 @@
             // btnOk
             // 
             this.btnOk.DialogResult = System.Windows.Forms.DialogResult.OK;
-            this.btnOk.Location = new System.Drawing.Point(237, 316);
+            this.btnOk.Location = new System.Drawing.Point(237, 462);
             this.btnOk.Name = "btnOk";
-            this.btnOk.Size = new System.Drawing.Size(75, 23);
+            this.btnOk.Size = new System.Drawing.Size(75, 26);
             this.btnOk.TabIndex = 4;
             this.btnOk.Text = "OK";
             this.btnOk.UseVisualStyleBackColor = true;
             this.btnOk.Click += new System.EventHandler(this.btnOk_Click);
             // 
+            // groupBox3
+            // 
+            this.groupBox3.Controls.Add(this.txtMusicByte03);
+            this.groupBox3.Controls.Add(this.txtMusicByte02);
+            this.groupBox3.Controls.Add(this.txtMusicByte01);
+            this.groupBox3.Controls.Add(this.label13);
+            this.groupBox3.Controls.Add(this.label12);
+            this.groupBox3.Controls.Add(this.label11);
+            this.groupBox3.Controls.Add(this.label10);
+            this.groupBox3.Location = new System.Drawing.Point(12, 317);
+            this.groupBox3.Name = "groupBox3";
+            this.groupBox3.Size = new System.Drawing.Size(381, 111);
+            this.groupBox3.TabIndex = 5;
+            this.groupBox3.TabStop = false;
+            this.groupBox3.Text = "Level Music";
+            // 
+            // txtMusicByte03
+            // 
+            this.txtMusicByte03.Location = new System.Drawing.Point(266, 87);
+            this.txtMusicByte03.Name = "txtMusicByte03";
+            this.txtMusicByte03.Size = new System.Drawing.Size(100, 20);
+            this.txtMusicByte03.TabIndex = 6;
+            // 
+            // txtMusicByte02
+            // 
+            this.txtMusicByte02.Location = new System.Drawing.Point(266, 64);
+            this.txtMusicByte02.Name = "txtMusicByte02";
+            this.txtMusicByte02.Size = new System.Drawing.Size(100, 20);
+            this.txtMusicByte02.TabIndex = 5;
+            // 
+            // txtMusicByte01
+            // 
+            this.txtMusicByte01.Location = new System.Drawing.Point(266, 40);
+            this.txtMusicByte01.Name = "txtMusicByte01";
+            this.txtMusicByte01.Size = new System.Drawing.Size(100, 20);
+            this.txtMusicByte01.TabIndex = 4;
+            // 
+            // label13
+            // 
+            this.label13.AutoSize = true;
+            this.label13.Location = new System.Drawing.Point(105, 90);
+            this.label13.Name = "label13";
+            this.label13.Size = new System.Drawing.Size(128, 13);
+            this.label13.TabIndex = 3;
+            this.label13.Text = "Byte 03 (SSEQ (0-) Index)";
+            // 
+            // label12
+            // 
+            this.label12.AutoSize = true;
+            this.label12.Location = new System.Drawing.Point(105, 67);
+            this.label12.Name = "label12";
+            this.label12.Size = new System.Drawing.Size(142, 13);
+            this.label12.TabIndex = 2;
+            this.label12.Text = "Byte 02 (Unknown, required)";
+            // 
+            // label11
+            // 
+            this.label11.AutoSize = true;
+            this.label11.Location = new System.Drawing.Point(105, 43);
+            this.label11.Name = "label11";
+            this.label11.Size = new System.Drawing.Size(142, 13);
+            this.label11.TabIndex = 1;
+            this.label11.Text = "Byte 01 (Unknown, required)";
+            // 
+            // label10
+            // 
+            this.label10.AutoSize = true;
+            this.label10.Location = new System.Drawing.Point(15, 25);
+            this.label10.Name = "label10";
+            this.label10.Size = new System.Drawing.Size(93, 13);
+            this.label10.TabIndex = 0;
+            this.label10.Text = "Level music track:";
+            // 
             // LevelSettingsForm
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(405, 351);
+            this.ClientSize = new System.Drawing.Size(405, 500);
+            this.Controls.Add(this.groupBox3);
             this.Controls.Add(this.btnOk);
             this.Controls.Add(this.btnCancel);
             this.Controls.Add(this.groupBox2);
@@ -341,12 +424,14 @@
             this.MinimizeBox = false;
             this.Name = "LevelSettingsForm";
             this.Text = "Level settings";
-            this.Load += new System.EventHandler(this.LevelSettingsForm_Load);
             this.FormClosed += new System.Windows.Forms.FormClosedEventHandler(this.LevelSettingsForm_FormClosed);
+            this.Load += new System.EventHandler(this.LevelSettingsForm_Load);
             this.groupBox1.ResumeLayout(false);
             this.groupBox1.PerformLayout();
             this.groupBox2.ResumeLayout(false);
             this.groupBox2.PerformLayout();
+            this.groupBox3.ResumeLayout(false);
+            this.groupBox3.PerformLayout();
             this.ResumeLayout(false);
 
         }
@@ -375,5 +460,13 @@
         private System.Windows.Forms.ComboBox cbxBank1;
         private System.Windows.Forms.Button btnCancel;
         private System.Windows.Forms.Button btnOk;
+        private System.Windows.Forms.GroupBox groupBox3;
+        private System.Windows.Forms.TextBox txtMusicByte03;
+        private System.Windows.Forms.TextBox txtMusicByte02;
+        private System.Windows.Forms.TextBox txtMusicByte01;
+        private System.Windows.Forms.Label label13;
+        private System.Windows.Forms.Label label12;
+        private System.Windows.Forms.Label label11;
+        private System.Windows.Forms.Label label10;
     }
 }

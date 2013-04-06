@@ -272,21 +272,21 @@ namespace SM64DSe
                     {
                         switch (newTextByte[i])
                         {
-                            case '?': byteToWrite = 0x26; break;
-                            case '!': byteToWrite = 0x27; break;
-                            case '~': byteToWrite = 0x28; break;
-                            case ',': byteToWrite = 0x29; break;
-                            case '“': byteToWrite = 0x2A; break;
-                            case '”': byteToWrite = 0x2B; break;
+                            case '?': byteToWrite = (byte)(newTextByte[i] - '?' + 0x26); break;
+                            case '!': byteToWrite = (byte)(newTextByte[i] - '!' + 0x27); break;
+                            case '~': byteToWrite = (byte)(newTextByte[i] - '~' + 0x28); break;
+                            case ',': byteToWrite = (byte)(newTextByte[i] - ',' + 0x29); break;
+                            case '“': byteToWrite = (byte)(newTextByte[i] - '“' + 0x2A); break;
+                            case '”': byteToWrite = (byte)(newTextByte[i] - '”' + 0x2B); break;
 
-                            case '-': byteToWrite = 0x47; break;
-                            case '.': byteToWrite = 0x48; break;
-                            case '\'': byteToWrite = 0x49; break;
-                            case ':': byteToWrite = 0x4A; break;
-                            case ';': byteToWrite = 0x4B; break;
-                            case '&': byteToWrite = 0x4C; break;
-                            case ' ': byteToWrite = 0x4D; break;
-                            case '/': byteToWrite = 0x4E; break;
+                            case '-': byteToWrite = (byte)(newTextByte[i] - '-' + 0x47); break;
+                            case '.': byteToWrite = (byte)(newTextByte[i] - '.' + 0x48); break;
+                            case '\'': byteToWrite = (byte)(newTextByte[i] - '\'' + 0x49); break;
+                            case ':': byteToWrite = (byte)(newTextByte[i] - ':' + 0x4A); break;
+                            case ';': byteToWrite = (byte)(newTextByte[i] - ';' + 0x4B); break;
+                            case '&': byteToWrite = (byte)(newTextByte[i] - '&' + 0x4C); break;
+                            case ' ': byteToWrite = (byte)(newTextByte[i] - ' ' + 0x4D); break;
+                            case '/': byteToWrite = (byte)(newTextByte[i] - '/' + 0x4E); break;
                         }
                     }
                 }

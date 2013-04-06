@@ -229,14 +229,11 @@ namespace SM64DSe
                         break;
 
                     case 14:
-                        // ??? todo
+                        // ??? Unknown
+                        for (byte e = 0; e < entries_num; e++)
                         {
-                            /*   string lol = "OBJECT 14:  ";
-                               for (byte e = 0; e < entries_num; e++)
-                                   lol += string.Format("{0:X8} | ", m_Overlay.Read32((uint)(entries_offset + (e * 4))));
-                               MessageBox.Show(lol.Substring(0, lol.Length - 3));*/
-                            //m_Overlay.Write32(entries_offset, 0x03030304);
-                            //m_Overlay.Write32(entries_offset, 0xFFFFFFFF);
+                            LevelObject obj = new Type14Object(m_Overlay, (uint)(entries_offset + (e * 4)), m_LevelObjects.Count, layer, area);
+                            m_LevelObjects.Add(obj.m_UniqueID, obj);
                         }
                         break;
                 }
@@ -651,11 +648,13 @@ namespace SM64DSe
                 case 5:
                     {
                         btnAddFog.Visible = true;
+                        btnAdd14.Visible = true;
                         btnRemoveSel.Visible = true;
                         
                         if (!m_ShowCommonLayer) break;
                         TreeNode node0 = tvObjectList.Nodes.Add("parent0", "Minimap Scales");
                         TreeNode node1 = tvObjectList.Nodes.Add("parent1", "Fog");
+                        TreeNode node2 = tvObjectList.Nodes.Add("parent2", "Type 14 Object");
 
                         IEnumerable<LevelObject> objects = m_LevelObjects.Values.Where(obj => (obj.m_UniqueID >> 28) == 5);
                         foreach (LevelObject obj in objects)
@@ -664,6 +663,7 @@ namespace SM64DSe
                             {
                                 case 8: node1.Nodes.Add(obj.m_UniqueID.ToString("X8"), obj.GetDescription()).Tag = obj.m_UniqueID; break;
                                 case 12: node0.Nodes.Add(obj.m_UniqueID.ToString("X8"), obj.GetDescription()).Tag = obj.m_UniqueID; break;
+                                case 14: node2.Nodes.Add(obj.m_UniqueID.ToString("X8"), obj.GetDescription()).Tag = obj.m_UniqueID; break;
                             }
                         }
                     }
@@ -947,7 +947,7 @@ namespace SM64DSe
                 case 10: parentnode = "parent1"; obj = new ExitObject(m_Overlay, offset, (int)uniqueid, layer); break;
                 case 11: /* minimap */ break;
                 case 12: parentnode = "parent0"; obj = new MinimapScaleObject(m_Overlay, offset, (int)uniqueid, layer, area); break;
-                case 14: /* unk */ break;
+                case 14: /* unk */ parentnode = "parent2"; obj = new Type14Object(m_Overlay, offset, (int)uniqueid, layer, area); break;
             }
 
             if (obj != null)
@@ -2400,6 +2400,40 @@ namespace SM64DSe
                 m_ObjectBeingPlaced = 0xFFFF;
                 slStatusLabel.Text = "Object added.";
             }
+        }
+
+        private void btnAdd14_Click(object sender, EventArgs e)
+        {
+            uint type0 = 14;
+            m_ObjectBeingPlaced = type0 << 16;
+
+            int type = (int)(m_ObjectBeingPlaced >> 16);
+            ushort id = (ushort)(m_ObjectBeingPlaced & 0xFFFF);
+
+            LevelObject obj = AddObject(type, id, 0, 0);
+            obj.GenerateProperties();
+            pgObjectProperties.SelectedObject = obj.m_Properties;
+
+            m_Selected = obj.m_UniqueID;
+            m_SelectedObject = obj;
+            m_LastSelected = obj.m_UniqueID;
+            m_Hovered = obj.m_UniqueID;
+            m_HoveredObject = obj;
+            m_LastHovered = obj.m_UniqueID;
+            m_LastClicked = obj.m_UniqueID;
+
+            RefreshObjects(m_SelectedObject.m_Layer);
+
+            if (!m_ShiftPressed)
+            {
+                m_ObjectBeingPlaced = 0xFFFF;
+                slStatusLabel.Text = "Object added.";
+            }
+        }
+
+        private void btnCLPS_Click(object sender, EventArgs e)
+        {
+            new CLPS_Form(this).Show(this);
         }
     }
 }
