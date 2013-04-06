@@ -50,6 +50,8 @@
             this.btnRemoveSel = new System.Windows.Forms.ToolStripButton();
             this.btnReplaceObjModel = new System.Windows.Forms.ToolStripButton();
             this.btnExportObjectModel = new System.Windows.Forms.ToolStripButton();
+            this.btnAddFog = new System.Windows.Forms.ToolStripButton();
+            this.btnAdd14 = new System.Windows.Forms.ToolStripButton();
             this.glLevelView = new SM64DSe.HaxxGLControl();
             this.tsViewActions = new System.Windows.Forms.ToolStrip();
             this.btnDumpOverlay = new System.Windows.Forms.ToolStripButton();
@@ -61,6 +63,7 @@
             this.btnLevelSettings = new System.Windows.Forms.ToolStripButton();
             this.btnEditMinimap = new System.Windows.Forms.ToolStripButton();
             this.btnEditTexAnim = new System.Windows.Forms.ToolStripButton();
+            this.btnCLPS = new System.Windows.Forms.ToolStripButton();
             this.toolStripSeparator2 = new System.Windows.Forms.ToolStripSeparator();
             this.toolStripLabel4 = new System.Windows.Forms.ToolStripLabel();
             this.btnEdit3DModel = new System.Windows.Forms.ToolStripButton();
@@ -81,7 +84,6 @@
             this.btnStarAll = new System.Windows.Forms.ToolStripButton();
             this.ssStatusBar = new System.Windows.Forms.StatusStrip();
             this.slStatusLabel = new System.Windows.Forms.ToolStripStatusLabel();
-            this.btnAddFog = new System.Windows.Forms.ToolStripButton();
             ((System.ComponentModel.ISupportInitialize)(this.spcMainContainer)).BeginInit();
             this.spcMainContainer.Panel1.SuspendLayout();
             this.spcMainContainer.Panel2.SuspendLayout();
@@ -115,7 +117,7 @@
             // 
             this.spcMainContainer.Panel2.Controls.Add(this.glLevelView);
             this.spcMainContainer.Panel2.Controls.Add(this.tsViewActions);
-            this.spcMainContainer.Size = new System.Drawing.Size(879, 486);
+            this.spcMainContainer.Size = new System.Drawing.Size(957, 486);
             this.spcMainContainer.SplitterDistance = 264;
             this.spcMainContainer.TabIndex = 0;
             // 
@@ -176,7 +178,8 @@
             this.btnRemoveSel,
             this.btnReplaceObjModel,
             this.btnExportObjectModel,
-            this.btnAddFog});
+            this.btnAddFog,
+            this.btnAdd14});
             this.tsEditActions.LayoutStyle = System.Windows.Forms.ToolStripLayoutStyle.Flow;
             this.tsEditActions.Location = new System.Drawing.Point(0, 0);
             this.tsEditActions.Name = "tsEditActions";
@@ -344,13 +347,31 @@
             this.btnExportObjectModel.Text = "Export object model";
             this.btnExportObjectModel.Click += new System.EventHandler(this.btnExportObjectModel_Click);
             // 
+            // btnAddFog
+            // 
+            this.btnAddFog.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Text;
+            this.btnAddFog.ImageTransparentColor = System.Drawing.Color.Magenta;
+            this.btnAddFog.Name = "btnAddFog";
+            this.btnAddFog.Size = new System.Drawing.Size(56, 19);
+            this.btnAddFog.Text = "Add Fog";
+            this.btnAddFog.Click += new System.EventHandler(this.btnAddFog_Click);
+            // 
+            // btnAdd14
+            // 
+            this.btnAdd14.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Text;
+            this.btnAdd14.ImageTransparentColor = System.Drawing.Color.Magenta;
+            this.btnAdd14.Name = "btnAdd14";
+            this.btnAdd14.Size = new System.Drawing.Size(77, 19);
+            this.btnAdd14.Text = "Add Type 14";
+            this.btnAdd14.Click += new System.EventHandler(this.btnAdd14_Click);
+            // 
             // glLevelView
             // 
             this.glLevelView.BackColor = System.Drawing.Color.Black;
             this.glLevelView.Dock = System.Windows.Forms.DockStyle.Fill;
             this.glLevelView.Location = new System.Drawing.Point(0, 25);
             this.glLevelView.Name = "glLevelView";
-            this.glLevelView.Size = new System.Drawing.Size(611, 461);
+            this.glLevelView.Size = new System.Drawing.Size(689, 461);
             this.glLevelView.TabIndex = 1;
             this.glLevelView.VSync = false;
             this.glLevelView.Load += new System.EventHandler(this.glLevelView_Load);
@@ -371,7 +392,7 @@
             this.btnExportLevelModel});
             this.tsViewActions.Location = new System.Drawing.Point(0, 0);
             this.tsViewActions.Name = "tsViewActions";
-            this.tsViewActions.Size = new System.Drawing.Size(611, 25);
+            this.tsViewActions.Size = new System.Drawing.Size(689, 25);
             this.tsViewActions.TabIndex = 0;
             this.tsViewActions.Text = "toolStrip2";
             // 
@@ -418,6 +439,7 @@
             this.btnLevelSettings,
             this.btnEditMinimap,
             this.btnEditTexAnim,
+            this.btnCLPS,
             this.toolStripSeparator2,
             this.toolStripLabel4,
             this.btnEdit3DModel,
@@ -438,7 +460,7 @@
             this.btnStarAll});
             this.tsToolBar.Location = new System.Drawing.Point(0, 0);
             this.tsToolBar.Name = "tsToolBar";
-            this.tsToolBar.Size = new System.Drawing.Size(879, 25);
+            this.tsToolBar.Size = new System.Drawing.Size(957, 25);
             this.tsToolBar.TabIndex = 1;
             this.tsToolBar.TabStop = true;
             this.tsToolBar.Text = "toolStrip1";
@@ -489,6 +511,15 @@
             this.btnEditTexAnim.Size = new System.Drawing.Size(107, 22);
             this.btnEditTexAnim.Text = "Texture animation";
             this.btnEditTexAnim.Click += new System.EventHandler(this.btnEditTexAnim_Click);
+            // 
+            // btnCLPS
+            // 
+            this.btnCLPS.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Text;
+            this.btnCLPS.ImageTransparentColor = System.Drawing.Color.Magenta;
+            this.btnCLPS.Name = "btnCLPS";
+            this.btnCLPS.Size = new System.Drawing.Size(38, 22);
+            this.btnCLPS.Text = "CLPS";
+            this.btnCLPS.Click += new System.EventHandler(this.btnCLPS_Click);
             // 
             // toolStripSeparator2
             // 
@@ -681,34 +712,25 @@
             this.slStatusLabel});
             this.ssStatusBar.Location = new System.Drawing.Point(0, 511);
             this.ssStatusBar.Name = "ssStatusBar";
-            this.ssStatusBar.Size = new System.Drawing.Size(879, 22);
+            this.ssStatusBar.Size = new System.Drawing.Size(957, 22);
             this.ssStatusBar.TabIndex = 2;
             this.ssStatusBar.Text = "statusStrip1";
             // 
             // slStatusLabel
             // 
             this.slStatusLabel.Name = "slStatusLabel";
-            this.slStatusLabel.Size = new System.Drawing.Size(864, 17);
+            this.slStatusLabel.Size = new System.Drawing.Size(942, 17);
             this.slStatusLabel.Spring = true;
             this.slStatusLabel.Text = "status!";
             this.slStatusLabel.TextAlign = System.Drawing.ContentAlignment.MiddleLeft;
             this.slStatusLabel.Paint += new System.Windows.Forms.PaintEventHandler(this.slStatusLabel_Paint);
             this.slStatusLabel.TextChanged += new System.EventHandler(this.slStatusLabel_TextChanged);
             // 
-            // btnAddFog
-            // 
-            this.btnAddFog.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Text;
-            this.btnAddFog.ImageTransparentColor = System.Drawing.Color.Magenta;
-            this.btnAddFog.Name = "btnAddFog";
-            this.btnAddFog.Size = new System.Drawing.Size(56, 19);
-            this.btnAddFog.Text = "Add Fog";
-            this.btnAddFog.Click += new System.EventHandler(this.btnAddFog_Click);
-            // 
             // LevelEditorForm
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(879, 533);
+            this.ClientSize = new System.Drawing.Size(957, 533);
             this.Controls.Add(this.ssStatusBar);
             this.Controls.Add(this.tsToolBar);
             this.Controls.Add(this.spcMainContainer);
@@ -794,6 +816,8 @@
         private System.Windows.Forms.ToolStripButton btnExportObjectModel;
         private System.Windows.Forms.ToolStripButton btnEditTexAnim;
         private System.Windows.Forms.ToolStripButton btnAddFog;
+        private System.Windows.Forms.ToolStripButton btnAdd14;
+        private System.Windows.Forms.ToolStripButton btnCLPS;
 
 
     }

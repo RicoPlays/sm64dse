@@ -35,6 +35,7 @@ namespace SM64DSe
         public const uint LEVEL_OVERLAY_SIZE = 32768;
 
         private uint ARM_BL(uint src, uint dst) { return (0xEB000000 | (((dst - src - 8) >> 2) & 0x00FFFFFF)); }
+        private uint ARM_B(uint src, uint dst) { return (0xEA000000 | (((dst - src - 8) >> 2) & 0x00FFFFFF)); }
 
         private ushort CalcCRC16(uint offset, uint len)
         {
@@ -124,6 +125,12 @@ namespace SM64DSe
 	        uint[] ovltable_size_patch = new uint[4];
             uint lvlload_addr_patch = 0, lvlload_code_patch = 0;
             uint objbank_addr_patch = 0, objbank_code_patch = 0;
+            // Music table address
+            uint music_tbl_addr = 0;
+            // Store locations of the music bytes (music table address, +1, +2) - update to point to within overlay
+            uint music_tbl_byte_1_addr = 0, music_tbl_byte_2_addr = 0, music_tbl_byte_3_addr = 0;
+            // Locations at which offsets into the music table are calculated
+            uint music_byte_1_offset = 0, music_byte_2_offset = 0, music_byte_3_offset = 0;
 
 	        switch (m_Version)
 	        {
@@ -144,6 +151,13 @@ namespace SM64DSe
 		        lvlload_code_patch = 0x2D288;
 		        objbank_addr_patch = 0x2E074;
 		        objbank_code_patch = 0x2DFAC;
+                music_tbl_addr = 0x75768;
+                music_byte_1_offset = 0x2de28;
+                music_byte_2_offset = 0x2d184;
+                music_byte_3_offset = 0x2d360;
+                music_tbl_byte_1_addr = 0x2de60;
+                music_tbl_byte_2_addr = 0x2d608;
+                music_tbl_byte_3_addr = 0x2d644;
 		        break;
 
             case Version.JAP:
@@ -163,6 +177,13 @@ namespace SM64DSe
                 lvlload_code_patch = 0x2C430;
                 objbank_addr_patch = 0x2CFCC;
                 objbank_code_patch = 0x2CF04;
+                music_tbl_addr = 0x739d8;
+                music_byte_1_offset = 0x2cd80;
+                music_byte_2_offset = 0x2c32c;
+                music_byte_3_offset = 0x2c508;
+                music_tbl_byte_1_addr = 0x2cdb8;
+                music_tbl_byte_2_addr = 0x2c7b0;
+                music_tbl_byte_3_addr = 0x2c7ec;
                 break;
 
 	        case Version.USA_v1:
@@ -182,6 +203,13 @@ namespace SM64DSe
 		        lvlload_code_patch = 0x2C15C;
 		        objbank_addr_patch = 0x2CCF4;
 		        objbank_code_patch = 0x2CC2C;
+                music_tbl_addr = 0x73434;
+                music_byte_1_offset = 0x2caa8;
+                music_byte_2_offset = 0x2c058;
+                music_byte_3_offset = 0x2c234;
+                music_tbl_byte_1_addr = 0x2cae0;
+                music_tbl_byte_2_addr = 0x2c4d8;
+                music_tbl_byte_3_addr = 0x2c514;
 		        break;
 
 	        case Version.USA_v2:
@@ -201,6 +229,13 @@ namespace SM64DSe
 		        lvlload_code_patch = 0x2C46C;
 		        objbank_addr_patch = 0x2D008;
 		        objbank_code_patch = 0x2CF40;
+                music_tbl_addr = 0x74154;
+                music_byte_1_offset = 0x2cdbc;
+                music_byte_2_offset = 0x2c368;
+                music_byte_3_offset = 0x2c544;
+                music_tbl_byte_1_addr = 0x2cdf4;
+                music_tbl_byte_2_addr = 0x2c7ec;
+                music_tbl_byte_3_addr = 0x2c828;
 		        break;
 	        }
 
@@ -473,6 +508,12 @@ namespace SM64DSe
 				        }
 			        }
 
+                    // Level music
+                    m_FileStream.Position = music_tbl_addr + (i * 3);
+                    ovl.Write8(0x7C + 0, m_BinReader.ReadByte());
+                    ovl.Write8(0x7C + 1, m_BinReader.ReadByte());
+                    ovl.Write8(0x7C + 2, m_BinReader.ReadByte());
+
 			        // misc header pieces
 			        ovl.Write32(dataoffset + 0x14, oldovl.Read32(header_offset + 0x8));
 			        ovl.Write32(dataoffset + 0x18, oldovl.Read32(header_offset + 0xC));
@@ -487,28 +528,42 @@ namespace SM64DSe
 	        // fix the level loader as to load from the new overlays
 	        m_FileStream.Position = lvlload_addr_patch;
 	        m_BinWriter.Write((uint)(lvl_start + dataoffset + 0xC));
-
+            
 	        m_FileStream.Position = lvlload_code_patch;
 	        m_BinWriter.Write((uint)0xE1A00000);
 
 	        // refill the old level header address table
 	        // to adapt it to its new usages
-	        m_FileStream.Position = levelptr_table;
-	        for (uint i = 0; i < 13; i++)
-	        {
-		        m_BinWriter.Write((uint)0xFFFFFFFF);
-		        m_BinWriter.Write((uint)0x00000000);
-		        m_BinWriter.Write((uint)0x00000000);
-	        }
-	        m_BinWriter.Write((uint)0x00000000);
-	        m_BinWriter.Write((uint)0x00000000);
+            m_FileStream.Position = levelptr_table;
+            for (uint i = 0; i < 13; i++)
+            {
+                m_BinWriter.Write((uint)0xFFFFFFFF);
+                m_BinWriter.Write((uint)0x00000000);
+                m_BinWriter.Write((uint)0x00000000);
+            }
+            m_BinWriter.Write((uint)0x00000000);
+            m_BinWriter.Write((uint)0x00000000);
 
 	        // fix the object banks thingy
 	        m_FileStream.Position = objbank_addr_patch;
 	        m_BinWriter.Write((uint)(levelptr_table + 0x0200009C));
 
 	        m_FileStream.Position = objbank_code_patch;
-	        m_BinWriter.Write((uint)0xE1A07001);
+            m_BinWriter.Write((uint)0xE1A07001);
+
+            // Patch music code to load from overlays
+            m_FileStream.Position = music_byte_1_offset;// Offset into table generated
+            m_BinWriter.Write((uint)0xe3a03000);//MOV R3, #0    ;Set offset to 0
+            m_FileStream.Position = music_tbl_byte_1_addr;// Stores location of music table byte 1
+            m_BinWriter.Write((uint)(lvl_start + 0x7C));// Write location in overlay of music data
+            m_FileStream.Position = music_byte_2_offset;
+            m_BinWriter.Write((uint)0xe3a02001);//MOV R2, #1    ;Set offset to 1
+            m_FileStream.Position = music_tbl_byte_2_addr;
+            m_BinWriter.Write((uint)(lvl_start + 0x7C));
+            m_FileStream.Position = music_byte_3_offset;
+            m_BinWriter.Write((uint)0xe3a01002);//MOV R1, #2    ;Set offset to 0
+            m_FileStream.Position = music_tbl_byte_3_addr;
+            m_BinWriter.Write((uint)(lvl_start + 0x7C));
 
 	        // phew! what a goddamn long thing
             lazyman.ReportProgress(299);

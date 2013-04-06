@@ -215,7 +215,7 @@ namespace SM64DSe
             btnEditLevel.Enabled = false;
             btnEditTexts.Enabled = false;
             btnKCLEditor.Enabled = false;
-
+            
             if (ofdOpenFile.ShowDialog(this) == DialogResult.OK)
                 LoadROM(ofdOpenFile.FileName);
         }
@@ -300,7 +300,7 @@ namespace SM64DSe
                 "\n" +
                 Program.AppTitle + " is free software. If you paid for it, notify Mega-Mario about it.\n" +
                 "\n" +
-                "Visit Kuribo64's site (http://kuribo64.cjb.net/) for more details.";
+                "Visit Kuribo64's site (http://kuribo64.net/) for more details.";
 
             // for the lulz
             if (Program.AppVersion.ToLowerInvariant().Contains("private beta"))

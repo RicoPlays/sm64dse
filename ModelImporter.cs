@@ -1214,6 +1214,19 @@ namespace SM64DSe
             return ret;
         }
 
+        private void addWhiteMat()
+        {
+            MaterialDef mat = new MaterialDef();
+            mat.m_Faces = new List<FaceDef>();
+            mat.m_DiffuseColor = Color.White;
+            mat.m_Opacity = 255;
+            mat.m_HasTextures = false;
+            mat.m_DiffuseMapName = "";
+            mat.m_DiffuseMapID = 0;
+            mat.m_DiffuseMapSize = new Vector2(0f, 0f);
+            m_Materials.Add("default_white", mat);
+        }
+
 
         private void OBJ_LoadMTL(string filename)
         {
@@ -1225,21 +1238,15 @@ namespace SM64DSe
             catch
             {
                 MessageBox.Show("Material library not found:\n\n" + filename + "\n\nA default white material will be used instead.");
-                MaterialDef mat = new MaterialDef();
-                mat.m_Faces = new List<FaceDef>();
-                mat.m_DiffuseColor = Color.White;
-                mat.m_Opacity = 255;
-                mat.m_HasTextures = false;
-                mat.m_DiffuseMapName = "";
-                mat.m_DiffuseMapID = 0;
-                mat.m_DiffuseMapSize = new Vector2(0f, 0f);
-                m_Materials.Add("default_white", mat);
+                addWhiteMat();
                 return;
             }
             StreamReader sr = new StreamReader(fs);
 
             string curmaterial = "";
             CultureInfo usahax = new CultureInfo("en-US");
+
+            string imagesNotFound = "";
 
             string curline;
             while ((curline = sr.ReadLine()) != null)
@@ -1315,71 +1322,82 @@ namespace SM64DSe
                     case "mapKd": // diffuse map (texture)
                         {
                             string texname = curline.Substring(parts[0].Length + 1).Trim();
-                            Bitmap tex = new Bitmap(m_ModelPath + texname);
-
-                            int width = 8, height = 8;
-                            while (width < tex.Width) width *= 2;
-                            while (height < tex.Height) height *= 2;
-
-                            // cheap resizing for textures whose dimensions aren't power-of-two
-                            if ((width != tex.Width) || (height != tex.Height))
+                            Bitmap tex;
+                            try
                             {
-                                Bitmap newbmp = new Bitmap(width, height);
-                                Graphics g = Graphics.FromImage(newbmp);
-                                g.DrawImage(tex, new Rectangle(0, 0, width, height));
-                                tex = newbmp;
-                            }
+                                tex = new Bitmap(m_ModelPath + texname);
 
-                            MaterialDef mat = (MaterialDef)m_Materials[curmaterial];
-                            mat.m_HasTextures = true;
+                                int width = 8, height = 8;
+                                while (width < tex.Width) width *= 2;
+                                while (height < tex.Height) height *= 2;
 
-                            byte[] map = new byte[tex.Width * tex.Height * 4];
-                            for (int y = 0; y < tex.Height; y++)
-                            {
-                                for (int x = 0; x < tex.Width; x++)
+                                // cheap resizing for textures whose dimensions aren't power-of-two
+                                if ((width != tex.Width) || (height != tex.Height))
                                 {
-                                    Color pixel = tex.GetPixel(x, y);
-                                    int pos = ((y * tex.Width) + x) * 4;
-
-                                    map[pos] = pixel.B;
-                                    map[pos + 1] = pixel.G;
-                                    map[pos + 2] = pixel.R;
-                                    map[pos + 3] = pixel.A;
+                                    Bitmap newbmp = new Bitmap(width, height);
+                                    Graphics g = Graphics.FromImage(newbmp);
+                                    g.DrawImage(tex, new Rectangle(0, 0, width, height));
+                                    tex = newbmp;
                                 }
-                            }
-                            //System.Drawing.Imaging.BitmapData lol = tex.LockBits(new Rectangle(0, 0, tex.Width, tex.Height), System.Drawing.Imaging.ImageLockMode.ReadOnly, System.Drawing.Imaging.PixelFormat.Format32bppArgb);
-                            //System.Runtime.InteropServices.Marshal.Copy(lol.Scan0, map, 0, tex.Width * tex.Height * 4);
 
-                            string imghash = HexString(m_MD5.ComputeHash(map));
-                            if (m_Textures.ContainsKey(imghash))
+                                MaterialDef mat = (MaterialDef)m_Materials[curmaterial];
+                                mat.m_HasTextures = true;
+
+                                byte[] map = new byte[tex.Width * tex.Height * 4];
+                                for (int y = 0; y < tex.Height; y++)
+                                {
+                                    for (int x = 0; x < tex.Width; x++)
+                                    {
+                                        Color pixel = tex.GetPixel(x, y);
+                                        int pos = ((y * tex.Width) + x) * 4;
+
+                                        map[pos] = pixel.B;
+                                        map[pos + 1] = pixel.G;
+                                        map[pos + 2] = pixel.R;
+                                        map[pos + 3] = pixel.A;
+                                    }
+                                }
+                                //System.Drawing.Imaging.BitmapData lol = tex.LockBits(new Rectangle(0, 0, tex.Width, tex.Height), System.Drawing.Imaging.ImageLockMode.ReadOnly, System.Drawing.Imaging.PixelFormat.Format32bppArgb);
+                                //System.Runtime.InteropServices.Marshal.Copy(lol.Scan0, map, 0, tex.Width * tex.Height * 4);
+
+                                string imghash = HexString(m_MD5.ComputeHash(map));
+                                if (m_Textures.ContainsKey(imghash))
+                                {
+                                    MaterialDef mat2 = m_Textures[imghash];
+                                    mat.m_DiffuseMapName = mat2.m_DiffuseMapName;
+                                    mat.m_DiffuseMapID = mat2.m_DiffuseMapID;
+                                    mat.m_DiffuseMapSize = mat2.m_DiffuseMapSize;
+                                    break;
+                                }
+
+                                mat.m_DiffuseMapName = texname;
+                                m_Textures.Add(imghash, mat);
+
+                                mat.m_DiffuseMapSize.X = tex.Width;
+                                mat.m_DiffuseMapSize.Y = tex.Height;
+
+                                mat.m_DiffuseMapID = GL.GenTexture();
+                                GL.BindTexture(TextureTarget.Texture2D, mat.m_DiffuseMapID);
+                                GL.TexImage2D(TextureTarget.Texture2D, 0, PixelInternalFormat.Four, tex.Width, tex.Height,
+                                    0, PixelFormat.Bgra, PixelType.UnsignedByte, map);
+
+                                GL.TexParameter(TextureTarget.Texture2D, TextureParameterName.TextureMinFilter, (int)TextureMinFilter.Nearest);
+                                GL.TexParameter(TextureTarget.Texture2D, TextureParameterName.TextureMagFilter, (int)TextureMagFilter.Nearest);
+
+                                GL.TexParameter(TextureTarget.Texture2D, TextureParameterName.TextureWrapS, (int)TextureWrapMode.Repeat);
+                                GL.TexParameter(TextureTarget.Texture2D, TextureParameterName.TextureWrapT, (int)TextureWrapMode.Repeat);
+                            }
+                            catch
                             {
-                                MaterialDef mat2 = m_Textures[imghash];
-                                mat.m_DiffuseMapName = mat2.m_DiffuseMapName;
-                                mat.m_DiffuseMapID = mat2.m_DiffuseMapID;
-                                mat.m_DiffuseMapSize = mat2.m_DiffuseMapSize;
-                                break;
+                                imagesNotFound += m_ModelPath + texname + "\n";
                             }
-
-                            mat.m_DiffuseMapName = texname;
-                            m_Textures.Add(imghash, mat);
-
-                            mat.m_DiffuseMapSize.X = tex.Width;
-                            mat.m_DiffuseMapSize.Y = tex.Height;
-
-                            mat.m_DiffuseMapID = GL.GenTexture();
-                            GL.BindTexture(TextureTarget.Texture2D, mat.m_DiffuseMapID);
-                            GL.TexImage2D(TextureTarget.Texture2D, 0, PixelInternalFormat.Four, tex.Width, tex.Height,
-                                0, PixelFormat.Bgra, PixelType.UnsignedByte, map);
-
-                            GL.TexParameter(TextureTarget.Texture2D, TextureParameterName.TextureMinFilter, (int)TextureMinFilter.Nearest);
-                            GL.TexParameter(TextureTarget.Texture2D, TextureParameterName.TextureMagFilter, (int)TextureMagFilter.Nearest);
-
-                            GL.TexParameter(TextureTarget.Texture2D, TextureParameterName.TextureWrapS, (int)TextureWrapMode.Repeat);
-                            GL.TexParameter(TextureTarget.Texture2D, TextureParameterName.TextureWrapT, (int)TextureWrapMode.Repeat);
+                            break;
                         }
-                        break;
                 }
             }
+
+            if (!imagesNotFound.Equals(""))
+                MessageBox.Show("The following images were not found:\n\n" + imagesNotFound);
 
             sr.Close();
         }
@@ -1470,14 +1488,7 @@ namespace SM64DSe
                                 {
                                     MessageBox.Show("No material library has been specified, yet faces are still set to use \n" +
                                         "a material. A default white material will be used instead.");
-                                    mat.m_Faces = new List<FaceDef>();
-                                    mat.m_DiffuseColor = Color.White;
-                                    mat.m_Opacity = 255;
-                                    mat.m_HasTextures = false;
-                                    mat.m_DiffuseMapName = "";
-                                    mat.m_DiffuseMapID = 0;
-                                    mat.m_DiffuseMapSize = new Vector2(0f, 0f);
-                                    m_Materials.Add("default_white", mat);
+                                    addWhiteMat();
                                 }
                                 mat = (MaterialDef)m_Materials[curmaterial];
                             }

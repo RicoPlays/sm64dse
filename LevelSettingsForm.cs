@@ -85,6 +85,10 @@ namespace SM64DSe
             }
 
             cbxBackground.SelectedIndex = m_LevelSettings.Background;
+
+            txtMusicByte01.Text = m_LevelSettings.m_Overlay.Read8(0x7C).ToString();
+            txtMusicByte02.Text = m_LevelSettings.m_Overlay.Read8(0x7D).ToString();
+            txtMusicByte03.Text = m_LevelSettings.m_Overlay.Read8(0x7E).ToString();
         }
 
         private void cbxBankX_MeasureItem(object sender, MeasureItemEventArgs e)
@@ -143,6 +147,10 @@ namespace SM64DSe
             m_LevelSettings.ObjectBanks[5] = (uint)cbxBank5.SelectedIndex;
             m_LevelSettings.ObjectBanks[6] = (uint)cbxBank6.SelectedIndex;
             m_LevelSettings.ObjectBanks[7] = (uint)cbxBank7.SelectedIndex;
+
+            m_LevelSettings.m_Overlay.Write8((uint)0x7C, (byte)int.Parse(txtMusicByte01.Text));
+            m_LevelSettings.m_Overlay.Write8((uint)0x7D, (byte)int.Parse(txtMusicByte02.Text));
+            m_LevelSettings.m_Overlay.Write8((uint)0x7E, (byte)int.Parse(txtMusicByte03.Text));
         }
 
         private void cbxBackground_SelectedIndexChanged(object sender, EventArgs e)

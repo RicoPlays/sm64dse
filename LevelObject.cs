@@ -1061,6 +1061,70 @@ namespace SM64DSe
         }
     }
 
+    public class Type14Object : LevelObject
+    {
+        public Type14Object(NitroOverlay ovl, uint offset, int num, int layer, int area)
+            : base(ovl, offset, layer)
+        {
+            m_Area = area;
+            m_Type = 14;
+            m_UniqueID = (uint)(0x50000000 | num);
+
+            Parameters = new ushort[4];
+            Parameters[0] = m_Overlay.Read8(m_Offset);
+            Parameters[1] = m_Overlay.Read8(m_Offset + 1);
+            Parameters[2] = m_Overlay.Read8(m_Offset + 2);
+            Parameters[3] = m_Overlay.Read8(m_Offset + 3);
+
+            m_Renderer = new ColorCubeRenderer(Color.FromArgb(255, 255, 0), Color.FromArgb(64, 64, 0), true);
+            m_Properties = new PropertyTable();
+            GenerateProperties();
+        }
+
+        public override string GetDescription()
+        {
+            return "Unknown Type 14 Object";
+        }
+
+        public override void GenerateProperties()
+        {
+            m_Properties.Properties.Clear();
+
+            m_Properties.Properties.Add(new PropertySpec("Parameter 1", typeof(float), "Specific", "It's a mystery...", (float)Parameters[0], "", typeof(FloatTypeConverter)));
+            m_Properties.Properties.Add(new PropertySpec("Parameter 2", typeof(float), "Specific", "It's a mystery...", (float)Parameters[1], "", typeof(FloatTypeConverter)));
+            m_Properties.Properties.Add(new PropertySpec("Parameter 3", typeof(float), "Specific", "It's a mystery...", (float)Parameters[2], "", typeof(FloatTypeConverter)));
+            m_Properties.Properties.Add(new PropertySpec("Parameter 4", typeof(float), "Specific", "It's a mystery...", (float)Parameters[3], "", typeof(FloatTypeConverter)));
+
+            m_Properties["Parameter 1"] = (float)Parameters[0];
+            m_Properties["Parameter 2"] = (float)Parameters[1];
+            m_Properties["Parameter 3"] = (float)Parameters[2];
+            m_Properties["Parameter 4"] = (float)Parameters[3];
+        }
+
+        public override bool SupportsRotation() { return false; }
+
+        public override int SetProperty(string field, object newval)
+        {
+            switch (field)
+            {
+                case "Parameter 1": Parameters[0] = (ushort)(float)newval; break;
+                case "Parameter 2": Parameters[1] = (ushort)(float)newval; break;
+                case "Parameter 3": Parameters[2] = (ushort)(float)newval; break;
+                case "Parameter 4": Parameters[3] = (ushort)(float)newval; break;
+            }
+
+            return 0;
+        }
+
+        public override void SaveChanges()
+        {
+            m_Overlay.Write8(m_Offset, (byte)Parameters[0]);
+            m_Overlay.Write8(m_Offset + 1, (byte)Parameters[1]);
+            m_Overlay.Write8(m_Offset + 2, (byte)Parameters[2]);
+            m_Overlay.Write8(m_Offset + 3, (byte)Parameters[3]);
+        }
+    }
+
 
     public class LevelTexAnim
     {
