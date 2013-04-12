@@ -31,6 +31,7 @@
             System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(TextEditorForm));
             this.splitContainer1 = new System.Windows.Forms.SplitContainer();
             this.lbxMsgList = new System.Windows.Forms.ListBox();
+            this.btnSaveAll = new System.Windows.Forms.Button();
             this.btnHelp = new System.Windows.Forms.Button();
             this.label3 = new System.Windows.Forms.Label();
             this.cmbLanguages = new System.Windows.Forms.ComboBox();
@@ -47,9 +48,12 @@
             this.btnStarEmpty = new System.Windows.Forms.Button();
             this.btnStarFull = new System.Windows.Forms.Button();
             this.label1 = new System.Windows.Forms.Label();
-            this.btnSave = new System.Windows.Forms.Button();
+            this.btnUpdateString = new System.Windows.Forms.Button();
             this.txtEdit = new System.Windows.Forms.TextBox();
             this.tbxMsgPreview = new System.Windows.Forms.TextBox();
+            this.label4 = new System.Windows.Forms.Label();
+            this.label5 = new System.Windows.Forms.Label();
+            ((System.ComponentModel.ISupportInitialize)(this.splitContainer1)).BeginInit();
             this.splitContainer1.Panel1.SuspendLayout();
             this.splitContainer1.Panel2.SuspendLayout();
             this.splitContainer1.SuspendLayout();
@@ -67,6 +71,9 @@
             // 
             // splitContainer1.Panel2
             // 
+            this.splitContainer1.Panel2.Controls.Add(this.label5);
+            this.splitContainer1.Panel2.Controls.Add(this.label4);
+            this.splitContainer1.Panel2.Controls.Add(this.btnSaveAll);
             this.splitContainer1.Panel2.Controls.Add(this.btnHelp);
             this.splitContainer1.Panel2.Controls.Add(this.label3);
             this.splitContainer1.Panel2.Controls.Add(this.cmbLanguages);
@@ -83,7 +90,7 @@
             this.splitContainer1.Panel2.Controls.Add(this.btnStarEmpty);
             this.splitContainer1.Panel2.Controls.Add(this.btnStarFull);
             this.splitContainer1.Panel2.Controls.Add(this.label1);
-            this.splitContainer1.Panel2.Controls.Add(this.btnSave);
+            this.splitContainer1.Panel2.Controls.Add(this.btnUpdateString);
             this.splitContainer1.Panel2.Controls.Add(this.txtEdit);
             this.splitContainer1.Panel2.Controls.Add(this.tbxMsgPreview);
             this.splitContainer1.Size = new System.Drawing.Size(678, 515);
@@ -96,9 +103,19 @@
             this.lbxMsgList.FormattingEnabled = true;
             this.lbxMsgList.Location = new System.Drawing.Point(0, 0);
             this.lbxMsgList.Name = "lbxMsgList";
-            this.lbxMsgList.Size = new System.Drawing.Size(226, 511);
+            this.lbxMsgList.Size = new System.Drawing.Size(226, 515);
             this.lbxMsgList.TabIndex = 0;
             this.lbxMsgList.SelectedIndexChanged += new System.EventHandler(this.lbxMsgList_SelectedIndexChanged);
+            // 
+            // btnSaveAll
+            // 
+            this.btnSaveAll.Location = new System.Drawing.Point(3, 480);
+            this.btnSaveAll.Name = "btnSaveAll";
+            this.btnSaveAll.Size = new System.Drawing.Size(103, 23);
+            this.btnSaveAll.TabIndex = 20;
+            this.btnSaveAll.Text = "Save Changes";
+            this.btnSaveAll.UseVisualStyleBackColor = true;
+            this.btnSaveAll.Click += new System.EventHandler(this.btnSaveAll_Click);
             // 
             // btnHelp
             // 
@@ -260,15 +277,15 @@
             this.label1.TabIndex = 3;
             this.label1.Text = "Enter your edited text here:";
             // 
-            // btnSave
+            // btnUpdateString
             // 
-            this.btnSave.Location = new System.Drawing.Point(0, 450);
-            this.btnSave.Name = "btnSave";
-            this.btnSave.Size = new System.Drawing.Size(101, 34);
-            this.btnSave.TabIndex = 2;
-            this.btnSave.Text = "Save";
-            this.btnSave.UseVisualStyleBackColor = true;
-            this.btnSave.Click += new System.EventHandler(this.btnSave_Click);
+            this.btnUpdateString.Location = new System.Drawing.Point(3, 449);
+            this.btnUpdateString.Name = "btnUpdateString";
+            this.btnUpdateString.Size = new System.Drawing.Size(103, 23);
+            this.btnUpdateString.TabIndex = 2;
+            this.btnUpdateString.Text = "Update String";
+            this.btnUpdateString.UseVisualStyleBackColor = true;
+            this.btnUpdateString.Click += new System.EventHandler(this.btnUpdateString_Click);
             // 
             // txtEdit
             // 
@@ -289,6 +306,24 @@
             this.tbxMsgPreview.Size = new System.Drawing.Size(448, 243);
             this.tbxMsgPreview.TabIndex = 0;
             // 
+            // label4
+            // 
+            this.label4.AutoSize = true;
+            this.label4.Location = new System.Drawing.Point(112, 454);
+            this.label4.Name = "label4";
+            this.label4.Size = new System.Drawing.Size(268, 13);
+            this.label4.TabIndex = 21;
+            this.label4.Text = "Click this when you\'ve finished editing the current entry.";
+            // 
+            // label5
+            // 
+            this.label5.AutoSize = true;
+            this.label5.Location = new System.Drawing.Point(112, 485);
+            this.label5.Name = "label5";
+            this.label5.Size = new System.Drawing.Size(207, 13);
+            this.label5.TabIndex = 22;
+            this.label5.Text = "Click this to permanently save all changes.";
+            // 
             // TextEditorForm
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
@@ -302,6 +337,7 @@
             this.splitContainer1.Panel1.ResumeLayout(false);
             this.splitContainer1.Panel2.ResumeLayout(false);
             this.splitContainer1.Panel2.PerformLayout();
+            ((System.ComponentModel.ISupportInitialize)(this.splitContainer1)).EndInit();
             this.splitContainer1.ResumeLayout(false);
             this.ResumeLayout(false);
 
@@ -313,7 +349,7 @@
         private System.Windows.Forms.ListBox lbxMsgList;
         private System.Windows.Forms.TextBox tbxMsgPreview;
         private System.Windows.Forms.TextBox txtEdit;
-        private System.Windows.Forms.Button btnSave;
+        private System.Windows.Forms.Button btnUpdateString;
         private System.Windows.Forms.Label label1;
         private System.Windows.Forms.Button btnStarEmpty;
         private System.Windows.Forms.Button btnStarFull;
@@ -330,5 +366,8 @@
         private System.Windows.Forms.Label label3;
         private System.Windows.Forms.ComboBox cmbLanguages;
         private System.Windows.Forms.Button btnHelp;
+        private System.Windows.Forms.Button btnSaveAll;
+        private System.Windows.Forms.Label label5;
+        private System.Windows.Forms.Label label4;
     }
 }
