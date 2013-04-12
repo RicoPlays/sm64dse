@@ -262,6 +262,7 @@ namespace SM64DSe
         {
             btnEditLevel.Enabled = (lbxLevels.SelectedIndex != -1);
             btnKCLEditor.Enabled = (lbxLevels.SelectedIndex != -1);
+            btnEditTexts.Enabled = true;
         }
 
         private void btnDumpObjInfo_Click(object sender, EventArgs e)
