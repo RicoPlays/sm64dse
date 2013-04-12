@@ -172,10 +172,11 @@ namespace SM64DSe
             Position.Z = (float)((short)m_Overlay.Read16(m_Offset + 0x6)) / 1000f;
             YRotation = ((float)((short)m_Overlay.Read16(m_Offset + 0xA)) / 4096f) * 22.5f;
 
-            Parameters = new ushort[3];
-            Parameters[0] = m_Overlay.Read16(m_Offset + 0xE);
-            Parameters[1] = m_Overlay.Read16(m_Offset + 0x8);
-            Parameters[2] = m_Overlay.Read16(m_Offset + 0xC);
+            Parameters = new ushort[4];
+            Parameters[0] = m_Overlay.Read8(m_Offset + 0xF);
+            Parameters[1] = m_Overlay.Read8(m_Offset + 0xE);
+            Parameters[2] = m_Overlay.Read16(m_Offset + 0x8);
+            Parameters[3] = m_Overlay.Read16(m_Offset + 0xC);
 
             m_Renderer = ObjectRenderer.FromLevelObject(this);
            // m_PParams = new Hashtable();
@@ -213,8 +214,9 @@ namespace SM64DSe
             }*/
 
             m_Properties.Properties.Add(new PropertySpec("Parameter 1", typeof(ushort), "Object-specific (raw)", "", Parameters[0], "", typeof(HexNumberTypeConverter)));
-            m_Properties.Properties.Add(new PropertySpec("Parameter 2", typeof(ushort), "Object-specific (raw)", "", Parameters[1], "", typeof(HexNumberTypeConverter)));
-            m_Properties.Properties.Add(new PropertySpec("Parameter 3", typeof(ushort), "Object-specific (raw)", "", Parameters[2], "", typeof(HexNumberTypeConverter)));
+            m_Properties.Properties.Add(new PropertySpec("Parameter 2", typeof(ushort), "Object-specific (raw)", "", Parameters[2], "", typeof(HexNumberTypeConverter)));
+            m_Properties.Properties.Add(new PropertySpec("Parameter 3", typeof(ushort), "Object-specific (raw)", "", Parameters[3], "", typeof(HexNumberTypeConverter)));
+            m_Properties.Properties.Add(new PropertySpec("Parameter 4", typeof(ushort), "Object-specific (raw)", "", Parameters[1], "", typeof(HexNumberTypeConverter)));
 
             m_Properties["Star"] = m_Layer;
             m_Properties["Area"] = m_Area;
@@ -224,8 +226,9 @@ namespace SM64DSe
             m_Properties["Z position"] = Position.Z;
             m_Properties["Y rotation"] = YRotation;
             m_Properties["Parameter 1"] = Parameters[0];
-            m_Properties["Parameter 2"] = Parameters[1];
-            m_Properties["Parameter 3"] = Parameters[2];
+            m_Properties["Parameter 2"] = Parameters[2];
+            m_Properties["Parameter 3"] = Parameters[3];
+            m_Properties["Parameter 4"] = Parameters[1];
         }
 
         public override int SetProperty(string field, object newval)
@@ -256,8 +259,9 @@ namespace SM64DSe
                     case "Z position": Position.Z = (float)newval; break;
                     case "Y rotation": YRotation = (float)newval; break;
                     case "Parameter 1": Parameters[0] = (ushort)newval; break;
-                    case "Parameter 2": Parameters[1] = (ushort)newval; break;
-                    case "Parameter 3": Parameters[2] = (ushort)newval; break;
+                    case "Parameter 2": Parameters[2] = (ushort)newval; break;
+                    case "Parameter 3": Parameters[3] = (ushort)newval; break;
+                    case "Parameter 4": Parameters[1] = (ushort)newval; break;
                 }
 
                 if ((field == "Object ID") || (field.IndexOf("Parameter ") != -1))
@@ -282,9 +286,10 @@ namespace SM64DSe
             m_Overlay.Write16(m_Offset + 0x6, (ushort)((short)(Position.Z * 1000f)));
             m_Overlay.Write16(m_Offset + 0xA, (ushort)((short)((YRotation / 22.5f) * 4096f)));
 
-            m_Overlay.Write16(m_Offset + 0xE, Parameters[0]);
-            m_Overlay.Write16(m_Offset + 0x8, Parameters[1]);
-            m_Overlay.Write16(m_Offset + 0xC, Parameters[2]);
+            m_Overlay.Write8(m_Offset + 0xF, (byte)Parameters[0]);
+            m_Overlay.Write8(m_Offset + 0xE, (byte)Parameters[1]);
+            m_Overlay.Write16(m_Offset + 0x8, Parameters[2]);
+            m_Overlay.Write16(m_Offset + 0xC, Parameters[3]);
         }
     }
 
@@ -671,35 +676,64 @@ namespace SM64DSe
 
     public class PathPointObject : LevelObject
     {
-        public PathPointObject(NitroOverlay ovl, uint offset, int num)
+        public PathPointObject(NitroOverlay ovl, uint offset, int num/*, int parentPath*/)
             : base(ovl, offset, 0)
         {
             m_UniqueID = (uint)(0x30000000 | num);
             m_Type = 2;
+            //this.pathNodeID = pathNodeID;
+            //if (pathNodeID > lastNodeID)
+            //    lastNodeID = pathNodeID;
+            //this.parentPath = parentPath;
 
-            //ID = m_Overlay.Read16(m_Offset);
             Position.X = (float)((short)m_Overlay.Read16(m_Offset)) / 1000f;
             Position.Y = (float)((short)m_Overlay.Read16(m_Offset + 0x2)) / 1000f;
             Position.Z = (float)((short)m_Overlay.Read16(m_Offset + 0x4)) / 1000f;
-            YRotation = 0.0f;
 
-            Parameters = new ushort[1];
-            // Parameters[0] = (ushort)(idparam >> 9);
-
-            m_Renderer = new ColorCubeRenderer(Color.FromArgb(0, 255, 255), Color.FromArgb(0, 64, 64), false);
+            m_Renderer = new ColourArrowRenderer(Color.FromArgb(0, 255, 255), Color.FromArgb(0, 64, 64), false);
+            m_Properties = new PropertyTable();
+            GenerateProperties();
         }
+        //public int pathNodeID;
+        public int parentPath;
+        //public static int lastNodeID = -1;
 
         public override string GetDescription()
         {
             return "PathPointObject";
         }
 
+        public override bool SupportsRotation() { return false; }
+
+        public override void GenerateProperties()
+        {
+            m_Properties.Properties.Clear();
+
+            m_Properties.Properties.Add(new PropertySpec("X position", typeof(float), "General", "The view's position along the X axis.", Position.X, "", typeof(FloatTypeConverter)));
+            m_Properties.Properties.Add(new PropertySpec("Y position", typeof(float), "General", "The view's position along the Y axis.", Position.Y, "", typeof(FloatTypeConverter)));
+            m_Properties.Properties.Add(new PropertySpec("Z position", typeof(float), "General", "The view's position along the Z axis.", Position.Z, "", typeof(FloatTypeConverter)));
+            
+            m_Properties["X position"] = Position.X;
+            m_Properties["Y position"] = Position.Y;
+            m_Properties["Z position"] = Position.Z;
+        }
+
+        public override int SetProperty(string field, object newval)
+        {
+            switch (field)
+            {
+                case "X position": Position.X = (float)newval; break;
+                case "Y position": Position.Y = (float)newval; break;
+                case "Z position": Position.Z = (float)newval; break;
+            }
+            return 0;
+        }
+
         public override void SaveChanges()
         {
-            //  m_Overlay.Write16(m_Offset, ID);
-            //  m_Overlay.Write16(m_Offset + 0x2, (ushort)((short)(Position.X * 1000.0f)));
-            // m_Overlay.Write16(m_Offset + 0x4, (ushort)((short)(Position.Y * 1000.0f)));
-            // m_Overlay.Write16(m_Offset + 0x6, (ushort)((short)(Position.Z * 1000.0f)));
+            m_Overlay.Write16(m_Offset + 0x0, (ushort)((short)(Position.X * 1000.0f)));
+            m_Overlay.Write16(m_Offset + 0x2, (ushort)((short)(Position.Y * 1000.0f)));
+            m_Overlay.Write16(m_Offset + 0x4, (ushort)((short)(Position.Z * 1000.0f)));
         }
     }
 
@@ -710,19 +744,63 @@ namespace SM64DSe
         {
             m_UniqueID = (uint)(0x30000000 | num);
             m_Type = 3;
+
+            Parameters = new ushort[5];
+            Parameters[0] = m_Overlay.Read16(m_Offset);
+            Parameters[1] = (ushort)m_Overlay.Read8(m_Offset + 0x2);
+            Parameters[2] = (ushort)m_Overlay.Read8(m_Offset + 0x3);
+            Parameters[3] = (ushort)m_Overlay.Read8(m_Offset + 0x4);
+            Parameters[4] = (ushort)m_Overlay.Read8(m_Offset + 0x5);
+
+            m_Properties = new PropertyTable();
+            GenerateProperties();
         }
 
         public override string GetDescription()
         {
-            return "PathObject lol";
+            return "PathObject";
+        }
+
+        public override void GenerateProperties()
+        {
+            m_Properties.Properties.Clear();
+
+            m_Properties.Properties.Add(new PropertySpec("Start Node", typeof(float), "General", "Index of starting node.", (float)Parameters[0], "", typeof(FloatTypeConverter)));
+            m_Properties.Properties.Add(new PropertySpec("Length", typeof(float), "General", "Number of nodes in path.", (float)Parameters[1], "", typeof(FloatTypeConverter)));
+            m_Properties.Properties.Add(new PropertySpec("Parameter 3", typeof(float), "General", "Unknown", (float)Parameters[2], "", typeof(FloatTypeConverter)));
+            m_Properties.Properties.Add(new PropertySpec("Parameter 4", typeof(float), "General", "Unknown", (float)Parameters[3], "", typeof(FloatTypeConverter)));
+            m_Properties.Properties.Add(new PropertySpec("Parameter 5", typeof(float), "General", "Unknown", (float)Parameters[4], "", typeof(FloatTypeConverter)));
+
+            m_Properties["Start Node"] = (float)Parameters[0];
+            m_Properties["Length"] = (float)Parameters[1];
+            m_Properties["Parameter 3"] = (float)Parameters[2];
+            m_Properties["Parameter 4"] = (float)Parameters[3];
+            m_Properties["Parameter 5"] = (float)Parameters[4];
+        }
+
+        public override bool SupportsRotation() { return false; }
+
+        public override int SetProperty(string field, object newval)
+        {
+            switch (field)
+            {
+                case "Start Node": Parameters[0] = (ushort)(float)newval; break;
+                case "Length": Parameters[1] = (ushort)(float)newval; break;
+                case "Parameter 3": Parameters[2] = (ushort)(float)newval; break;
+                case "Parameter 4": Parameters[3] = (ushort)(float)newval; break;
+                case "Parameter 5": Parameters[4] = (ushort)(float)newval; break;
+            }
+
+            return 0;
         }
 
         public override void SaveChanges()
         {
-            //  m_Overlay.Write16(m_Offset, ID);
-            //  m_Overlay.Write16(m_Offset + 0x2, (ushort)((short)(Position.X * 1000.0f)));
-            // m_Overlay.Write16(m_Offset + 0x4, (ushort)((short)(Position.Y * 1000.0f)));
-            // m_Overlay.Write16(m_Offset + 0x6, (ushort)((short)(Position.Z * 1000.0f)));
+            m_Overlay.Write16(m_Offset + 0x00, Parameters[0]);
+            m_Overlay.Write8(m_Offset + 0x02, (byte)Parameters[1]);
+            m_Overlay.Write8(m_Offset + 0x03, (byte)Parameters[2]);
+            m_Overlay.Write8(m_Offset + 0x04, (byte)Parameters[3]);
+            m_Overlay.Write8(m_Offset + 0x05, (byte)Parameters[4]);
         }
 
         public override void Render(RenderMode mode) { }
@@ -821,8 +899,9 @@ namespace SM64DSe
             Position.Z = (float)((short)m_Overlay.Read16(m_Offset + 0x4)) / 1000.0f;
             YRotation = 0.0f;
 
-            Parameters = new ushort[1];
+            Parameters = new ushort[2];
             Parameters[0] = m_Overlay.Read8(m_Offset + 0x6);
+            Parameters[1] = m_Overlay.Read8(m_Offset + 0x07);
 
             m_Renderer = new ColorCubeRenderer(Color.FromArgb(255, 0, 255), Color.FromArgb(64, 0, 64), false);
             m_Properties = new PropertyTable();
@@ -841,12 +920,14 @@ namespace SM64DSe
             m_Properties.Properties.Add(new PropertySpec("X position", typeof(float), "General", "The teleport source's position along the X axis.", Position.X, "", typeof(FloatTypeConverter)));
             m_Properties.Properties.Add(new PropertySpec("Y position", typeof(float), "General", "The teleport source's position along the Y axis.", Position.Y, "", typeof(FloatTypeConverter)));
             m_Properties.Properties.Add(new PropertySpec("Z position", typeof(float), "General", "The teleport source's position along the Z axis.", Position.Z, "", typeof(FloatTypeConverter)));
-            m_Properties.Properties.Add(new PropertySpec("Parameter", typeof(ushort), "Specific", "Purpose unknown.", Parameters[0], "", typeof(HexNumberTypeConverter)));
+            m_Properties.Properties.Add(new PropertySpec("Parameter 1", typeof(ushort), "Specific", "Purpose unknown.", Parameters[0], "", typeof(HexNumberTypeConverter)));
+            m_Properties.Properties.Add(new PropertySpec("Parameter 2", typeof(ushort), "Specific", "Teleport destination index (0 based) * 10.", Parameters[1], "", typeof(HexNumberTypeConverter)));
 
             m_Properties["X position"] = Position.X;
             m_Properties["Y position"] = Position.Y;
             m_Properties["Z position"] = Position.Z;
-            m_Properties["Parameter"] = Parameters[0];
+            m_Properties["Parameter 1"] = Parameters[0];
+            m_Properties["Parameter 2"] = Parameters[1];
         }
 
         public override int SetProperty(string field, object newval)
@@ -857,7 +938,8 @@ namespace SM64DSe
                 case "Y position": Position.Y = (float)newval; return 1;
                 case "Z position": Position.Z = (float)newval; return 1;
 
-                case "Parameter": Parameters[0] = (ushort)newval; return 0;
+                case "Parameter 1": Parameters[0] = (ushort)newval; return 0;
+                case "Parameter 2": Parameters[1] = (ushort)newval; return 0;
             }
 
             return 0;
@@ -869,7 +951,8 @@ namespace SM64DSe
             m_Overlay.Write16(m_Offset + 0x2, (ushort)((short)(Position.Y * 1000.0f)));
             m_Overlay.Write16(m_Offset + 0x4, (ushort)((short)(Position.Z * 1000.0f)));
 
-            m_Overlay.Write16(m_Offset + 0x6, Parameters[0]);
+            m_Overlay.Write8(m_Offset + 0x6, (byte)Parameters[0]);
+            m_Overlay.Write8(m_Offset + 0x7, (byte)Parameters[1]);
         }
     }
 
@@ -943,30 +1026,29 @@ namespace SM64DSe
         public MinimapScaleObject(NitroOverlay ovl, uint offset, int num, int layer, int area)
             : base(ovl, offset, layer)
         {
-            m_Area = area;
             m_Type = 12;
+            m_Area = area;
             m_UniqueID = (uint)(0x50000000 | num);
 
             Parameters = new ushort[1];
             Parameters[0] = m_Overlay.Read16(m_Offset);
 
-            m_Renderer = new ColorCubeRenderer(Color.FromArgb(255, 255, 0), Color.FromArgb(64, 64, 0), true);
             m_Properties = new PropertyTable();
             GenerateProperties();
         }
 
         public override string GetDescription()
         {
-            return "Minimap scale for area " + m_Area;
+            return "Minimap Scale";
         }
 
         public override void GenerateProperties()
         {
             m_Properties.Properties.Clear();
 
-            m_Properties.Properties.Add(new PropertySpec("Scale", typeof(float), "Specific", "Scale at which minimap is to be displayed for this area.", (float)(m_Overlay.Read16(m_Offset) / 1000f), "", typeof(FloatTypeConverter)));
+            m_Properties.Properties.Add(new PropertySpec("Scale", typeof(float), "Specific", "Scale of minimap.", (float)(Parameters[0] / 1000f), "", typeof(FloatTypeConverter)));
 
-            m_Properties["Scale"] = (float)(m_Overlay.Read16(m_Offset) / 1000f);
+            m_Properties["Scale"] = (float)(Parameters[0] / 1000f);
         }
 
         public override bool SupportsRotation() { return false; }
@@ -975,7 +1057,7 @@ namespace SM64DSe
         {
             switch (field)
             {
-                case "Scale": Parameters[0] = (ushort)((float)(newval) * 1000); break;
+                case "Scale": Parameters[0] = (ushort)((float)newval * 1000f); break;
             }
 
             return 0;
@@ -983,8 +1065,11 @@ namespace SM64DSe
 
         public override void SaveChanges()
         {
-            m_Overlay.Write16(m_Offset, Parameters[0]);
+            m_Overlay.Write16(m_Offset, (ushort)Parameters[0]);
         }
+
+        public override void Render(RenderMode mode) { }
+        public override void Release() { }
     }
 
     public class FogObject : LevelObject
@@ -1004,7 +1089,7 @@ namespace SM64DSe
             Parameters[4] = m_Overlay.Read16(m_Offset + 4);
             Parameters[5] = m_Overlay.Read16(m_Offset + 6);
 
-            m_Renderer = new ColorCubeRenderer(Color.FromArgb(255, 255, 0), Color.FromArgb(Parameters[1], Parameters[2], Parameters[3]), true);
+            //m_Renderer = new ColorCubeRenderer(Color.FromArgb(255, 255, 0), Color.FromArgb(Parameters[1], Parameters[2], Parameters[3]), true);
             m_Properties = new PropertyTable();
             GenerateProperties();
         }
@@ -1059,6 +1144,9 @@ namespace SM64DSe
             m_Overlay.Write16(m_Offset + 4, (ushort)Parameters[4]);
             m_Overlay.Write16(m_Offset + 6, (ushort)Parameters[5]);
         }
+
+        public override void Render(RenderMode mode) { }
+        public override void Release() { }
     }
 
     public class Type14Object : LevelObject
@@ -1076,7 +1164,6 @@ namespace SM64DSe
             Parameters[2] = m_Overlay.Read8(m_Offset + 2);
             Parameters[3] = m_Overlay.Read8(m_Offset + 3);
 
-            m_Renderer = new ColorCubeRenderer(Color.FromArgb(255, 255, 0), Color.FromArgb(64, 64, 0), true);
             m_Properties = new PropertyTable();
             GenerateProperties();
         }
@@ -1123,6 +1210,60 @@ namespace SM64DSe
             m_Overlay.Write8(m_Offset + 2, (byte)Parameters[2]);
             m_Overlay.Write8(m_Offset + 3, (byte)Parameters[3]);
         }
+
+        public override void Render(RenderMode mode) { }
+        public override void Release() { }
+    }
+
+    public class MinimapTileIDObject : LevelObject
+    {
+        public MinimapTileIDObject(NitroOverlay ovl, uint offset, int num, int layer, int area)
+            : base(ovl, offset, layer)
+        {
+            m_Type = 11;
+            m_Area = area;
+            m_UniqueID = (uint)(0x50000000 | num);
+
+            Parameters = new ushort[2];
+            Parameters[0] = m_Overlay.Read16(m_Offset);
+
+            m_Properties = new PropertyTable();
+            GenerateProperties();
+        }
+
+        public override string GetDescription()
+        {
+            return "Minimap Tile ID for area " + m_Area;
+        }
+
+        public override void GenerateProperties()
+        {
+            m_Properties.Properties.Clear();
+
+            m_Properties.Properties.Add(new PropertySpec("Tile ID", typeof(float), "Specific", "ID of minimap tile to use in area " + m_Area, (float)Parameters[0], "", typeof(FloatTypeConverter)));
+
+            m_Properties["Tile ID"] = (float)Parameters[0];
+        }
+
+        public override bool SupportsRotation() { return false; }
+
+        public override int SetProperty(string field, object newval)
+        {
+            switch (field)
+            {
+                case "Tile ID": Parameters[0] = (ushort)(float)newval; break;
+            }
+
+            return 0;
+        }
+
+        public override void SaveChanges()
+        {
+            m_Overlay.Write16(m_Offset, (ushort)Parameters[0]);
+        }
+
+        public override void Render(RenderMode mode) { }
+        public override void Release() { }
     }
 
 

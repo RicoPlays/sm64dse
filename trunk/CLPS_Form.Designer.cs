@@ -28,10 +28,17 @@
         /// </summary>
         private void InitializeComponent()
         {
+            System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle3 = new System.Windows.Forms.DataGridViewCellStyle();
             this.label1 = new System.Windows.Forms.Label();
             this.txtNumEntries = new System.Windows.Forms.TextBox();
             this.btnCopy = new System.Windows.Forms.Button();
             this.cbxLevels = new System.Windows.Forms.ComboBox();
+            this.gridCLPSData = new System.Windows.Forms.DataGridView();
+            this.btnRemove = new System.Windows.Forms.Button();
+            this.btnAdd = new System.Windows.Forms.Button();
+            this.btnShiftUp = new System.Windows.Forms.Button();
+            this.btnShiftDown = new System.Windows.Forms.Button();
+            ((System.ComponentModel.ISupportInitialize)(this.gridCLPSData)).BeginInit();
             this.SuspendLayout();
             // 
             // label1
@@ -46,7 +53,7 @@
             // txtNumEntries
             // 
             this.txtNumEntries.Enabled = false;
-            this.txtNumEntries.Location = new System.Drawing.Point(223, 26);
+            this.txtNumEntries.Location = new System.Drawing.Point(261, 26);
             this.txtNumEntries.Name = "txtNumEntries";
             this.txtNumEntries.Size = new System.Drawing.Size(121, 20);
             this.txtNumEntries.TabIndex = 1;
@@ -64,22 +71,83 @@
             // cbxLevels
             // 
             this.cbxLevels.FormattingEnabled = true;
-            this.cbxLevels.Location = new System.Drawing.Point(158, 74);
+            this.cbxLevels.Location = new System.Drawing.Point(196, 74);
             this.cbxLevels.Name = "cbxLevels";
             this.cbxLevels.Size = new System.Drawing.Size(186, 21);
             this.cbxLevels.TabIndex = 4;
+            // 
+            // gridCLPSData
+            // 
+            this.gridCLPSData.AllowUserToAddRows = false;
+            this.gridCLPSData.AllowUserToDeleteRows = false;
+            this.gridCLPSData.ColumnHeadersHeightSizeMode = System.Windows.Forms.DataGridViewColumnHeadersHeightSizeMode.AutoSize;
+            this.gridCLPSData.Location = new System.Drawing.Point(15, 110);
+            this.gridCLPSData.MultiSelect = false;
+            this.gridCLPSData.Name = "gridCLPSData";
+            dataGridViewCellStyle3.ForeColor = System.Drawing.Color.Black;
+            this.gridCLPSData.RowsDefaultCellStyle = dataGridViewCellStyle3;
+            this.gridCLPSData.Size = new System.Drawing.Size(367, 150);
+            this.gridCLPSData.StandardTab = true;
+            this.gridCLPSData.TabIndex = 6;
+            this.gridCLPSData.CellEndEdit += new System.Windows.Forms.DataGridViewCellEventHandler(this.gridCLPSData_CellEndEdit);
+            // 
+            // btnRemove
+            // 
+            this.btnRemove.Location = new System.Drawing.Point(15, 267);
+            this.btnRemove.Name = "btnRemove";
+            this.btnRemove.Size = new System.Drawing.Size(22, 23);
+            this.btnRemove.TabIndex = 7;
+            this.btnRemove.Text = "-";
+            this.btnRemove.UseVisualStyleBackColor = true;
+            this.btnRemove.Click += new System.EventHandler(this.btnRemove_Click);
+            // 
+            // btnAdd
+            // 
+            this.btnAdd.Location = new System.Drawing.Point(43, 267);
+            this.btnAdd.Name = "btnAdd";
+            this.btnAdd.Size = new System.Drawing.Size(22, 23);
+            this.btnAdd.TabIndex = 8;
+            this.btnAdd.Text = "+";
+            this.btnAdd.UseVisualStyleBackColor = true;
+            this.btnAdd.Click += new System.EventHandler(this.btnAdd_Click);
+            // 
+            // btnShiftUp
+            // 
+            this.btnShiftUp.Location = new System.Drawing.Point(388, 156);
+            this.btnShiftUp.Name = "btnShiftUp";
+            this.btnShiftUp.Size = new System.Drawing.Size(22, 23);
+            this.btnShiftUp.TabIndex = 9;
+            this.btnShiftUp.Text = "^";
+            this.btnShiftUp.UseVisualStyleBackColor = true;
+            this.btnShiftUp.Click += new System.EventHandler(this.btnShiftUp_Click);
+            // 
+            // btnShiftDown
+            // 
+            this.btnShiftDown.Location = new System.Drawing.Point(388, 185);
+            this.btnShiftDown.Name = "btnShiftDown";
+            this.btnShiftDown.Size = new System.Drawing.Size(22, 23);
+            this.btnShiftDown.TabIndex = 10;
+            this.btnShiftDown.Text = "v";
+            this.btnShiftDown.UseVisualStyleBackColor = true;
+            this.btnShiftDown.Click += new System.EventHandler(this.btnShiftDown_Click);
             // 
             // CLPS_Form
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(356, 134);
+            this.ClientSize = new System.Drawing.Size(439, 312);
+            this.Controls.Add(this.btnShiftDown);
+            this.Controls.Add(this.btnShiftUp);
+            this.Controls.Add(this.btnAdd);
+            this.Controls.Add(this.btnRemove);
+            this.Controls.Add(this.gridCLPSData);
             this.Controls.Add(this.cbxLevels);
             this.Controls.Add(this.btnCopy);
             this.Controls.Add(this.txtNumEntries);
             this.Controls.Add(this.label1);
             this.Name = "CLPS_Form";
             this.Text = "CLPS Data";
+            ((System.ComponentModel.ISupportInitialize)(this.gridCLPSData)).EndInit();
             this.ResumeLayout(false);
             this.PerformLayout();
 
@@ -91,5 +159,10 @@
         private System.Windows.Forms.TextBox txtNumEntries;
         private System.Windows.Forms.Button btnCopy;
         private System.Windows.Forms.ComboBox cbxLevels;
+        private System.Windows.Forms.DataGridView gridCLPSData;
+        private System.Windows.Forms.Button btnRemove;
+        private System.Windows.Forms.Button btnAdd;
+        private System.Windows.Forms.Button btnShiftUp;
+        private System.Windows.Forms.Button btnShiftDown;
     }
 }
