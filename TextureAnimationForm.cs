@@ -695,8 +695,6 @@ namespace SM64DSe
                     uint remAnimName = _owner.m_TexAnims[lbxArea.SelectedIndex][lbxTexAnim.SelectedIndex].m_MatNameOffset;
                     int remAnimNameLen = (_owner.m_TexAnims[lbxArea.SelectedIndex][lbxTexAnim.SelectedIndex].m_MatName.Length + 1);//+1 for null at end
 
-                    //Remove from list of texture animations - important
-                    _owner.m_TexAnims[lbxArea.SelectedIndex].RemoveAt(lbxTexAnim.SelectedIndex);
                     //Remove animation data and material name offsets from list of pointers - important
                     List<int> rmAt = new List<int>();
                     for (int i = 0; i < _owner.m_PointerList.Count; i++)
@@ -750,22 +748,17 @@ namespace SM64DSe
         {
             if (lbxArea.SelectedIndex != -1 && lbxTexAnim.SelectedIndex != -1 && lbxTexAnim.Items.Count > 0)//Area already has at least one texture animation
             {
-                //Had to change patch to pad with 3 nulls instead of 1 as scale started straight after end of string (including null) 
-                //and this caused problems in the levels that needed the patch (reloadData())
-                
                 //Make room for new material name
                 string matName = "MaterialName";
+                uint newHdr = (uint)(_owner.m_TexAnims[lbxArea.SelectedIndex][lbxTexAnim.Items.Count - 1].m_Offset + 28);
                 uint newMatOffset = (uint)(_owner.m_TexAnims[lbxArea.SelectedIndex][lbxTexAnim.Items.Count - 1].m_MatNameOffset + _owner.m_TexAnims[lbxArea.SelectedIndex][lbxTexAnim.Items.Count - 1].m_MatName.Length + 1);
+                _owner.m_Overlay.Write32((uint)(_owner.m_TexAnims[lbxArea.SelectedIndex][0].m_TexAnimHeaderOffset + 0x10), (uint)(lbxTexAnim.Items.Count + 1));
                 AddSpace(newMatOffset, (int)(matName.ToCharArray().Length + 1));
                 
                 //Make room for new header
-                AddSpace((uint)(_owner.m_TexAnims[lbxArea.SelectedIndex][lbxTexAnim.Items.Count - 1].m_Offset + 28), 28);
-                uint newHdr = (uint)(_owner.m_TexAnims[lbxArea.SelectedIndex][lbxTexAnim.Items.Count - 1].m_Offset + 28);
+                AddSpace((uint)(newHdr), 28);
                 //Increase number of animations
-                _owner.m_Overlay.Write32((uint)(_owner.m_TexAnims[lbxArea.SelectedIndex][0].m_TexAnimHeaderOffset + 0x10), (uint)(lbxTexAnim.Items.Count + 1));
                 //Write material name offset
-                newMatOffset = (uint)(_owner.m_TexAnims[lbxArea.SelectedIndex][lbxTexAnim.Items.Count - 1].m_MatNameOffset +
-                    _owner.m_TexAnims[lbxArea.SelectedIndex][lbxTexAnim.Items.Count - 1].m_MatName.Length + 1);
                 _owner.m_Overlay.WritePointer((uint)(newHdr + 0x04), newMatOffset);
                 //Write material name and write scale, rotation and tranlsation start index and size
                 for (int a = 0; a < matName.ToCharArray().Length; a++)

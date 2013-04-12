@@ -118,7 +118,7 @@ namespace SM64DSe
 
                 byte type = (byte)(flags & 0x1F);
                 byte layer = (byte)(flags >> 5);
-
+                
                 switch (type)
                 {
                     case 0:
@@ -137,21 +137,21 @@ namespace SM64DSe
                         }
                         break;
 
-                    /*case 2:
+                    case 2: // Path Node
                         for (byte e = 0; e < entries_num; e++)
                         {
-                            LevelObject obj = new PathPointObject(m_Overlay, (uint)(entries_offset + (e * 6)), m_LevelObjects.Count);
+                            LevelObject obj = new PathPointObject(m_Overlay, (uint)(entries_offset + (e * 6)), m_LevelObjects.Count/*, getPathNodeParentIDFromOffset((uint)(entries_offset + (e * 6)))*/);
                             m_LevelObjects.Add(obj.m_UniqueID, obj);
                         }
                         break;
 
-                    case 3:
+                    case 3: // Path
                         for (byte e = 0; e < entries_num; e++)
                         {
                             LevelObject obj = new PathObject(m_Overlay, (uint)(entries_offset + (e * 6)), m_LevelObjects.Count);
                             m_LevelObjects.Add(obj.m_UniqueID, obj);
                         }
-                        break;*/
+                        break;
 
                     case 4:
                         for (byte e = 0; e < entries_num; e++)
@@ -187,12 +187,10 @@ namespace SM64DSe
 
                     case 8:
                         // Fog
+                        for (byte e = 0; e < entries_num; e++)
                         {
-                            for (byte e = 0; e < entries_num; e++)
-                            {
-                                LevelObject obj = new FogObject(m_Overlay, (uint)(entries_offset + (e * 8)), m_LevelObjects.Count, layer, area);
-                                m_LevelObjects.Add(obj.m_UniqueID, obj);
-                            }
+                            LevelObject obj = new FogObject(m_Overlay, (uint)(entries_offset + (e * 8)), m_LevelObjects.Count, layer, area);
+                            m_LevelObjects.Add(obj.m_UniqueID, obj);
                         }
                         break;
 
@@ -213,10 +211,16 @@ namespace SM64DSe
                         break;
 
                     case 11:
-                        m_MinimapFileIDsOffset = entries_offset;
+                        for (byte e = 0; e < entries_num; e++)
+                        {
+                            LevelObject obj = new MinimapTileIDObject(m_Overlay, (uint)(entries_offset + (e * 2)), m_LevelObjects.Count, layer, area);
+                            m_LevelObjects.Add(obj.m_UniqueID, obj);
+                        }
+                        // This is still used by Minimap Editor
                         m_MinimapFileIDs = new ushort[entries_num];
                         for (byte e = 0; e < entries_num; e++)
                             m_MinimapFileIDs[e] = m_Overlay.Read16((uint)(entries_offset + (e * 2)));
+
                         break;
 
                     case 12:
@@ -238,6 +242,10 @@ namespace SM64DSe
                         break;
                 }
             }
+
+            IEnumerable<LevelObject> pathNodes = m_LevelObjects.Values.Where(obj => (obj.m_Type) == 2);
+            IEnumerable<LevelObject> paths = m_LevelObjects.Values.Where(obj => (obj.m_Type) == 3);
+            AlignPathNodes(paths.ToList<LevelObject>(), pathNodes.ToList<LevelObject>());
         }
 
         public void ReadTextureAnimations(uint offset, int area)
@@ -539,8 +547,97 @@ namespace SM64DSe
             GL.EndList();
         }
 
+        private void RenderPathHilite(List<LevelObject> objs, Color color, int dlist)
+        {
+            GL.NewList(dlist, ListMode.Compile);
+            GL.PushAttrib(AttribMask.AllAttribBits);
+
+            GL.Disable(EnableCap.Lighting);
+            GL.BindTexture(TextureTarget.Texture2D, 0);
+
+            for (int i = 0; i < objs.Count(); i++)
+            {
+                LevelObject obj = objs.ElementAt(i);
+
+                GL.ColorMask(true, true, true, true);
+                GL.Enable(EnableCap.PolygonOffsetFill);
+                GL.PolygonOffset(-1.0f, -1.0f);
+                GL.StencilFunc(StencilFunction.Equal, 0x1, 0x3);
+                GL.StencilOp(StencilOp.Keep, StencilOp.Keep, StencilOp.Incr);
+                if (i == 0 || objs.Count() == 1)
+                    GL.Color4(Color.FromArgb(50, 0, 255, 0));
+                else if (i == objs.Count() - 1)
+                    GL.Color4(Color.FromArgb(50, 255, 0, 0));
+                else
+                    GL.Color4(Color.FromArgb(50, color));
+                obj.Render(RenderMode.Picking);
+
+                GL.Disable(EnableCap.PolygonOffsetFill);
+                GL.PolygonMode(MaterialFace.FrontAndBack, PolygonMode.Line);
+                GL.LineWidth(3.0f);
+                GL.StencilFunc(StencilFunction.Equal, 0x0, 0x3);
+                GL.StencilOp(StencilOp.Keep, StencilOp.Keep, StencilOp.Replace);
+                GL.DepthFunc(DepthFunction.Always);
+                if (i == 0 || objs.Count() == 1)
+                    GL.Color4(Color.FromArgb(50, 0, 255, 0));
+                else if (i == objs.Count() - 1)
+                    GL.Color4(Color.FromArgb(50, 255, 0, 0));
+                else
+                    GL.Color4(Color.FromArgb(50, color));
+                obj.Render(RenderMode.Picking);
+            }
+
+            GL.PopAttrib();
+            GL.EndList();
+        }
+
+        private void AlignPathNodes(List<LevelObject> paths, List<LevelObject> nodes)
+        {
+            // Aligns the path nodes to point to the next node in their path to make direction clear
+
+            foreach (LevelObject path in paths)
+            {
+                int startNode = path.Parameters[0], endNode = startNode + path.Parameters[1] - 1;
+                int numNodes = nodes.Count;
+
+                if (numNodes == 1)
+                    ((PathPointObject)nodes[0]).m_Renderer = new ColorCubeRenderer(Color.FromArgb(0, 255, 255), Color.FromArgb(0, 64, 64), false);
+                else
+                {
+                    // Render each node as an arrow that points to next node
+                    for (int i = startNode; i <= endNode; i++)
+                    {
+                        int next = 0;
+                        if (i != endNode)
+                            next = i + 1;
+                        else
+                            next = startNode;
+                        try
+                        {
+                            float opposite = nodes[next].Position.X - nodes[i].Position.X;
+                            float adjacent = nodes[next].Position.Z - nodes[i].Position.Z;
+                            float rotY = MathHelper.RadiansToDegrees((float)Math.Atan(opposite / adjacent));
+                            if (adjacent >= 0)
+                            {
+                                rotY += 180;
+                            }
+                            ((PathPointObject)nodes[i]).m_Renderer = new ColourArrowRenderer(Color.FromArgb(0, 255, 255), Color.FromArgb(0, 64, 64), false, 0f, rotY, 0f);
+                        }
+                        catch
+                        {
+                            // Object has been deleted
+                        }
+                    }
+                }
+            }
+        }
+
         private void RefreshObjects(int layer)
         {
+            IEnumerable<LevelObject> pathNodes = m_LevelObjects.Values.Where(obj => (obj.m_Type) == 2 && (obj.m_Layer) == layer);
+            IEnumerable<LevelObject> paths = m_LevelObjects.Values.Where(obj => (obj.m_Type) == 3 && (obj.m_Layer) == layer);
+            AlignPathNodes(paths.ToList<LevelObject>(), pathNodes.ToList<LevelObject>());
+
             RenderObjectLists(RenderMode.Opaque, layer);
             RenderObjectLists(RenderMode.Translucent, layer);
             RenderObjectLists(RenderMode.Picking, layer);
@@ -558,6 +655,8 @@ namespace SM64DSe
             tvObjectList.Nodes.Clear();
             foreach (ToolStripItem ctl in tsEditActions.Items)
                 ctl.Visible = false;
+
+            slStatusLabel.Text = "Ready";
 
             switch (m_EditMode)
             {
@@ -621,13 +720,36 @@ namespace SM64DSe
                     }
                     break;
 
-                /*case 3:
+                case 3:
                     {
+                        btnAddPathNodes.Visible = true;
+                        btnAddPath.Visible = true;
+                        btnRemoveSel.Visible = true;
+
                         TreeNode node0 = tvObjectList.Nodes.Add("parent0", "Paths");
-                        foreach (PathObject obj in m_PathObjects)
-                            node0.Nodes.Add(obj.m_Num.ToString("X8"), obj.GetDescription()).Tag = 0;
+
+                        IEnumerable<LevelObject> paths = m_LevelObjects.Values.Where(obj => (obj.m_Type) == 3);
+                        for (int i = 0; i < paths.Count(); i++)
+                        {
+                            node0.Nodes.Add(paths.ElementAt(i).m_UniqueID.ToString("X8"), paths.ElementAt(i).GetDescription() + " " + i).Tag = paths.ElementAt(i).m_UniqueID;
+                            tvObjectList.Nodes.Add("parent" + (i + 1), "Path " + i + " Nodes");
+                        }
+
+                        IEnumerable<LevelObject> pathNodes = m_LevelObjects.Values.Where(obj => (obj.m_Type) == 2);
+                        //TreeNode node1 = tvObjectList.Nodes.Add("parent1", "Path Nodes");
+                        for (int i = 0; i < paths.Count(); i++)
+                        {
+                            int start = paths.ElementAt(i).Parameters[0];
+                            int end = start + paths.ElementAt(i).Parameters[1];
+                            for (int j = start; j < end; j++)
+                                tvObjectList.Nodes[i + 1].Nodes.Add(pathNodes.ElementAt(j).m_UniqueID.ToString("X8"), pathNodes.ElementAt(j).GetDescription() + " " + j).Tag = pathNodes.ElementAt(j).m_UniqueID;
+                        }
+
+                        btnAddPathNodes.DropDownItems.Clear();
+                        for (int i = 0; i < paths.Count(); i++)
+                            btnAddPathNodes.DropDownItems.Add("Add Node to Path " + i);
                     }
-                    break;*/
+                    break;
 
                 case 4:
                     {
@@ -647,14 +769,14 @@ namespace SM64DSe
 
                 case 5:
                     {
-                        btnAddFog.Visible = true;
-                        btnAdd14.Visible = true;
+                        btnAddMisc.Visible = true;
                         btnRemoveSel.Visible = true;
                         
                         if (!m_ShowCommonLayer) break;
                         TreeNode node0 = tvObjectList.Nodes.Add("parent0", "Minimap Scales");
                         TreeNode node1 = tvObjectList.Nodes.Add("parent1", "Fog");
                         TreeNode node2 = tvObjectList.Nodes.Add("parent2", "Type 14 Object");
+                        TreeNode node3 = tvObjectList.Nodes.Add("parent3", "Minimap Tile ID");
 
                         IEnumerable<LevelObject> objects = m_LevelObjects.Values.Where(obj => (obj.m_UniqueID >> 28) == 5);
                         foreach (LevelObject obj in objects)
@@ -662,6 +784,7 @@ namespace SM64DSe
                             switch (obj.m_Type)
                             {
                                 case 8: node1.Nodes.Add(obj.m_UniqueID.ToString("X8"), obj.GetDescription()).Tag = obj.m_UniqueID; break;
+                                case 11: node3.Nodes.Add(obj.m_UniqueID.ToString("X8"), obj.GetDescription()).Tag = obj.m_UniqueID; break;
                                 case 12: node0.Nodes.Add(obj.m_UniqueID.ToString("X8"), obj.GetDescription()).Tag = obj.m_UniqueID; break;
                                 case 14: node2.Nodes.Add(obj.m_UniqueID.ToString("X8"), obj.GetDescription()).Tag = obj.m_UniqueID; break;
                             }
@@ -791,7 +914,7 @@ namespace SM64DSe
             UpdateObjectOffsets(offset + amount, (uint)-amount);
         }
 
-        private uint AddObjectSlot(int type, int layer, int area)
+        private uint AddObjectSlot(int type, int layer, int area, int off = -1)
         {
             int[] sizes = { 16, 16, 6, 6, 14, 8, 8, 8, 8, 12, 14, 2, 2, 0, 4 };
             int size = sizes[type];
@@ -833,12 +956,16 @@ namespace SM64DSe
                 byte numobjs = m_Overlay.Read8(curptr + 1);
                 if (numobjs == 255) continue;
 
-                uint endptr = (uint)(m_Overlay.ReadPointer(curptr + 4) + (numobjs * size));
+                uint endptr = 0;
+                if (off == -1)
+                    endptr = (uint)(m_Overlay.ReadPointer(curptr + 4) + (numobjs * size));
+                else
+                    endptr = (uint)off;
                 AddSpace(endptr, (uint)size);
                 m_Overlay.Write8(curptr + 1, (byte)(numobjs + 1));
                 return endptr;
             }
-
+            // If a new table needs created for this object type
             uint tableendptr = (uint)(m_Overlay.ReadPointer(tableptr + 4) + (numentries * 8));
             AddSpace(tableendptr, 8);
             m_Overlay.Write32(tableptr, numentries + 1);
@@ -908,12 +1035,16 @@ namespace SM64DSe
             }
         }
 
-        private LevelObject AddObject(int type, ushort id, int layer, int area)
+        private LevelObject AddObject(int type, ushort id, int layer, int area, int off = -1)
         {
             int[] sizes = { 16, 16, 6, 6, 14, 8, 8, 8, 8, 12, 14, 2, 2, 0, 4 };
             int size = sizes[type];
 
-            uint offset = AddObjectSlot(type, layer, area);
+            uint offset = 0;
+            if (off == -1)
+                offset = AddObjectSlot(type, layer, area);
+            else
+                offset = AddObjectSlot(type, layer, area, off);
             for (int i = 0; i < size; i++)
                 m_Overlay.Write8((uint)(offset + i), 0x00);
 
@@ -936,8 +1067,8 @@ namespace SM64DSe
                         obj = new EntranceObject(m_Overlay, offset, (int)uniqueid, layer, maxid + 1);
                     }
                     break;
-                case 2: obj = new PathPointObject(m_Overlay, offset, (int)uniqueid); break;
-                case 3: break;
+                case 2: parentnode = "parent" + (1 + getPathNodeParentIDFromOffset(offset)); obj = new PathPointObject(m_Overlay, offset, (int)uniqueid); break;
+                case 3: parentnode = "parent0"; obj = new PathObject(m_Overlay, offset, (int)uniqueid); break;
                 case 4: obj = new ViewObject(m_Overlay, offset, (int)uniqueid); break;
                 case 5: obj = new SimpleObject(m_Overlay, offset, (int)uniqueid, layer, area); break;
                 case 6: parentnode = "parent3"; obj = new TpSrcObject(m_Overlay, offset, (int)uniqueid, layer); break;
@@ -945,9 +1076,9 @@ namespace SM64DSe
                 case 8: parentnode = "parent1"; obj = new FogObject(m_Overlay, offset, (int)uniqueid, layer, area); break;
                 case 9: parentnode = "parent2"; obj = new DoorObject(m_Overlay, offset, (int)uniqueid, layer); break;
                 case 10: parentnode = "parent1"; obj = new ExitObject(m_Overlay, offset, (int)uniqueid, layer); break;
-                case 11: /* minimap */ break;
+                case 11: parentnode = "parent3"; obj = new MinimapTileIDObject(m_Overlay, offset, (int)uniqueid, layer, area); break;
                 case 12: parentnode = "parent0"; obj = new MinimapScaleObject(m_Overlay, offset, (int)uniqueid, layer, area); break;
-                case 14: /* unk */ parentnode = "parent2"; obj = new Type14Object(m_Overlay, offset, (int)uniqueid, layer, area); break;
+                case 14: parentnode = "parent2"; obj = new Type14Object(m_Overlay, offset, (int)uniqueid, layer, area); break;
             }
 
             if (obj != null)
@@ -992,7 +1123,7 @@ namespace SM64DSe
         public Dictionary<uint, LevelObject> m_LevelObjects;
         public List<LevelTexAnim>[] m_TexAnims;
 
-        public uint m_MinimapFileIDsOffset;
+        //public uint m_MinimapFileIDsOffset;
         public ushort[] m_MinimapFileIDs;
 
         private bool m_GLLoaded;
@@ -1888,13 +2019,6 @@ namespace SM64DSe
             foreach (LevelObject obj in m_LevelObjects.Values)
                 obj.SaveChanges();
 
-            uint curoffset = m_MinimapFileIDsOffset;
-            foreach (ushort id in m_MinimapFileIDs)
-            {
-                m_Overlay.Write16(curoffset, id);
-                curoffset += 2;
-            }
-
             
             m_Overlay.SaveChanges();
             slStatusLabel.Text = "Changes saved.";
@@ -1908,7 +2032,17 @@ namespace SM64DSe
             m_Selected = m_LastSelected = objid;
             m_SelectedObject = m_LevelObjects[objid];
             pgObjectProperties.SelectedObject = m_SelectedObject.m_Properties;
-            RenderObjectHilite(m_SelectedObject, k_SelectionColor, m_SelectHiliteDL);
+            if (m_SelectedObject.m_Type == 3)
+            {
+                // If object selected is a path, highlight all nodes in current path
+                IEnumerable<LevelObject> pathNodes = m_LevelObjects.Values.Where(obj => (obj.m_Type) == 2);
+                List<LevelObject> nodes = new List<LevelObject>();
+                for (int i = ((PathObject)m_SelectedObject).Parameters[0]; i < (((PathObject)m_SelectedObject).Parameters[0] + ((PathObject)m_SelectedObject).Parameters[1]); i++)
+                    nodes.Add(pathNodes.ElementAt(i));
+                RenderPathHilite(nodes, k_SelectionColor, m_SelectHiliteDL);
+            }
+            else
+                RenderObjectHilite(m_SelectedObject, k_SelectionColor, m_SelectHiliteDL);
             glLevelView.Refresh();
         }
 
@@ -1998,7 +2132,7 @@ namespace SM64DSe
             switch (type)
             {
                 case 1: obj = "entrance"; break;
-                case 2: obj = "path node"; break;
+                //case 2: obj = "path node"; break;
                 case 4: obj = "view"; break;
                 case 6: obj = "teleport source"; break;
                 case 7: obj = "teleport destination"; break;
@@ -2025,13 +2159,15 @@ namespace SM64DSe
 
                 return;
             }
-            if (m_SelectedObject.m_Type != 12)//Game crashes of you remove minimap scales
-            {
-                LevelObject obj = m_SelectedObject;
-                RemoveObject(obj);
-                RefreshObjects(obj.m_Layer);
-                slStatusLabel.Text = "Object removed.";
-            }
+            
+            LevelObject obj = m_SelectedObject;
+
+            if (obj.m_Type == 2)
+                updatePathsNodeRemoved((PathPointObject)obj);
+
+            RemoveObject(obj);
+            RefreshObjects(obj.m_Layer);
+            slStatusLabel.Text = "Object removed.";
         }
 
         bool xDown, yDown, zDown;
@@ -2133,6 +2269,164 @@ namespace SM64DSe
                 form.Show(this);
         }
 
+        private void btnEditTexAnim_Click(object sender, EventArgs e)
+        {
+            new TextureAnimationForm(this).Show(this);
+        }
+
+        private void btnCLPS_Click(object sender, EventArgs e)
+        {
+            new CLPS_Form(this).Show(this);
+        }
+
+        private void btnAddPath_Click(object sender, EventArgs e)
+        {
+            uint type0 = 3;
+            m_ObjectBeingPlaced = type0 << 16;
+
+            int type = (int)(m_ObjectBeingPlaced >> 16);
+            ushort id = (ushort)(m_ObjectBeingPlaced & 0xFFFF);
+
+            LevelObject obj = AddObject(type, id, 0, 0);
+            obj.GenerateProperties();
+            pgObjectProperties.SelectedObject = obj.m_Properties;
+
+            m_Selected = obj.m_UniqueID;
+            m_SelectedObject = obj;
+            m_LastSelected = obj.m_UniqueID;
+            m_Hovered = obj.m_UniqueID;
+            m_HoveredObject = obj;
+            m_LastHovered = obj.m_UniqueID;
+            m_LastClicked = obj.m_UniqueID;
+
+            RefreshObjects(m_SelectedObject.m_Layer);
+
+            if (!m_ShiftPressed)
+            {
+                m_ObjectBeingPlaced = 0xFFFF;
+                slStatusLabel.Text = "Object added.";
+            }
+        }
+
+        void btnAddPathNodes_DropDownItemClicked(object sender, System.Windows.Forms.ToolStripItemClickedEventArgs e)
+        {
+            uint type0 = 2;
+            m_ObjectBeingPlaced = type0 << 16;
+
+            int type = (int)(m_ObjectBeingPlaced >> 16);
+            ushort id = (ushort)(m_ObjectBeingPlaced & 0xFFFF);
+
+            // Parse path to which node is to be added
+            String chosenPath = e.ClickedItem.Text;
+            int parentNode = int.Parse(chosenPath.Substring(17, chosenPath.Length - 17));
+
+            IEnumerable<LevelObject> paths = m_LevelObjects.Values.Where(obj0 => (obj0.m_Type) == 3);
+            IEnumerable<LevelObject> pathNodes = m_LevelObjects.Values.Where(obj0 => (obj0.m_Type) == 2);
+            uint lastNodeInPathOff = pathNodes.ElementAt(paths.ElementAt(parentNode).Parameters[0] + (paths.ElementAt(parentNode).Parameters[1] - 1)).m_Offset;
+
+            // Update start indices and lengths of paths
+            for (int i = parentNode; i < paths.Count(); i++)
+            {
+                if (i == parentNode)
+                {
+                    // Increase length of parent path
+                    paths.ElementAt(i).Parameters[1] += 1;
+                }
+                else
+                {
+                    // Increase start node index for all following paths
+                    paths.ElementAt(i).Parameters[0] += 1;
+                }
+                paths.ElementAt(i).GenerateProperties();
+            }
+
+            LevelObject obj = AddObject(type, id, 0, 0, (int)lastNodeInPathOff + 6);
+            obj.GenerateProperties();
+            pgObjectProperties.SelectedObject = obj.m_Properties;
+
+            m_Selected = obj.m_UniqueID;
+            m_SelectedObject = obj;
+            m_LastSelected = obj.m_UniqueID;
+            m_Hovered = obj.m_UniqueID;
+            m_HoveredObject = obj;
+            m_LastHovered = obj.m_UniqueID;
+            m_LastClicked = obj.m_UniqueID;
+
+            RefreshObjects(m_SelectedObject.m_Layer);
+
+            if (!m_ShiftPressed)
+            {
+                m_ObjectBeingPlaced = 0xFFFF;
+                slStatusLabel.Text = "Object added.";
+            }
+        }
+
+        public int getPathNodeParentIDFromOffset(uint offset)
+        {
+            int pos = -1;
+
+            IEnumerable<LevelObject> paths = m_LevelObjects.Values.Where(obj0 => (obj0.m_Type) == 3);
+            IEnumerable<LevelObject> pathNodes = m_LevelObjects.Values.Where(obj0 => (obj0.m_Type) == 2);
+            for (int i = 0; i < paths.Count(); i++)
+            {
+                if (offset > pathNodes.ElementAt(paths.ElementAt(i).Parameters[0]).m_Offset)
+                {
+                    pos = i;
+                }
+                if (offset < pathNodes.ElementAt(paths.ElementAt(i).Parameters[0]).m_Offset)
+                {
+                    break;
+                }
+            }
+
+            return pos;
+        }
+
+        void updatePathsNodeRemoved(PathPointObject removedNode)
+        {
+            int pathNum = getPathNodeParentIDFromOffset(removedNode.m_Offset);
+
+            // Decrease length of current path
+            IEnumerable<LevelObject> paths = m_LevelObjects.Values.Where(obj0 => (obj0.m_Type) == 3);
+            paths.ElementAt(pathNum).Parameters[1] -= 1;
+            // Decrease starting indices of following paths
+            for (int i = pathNum + 1; i < paths.Count(); i++)
+            {
+                paths.ElementAt(i).Parameters[0] -= 1;
+            }
+        }
+
+        void btnAddMisc_DropDownItemClicked(object sender, System.Windows.Forms.ToolStripItemClickedEventArgs e)
+        {
+            int selected = int.Parse(e.ClickedItem.Tag.ToString());
+
+            uint type0 = (uint)selected;
+            m_ObjectBeingPlaced = type0 << 16;
+
+            int type = (int)(m_ObjectBeingPlaced >> 16);
+            ushort id = (ushort)(m_ObjectBeingPlaced & 0xFFFF);
+
+            LevelObject obj = AddObject(type, id, 0, 0);
+            obj.GenerateProperties();
+            pgObjectProperties.SelectedObject = obj.m_Properties;
+
+            m_Selected = obj.m_UniqueID;
+            m_SelectedObject = obj;
+            m_LastSelected = obj.m_UniqueID;
+            m_Hovered = obj.m_UniqueID;
+            m_HoveredObject = obj;
+            m_LastHovered = obj.m_UniqueID;
+            m_LastClicked = obj.m_UniqueID;
+
+            RefreshObjects(m_SelectedObject.m_Layer);
+
+            if (!m_ShiftPressed)
+            {
+                m_ObjectBeingPlaced = 0xFFFF;
+                slStatusLabel.Text = "Object added.";
+            }
+        }
+
         private void btnExportLevelModel_Click(object sender, EventArgs e)
         {
             exportOBJ(new BMD(m_ROM.GetFileFromInternalID(m_LevelSettings.BMDFileID)));
@@ -2140,7 +2434,14 @@ namespace SM64DSe
 
         private void exportOBJ(BMD levelModelToExport)
         {
-            //BMD levelModelToExport = new BMD(m_ROM.GetFileFromInternalID(m_LevelSettings.BMDFileID));
+            // Custom models store diffuse colour as vertex colour, built-in ones use a material property
+            bool isCustom = true;
+            DialogResult dialogueResult = MessageBox.Show("Is this a custom model?", "Model Export", MessageBoxButtons.YesNo);
+            if (dialogueResult == DialogResult.Yes)
+                isCustom = true;
+            else if (dialogueResult == DialogResult.No)
+                isCustom = false;
+
             string output = "";
             string mtllib = "";
             CultureInfo usa = new CultureInfo("en-US");//Need to ensure 1.23 not 1,23 when floatVar.ToString() used - use floatVar.ToString(usa)
@@ -2171,10 +2472,20 @@ namespace SM64DSe
                     mtllib += "Ka " + (levelModelToExport.m_ModelChunks[i].m_MatGroups[j].m_AmbientColor.R / 255.0f).ToString(usa) +
                         " " + (levelModelToExport.m_ModelChunks[i].m_MatGroups[j].m_AmbientColor.G / 255.0f).ToString(usa) +
                         " " + (levelModelToExport.m_ModelChunks[i].m_MatGroups[j].m_AmbientColor.B / 255.0f).ToString(usa) + "\n";
-                    //Specify diffuse colour - RGB 0-1
-                    mtllib += "Kd " + (levelModelToExport.m_ModelChunks[i].m_MatGroups[j].m_DiffuseColor.R / 255.0f).ToString(usa) +
-                        " " + (levelModelToExport.m_ModelChunks[i].m_MatGroups[j].m_DiffuseColor.G / 255.0f).ToString(usa) +
-                        " " + (levelModelToExport.m_ModelChunks[i].m_MatGroups[j].m_DiffuseColor.B / 255.0f).ToString(usa) + "\n";
+                    if (!isCustom)
+                    {
+                        //Specify diffuse colour - RGB 0-1 // Built-in Model
+                        mtllib += "Kd " + (levelModelToExport.m_ModelChunks[i].m_MatGroups[j].m_DiffuseColor.R / 255.0f).ToString(usa) +
+                            " " + (levelModelToExport.m_ModelChunks[i].m_MatGroups[j].m_DiffuseColor.G / 255.0f).ToString(usa) +
+                            " " + (levelModelToExport.m_ModelChunks[i].m_MatGroups[j].m_DiffuseColor.B / 255.0f).ToString(usa) + "\n";
+                    }
+                    else if (isCustom)
+                    {
+                        //Specify diffuse colour - RGB 0-1 // Custom Model
+                        mtllib += "Kd " + (levelModelToExport.m_ModelChunks[i].m_MatGroups[j].m_Geometry[0].m_VertexList[0].m_Color.R / 255.0f).ToString(usa) +
+                            " " + (levelModelToExport.m_ModelChunks[i].m_MatGroups[j].m_Geometry[0].m_VertexList[0].m_Color.G / 255.0f).ToString(usa) +
+                            " " + (levelModelToExport.m_ModelChunks[i].m_MatGroups[j].m_Geometry[0].m_VertexList[0].m_Color.B / 255.0f).ToString(usa) + "\n";
+                    }
                     //Specify specular colour - RGB 0-1
                     mtllib += "Ks " + (levelModelToExport.m_ModelChunks[i].m_MatGroups[j].m_SpecularColor.R / 255.0f).ToString(usa) +
                         " " + (levelModelToExport.m_ModelChunks[i].m_MatGroups[j].m_SpecularColor.G / 255.0f).ToString(usa) +
@@ -2203,8 +2514,18 @@ namespace SM64DSe
                                  currentTexture.m_Data[((y * currentTexture.m_Width) + x) * 4]));
                             }
                         }
-                        lol.Save(dir + "/" + currentTexture.m_TexName + ".png", System.Drawing.Imaging.ImageFormat.Png);
+                        try
+                        {
+                            lol.Save(dir + "/" + currentTexture.m_TexName + ".png", System.Drawing.Imaging.ImageFormat.Png);
+                        }
+                        catch (Exception e)
+                        {
+                            MessageBox.Show("An error occurred while trying to save texture " + currentTexture.m_TexName + ".\n\n " + 
+                                e.Message + "\n" + e.Data + "\n" + e.StackTrace + "\n" + e.Source);
+                        }
                     }
+                    else
+                        mtllib += "\n\n";
 
                     for (int k = 0; k < levelModelToExport.m_ModelChunks[i].m_MatGroups[j].m_Geometry.Count; k++)
                     {
@@ -2366,74 +2687,6 @@ namespace SM64DSe
 
             BMD objectBMD = new BMD(m_ROM.GetFileFromName(selObjBMDName));
             exportOBJ(objectBMD);
-        }
-
-        private void btnEditTexAnim_Click(object sender, EventArgs e)
-        {
-            new TextureAnimationForm(this).Show(this);
-        }
-
-        private void btnAddFog_Click(object sender, EventArgs e)
-        {
-            uint type0 = 8;
-            m_ObjectBeingPlaced = type0 << 16;
-            
-            int type = (int)(m_ObjectBeingPlaced >> 16);
-            ushort id = (ushort)(m_ObjectBeingPlaced & 0xFFFF);
-
-            LevelObject obj = AddObject(type, id, 0, 0);
-            obj.GenerateProperties();
-            pgObjectProperties.SelectedObject = obj.m_Properties;
-
-            m_Selected = obj.m_UniqueID;
-            m_SelectedObject = obj;
-            m_LastSelected = obj.m_UniqueID;
-            m_Hovered = obj.m_UniqueID;
-            m_HoveredObject = obj;
-            m_LastHovered = obj.m_UniqueID;
-            m_LastClicked = obj.m_UniqueID;
-
-            RefreshObjects(m_SelectedObject.m_Layer);
-
-            if (!m_ShiftPressed)
-            {
-                m_ObjectBeingPlaced = 0xFFFF;
-                slStatusLabel.Text = "Object added.";
-            }
-        }
-
-        private void btnAdd14_Click(object sender, EventArgs e)
-        {
-            uint type0 = 14;
-            m_ObjectBeingPlaced = type0 << 16;
-
-            int type = (int)(m_ObjectBeingPlaced >> 16);
-            ushort id = (ushort)(m_ObjectBeingPlaced & 0xFFFF);
-
-            LevelObject obj = AddObject(type, id, 0, 0);
-            obj.GenerateProperties();
-            pgObjectProperties.SelectedObject = obj.m_Properties;
-
-            m_Selected = obj.m_UniqueID;
-            m_SelectedObject = obj;
-            m_LastSelected = obj.m_UniqueID;
-            m_Hovered = obj.m_UniqueID;
-            m_HoveredObject = obj;
-            m_LastHovered = obj.m_UniqueID;
-            m_LastClicked = obj.m_UniqueID;
-
-            RefreshObjects(m_SelectedObject.m_Layer);
-
-            if (!m_ShiftPressed)
-            {
-                m_ObjectBeingPlaced = 0xFFFF;
-                slStatusLabel.Text = "Object added.";
-            }
-        }
-
-        private void btnCLPS_Click(object sender, EventArgs e)
-        {
-            new CLPS_Form(this).Show(this);
         }
     }
 }

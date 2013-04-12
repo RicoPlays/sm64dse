@@ -13,6 +13,9 @@ namespace SM64DSe
     {
 
         LevelEditorForm _owner;
+        uint clps_addr = 0;
+        ushort clps_num = 0;
+        uint clps_size = 0;
 
         public CLPS_Form(LevelEditorForm _owner)
         {
@@ -20,21 +23,43 @@ namespace SM64DSe
 
             this._owner = _owner;
 
-            uint clps_addr = _owner.m_Overlay.ReadPointer(0x60);
-            ushort clps_num = _owner.m_Overlay.Read16(clps_addr + 0x06);
-            uint clps_size = (uint)(8 + (clps_num * 8));
+            loadCLPSData();
+        }
+
+        private void loadCLPSData()
+        {
+            clps_addr = _owner.m_Overlay.ReadPointer(0x60);
+            clps_num = _owner.m_Overlay.Read16(clps_addr + 0x06);
+            clps_size = (uint)(8 + (clps_num * 8));
             txtNumEntries.Text = "" + clps_num;
 
-            //uint entry = clps_addr + 0x08;
-            //for (int i = 0; i < clps_num; i++)
-            //{
-            //    lbxEntries.Items.Add(_owner.m_Overlay.Read8(entry));
-            //    entry += 8;
-            //}
 
-            for (int i = 0; i < 52; i++)
+            gridCLPSData.ColumnCount = 8;
+            gridCLPSData.RowCount = clps_num;
+            gridCLPSData.Columns[0].Width = 32;
+            uint entry = clps_addr + 0x08;
+            for (int i = 0; i < clps_num; i++)
             {
-                cbxLevels.Items.Add(i + " - " + Strings.LevelNames[i]);
+                gridCLPSData.Rows[i].HeaderCell.Value = "" + i;
+                for (int j = 0; j < gridCLPSData.ColumnCount; j++)
+                {
+                    gridCLPSData.Rows[i].Cells[j].Value = _owner.m_Overlay.Read8((uint)(entry + (j)));
+                    gridCLPSData.Columns[j].Width = 32;
+                }
+                entry += 8;
+            }
+        }
+
+        void gridCLPSData_CellEndEdit(object sender, System.Windows.Forms.DataGridViewCellEventArgs e)
+        {
+            try
+            {
+                _owner.m_Overlay.Write8((uint)((clps_addr + 8) + (8 * e.RowIndex) + e.ColumnIndex),
+                    (byte)int.Parse(gridCLPSData.Rows[e.RowIndex].Cells[e.ColumnIndex].Value.ToString()));
+            }
+            catch
+            {
+                MessageBox.Show("Please enter a valid number between 0 - 255.");
             }
         }
 
@@ -142,6 +167,67 @@ namespace SM64DSe
         {
             if (cbxLevels.SelectedIndex != -1)
                 copyCLPS(cbxLevels.SelectedIndex);
+        }
+
+        private void btnAdd_Click(object sender, EventArgs e)
+        {
+            if (gridCLPSData.SelectedRows.Count == 0)
+            {
+                // Make room for a new entry at end
+                AddSpace(clps_addr + clps_size, 8);
+            }
+            else
+            {
+                // Make room after selected row
+                AddSpace((uint)(clps_addr + 8 + (8 * gridCLPSData.SelectedRows[0].Index) + 8), 8);
+            }
+            // Update the number of entries
+            _owner.m_Overlay.Write16(clps_addr + 0x06, (ushort)(_owner.m_Overlay.Read16(clps_addr + 0x06) + 1));
+            // Reload data
+            loadCLPSData();
+        }
+
+        private void btnRemove_Click(object sender, EventArgs e)
+        {
+            if (gridCLPSData.SelectedRows.Count == 0)
+                MessageBox.Show("Please select a row to delete.");
+            else
+            {
+                // Remove selected row
+                RemoveSpace((uint)(clps_addr + 8 + (8 * gridCLPSData.SelectedRows[0].Index)), 8);
+                // Update the number of entries
+                _owner.m_Overlay.Write16(clps_addr + 0x06, (ushort)(_owner.m_Overlay.Read16(clps_addr + 0x06) - 1));
+                // Reload data
+                loadCLPSData();
+            }
+        }
+
+        private void btnShiftUp_Click(object sender, EventArgs e)
+        {
+            if (gridCLPSData.SelectedRows.Count == 0)
+                MessageBox.Show("Please select a row to move.");
+            else if (gridCLPSData.SelectedRows[0].Index != 0)
+            {
+                byte[] rowA = _owner.m_Overlay.ReadBlock((uint)(clps_addr + 8 + (8 * gridCLPSData.SelectedRows[0].Index)), 8);
+                byte[] rowB = _owner.m_Overlay.ReadBlock((uint)(clps_addr + 8 + (8 * (gridCLPSData.SelectedRows[0].Index - 1))), 8);
+                _owner.m_Overlay.WriteBlock((uint)(clps_addr + 8 + (8 * gridCLPSData.SelectedRows[0].Index)), rowB);
+                _owner.m_Overlay.WriteBlock((uint)(clps_addr + 8 + (8 * (gridCLPSData.SelectedRows[0].Index - 1))), rowA);
+            }
+            loadCLPSData();
+        }
+
+        private void btnShiftDown_Click(object sender, EventArgs e)
+        {
+            if (gridCLPSData.SelectedRows.Count == 0)
+                MessageBox.Show("Please select a row to move.");
+            else if (gridCLPSData.SelectedRows[0].Index != gridCLPSData.Rows.Count - 1)
+            {
+                byte[] rowA = _owner.m_Overlay.ReadBlock((uint)(clps_addr + 8 + (8 * gridCLPSData.SelectedRows[0].Index)), 8);
+                byte[] rowB = _owner.m_Overlay.ReadBlock((uint)(clps_addr + 8 + (8 * (gridCLPSData.SelectedRows[0].Index + 1))), 8);
+                _owner.m_Overlay.WriteBlock((uint)(clps_addr + 8 + (8 * gridCLPSData.SelectedRows[0].Index)), rowB);
+                _owner.m_Overlay.WriteBlock((uint)(clps_addr + 8 + (8 * (gridCLPSData.SelectedRows[0].Index + 1))), rowA);
+            }
+            loadCLPSData();
         }
     }
 }
