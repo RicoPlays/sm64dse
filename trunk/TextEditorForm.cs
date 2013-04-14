@@ -293,7 +293,7 @@ namespace SM64DSe
         private void updateEntries()
         {
             m_MsgData[selectedIndex] = txtEdit.Text;
-            int lengthDif = txtEdit.Text.Length - m_StringLengths[selectedIndex];
+            int lengthDif = EncodeString(txtEdit.Text).Count - m_StringLengths[selectedIndex];
             m_StringLengths[selectedIndex] += lengthDif;
 
             //Make or remove room for the new string if needed (don't need to for last entry)
@@ -343,16 +343,11 @@ namespace SM64DSe
                 file.WriteBlock(m_StringHeaderData[index] + m_DAT1Start, entry.ToArray<byte>());
             }
 
+            // Compress file
+            file.Compress();
+
             // Save changes
             file.SaveChanges();
-
-            //Console.WriteLine("First header address:\t" + m_StringHeadersStart);
-            //for (int i = 0; i < m_StringHeaderAddr.Length; i++ )
-            //{
-            //    Console.WriteLine("Header address " + i + ":\t" + m_StringHeaderAddr[i]);
-            //    Console.WriteLine("Header data " + i + ":\t" + m_StringHeaderData[i]);
-            //    //Console.WriteLine("Message " + i + ":\t" + m_MsgData[i]);
-            //}
         }
 
         private void btnCoins_Click(object sender, EventArgs e)

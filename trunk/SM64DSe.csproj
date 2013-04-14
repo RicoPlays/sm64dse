@@ -78,6 +78,12 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="3DStuff.cs" />
+    <Compile Include="AdditionalPatchesForm.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="AdditionalPatchesForm.Designer.cs">
+      <DependentUpon>AdditionalPatchesForm.cs</DependentUpon>
+    </Compile>
     <Compile Include="AnimationEditorForm.cs">
       <SubType>Form</SubType>
     </Compile>
@@ -159,6 +165,9 @@
     </Compile>
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <EmbeddedResource Include="AdditionalPatchesForm.resx">
+      <DependentUpon>AdditionalPatchesForm.cs</DependentUpon>
+    </EmbeddedResource>
     <EmbeddedResource Include="AnimationEditorForm.resx">
       <DependentUpon>AnimationEditorForm.cs</DependentUpon>
       <SubType>Designer</SubType>

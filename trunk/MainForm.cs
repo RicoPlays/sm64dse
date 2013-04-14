@@ -126,6 +126,7 @@ namespace SM64DSe
             lbxLevels.Items.AddRange(Strings.LevelNames);
 
             btnEditTexts.Enabled = true;
+            btnAddPatches.Enabled = true;
         }
 
         public MainForm(string[] args)
@@ -140,7 +141,7 @@ namespace SM64DSe
                 btnSecretShit.Visible = false;
             else
             {
-                btnEditTexts.Visible = true; // remove me
+                btnAddPatches.Enabled = false;
                 btnSecretShit.DropDownItems.Add("animation editor test", null, new EventHandler(this.animationeditortest));
             }
 
@@ -341,6 +342,12 @@ namespace SM64DSe
             NitroFile curKCL = Program.m_ROM.GetFileFromInternalID(curOvl.Read16((uint)(0x6A)));
             KCLEditorForm kclForm = new KCLEditorForm(curKCL);
             kclForm.Show();
+        }
+
+        private void btnAddPatches_Click(object sender, EventArgs e)
+        {
+            AdditionalPatchesForm addPatchesForm = new AdditionalPatchesForm();
+            addPatchesForm.Show();
         }
 
     }
