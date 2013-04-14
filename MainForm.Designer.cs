@@ -44,6 +44,7 @@
             this.btnUpdateODB = new System.Windows.Forms.ToolStripMenuItem();
             this.btnEditorSettings = new System.Windows.Forms.ToolStripMenuItem();
             this.btnHalp = new System.Windows.Forms.ToolStripButton();
+            this.btnAddPatches = new System.Windows.Forms.ToolStripButton();
             this.lbxLevels = new System.Windows.Forms.ListBox();
             this.ofdOpenFile = new System.Windows.Forms.OpenFileDialog();
             this.sfdSaveFile = new System.Windows.Forms.SaveFileDialog();
@@ -64,6 +65,7 @@
             this.btnSecretShit,
             this.btnKCLEditor,
             this.toolStripSeparator2,
+            this.btnAddPatches,
             this.btnOptions,
             this.btnHalp});
             this.tsToolBar.Location = new System.Drawing.Point(0, 0);
@@ -204,6 +206,15 @@
             this.btnHalp.ToolTipText = "Help, about, etc...";
             this.btnHalp.Click += new System.EventHandler(this.btnHalp_Click);
             // 
+            // btnAddPatches
+            // 
+            this.btnAddPatches.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Text;
+            this.btnAddPatches.ImageTransparentColor = System.Drawing.Color.Magenta;
+            this.btnAddPatches.Name = "btnAddPatches";
+            this.btnAddPatches.Size = new System.Drawing.Size(110, 22);
+            this.btnAddPatches.Text = "Additional Patches";
+            this.btnAddPatches.Click += new System.EventHandler(this.btnAddPatches_Click);
+            // 
             // lbxLevels
             // 
             this.lbxLevels.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom)
@@ -300,6 +311,7 @@
         private System.Windows.Forms.ToolStripButton btnHalp;
         private System.Windows.Forms.ToolStripMenuItem mnitDumpAllOvls;
         private System.Windows.Forms.ToolStripButton btnKCLEditor;
+        private System.Windows.Forms.ToolStripButton btnAddPatches;
     }
 }
 

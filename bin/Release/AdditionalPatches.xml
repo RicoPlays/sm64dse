@@ -1,0 +1,46 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Patches>
+  <Patch>
+    <PatchName>Skip Introduction</PatchName>
+    <EURAddresses>
+      <Address>81396</Address>
+    </EURAddresses>
+    <USv1Addresses>
+      <Address>81104</Address>
+    </USv1Addresses>
+    <USv2Addresses>
+      <Address>81224</Address>
+    </USv2Addresses>
+    <JAPAddresses>
+      <Address>81224</Address>
+    </JAPAddresses>
+    <EURPatchData>
+      <Size>8</Size>
+      <Value>136</Value>
+    </EURPatchData>
+    <USv1PatchData>
+      <Size>8</Size>
+      <Value>136</Value>
+    </USv1PatchData>
+    <USv2PatchData>
+      <Size>8</Size>
+      <Value>136</Value>
+    </USv2PatchData>
+    <JAPPatchData>
+      <Size>8</Size>
+      <Value>136</Value>
+    </JAPPatchData>
+    <EURRestoreData>
+      <Value>8</Value>
+    </EURRestoreData>
+    <USv1RestoreData>
+      <Value>8</Value>
+    </USv1RestoreData>
+    <USv2RestoreData>
+      <Value>8</Value>
+    </USv2RestoreData>
+    <JAPRestoreData>
+      <Value>8</Value>
+    </JAPRestoreData>
+  </Patch>
+</Patches>
