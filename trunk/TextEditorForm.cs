@@ -310,11 +310,12 @@ namespace SM64DSe
             }
             else if (lengthDif < 0 && selectedIndex != m_MsgData.Length - 1)
             {
+                // lengthDif is negative, -- +
                 uint nextStringStart = m_StringHeaderData[selectedIndex + 1] + m_DAT1Start;
                 byte[] followingData = file.ReadBlock(nextStringStart, (uint)(file.m_Data.Length - nextStringStart));
-                file.WriteBlock((uint)(nextStringStart - lengthDif), followingData);
+                file.WriteBlock((uint)(nextStringStart + lengthDif), followingData);
                 int oldSize = file.m_Data.Length;
-                Array.Resize(ref file.m_Data, oldSize - lengthDif);// Remove duplicate data at end of file
+                Array.Resize(ref file.m_Data, oldSize + lengthDif);// Remove duplicate data at end of file
             }
 
             // Update pointers to string entry data
@@ -325,13 +326,15 @@ namespace SM64DSe
                     if (lengthDif > 0)
                         m_StringHeaderData[i] += (uint)lengthDif;
                     else if (lengthDif < 0)
-                        m_StringHeaderData[i] -= (uint)lengthDif;
+                        m_StringHeaderData[i] = (uint)(m_StringHeaderData[i] + lengthDif);
 
                     file.Write32(m_StringHeaderAddr[i], m_StringHeaderData[i]);
                 }
             }
             // Update total file size
             file.Write32(0x08, (uint)(int)(file.Read32(0x08) + lengthDif));
+            // Update DAT1 size
+            file.Write32(m_DAT1Start - 0x04, (uint)(int)(file.Read32(m_DAT1Start - 0x04) + lengthDif));
         }
 
         private void writeData()
