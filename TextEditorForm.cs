@@ -24,6 +24,7 @@ using System.Drawing;
 using System.Linq;
 using System.Text;
 using System.Windows.Forms;
+using System.Xml;
 
 namespace SM64DSe
 {
@@ -49,6 +50,7 @@ namespace SM64DSe
 
         int limit = 45;// Length of preview text to be shown
         int selectedIndex;
+        int langIndex = -1;
 
         private void TextEditorForm_Load(object sender, EventArgs e)
         {
@@ -81,7 +83,7 @@ namespace SM64DSe
 
             for (int i = 0; i < langs.Length; i++)
             {
-                cmbLanguages.Items.Add(langs[i]);
+                btnLanguages.DropDownItems.Add(langs[i]).Tag = i;
             }
 
         }
@@ -157,6 +159,14 @@ namespace SM64DSe
                             case 0x4C: thechar = '&'; break;
                             case 0x4D: thechar = ' '; break;
                             case 0x4E: thechar = '/'; break;
+                            case 0xEE: thetext += "[\\r]C"; straddr++; length++; break;
+                            case 0xF0: thetext += "[\\r]S"; break;
+                            case 0xF1: thetext += "[\\r]s"; break;
+                            case 0xF2: thetext += "[\\r]D"; straddr++; length++; break;
+                            case 0xF4: thetext += "[\\r]A"; straddr++; length++; break;
+                            case 0xF6: thetext += "[\\r]B"; straddr++; length++; break;
+                            case 0xF8: thetext += "[\\r]X"; straddr++; length++; break;
+                            case 0xFA: thetext += "[\\r]Y"; straddr++; length++; break;
                         }
                     }
 
@@ -166,8 +176,18 @@ namespace SM64DSe
                         thetext += "\r\n";
                     else if (cur == 0xFF)
                         break;
-                    else
-                        thetext += String.Format("[0x{0:X2}]", cur);
+                    else if (cur == 0xFE)// Special Character
+                    {
+                        int len = file.Read8(straddr);
+                        thetext += "[\\r]";
+                        thetext += String.Format("{0:X2}", cur);
+                        for (int spec = 0; spec < len - 1; spec++)
+                        {
+                            thetext += String.Format("{0:X2}", file.Read8((uint)(straddr + spec)));
+                        }
+                        length += (len - 1);// Already increased by 1 at start
+                        straddr += (uint)(len - 1);
+                    }
                 }
 
                 m_MsgData[i] = thetext;
@@ -176,83 +196,121 @@ namespace SM64DSe
                 string shortversion = thetext.Replace("\r\n", " ");
                 shortversion = (thetext.Length > limit) ? thetext.Substring(0, limit - 3) + "..." : thetext;
                 lbxMsgList.Items.Add(string.Format("[{0:X4}] {1}", i, shortversion));
+
+                btnImport.Enabled = true; btnExport.Enabled = true;
             }
         }
 
         private List<byte> EncodeString(String msg)
         {
-            String newMsg = msg;
-            char[] newTextByte = msg.ToCharArray();
+            String newMsg = msg.Replace("[\\r]", "\r");
+            char[] newTextByte = newMsg.ToCharArray();
             List<byte> encodedString = new List<byte>();
-            
 
-            bool flagSpecialChar = false;// For inserting New Line and special DS-specific characters
-
-            for (int i = 0; i < newTextByte.Length; i++)
+            int i = 0;
+            while (i < newTextByte.Length)
             {
-                byte byteToWrite = 0;
-
-                if (!flagSpecialChar)
+                // Upper
+                // nintendo encoding = ('A' + cur - 0x0A);
+                // ascii = A + ne - 0x0A
+                // ascii - A + 0x0A = ne
+                if (Char.IsNumber(newTextByte[i]))// Numeric
+                    encodedString.Add((byte)(newTextByte[i] - '0'));
+                else if (newTextByte[i] >= 0x41 && newTextByte[i] <= 0x5A)//Uppercase
+                    encodedString.Add((byte)(newTextByte[i] - 'A' + 0x0A));
+                else if (newTextByte[i] >= 0x61 && newTextByte[i] <= 0x7A)// Lowercase
+                    encodedString.Add((byte)(newTextByte[i] - 'a' + 0x2D));
+                else if (newTextByte[i] >= 0x80 && newTextByte[i] < (0xFF + 0x01))// Extended characters 128 to 255
+                    encodedString.Add((byte)(newTextByte[i] - 0x30));// Character - offset of 0x30 to get Nintendo character
+                else if (newTextByte[i].Equals('\r'))// New Line is \r\n
                 {
-                    // Upper
-                    // nintendo encoding = ('A' + cur - 0x0A);
-                    // ascii = A + ne - 0x0A
-                    // ascii - A + 0x0A = ne
-                    if (Char.IsNumber(newTextByte[i]))// Numeric
-                        byteToWrite = (byte)(newTextByte[i] - '0');
-                    else if (newTextByte[i] >= 0x41 && newTextByte[i] <= 0x5A)//Uppercase
-                        byteToWrite = (byte)(newTextByte[i] - 'A' + 0x0A);
-                    else if (newTextByte[i] >= 0x61 && newTextByte[i] <= 0x7A)// Lowercase
-                        byteToWrite = (byte)(newTextByte[i] - 'a' + 0x2D);
-                    else if (newTextByte[i] >= 0x80 && newTextByte[i] < (0xFF + 0x01))// Extended characters 128 to 255
-                        byteToWrite = (byte)(newTextByte[i] - 0x30);// Character - offset of 0x30 to get Nintendo character
-                    else if (newTextByte[i].Equals('\r'))// New Line is \r\n and also using \r for special DS-only characters like D-Pad icon
+                    i++;// Point after r
+                    if (newTextByte[i].Equals('\n'))
                     {
-                        flagSpecialChar = true;
-                        continue;// Now go check the next character
+                        encodedString.Add((byte)0xFD);
+                        i++;
+                        continue;
                     }
-
-                    else// Punctuation and other characters
+                    // 0xFE denotes special character
+                    else if (newTextByte[i].Equals('F') && newTextByte[i + 1].Equals('E'))
                     {
-                        switch (newTextByte[i])
+                        //FE 05 03 00 06 - [R) glyph
+                        //FE 07 01 00 00 00 XX - number of stars till you get XX
+                        String byte2 = "" + newTextByte[i + 2] + newTextByte[i + 3];
+                        int len = int.Parse(byte2, System.Globalization.NumberStyles.HexNumber);
+                        for (int j = 0; j < (len * 2); j += 2)
                         {
-                            case '?': byteToWrite = (byte)(newTextByte[i] - '?' + 0x26); break;
-                            case '!': byteToWrite = (byte)(newTextByte[i] - '!' + 0x27); break;
-                            case '~': byteToWrite = (byte)(newTextByte[i] - '~' + 0x28); break;
-                            case ',': byteToWrite = (byte)(newTextByte[i] - ',' + 0x29); break;
-                            case '“': byteToWrite = (byte)(newTextByte[i] - '“' + 0x2A); break;
-                            case '”': byteToWrite = (byte)(newTextByte[i] - '”' + 0x2B); break;
-
-                            case '-': byteToWrite = (byte)(newTextByte[i] - '-' + 0x47); break;
-                            case '.': byteToWrite = (byte)(newTextByte[i] - '.' + 0x48); break;
-                            case '\'': byteToWrite = (byte)(newTextByte[i] - '\'' + 0x49); break;
-                            case ':': byteToWrite = (byte)(newTextByte[i] - ':' + 0x4A); break;
-                            case ';': byteToWrite = (byte)(newTextByte[i] - ';' + 0x4B); break;
-                            case '&': byteToWrite = (byte)(newTextByte[i] - '&' + 0x4C); break;
-                            case ' ': byteToWrite = (byte)(newTextByte[i] - ' ' + 0x4D); break;
-                            case '/': byteToWrite = (byte)(newTextByte[i] - '/' + 0x4E); break;
+                            String temp = "" + newTextByte[i + j] + newTextByte[i + j + 1];
+                            encodedString.Add((byte)int.Parse(temp, System.Globalization.NumberStyles.HexNumber));
                         }
+                        i += (len * 2);
+
+                        continue;
                     }
-                }
-                else if (flagSpecialChar)
-                {
-                    if (newTextByte[i] == '\n')
-                    {
-                        byteToWrite = 0xFD;
-                    }
-                    // '\r' followed by a number refers to the DS-only characters
-                    // Some of these characters are actually 2 characters long
                     else
                     {
-                        int specialCharOffset = 0x42;
-                        // Difficulty dealing with the characters past '?' - Rom crashes
-
-                        byteToWrite = (byte)(newTextByte[i] - specialCharOffset);
+                        // 0x42
+                        int special = 0x42;
+                        switch (newTextByte[i])
+                        {
+                            case 'C':
+                                encodedString.Add((byte)(48 - special));
+                                encodedString.Add((byte)(49 - special));
+                                break;
+                            case 'S':
+                                encodedString.Add((byte)(50 - special));
+                                break;
+                            case 's':
+                                encodedString.Add((byte)(51 - special));
+                                break;
+                            case 'D':
+                                encodedString.Add((byte)(52 - special));
+                                encodedString.Add((byte)(53 - special));
+                                break;
+                            case 'A':
+                                encodedString.Add((byte)(54 - special));
+                                encodedString.Add((byte)(55 - special));
+                                break;
+                            case 'B':
+                                encodedString.Add((byte)(56 - special));
+                                encodedString.Add((byte)(57 - special));
+                                break;
+                            case 'X':
+                                encodedString.Add((byte)(58 - special));
+                                encodedString.Add((byte)(59 - special));
+                                break;
+                            case 'Y':
+                                encodedString.Add((byte)(60 - special));
+                                encodedString.Add((byte)(61 - special));
+                                break;
+                        }
+                        i++;
+                        continue;
                     }
-                    flagSpecialChar = false;// Back to normal text
                 }
 
-                encodedString.Add(byteToWrite);
+                else// Punctuation and other characters
+                {
+                    switch (newTextByte[i])
+                    {
+                        case '?': encodedString.Add((byte)(newTextByte[i] - '?' + 0x26)); break;
+                        case '!': encodedString.Add((byte)(newTextByte[i] - '!' + 0x27)); break;
+                        case '~': encodedString.Add((byte)(newTextByte[i] - '~' + 0x28)); break;
+                        case ',': encodedString.Add((byte)(newTextByte[i] - ',' + 0x29)); break;
+                        case '“': encodedString.Add((byte)(newTextByte[i] - '“' + 0x2A)); break;
+                        case '”': encodedString.Add((byte)(newTextByte[i] - '”' + 0x2B)); break;
+
+                        case '-': encodedString.Add((byte)(newTextByte[i] - '-' + 0x47)); break;
+                        case '.': encodedString.Add((byte)(newTextByte[i] - '.' + 0x48)); break;
+                        case '\'': encodedString.Add((byte)(newTextByte[i] - '\'' + 0x49)); break;
+                        case ':': encodedString.Add((byte)(newTextByte[i] - ':' + 0x4A)); break;
+                        case ';': encodedString.Add((byte)(newTextByte[i] - ';' + 0x4B)); break;
+                        case '&': encodedString.Add((byte)(newTextByte[i] - '&' + 0x4C)); break;
+                        case ' ': encodedString.Add((byte)(newTextByte[i] - ' ' + 0x4D)); break;
+                        case '/': encodedString.Add((byte)(newTextByte[i] - '/' + 0x4E)); break;
+                    }
+                }
+                i++;
             }
 
             encodedString.Add(0xFF);// End of message
@@ -273,7 +331,7 @@ namespace SM64DSe
         {
             if (lbxMsgList.SelectedIndex != -1)
             {
-                updateEntries();
+                updateEntries(txtEdit.Text, selectedIndex);
                 m_EditedEntries.Add(selectedIndex);
                 string shortversion = m_MsgData[selectedIndex].Replace("\r\n", " ");
                 shortversion = (m_MsgData[selectedIndex].Length > limit) ? m_MsgData[selectedIndex].Substring(0, limit - 3) + "..." : m_MsgData[selectedIndex];
@@ -286,21 +344,21 @@ namespace SM64DSe
             writeData();
 
             int index = lbxMsgList.SelectedIndex;
-            ReadStrings("data/message/msg_data_" + langNames[cmbLanguages.SelectedIndex] + ".bin");//Reload texts after saving
+            ReadStrings("data/message/msg_data_" + langNames[langIndex] + ".bin");//Reload texts after saving
             lbxMsgList.SelectedIndex = index;
         }
 
-        private void updateEntries()
+        private void updateEntries(String msg, int index)
         {
-            m_MsgData[selectedIndex] = txtEdit.Text;
-            int lengthDif = EncodeString(txtEdit.Text).Count - m_StringLengths[selectedIndex];
-            m_StringLengths[selectedIndex] += lengthDif;
+            m_MsgData[index] = msg;
+            int lengthDif = EncodeString(msg).Count - m_StringLengths[index];
+            m_StringLengths[index] += lengthDif;
 
             //Make or remove room for the new string if needed (don't need to for last entry)
-            if (lengthDif > 0 && selectedIndex != m_MsgData.Length - 1)
+            if (lengthDif > 0 && index != m_MsgData.Length - 1)
             {
-                uint curStringStart = m_StringHeaderData[selectedIndex] + m_DAT1Start;
-                uint nextStringStart = m_StringHeaderData[selectedIndex + 1] + m_DAT1Start;
+                uint curStringStart = m_StringHeaderData[index] + m_DAT1Start;
+                uint nextStringStart = m_StringHeaderData[index + 1] + m_DAT1Start;
                 byte[] followingData = file.ReadBlock(nextStringStart, (uint)(file.m_Data.Length - nextStringStart));
                 for (int i = (int)curStringStart; i < (int)nextStringStart + lengthDif; i++)
                 {
@@ -308,10 +366,10 @@ namespace SM64DSe
                 }
                 file.WriteBlock((uint)(nextStringStart + lengthDif), followingData);
             }
-            else if (lengthDif < 0 && selectedIndex != m_MsgData.Length - 1)
+            else if (lengthDif < 0 && index != m_MsgData.Length - 1)
             {
                 // lengthDif is negative, -- +
-                uint nextStringStart = m_StringHeaderData[selectedIndex + 1] + m_DAT1Start;
+                uint nextStringStart = m_StringHeaderData[index + 1] + m_DAT1Start;
                 byte[] followingData = file.ReadBlock(nextStringStart, (uint)(file.m_Data.Length - nextStringStart));
                 file.WriteBlock((uint)(nextStringStart + lengthDif), followingData);
                 int oldSize = file.m_Data.Length;
@@ -321,7 +379,7 @@ namespace SM64DSe
             // Update pointers to string entry data
             if (lengthDif != 0)
             {
-                for (int i = selectedIndex + 1; i < m_MsgData.Length; i++)
+                for (int i = index + 1; i < m_MsgData.Length; i++)
                 {
                     if (lengthDif > 0)
                         m_StringHeaderData[i] += (uint)lengthDif;
@@ -347,7 +405,7 @@ namespace SM64DSe
             }
 
             // Compress file
-            file.Compress();
+            //file.Compress();
 
             // Save changes
             file.SaveChanges();
@@ -355,59 +413,60 @@ namespace SM64DSe
 
         private void btnCoins_Click(object sender, EventArgs e)
         {
-            txtEdit.Text = txtEdit.Text + '\r' + '0' + '\r' + '1';
+            txtEdit.Text += "[\\r]C";
         }
 
         private void btnStarFull_Click(object sender, EventArgs e)
         {
-            txtEdit.Text = txtEdit.Text + '\r' + '2';
+            txtEdit.Text += "[\\r]S";
         }
 
         private void btnStarEmpty_Click(object sender, EventArgs e)
         {
-            txtEdit.Text = txtEdit.Text + '\r' + '3';
+            txtEdit.Text += "[\\r]s";
         }
 
         private void btnDPad_Click(object sender, EventArgs e)
         {
-            txtEdit.Text = txtEdit.Text + '\r' + '4' + '\r' + '5';
+            // FE05030000 doesn't always appear, depends on message
+            txtEdit.Text += "[\\r]D";
         }
 
         private void btnA_Click(object sender, EventArgs e)
         {
-            txtEdit.Text = txtEdit.Text + '\r' + '6' + '\r' + '7';
+            txtEdit.Text += "[\\r]A";
         }
 
         private void btnB_Click(object sender, EventArgs e)
         {
-            txtEdit.Text = txtEdit.Text + '\r' + '8' + '\r' + '9';
+            txtEdit.Text += "[\\r]B";
         }
 
         private void btnX_Click(object sender, EventArgs e)
         {
-            txtEdit.Text = txtEdit.Text + '\r' + ':' + '\r' + ';';
+            txtEdit.Text += "[\\r]X";
         }
 
         private void btnY_Click(object sender, EventArgs e)
         {
-            txtEdit.Text = txtEdit.Text + '\r' + '<' + '\r' + '=';
+            txtEdit.Text += "[\\r]Y";
         }
 
         private void btnL_Click(object sender, EventArgs e)
         {
-            txtEdit.Text = txtEdit.Text + '\r' + '>' + '\r' + '?' + '\r' + '@';
+            txtEdit.Text += "[\\r]FE05030005";
         }
 
         private void btnR_Click(object sender, EventArgs e)
         {
-            txtEdit.Text = txtEdit.Text + '\r' + 'A' + '\r' + 'B' + '\r' + 'C';
+            txtEdit.Text += "[\\r]FE05030006";
         }
 
-        private void cmbLanguages_SelectedIndexChanged(object sender, EventArgs e)
+        void btnLanguages_DropDownItemClicked(object sender, System.Windows.Forms.ToolStripItemClickedEventArgs e)
         {
-            ReadStrings("data/message/msg_data_" + langNames[cmbLanguages.SelectedIndex] + ".bin");
+            langIndex = int.Parse(e.ClickedItem.Tag.ToString());
+            ReadStrings("data/message/msg_data_" + langNames[int.Parse(e.ClickedItem.Tag.ToString())] + ".bin");
         }
-
         private void btnHelp_Click(object sender, EventArgs e)
         {
             MessageBox.Show("To begin editing, select a language using the drop-down menu. This will display \n" +
@@ -415,13 +474,103 @@ namespace SM64DSe
                             "Next, click on the string you want to edit on the left-hand side.\n" +
                             "The full text will then be displayed in the upper-right box.\n\n" +
                             "Type your new text in the text box on the right-hand side.\n" +
-                            "When done editing an entry, click 'Update String'.\n\nWhen you have finished, click " + 
-                            "on 'Save Changes'\n\n" + 
-                            "Use the buttons under the text editing box to insert the special characters.\n" +
+                            "When done editing an entry, click 'Update String'.\n\nWhen you have finished, click " +
+                            "on 'Save Changes'\n\n" +
+                            "Use the buttons under the text editing box to insert the special characters.\n" + 
+                            "[\\r] is the special character used by the text editor to indicate special characters.\n" + 
                             "When reading, their codes are as follows:\n\n" +
                             "[0xEE][0xEF] \t Coins\n[0xF0] \t\t Star Full\n[0xF1] \t\t Star Empty\n" +
                             "[0xF2][0xF3] \t D-Pad\n[0xF4][0xF5] \t A\n[0xF6][0xF7] \t B\n" +
                             "[0xF8][0xF9] \t X\n[0xFA][0xFB] \t Y");
+        }
+
+        private void btnImport_Click(object sender, EventArgs e)
+        {
+            ImportXML();
+        }
+
+        private void ImportXML()
+        {
+            OpenFileDialog ofd = new OpenFileDialog();
+            ofd.Filter = "XML Document (.xml)|*.xml";//Filter by .xml
+            DialogResult dlgeResult = ofd.ShowDialog();
+            if (dlgeResult == DialogResult.Cancel)
+                return;
+
+            lbxMsgList.Items.Clear();
+
+            using (XmlReader reader = XmlReader.Create(ofd.FileName))
+            {
+                reader.MoveToContent();
+
+                int i = 0;
+                while (reader.Read())
+                {
+                    if (reader.NodeType.Equals(XmlNodeType.Element))
+                    {
+                        switch (reader.LocalName)
+                        {
+                            case "Text":
+                                if (i < m_MsgData.Length)
+                                {
+                                    String temp = reader.ReadElementContentAsString();
+                                    temp = temp.Replace("\n", "\r\n");
+                                    temp = temp.Replace("[\\r]", "\r");
+                                    m_MsgData[i] = temp;
+                                    string shortversion = m_MsgData[i].Replace("\r\n", " ");
+                                    shortversion = (m_MsgData[i].Length > limit) ? m_MsgData[i].Substring(0, limit - 3) + "..." : m_MsgData[i];
+                                    lbxMsgList.Items.Add(string.Format("[{0:X4}] {1}", i, shortversion));
+                                }
+                                i++;
+                                break;
+                        }
+                    }
+                }
+            }
+
+            for (int i = 0; i < m_MsgData.Length; i++)
+            {
+                updateEntries(m_MsgData[i], i);
+                List<byte> entry = EncodeString(m_MsgData[i]);
+                file.WriteBlock(m_StringHeaderData[i] + m_DAT1Start, entry.ToArray<byte>());
+            }
+
+            file.SaveChanges();
+
+            ReadStrings("data/message/msg_data_" + langNames[langIndex] + ".bin");//Reload texts after saving
+        }
+
+        private void ExportXML()
+        {
+            SaveFileDialog saveXML = new SaveFileDialog();
+            saveXML.FileName = "SM64DS Texts";//Default name
+            saveXML.DefaultExt = ".xml";//Default file extension
+            saveXML.Filter = "XML Document (.xml)|*.xml";//Filter by .xml
+            if (saveXML.ShowDialog() == DialogResult.Cancel)
+                return;
+
+            XmlWriterSettings settings = new XmlWriterSettings();
+            settings.Indent = true;
+            settings.IndentChars = "  ";
+            settings.NewLineChars = "\r\n";
+            settings.NewLineHandling = NewLineHandling.Replace;
+            using (XmlWriter writer = XmlWriter.Create(saveXML.FileName, settings))
+            {
+                writer.WriteStartDocument();
+                writer.WriteStartElement("SM64DS_Texts");
+
+                for (int i = 0; i < m_MsgData.Length; i++)
+                {
+                    writer.WriteElementString("Text", m_MsgData[i]);
+                }
+                writer.WriteEndElement();
+                writer.WriteEndDocument();
+            }
+        }
+
+        private void btnExport_Click(object sender, EventArgs e)
+        {
+            ExportXML();
         }
 
     }
