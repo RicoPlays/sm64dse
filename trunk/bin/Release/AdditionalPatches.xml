@@ -43,4 +43,47 @@
       <Value>8</Value>
     </JAPRestoreData>
   </Patch>
+  <Patch>
+    <PatchName>All Minigames Unlocked by Skelux</PatchName>
+    <EURAddresses>
+      <Address>79428</Address>
+    </EURAddresses>
+    <USv1Addresses>
+      <Address>79136</Address>
+    </USv1Addresses>
+    <USv2Addresses>
+      <Address>79256</Address>
+    </USv2Addresses>
+    <JAPAddresses>
+      <Address>79256</Address>
+    </JAPAddresses>
+    <EURPatchData>
+      <Size>32</Size>
+      <Value>4278231267</Value>
+    </EURPatchData>
+    <USv1PatchData>
+      <Size>32</Size>
+      <Value>4278231267</Value>
+    </USv1PatchData>
+    <USv2PatchData>
+      <Size>32</Size>
+      <Value>4278231267</Value>
+    </USv2PatchData>
+    <JAPPatchData>
+      <Size>32</Size>
+      <Value>4278231267</Value>
+    </JAPPatchData>
+    <EURRestoreData>
+      <Value>3758161938</Value>
+    </EURRestoreData>
+    <USv1RestoreData>
+      <Value>34198900</Value>
+    </USv1RestoreData>
+    <USv2RestoreData>
+      <Value>3813670940</Value>
+    </USv2RestoreData>
+    <JAPRestoreData>
+      <Value>3813670940</Value>
+    </JAPRestoreData>
+  </Patch>
 </Patches>

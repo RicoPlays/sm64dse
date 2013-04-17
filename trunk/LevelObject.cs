@@ -172,15 +172,14 @@ namespace SM64DSe
             Position.Z = (float)((short)m_Overlay.Read16(m_Offset + 0x6)) / 1000f;
             YRotation = ((float)((short)m_Overlay.Read16(m_Offset + 0xA)) / 4096f) * 22.5f;
 
-            Parameters = new ushort[4];
-            Parameters[0] = m_Overlay.Read8(m_Offset + 0xF);
-            Parameters[1] = m_Overlay.Read8(m_Offset + 0xE);
-            Parameters[2] = m_Overlay.Read16(m_Offset + 0x8);
-            Parameters[3] = m_Overlay.Read16(m_Offset + 0xC);
+            Parameters = new ushort[3];
+            Parameters[0] = m_Overlay.Read16(m_Offset + 0xE);
+            Parameters[1] = m_Overlay.Read16(m_Offset + 0x8);
+            Parameters[2] = m_Overlay.Read16(m_Offset + 0xC);
 
             m_Renderer = ObjectRenderer.FromLevelObject(this);
-           // m_PParams = new Hashtable();
-            m_Properties = new PropertyTable(); 
+            // m_PParams = new Hashtable();
+            m_Properties = new PropertyTable();
             GenerateProperties();
         }
 
@@ -214,9 +213,8 @@ namespace SM64DSe
             }*/
 
             m_Properties.Properties.Add(new PropertySpec("Parameter 1", typeof(ushort), "Object-specific (raw)", "", Parameters[0], "", typeof(HexNumberTypeConverter)));
-            m_Properties.Properties.Add(new PropertySpec("Parameter 2", typeof(ushort), "Object-specific (raw)", "", Parameters[2], "", typeof(HexNumberTypeConverter)));
-            m_Properties.Properties.Add(new PropertySpec("Parameter 3", typeof(ushort), "Object-specific (raw)", "", Parameters[3], "", typeof(HexNumberTypeConverter)));
-            m_Properties.Properties.Add(new PropertySpec("Parameter 4", typeof(ushort), "Object-specific (raw)", "", Parameters[1], "", typeof(HexNumberTypeConverter)));
+            m_Properties.Properties.Add(new PropertySpec("Parameter 2", typeof(ushort), "Object-specific (raw)", "", Parameters[1], "", typeof(HexNumberTypeConverter)));
+            m_Properties.Properties.Add(new PropertySpec("Parameter 3", typeof(ushort), "Object-specific (raw)", "", Parameters[2], "", typeof(HexNumberTypeConverter)));
 
             m_Properties["Star"] = m_Layer;
             m_Properties["Area"] = m_Area;
@@ -226,9 +224,8 @@ namespace SM64DSe
             m_Properties["Z position"] = Position.Z;
             m_Properties["Y rotation"] = YRotation;
             m_Properties["Parameter 1"] = Parameters[0];
-            m_Properties["Parameter 2"] = Parameters[2];
-            m_Properties["Parameter 3"] = Parameters[3];
-            m_Properties["Parameter 4"] = Parameters[1];
+            m_Properties["Parameter 2"] = Parameters[1];
+            m_Properties["Parameter 3"] = Parameters[2];
         }
 
         public override int SetProperty(string field, object newval)
@@ -239,7 +236,7 @@ namespace SM64DSe
                 uint pmask = (uint)(Math.Pow(2, pparam.m_ParamInfo.m_Length) - 1);
                 Parameters[pparam.m_ParamInfo.m_Offset >> 4] &= (ushort)(~(pmask << (pparam.m_ParamInfo.m_Offset & 0xF)));
                 Parameters[pparam.m_ParamInfo.m_Offset >> 4] |= (ushort)((pparam.m_ParamValue & pmask) << (pparam.m_ParamInfo.m_Offset & 0xF));
-                
+               
                 m_Properties["Parameter 1"] = Parameters[0];
                 m_Properties["Parameter 2"] = Parameters[1];
                 m_Properties["Parameter 3"] = Parameters[2];
@@ -259,9 +256,8 @@ namespace SM64DSe
                     case "Z position": Position.Z = (float)newval; break;
                     case "Y rotation": YRotation = (float)newval; break;
                     case "Parameter 1": Parameters[0] = (ushort)newval; break;
-                    case "Parameter 2": Parameters[2] = (ushort)newval; break;
-                    case "Parameter 3": Parameters[3] = (ushort)newval; break;
-                    case "Parameter 4": Parameters[1] = (ushort)newval; break;
+                    case "Parameter 2": Parameters[1] = (ushort)newval; break;
+                    case "Parameter 3": Parameters[2] = (ushort)newval; break;
                 }
 
                 if ((field == "Object ID") || (field.IndexOf("Parameter ") != -1))
@@ -286,12 +282,12 @@ namespace SM64DSe
             m_Overlay.Write16(m_Offset + 0x6, (ushort)((short)(Position.Z * 1000f)));
             m_Overlay.Write16(m_Offset + 0xA, (ushort)((short)((YRotation / 22.5f) * 4096f)));
 
-            m_Overlay.Write8(m_Offset + 0xF, (byte)Parameters[0]);
-            m_Overlay.Write8(m_Offset + 0xE, (byte)Parameters[1]);
-            m_Overlay.Write16(m_Offset + 0x8, Parameters[2]);
-            m_Overlay.Write16(m_Offset + 0xC, Parameters[3]);
+            m_Overlay.Write16(m_Offset + 0xE, Parameters[0]);
+            m_Overlay.Write16(m_Offset + 0x8, Parameters[1]);
+            m_Overlay.Write16(m_Offset + 0xC, Parameters[2]);
         }
     }
+
 
     public class SimpleObject : LevelObject
     {
