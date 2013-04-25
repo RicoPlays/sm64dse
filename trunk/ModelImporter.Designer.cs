@@ -42,6 +42,9 @@
             this.groupBox2 = new System.Windows.Forms.GroupBox();
             this.cbWipeLevel = new System.Windows.Forms.CheckBox();
             this.groupBox1 = new System.Windows.Forms.GroupBox();
+            this.lbl02 = new System.Windows.Forms.Label();
+            this.txtThreshold = new System.Windows.Forms.TextBox();
+            this.lbl01 = new System.Windows.Forms.Label();
             this.cbDropExtraShit = new System.Windows.Forms.CheckBox();
             this.cbMakeAcmlmboard = new System.Windows.Forms.CheckBox();
             this.lblScale = new System.Windows.Forms.Label();
@@ -49,16 +52,18 @@
             this.tbScale = new System.Windows.Forms.TextBox();
             this.cbZMirror = new System.Windows.Forms.CheckBox();
             this.ofdLoadModel = new System.Windows.Forms.OpenFileDialog();
-            this.lbl01 = new System.Windows.Forms.Label();
-            this.txtThreshold = new System.Windows.Forms.TextBox();
-            this.lbl02 = new System.Windows.Forms.Label();
+            this.gridColTypes = new System.Windows.Forms.DataGridView();
+            this.btnAssignTypes = new System.Windows.Forms.Button();
+            this.label1 = new System.Windows.Forms.Label();
             this.tsToolBar.SuspendLayout();
             this.ssStatusBar.SuspendLayout();
+            ((System.ComponentModel.ISupportInitialize)(this.spcMainContainer)).BeginInit();
             this.spcMainContainer.Panel1.SuspendLayout();
             this.spcMainContainer.Panel2.SuspendLayout();
             this.spcMainContainer.SuspendLayout();
             this.groupBox2.SuspendLayout();
             this.groupBox1.SuspendLayout();
+            ((System.ComponentModel.ISupportInitialize)(this.gridColTypes)).BeginInit();
             this.SuspendLayout();
             // 
             // tsToolBar
@@ -142,12 +147,12 @@
             this.glModelView.TabIndex = 2;
             this.glModelView.VSync = false;
             this.glModelView.Load += new System.EventHandler(this.glModelView_Load);
-            this.glModelView.MouseWheel += new System.Windows.Forms.MouseEventHandler(this.glModelView_MouseWheel);
             this.glModelView.Paint += new System.Windows.Forms.PaintEventHandler(this.glModelView_Paint);
-            this.glModelView.MouseMove += new System.Windows.Forms.MouseEventHandler(this.glModelView_MouseMove);
             this.glModelView.MouseDown += new System.Windows.Forms.MouseEventHandler(this.glModelView_MouseDown);
-            this.glModelView.Resize += new System.EventHandler(this.glModelView_Resize);
+            this.glModelView.MouseMove += new System.Windows.Forms.MouseEventHandler(this.glModelView_MouseMove);
             this.glModelView.MouseUp += new System.Windows.Forms.MouseEventHandler(this.glModelView_MouseUp);
+            this.glModelView.MouseWheel += new System.Windows.Forms.MouseEventHandler(this.glModelView_MouseWheel);
+            this.glModelView.Resize += new System.EventHandler(this.glModelView_Resize);
             // 
             // spcMainContainer
             // 
@@ -162,6 +167,9 @@
             // 
             // spcMainContainer.Panel1
             // 
+            this.spcMainContainer.Panel1.Controls.Add(this.label1);
+            this.spcMainContainer.Panel1.Controls.Add(this.btnAssignTypes);
+            this.spcMainContainer.Panel1.Controls.Add(this.gridColTypes);
             this.spcMainContainer.Panel1.Controls.Add(this.groupBox2);
             this.spcMainContainer.Panel1.Controls.Add(this.groupBox1);
             // 
@@ -213,6 +221,32 @@
             this.groupBox1.TabIndex = 5;
             this.groupBox1.TabStop = false;
             this.groupBox1.Text = "Model settings";
+            // 
+            // lbl02
+            // 
+            this.lbl02.ForeColor = System.Drawing.SystemColors.ControlDark;
+            this.lbl02.Location = new System.Drawing.Point(26, 87);
+            this.lbl02.Name = "lbl02";
+            this.lbl02.Size = new System.Drawing.Size(109, 32);
+            this.lbl02.TabIndex = 10;
+            this.lbl02.Text = "Enter 0 to keep all faces, default 0.001";
+            // 
+            // txtThreshold
+            // 
+            this.txtThreshold.Location = new System.Drawing.Point(150, 70);
+            this.txtThreshold.Name = "txtThreshold";
+            this.txtThreshold.Size = new System.Drawing.Size(86, 20);
+            this.txtThreshold.TabIndex = 9;
+            this.txtThreshold.Text = "0.001";
+            // 
+            // lbl01
+            // 
+            this.lbl01.AutoSize = true;
+            this.lbl01.Location = new System.Drawing.Point(26, 73);
+            this.lbl01.Name = "lbl01";
+            this.lbl01.Size = new System.Drawing.Size(118, 13);
+            this.lbl01.TabIndex = 8;
+            this.lbl01.Text = "Drop faces smaller than";
             // 
             // cbDropExtraShit
             // 
@@ -287,31 +321,35 @@
             this.ofdLoadModel.Filter = "Wavefront (*.obj)|*.obj";
             this.ofdLoadModel.Title = "Load model file...";
             // 
-            // lbl01
+            // gridColTypes
             // 
-            this.lbl01.AutoSize = true;
-            this.lbl01.Location = new System.Drawing.Point(26, 73);
-            this.lbl01.Name = "lbl01";
-            this.lbl01.Size = new System.Drawing.Size(118, 13);
-            this.lbl01.TabIndex = 8;
-            this.lbl01.Text = "Drop faces smaller than";
+            this.gridColTypes.AllowUserToAddRows = false;
+            this.gridColTypes.AllowUserToDeleteRows = false;
+            this.gridColTypes.ColumnHeadersHeightSizeMode = System.Windows.Forms.DataGridViewColumnHeadersHeightSizeMode.AutoSize;
+            this.gridColTypes.Location = new System.Drawing.Point(4, 278);
+            this.gridColTypes.Name = "gridColTypes";
+            this.gridColTypes.RowHeadersVisible = false;
+            this.gridColTypes.Size = new System.Drawing.Size(249, 133);
+            this.gridColTypes.TabIndex = 8;
             // 
-            // txtThreshold
+            // btnAssignTypes
             // 
-            this.txtThreshold.Location = new System.Drawing.Point(150, 70);
-            this.txtThreshold.Name = "txtThreshold";
-            this.txtThreshold.Size = new System.Drawing.Size(86, 20);
-            this.txtThreshold.TabIndex = 9;
-            this.txtThreshold.Text = "0.001";
+            this.btnAssignTypes.Location = new System.Drawing.Point(4, 417);
+            this.btnAssignTypes.Name = "btnAssignTypes";
+            this.btnAssignTypes.Size = new System.Drawing.Size(87, 23);
+            this.btnAssignTypes.TabIndex = 9;
+            this.btnAssignTypes.Text = "Assign Types";
+            this.btnAssignTypes.UseVisualStyleBackColor = true;
+            this.btnAssignTypes.Click += new System.EventHandler(this.btnAssignTypes_Click);
             // 
-            // lbl02
+            // label1
             // 
-            this.lbl02.ForeColor = System.Drawing.SystemColors.ControlDark;
-            this.lbl02.Location = new System.Drawing.Point(26, 87);
-            this.lbl02.Name = "lbl02";
-            this.lbl02.Size = new System.Drawing.Size(109, 32);
-            this.lbl02.TabIndex = 10;
-            this.lbl02.Text = "Enter 0 to keep all faces, default 0.001";
+            this.label1.AutoSize = true;
+            this.label1.Location = new System.Drawing.Point(3, 262);
+            this.label1.Name = "label1";
+            this.label1.Size = new System.Drawing.Size(139, 13);
+            this.label1.TabIndex = 10;
+            this.label1.Text = "Per Material Collision Types:";
             // 
             // ModelImporter
             // 
@@ -324,19 +362,22 @@
             this.Icon = ((System.Drawing.Icon)(resources.GetObject("$this.Icon")));
             this.Name = "ModelImporter";
             this.Text = "Model importer - Super Mario 64 DS Editor lolol";
-            this.Load += new System.EventHandler(this.ModelImporter_Load);
             this.FormClosed += new System.Windows.Forms.FormClosedEventHandler(this.ModelImporter_FormClosed);
+            this.Load += new System.EventHandler(this.ModelImporter_Load);
             this.tsToolBar.ResumeLayout(false);
             this.tsToolBar.PerformLayout();
             this.ssStatusBar.ResumeLayout(false);
             this.ssStatusBar.PerformLayout();
             this.spcMainContainer.Panel1.ResumeLayout(false);
+            this.spcMainContainer.Panel1.PerformLayout();
             this.spcMainContainer.Panel2.ResumeLayout(false);
+            ((System.ComponentModel.ISupportInitialize)(this.spcMainContainer)).EndInit();
             this.spcMainContainer.ResumeLayout(false);
             this.groupBox2.ResumeLayout(false);
             this.groupBox2.PerformLayout();
             this.groupBox1.ResumeLayout(false);
             this.groupBox1.PerformLayout();
+            ((System.ComponentModel.ISupportInitialize)(this.gridColTypes)).EndInit();
             this.ResumeLayout(false);
             this.PerformLayout();
 
@@ -367,5 +408,8 @@
         private System.Windows.Forms.TextBox txtThreshold;
         private System.Windows.Forms.Label lbl01;
         private System.Windows.Forms.Label lbl02;
+        private System.Windows.Forms.DataGridView gridColTypes;
+        private System.Windows.Forms.Label label1;
+        private System.Windows.Forms.Button btnAssignTypes;
     }
 }

@@ -26,14 +26,14 @@ namespace SM64DSe
         //    scale *= 1000; //Scale of collision file is 1000 times larger than model file
         //    write_kcl(kclOut, o[0] as List<Triangle>, 15, 1, scale);
         //}
-        public static void ConvertToKcl(string infile, ref NitroFile kclOut, float scale, float faceSizeThreshold)
+        public static void ConvertToKcl(string infile, ref NitroFile kclOut, float scale, float faceSizeThreshold, Dictionary<string, int> matColTypes)
         {
             //faceSizeThreshold is used for getting rid of very small faces below a given size, originally 0.001
-            object[] o = read_obj(infile, faceSizeThreshold);
+            object[] o = read_obj(infile, faceSizeThreshold, matColTypes);
             scale *= 1000; //Scale of collision file is 1000 times larger than model file
             write_kcl(kclOut, o[0] as List<Triangle>, 15, 1, scale);
         }
-        private static object[] read_obj(string filename, float faceSizeThreshold)
+        private static object[] read_obj(string filename, float faceSizeThreshold, Dictionary<string, int> matColTypes)
         {
             List<Vertex> vertices = new List<Vertex>();
             List<Triangle> triangles = new List<Triangle>();
@@ -117,7 +117,7 @@ namespace SM64DSe
 
                             //Below line gets rid of faces that are too small, original 0.001
                             if (cross(v.sub(u), w.sub(u)).norm_sq() < faceSizeThreshold) { continue; } //#TODO: find a better solution
-                            triangles.Add(new Triangle(u, v, w, curr_group));
+                                triangles.Add(new Triangle(u, v, w, matColTypes[group_name]));
                         }
                         break;
                 }
@@ -159,7 +159,7 @@ namespace SM64DSe
                 f.a_index = (ushort)normal_welder.add(a);
                 f.b_index = (ushort)normal_welder.add(b);
                 f.c_index = (ushort)normal_welder.add(c);
-                f.group = 0;
+                f.group = (ushort)t.group;
 
                 faces.Add(f);
             }
@@ -202,7 +202,7 @@ namespace SM64DSe
                 kcl.Write16(pos + 8, (ushort)f.a_index);
                 kcl.Write16(pos + 10, (ushort)f.b_index);
                 kcl.Write16(pos + 12, (ushort)f.c_index);
-                kcl.Write16(pos + 14, (ushort)0);
+                kcl.Write16(pos + 14, (ushort)f.group);
 
                 pos += 16;
             }
