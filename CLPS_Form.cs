@@ -33,6 +33,11 @@ namespace SM64DSe
             clps_size = (uint)(8 + (clps_num * 8));
             txtNumEntries.Text = "" + clps_num;
 
+            for (int i = 0; i < 52; i++)
+            {
+                cbxLevels.Items.Add(i + " - " + Strings.LevelNames[i]);
+            }
+
 
             gridCLPSData.ColumnCount = 8;
             gridCLPSData.RowCount = clps_num;

@@ -88,6 +88,7 @@ namespace SM64DSe
                 case 54: // FISH
                 case 55: // BUTTERFLY
                 case 60: // STAR_CAMERA
+                case 61: // POWER STAR
                 case 63: // STARBASE
                 case 269: // BLK_OKINOKO_TAG
                 case 270: // BLK_SKINOKO_TAG
