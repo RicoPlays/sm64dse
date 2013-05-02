@@ -24,6 +24,7 @@ using System.Drawing;
 using System.Linq;
 using System.Text;
 using System.Windows.Forms;
+using System.IO;
 
 namespace SM64DSe
 {
@@ -534,6 +535,45 @@ namespace SM64DSe
             }
 
             RedrawMinimap((LevelEditorForm)Owner);
+        }
+
+        private void btnExport_Click(object sender, EventArgs e)
+        {
+            SaveFileDialog export = new SaveFileDialog();
+            export.FileName = "Minimap_" + m_CurArea;//Default name
+            export.DefaultExt = ".bmp";//Default file extension
+            export.Filter = "Bitmap BMP (.bmp)|*.bmp";//Filter by .obj
+            if (export.ShowDialog() == DialogResult.Cancel)
+                return;
+
+            Bitmap bmp = new Bitmap(mapsize, mapsize);
+
+            uint tileoffset = 0;
+            for (int my = 0; my < mapsize; my += 8)
+            {
+                for (int mx = 0; mx < mapsize; mx += 8)
+                {
+                    ushort tilecrap = tmapfile[m_CurArea].Read16(tileoffset);
+                    uint tilenum = (uint)(tilecrap & 0x03FF);
+                    //Console.WriteLine("" + tilecrap);
+
+                    for (int ty = 0; ty < 8; ty++)
+                    {
+                        for (int tx = 0; tx < 8; tx++)
+                        {
+                            uint totaloffset = (uint)(tilenum * 64 + ty * 8 + tx);//Address of current pixel
+                            byte palentry = tsetfile.Read8(totaloffset);//Offset of current pixel's entry in palette file
+                            //Palentry is double to get the position of the colour in the palette file
+                            ushort pixel = palfile.Read16((uint)(palentry * 2));//Colour of current pixel from palette file
+                            bmp.SetPixel(mx + tx, my + ty, Helper.BGR15ToColor(pixel));
+                        }
+                    }
+
+                    tileoffset += 2;
+                }
+            }
+
+            bmp.Save(export.FileName, System.Drawing.Imaging.ImageFormat.Bmp);
         }
 
     }

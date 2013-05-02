@@ -42,6 +42,7 @@
             this.btnResize = new System.Windows.Forms.Button();
             this.textBox1 = new System.Windows.Forms.TextBox();
             this.lblMapsize = new System.Windows.Forms.Label();
+            this.btnExport = new System.Windows.Forms.ToolStripButton();
             ((System.ComponentModel.ISupportInitialize)(this.pbxMinimapGfx)).BeginInit();
             this.tsMinimapEditor.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.gridPalette)).BeginInit();
@@ -59,7 +60,8 @@
             // 
             this.tsMinimapEditor.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {
             this.tslBeforeAreaBtns,
-            this.btnImport});
+            this.btnImport,
+            this.btnExport});
             this.tsMinimapEditor.Location = new System.Drawing.Point(0, 0);
             this.tsMinimapEditor.Name = "tsMinimapEditor";
             this.tsMinimapEditor.Size = new System.Drawing.Size(816, 25);
@@ -195,6 +197,16 @@
             this.lblMapsize.TabIndex = 12;
             this.lblMapsize.Text = "label2";
             // 
+            // btnExport
+            // 
+            this.btnExport.Alignment = System.Windows.Forms.ToolStripItemAlignment.Right;
+            this.btnExport.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Text;
+            this.btnExport.ImageTransparentColor = System.Drawing.Color.Magenta;
+            this.btnExport.Name = "btnExport";
+            this.btnExport.Size = new System.Drawing.Size(44, 22);
+            this.btnExport.Text = "Export";
+            this.btnExport.Click += new System.EventHandler(this.btnExport_Click);
+            // 
             // MinimapEditor
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
@@ -240,5 +252,6 @@
         private System.Windows.Forms.Button btnResize;
         private System.Windows.Forms.TextBox textBox1;
         private System.Windows.Forms.Label lblMapsize;
+        private System.Windows.Forms.ToolStripButton btnExport;
     }
 }

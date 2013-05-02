@@ -336,7 +336,7 @@ namespace SM64DSe
             public bool[] m_Referenced;
         }
 
-        private ConvertedTexture ConvertTexture(string filename)
+        public ConvertedTexture ConvertTexture(string filename)
         {
             Bitmap bmp = new Bitmap(filename);
 
@@ -1547,8 +1547,10 @@ namespace SM64DSe
             bmd.Write32(0x14, ntex);
             bmd.Write32(0x18, texoffset);
 
+            // Offset to texture names
             uint textraoffset = (uint)(texoffset + (0x14 * ntex));
 
+            // Write texture entries
             foreach (ConvertedTexture tex in textures.Values)
             {
                 curoffset = (uint)(texoffset + (0x14 * tex.m_TextureID));
@@ -1568,8 +1570,10 @@ namespace SM64DSe
             bmd.Write32(0x1C, npal);
             bmd.Write32(0x20, paloffset);
 
+            // Offset to palette names
             uint pextraoffset = (uint)(paloffset + (0x10 * npal));
 
+            // Write texture palette entries
             foreach (ConvertedTexture tex in textures.Values)
             {
                 if (tex.m_PaletteData == null)
@@ -1588,6 +1592,7 @@ namespace SM64DSe
             // this must point to the texture data block
             bmd.Write32(0x38, curoffset);
 
+            // Write texture and texture palette data
             foreach (ConvertedTexture tex in textures.Values)
             {
                 bmd.WriteBlock(curoffset, tex.m_TextureData);
@@ -1765,7 +1770,7 @@ namespace SM64DSe
                 m_Scale = originalScale;//Back to previous scale for collision as it's not affected like model's scale
                 PrerenderModel();
                 glModelView.Refresh();
-                if (cbMakeAcmlmboard.Checked)
+                if (cbGenerateCollision.Checked)
                 {
                     try
                     {
@@ -1782,7 +1787,7 @@ namespace SM64DSe
             {
                 ImportModel();
                 kcl = Program.m_ROM.GetFileFromInternalID(m_LevelSettings.KCLFileID);
-                if (cbMakeAcmlmboard.Checked)
+                if (cbGenerateCollision.Checked)
                     ObjToKcl.ConvertToKcl(m_ModelFileName, ref kcl, m_Scale.X, faceSizeThreshold, matColTypes);
             }
 
@@ -1976,11 +1981,6 @@ namespace SM64DSe
             groupBox2.Visible = false;
         }
 
-        private void cbMakeAcmlmboard_CheckedChanged(object sender, EventArgs e)
-        {
-            cbDropExtraShit.Enabled = cbMakeAcmlmboard.Checked;
-        }
-
         private void cbSwapYZ_CheckedChanged(object sender, EventArgs e)
         {
             m_SwapYZ = cbSwapYZ.Checked;
@@ -1994,6 +1994,18 @@ namespace SM64DSe
             {
                 m_Materials.Values.ElementAt(i).m_ColType = int.Parse(gridColTypes.Rows[i].Cells[1].Value.ToString());
             }
+        }
+
+        private void btnEditTextures_Click(object sender, EventArgs e)
+        {
+            BMD bmd = new BMD(Program.m_ROM.GetFileFromInternalID(m_LevelSettings.BMDFileID));
+
+            if (!m_LevelSettings.editLevelBMDKCL)//If set to import an object model instead
+            {
+                bmd = new BMD(Program.m_ROM.GetFileFromName(m_LevelSettings.objBMD));
+            }
+
+            new TextureEditorForm(bmd, this).Show(this);
         }
     }
 }
