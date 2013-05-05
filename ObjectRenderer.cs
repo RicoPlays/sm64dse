@@ -596,6 +596,9 @@ namespace SM64DSe
             m_Model = ModelCache.GetModel(filename);
             m_DisplayLists = ModelCache.GetDisplayLists(m_Model);
             m_Scale = new Vector3(scale, scale, scale);
+
+            ObjectRenderer.currentObjFilename = filename;
+            ObjectRenderer.currentObjScale = scale;
         }
 
         private BMD m_Model;

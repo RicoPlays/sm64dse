@@ -131,6 +131,11 @@ namespace SM64DSe
             return m_FileEntries[id].FullName;
         }
 
+        public FileEntry[] GetFileEntries()
+        {
+            return m_FileEntries;
+        }
+
         public void MakeRoom(uint addr, uint amount)
         {
             int filelen = m_Data.Length;
@@ -155,7 +160,8 @@ namespace SM64DSe
             int delta = (int)(datalength - fe.Size);
 
             // move data that comes after the file
-            MakeRoom(fileend, (uint)delta);
+            if (delta > 0)
+                MakeRoom(fileend, (uint)delta);
 
             // write the new data for the file
             WriteBlock(IMGOffset + fe.Offset, data);
@@ -164,26 +170,23 @@ namespace SM64DSe
             // fix the FAT
             for (uint f = 0; f < (FATSize / 8); f++)
             {
-                if (f != fileid)
+                uint start = Read32(FATOffset + (f * 8));
+                if (f > fileid)// Update start offsets of following files
                 {
-                    uint start = Read32(FATOffset + (f * 8));
-                    if (start >= fileend)
-                    {
-                        start += (uint)delta;
-                        Write32(FATOffset + (f * 8), start);
-                    }
+                    start = (uint)((int)start + delta);
+                    Write32(FATOffset + (f * 8), start);
                 }
 
                 uint end = Read32(FATOffset + (f * 8) + 4);
-                if (end >= fileend)
+                if (f >= fileid)// Update the end offsets of following and current file
                 {
-                    end += (uint)delta;
+                    end = (uint)((int)end + delta);
                     Write32(FATOffset + (f * 8) + 4, end);
                 }
             }
 
             // fix misc stuff
-            IMGSize += (uint)delta;
+            IMGSize = (uint)((int)IMGSize + delta);
             Write32(IMGOffset - 0x4, IMGSize + 0x8);
 
             Write32(0x8, (uint)((m_Data.Length + 3) & ~3));
@@ -204,7 +207,7 @@ namespace SM64DSe
             public string FullName;
         }
 
-        private struct FileEntry
+        public struct FileEntry
         {
             public ushort ID;
             public ushort ParentID;

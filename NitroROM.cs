@@ -290,7 +290,7 @@ namespace SM64DSe
             if (id < 0xF000)
                 return new NitroFile(this, id);
 
-            string[] narcs = { "arc0", "ar1" };
+            string[] narcs = { "ar1", "arc0", "c2d", "cee", "cef", "ceg", "cei", "ces", "en1", "vs1", "vs2", "vs3", "vs4" };
             foreach (string narc in narcs)
             {
                 NARC thenarc = new NARC(this, GetFileIDFromName("ARCHIVE/" + narc + ".narc"));
@@ -321,6 +321,11 @@ namespace SM64DSe
         public string GetFileNameFromID(ushort id)
         {
             return m_FileEntries[id].FullName;
+        }
+
+        public FileEntry[] GetFileEntries()
+        {
+            return m_FileEntries;
         }
 
         public uint GetOverlayEntryOffset(uint ovlid) { return m_OverlayEntries[ovlid].EntryOffset; }
@@ -576,7 +581,7 @@ namespace SM64DSe
         private uint FATOffset, FATSize;
         private uint OVTOffset, OVTSize;
 
-        private struct DirEntry
+        public struct DirEntry
         {
             public ushort ID;
             public ushort ParentID;
@@ -584,7 +589,7 @@ namespace SM64DSe
             public string FullName;
         }
 
-        private struct FileEntry
+        public struct FileEntry
         {
             public ushort ID;
             public ushort ParentID;

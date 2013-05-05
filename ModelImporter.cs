@@ -572,6 +572,7 @@ namespace SM64DSe
         private Vector3 m_Scale;
         private bool m_ZMirror;
         private bool m_SwapYZ;
+        private float m_CustomScale;
 
         // camera
         private Vector2 m_CamRotation;
@@ -602,8 +603,9 @@ namespace SM64DSe
         private Vector3 m_MarioPosition;
         private float m_MarioRotation;
 
+        private String m_BMDName, m_KCLName;
 
-        public ModelImporter()
+        public ModelImporter(String modelName, String kclName, float scale = 1f)
         {
             InitializeComponent();
 
@@ -612,7 +614,11 @@ namespace SM64DSe
             m_GLLoaded = false;
             tbModelName.Text = "None";
 
+            m_BMDName = modelName;
+            m_KCLName = kclName;
+
             m_Scale = new Vector3(1f, 1f, 1f);
+            m_CustomScale = scale;
             m_ZMirror = false;
             m_SwapYZ = false;
 
@@ -1167,12 +1173,7 @@ namespace SM64DSe
             int b = 0;
             GXDisplayListPacker dlpacker = new GXDisplayListPacker();
 
-            NitroFile bmd = Program.m_ROM.GetFileFromInternalID(m_LevelSettings.BMDFileID);
-
-            if (!m_LevelSettings.editLevelBMDKCL)//If set to import an object model instead
-            {
-                bmd = Program.m_ROM.GetFileFromName(m_LevelSettings.objBMD);
-            }
+            NitroFile bmd = Program.m_ROM.GetFileFromName(m_BMDName);
             bmd.Clear();
 
             Vector4[] scaledvtxs = new Vector4[m_Vertices.Count];
@@ -1672,7 +1673,8 @@ namespace SM64DSe
 
             GL.ClearColor(Color.FromArgb(0, 0, 32));
 
-            LoadModel(true);
+            //LoadModel(true);
+            m_EarlyClosure = true;
         }
 
         private void glModelView_Paint(object sender, PaintEventArgs e)
@@ -1742,7 +1744,7 @@ namespace SM64DSe
 
         private void btnImport_Click(object sender, EventArgs e)
         {
-            Vector3 originalScale = new Vector3(0, 0, 0);
+            Vector3 originalScale = new Vector3(1, 1, 1);
             float faceSizeThreshold = 0.001f;
             if (txtThreshold.Text == "")
                 faceSizeThreshold = 0.001f;//Default value
@@ -1758,37 +1760,27 @@ namespace SM64DSe
                 matColTypes[m_Materials.Keys.ElementAt(i)] = m_Materials.Values.ElementAt(i).m_ColType;
             }
             NitroFile kcl;//This'll hold the KCL file that is to be replaced, either a level's or an object's
-            if (!m_LevelSettings.editLevelBMDKCL)//If we're importing an object's model
-            {
-                //If it's an object it'll be scaled down - need to get back to original value
-                originalScale = m_Scale;
-                m_Scale = m_Scale * (1 / ObjectRenderer.currentObjScale);
-                PrerenderModel();
-                glModelView.Refresh();
-                ImportModel();
+            //If it's an object it'll be scaled down - need to get back to original value
+            originalScale = m_Scale;
+            m_Scale = m_Scale * (1 / m_CustomScale);
+            PrerenderModel();
+            glModelView.Refresh();
+            ImportModel();
 
-                m_Scale = originalScale;//Back to previous scale for collision as it's not affected like model's scale
-                PrerenderModel();
-                glModelView.Refresh();
-                if (cbGenerateCollision.Checked)
-                {
-                    try
-                    {
-                        kcl = Program.m_ROM.GetFileFromName(m_LevelSettings.objKCL);
-                        ObjToKcl.ConvertToKcl(m_ModelFileName, ref kcl, m_Scale.X, faceSizeThreshold, matColTypes);
-                    }
-                    catch
-                    {
-                        MessageBox.Show("This object has no collision data, however the model will still be imported.");
-                    }
-                }
-            }
-            else//If it's a level model
+            m_Scale = originalScale;//Back to previous scale for collision as it's not affected like model's scale
+            PrerenderModel();
+            glModelView.Refresh();
+            if (cbGenerateCollision.Checked)
             {
-                ImportModel();
-                kcl = Program.m_ROM.GetFileFromInternalID(m_LevelSettings.KCLFileID);
-                if (cbGenerateCollision.Checked)
+                try
+                {
+                    kcl = Program.m_ROM.GetFileFromName(m_KCLName);
                     ObjToKcl.ConvertToKcl(m_ModelFileName, ref kcl, m_Scale.X, faceSizeThreshold, matColTypes);
+                }
+                catch
+                {
+                    MessageBox.Show("This object has no collision data, however the model will still be imported.");
+                }
             }
 
             ((LevelEditorForm)Owner).UpdateLevelModel();
@@ -1998,12 +1990,7 @@ namespace SM64DSe
 
         private void btnEditTextures_Click(object sender, EventArgs e)
         {
-            BMD bmd = new BMD(Program.m_ROM.GetFileFromInternalID(m_LevelSettings.BMDFileID));
-
-            if (!m_LevelSettings.editLevelBMDKCL)//If set to import an object model instead
-            {
-                bmd = new BMD(Program.m_ROM.GetFileFromName(m_LevelSettings.objBMD));
-            }
+            BMD bmd = new BMD(Program.m_ROM.GetFileFromName(m_BMDName));
 
             new TextureEditorForm(bmd, this).Show(this);
         }
