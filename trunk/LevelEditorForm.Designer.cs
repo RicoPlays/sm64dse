@@ -87,6 +87,7 @@
             this.btnStarAll = new System.Windows.Forms.ToolStripButton();
             this.ssStatusBar = new System.Windows.Forms.StatusStrip();
             this.slStatusLabel = new System.Windows.Forms.ToolStripStatusLabel();
+            this.btnImportOtherModel = new System.Windows.Forms.ToolStripButton();
             ((System.ComponentModel.ISupportInitialize)(this.spcMainContainer)).BeginInit();
             this.spcMainContainer.Panel1.SuspendLayout();
             this.spcMainContainer.Panel2.SuspendLayout();
@@ -181,7 +182,8 @@
             this.btnExportObjectModel,
             this.btnAddPathNodes,
             this.btnAddPath,
-            this.btnAddMisc});
+            this.btnAddMisc,
+            this.btnImportOtherModel});
             this.tsEditActions.LayoutStyle = System.Windows.Forms.ToolStripLayoutStyle.Flow;
             this.tsEditActions.Location = new System.Drawing.Point(0, 0);
             this.tsEditActions.Name = "tsEditActions";
@@ -195,8 +197,8 @@
             this.btnImportModel.Image = ((System.Drawing.Image)(resources.GetObject("btnImportModel.Image")));
             this.btnImportModel.ImageTransparentColor = System.Drawing.Color.Magenta;
             this.btnImportModel.Name = "btnImportModel";
-            this.btnImportModel.Size = new System.Drawing.Size(84, 19);
-            this.btnImportModel.Text = "Import model";
+            this.btnImportModel.Size = new System.Drawing.Size(111, 19);
+            this.btnImportModel.Text = "Import level model";
             this.btnImportModel.ToolTipText = "Replace the 3D model with one from a .obj file";
             this.btnImportModel.Click += new System.EventHandler(this.btnImportModel_Click);
             // 
@@ -752,6 +754,15 @@
             this.slStatusLabel.Paint += new System.Windows.Forms.PaintEventHandler(this.slStatusLabel_Paint);
             this.slStatusLabel.TextChanged += new System.EventHandler(this.slStatusLabel_TextChanged);
             // 
+            // btnImportOtherModel
+            // 
+            this.btnImportOtherModel.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Text;
+            this.btnImportOtherModel.ImageTransparentColor = System.Drawing.Color.Magenta;
+            this.btnImportOtherModel.Name = "btnImportOtherModel";
+            this.btnImportOtherModel.Size = new System.Drawing.Size(115, 19);
+            this.btnImportOtherModel.Text = "Import other model";
+            this.btnImportOtherModel.Click += new System.EventHandler(this.btnImportOtherModel_Click);
+            // 
             // LevelEditorForm
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
@@ -847,6 +858,7 @@
         private System.Windows.Forms.ToolStripMenuItem toolStripMenuItem2;
         private System.Windows.Forms.ToolStripMenuItem toolStripMenuItem3;
         private System.Windows.Forms.ToolStripMenuItem toolStripMenuItem4;
+        private System.Windows.Forms.ToolStripButton btnImportOtherModel;
 
 
     }

@@ -70,7 +70,6 @@ namespace SM64DSe
         public byte Background;
         public uint[] ObjectBanks;
         public ushort BMDFileID, KCLFileID, MinimapTsetFileID, MinimapPalFileID;
-        public bool editLevelBMDKCL;//Flag for determining whether the level's model should be replaced (true), or an object's (false)
         public string objBMD, objKCL;
     }
 

@@ -33,6 +33,8 @@ namespace SM64DSe
         private int m_NumAreas;
         private int m_CurArea;
 
+        int zoom = 2;
+
         LevelEditorForm _owner;
 
         public MinimapEditor()
@@ -42,94 +44,96 @@ namespace SM64DSe
 
         NitroFile palfile;
         NitroFile tsetfile;
-        NitroFile[] tmapfile;
-        int mapsize;
-        private void RedrawMinimap(LevelEditorForm _owner)
+        NitroFile[] tmapfiles;
+        NitroFile tmapfile;
+
+        int sizeX, sizeY;// Width and Height in pixels, divide by 8 to get number of tiles
+        int bpp;
+        Boolean usingTMap;
+
+        private void RedrawMinimap(Boolean usingTmap, int sizeX, int sizeY, int bpp)
         {
-            palfile = Program.m_ROM.GetFileFromInternalID(_owner.m_LevelSettings.MinimapPalFileID);
-            tsetfile = Program.m_ROM.GetFileFromInternalID(_owner.m_LevelSettings.MinimapTsetFileID);
-            for (int i = 0; i < m_NumAreas; i++)
+            Bitmap bmp = LoadImage(usingTMap, sizeX, sizeY, bpp);
+
+            pbxMinimapGfx.Image = new Bitmap(bmp, new Size(sizeX * zoom, sizeY * zoom));
+            pbxMinimapGfx.Refresh();
+
+            LoadPalette();
+        }
+
+        public Bitmap LoadImage(Boolean usingTMap, int sizeX, int sizeY, int bpp)
+        {
+            Bitmap bmp = new Bitmap(sizeX, sizeY);
+
+            uint tileoffset = 0, tilenum = 0;
+            ushort tilecrap = 0;
+            for (int my = 0; my < sizeY; my += 8)
             {
-                try
+                for (int mx = 0; mx < sizeX; mx += 8)
                 {
-                    tmapfile[i] = (Program.m_ROM.GetFileFromInternalID(_owner.m_MinimapFileIDs[i]));
-                    tmapfile[i].ForceDecompression();
-                }
-                catch//If the file doesn't exist
-                {
-                    continue;
-                }
-            }
-
-            tsetfile.ForceDecompression();
-
-            try
-            {
-                uint test = tmapfile[m_CurArea].Read16(0);
-                btnImport.Enabled = true;
-            }
-            catch
-            {
-                btnImport.Enabled = false;
-                return;
-            }
-
-            mapsize = 0;
-            switch (tmapfile[m_CurArea].m_Data.Length)
-            {
-                case 2 * 16 * 16: { mapsize = 128; cbSizes.SelectedIndex = 0; } break;
-                case 2 * 32 * 32: { mapsize = 256; cbSizes.SelectedIndex = 1; } break;
-                case 2 * 64 * 64: mapsize = 512; break;       // maps should never get that big
-                case 2 * 128 * 128: mapsize = 1024; break;    // but we never know :P
-                default: {
-                    mapsize = (int)(Math.Sqrt(tmapfile[m_CurArea].m_Data.Length / 2) * 8);
-                    break;
-                         }
-            }
-
-            lblMapsize.Text = mapsize + " x " + mapsize;
-
-            Bitmap bmp = new Bitmap(mapsize, mapsize);
-
-            uint tileoffset = 0;
-            for (int my = 0; my < mapsize; my += 8)
-            {
-                for (int mx = 0; mx < mapsize; mx += 8)
-                {
-                    ushort tilecrap = tmapfile[m_CurArea].Read16(tileoffset);
-                    uint tilenum = (uint)(tilecrap & 0x03FF);
-                    //Console.WriteLine("" + tilecrap);
+                    if (usingTMap)
+                    {
+                        tilecrap = tmapfile.Read16(tileoffset);
+                        tilenum = (uint)(tilecrap & 0x03FF);
+                    }
 
                     for (int ty = 0; ty < 8; ty++)
                     {
                         for (int tx = 0; tx < 8; tx++)
                         {
-                            uint totaloffset = (uint)(tilenum * 64 + ty * 8 + tx);//Address of current pixel
-                            byte palentry = tsetfile.Read8(totaloffset);//Offset of current pixel's entry in palette file
-                            //Palentry is double to get the position of the colour in the palette file
-                            ushort pixel = palfile.Read16((uint)(palentry * 2));//Colour of current pixel from palette file
-                            bmp.SetPixel(mx + tx, my + ty, Helper.BGR15ToColor(pixel));
+                            if (bpp == 8)
+                            {
+                                uint totaloffset = (uint)(tilenum * 64 + ty * 8 + tx);//Address of current pixel
+                                byte palentry = tsetfile.Read8(totaloffset);//Offset of current pixel's entry in palette file
+                                //Palentry is double to get the position of the colour in the palette file
+                                ushort pixel = palfile.Read16((uint)(palentry * 2));//Colour of current pixel from palette file
+                                bmp.SetPixel(mx + tx, my + ty, Helper.BGR15ToColor(pixel));
+                            }
+                            else if (bpp == 4)
+                            {
+                                float totaloffset = (float)((float)(tilenum * 64 + ty * 8 + tx) / 2f);//Address of current pixel
+                                byte palentry = 0;
+                                if (totaloffset % 1 == 0)
+                                {
+                                    palentry = tsetfile.Read8((uint)totaloffset);//Offset of current pixel's entry in palette file
+                                    palentry = (byte)(palentry & 0x0F);// Get 4 right bits
+                                }
+                                else
+                                {
+                                    palentry = tsetfile.Read8((uint)totaloffset);//Offset of current pixel's entry in palette file
+                                    palentry = (byte)(palentry >> 4);// Get 4 left bits
+                                }
+                                //Palentry is double to get the position of the colour in the palette file
+                                ushort pixel = palfile.Read16((uint)(palentry * 2));//Colour of current pixel from palette file
+                                bmp.SetPixel(mx + tx, my + ty, Helper.BGR15ToColor(pixel));
+                            }
                         }
                     }
 
                     tileoffset += 2;
+                    if (!usingTMap)
+                        tilenum++;
                 }
             }
 
-            pbxMinimapGfx.Image = new Bitmap(bmp, new Size(mapsize * 2, mapsize * 2));
-            pbxMinimapGfx.Refresh();
+            return bmp;
+        }
 
+        private void LoadPalette()
+        {
             gridPalette.RowCount = 16;
             gridPalette.ColumnCount = 16;
-            
+
             //Read palette colours
             Color[] paletteColours = new Color[256];
-            for (int i = 0; i < 256; i++)
+            for (int i = 0; i < palfile.m_Data.Length / 2; i++)
             {
                 //Colour in BGR15 format (16 bits) written to every even address 0,2,4...
                 ushort palColour = palfile.Read16((uint)(i * 2));
                 paletteColours[i] = Helper.BGR15ToColor(palColour);
             }
+            for (int i = palfile.m_Data.Length / 2; i < 256; i++)
+                paletteColours[i] = Helper.BGR15ToColor(0);// Fill blank entries with black
             //Display palette colours
             int clr = 0;
             for (int row = 0; row < gridPalette.RowCount; row++)//For every row
@@ -144,23 +148,16 @@ namespace SM64DSe
             gridPalette.CurrentCell.Selected = false;//Select none by default
         }
 
-        public void importBMP(string filename)
+        public void importBMP(string filename, Boolean replaceMinimap)
         {
+            // The tile maps (NSC / ISC) files for minimaps are always arranged a particular way - 0, 1, 2...15, 32 for 128 x 128
             Bitmap bmp = new Bitmap(filename);
 
             Color[] palette = bmp.Palette.Entries.ToArray<Color>();
             if (palette.Length > 256)
             {
                 MessageBox.Show("Too many colours\n\n" + 
-                    "You must import an indexed bitmap with 256 colours or fewer " + 
-                    "\nwith a resolution matching the mapsize");
-                return;
-            }
-            if (bmp.Width > mapsize || bmp.Height > mapsize)
-            {
-                MessageBox.Show("Wrong size\n\n" +
-                    "You must import an indexed bitmap with 256 colours or fewer " +
-                    "\nwith a resolution matching the mapsize");
+                    "You must import an indexed bitmap with 256 colours or fewer.");
                 return;
             }
 
@@ -171,21 +168,26 @@ namespace SM64DSe
                 //Colour in BGR15 format (16 bits) written to every even address 0,2,4...
                 palfile.Write16((uint)i * 2, (ushort)(Helper.ColorToBGR15(palette[i])));
             }
+            for (int i = palette.Length; i < 256; i++)
+                palfile.Write16((uint)i * 2, 0);
 
-            //Get last used tile number (highest) in previous areas so we know where write new data to
+            palfile.SaveChanges();
+
+            // If a tile map file is being used and we're editing minimaps,  
+            // get last used tile number (highest) in previous areas so we know where write new data to
             ushort prevLastTile = 0;
-            if (m_NumAreas > 1)
+            if (usingTMap && m_NumAreas > 1)
             {
                 for (int i = 0; i < m_NumAreas; i++)
                 {
                     try
                     {
                         uint tile = 0;
-                        for (int my = 0; my < mapsize; my += 8)
+                        for (int my = 0; my < sizeY; my += 8)
                         {
-                            for (int mx = 0; mx < mapsize; mx += 8)
+                            for (int mx = 0; mx < sizeX; mx += 8)
                             {
-                                ushort tilecrap = tmapfile[i].Read16(tile);
+                                ushort tilecrap = tmapfiles[i].Read16(tile);
                                 uint tilenum = (uint)(tilecrap & 0x03FF);
                                 if ((ushort)tilenum > prevLastTile)
                                     prevLastTile = (ushort)tilenum;
@@ -201,53 +203,77 @@ namespace SM64DSe
                 }
             }
 
-            //Fill current tmapfile to use full mapsize x mapsize
-            tmapfile[m_CurArea].Clear();
-            uint addr = 0;
-            int curTile = 0;
-            if (m_NumAreas == 1 || prevLastTile == 0)//If this is going to be the first tile, keep it at zero
-                curTile = prevLastTile;
-            else//else tiles should start one after the last (highest) one used by previous map
-                curTile = prevLastTile + 1;
-            int row = (int)(mapsize / 8);
-            int count = 0;
-            for (int my = 0; my < mapsize; my += 8)
+            //Fill current tmapfiles to use full mapsize x mapsize
+            if (usingTMap)
             {
-                for (int mx = 0; mx < mapsize; mx += 8)
+                tmapfile = Program.m_ROM.GetFileFromName(txtSelNSC.Text);
+                if (!chkNSCDcmpd.Checked)
+                    tmapfile.ForceDecompression();
+                tmapfile.Clear();
+                uint addr = 0;
+                int curTile = 0;
+                if (m_NumAreas == 1 || prevLastTile == 0)//If this is going to be the first tile, keep it at zero
+                    curTile = prevLastTile;
+                else//else tiles should start one after the last (highest) one used by previous map
+                    curTile = prevLastTile + 1;
+                int row = (int)(sizeX / 8);
+                int count = 0;
+                if (replaceMinimap)
                 {
-                    if (row == 16)//128x128 0, 1, 2...14, 15, 32, 33...47, 64...
+                    for (int my = 0; my < sizeY; my += 8)
                     {
-                        if (count == row)
+                        for (int mx = 0; mx < sizeX; mx += 8)
                         {
-                            curTile += row;
-                            count = 0;
+                            if (row == 16)//128x128 0, 1, 2...14, 15, 32, 33...47, 64...
+                            {
+                                if (count == row)
+                                {
+                                    curTile += row;
+                                    count = 0;
+                                }
+                                //Console.WriteLine("" + curTile);
+                                tmapfile.Write16(addr, (ushort)curTile);
+                                curTile++;
+                                count++;
+                                addr += 2;
+                            }
+                            else//256x256 0, 1, 2, 3...
+                            {
+                                tmapfile.Write16(addr, (ushort)curTile);
+                                curTile++;
+                                addr += 2;
+                            }
                         }
-                        //Console.WriteLine("" + curTile);
-                        tmapfile[m_CurArea].Write16(addr, (ushort)curTile);
-                        curTile++;
-                        count++;
-                        addr += 2;
-                    }
-                    else//256x256 0, 1, 2, 3...
+                    }// End For
+                }// End If ReplaceMinimap
+                else if (!replaceMinimap)
+                {
+                    for (int my = 0; my < sizeY; my += 8)
                     {
-                        tmapfile[m_CurArea].Write16(addr, (ushort)curTile);
-                        curTile++;
-                        addr += 2;
-                    }
-                }
-            }
+                        for (int mx = 0; mx < sizeX; mx += 8)
+                        {
+                            tmapfile.Write16(addr, (ushort)curTile);
+                            curTile++;
+                            addr += 2;
+                        }
+                    }// End For
+                }// End If !ReplaceMinimap
+                if (!chkNSCDcmpd.Checked)
+                    tmapfile.ForceCompression();
+                tmapfile.SaveChanges();
+            }// End If usingTMap
 
             //Check to see if there's already an identical tile and if so, change the current value to that
             //Works, but not if you want to keep existing data eg. multiple maps
-
+            
             //List<List<byte>> tiles = new List<List<byte>>();
             //List<byte> curTilePal = new List<byte>();
             //uint tileoffset = 0;
-            //for (int my = 0; my < mapsize; my += 8)
+            //for (int my = 0; my < sizeY; my += 8)
             //{
-            //    for (int mx = 0; mx < mapsize; mx += 8)
+            //    for (int mx = 0; mx < sizeX; mx += 8)
             //    {
-            //        ushort tilecrap = tmapfile[m_CurArea].Read16(tileoffset);
+            //        ushort tilecrap = tmapfile.Read16(tileoffset);
             //        uint tilenum = (uint)(tilecrap & 0x03FF);
 
             //        curTilePal = new List<byte>();
@@ -264,7 +290,7 @@ namespace SM64DSe
 
             //        if (posInList(tiles, curTilePal) != -1)
             //        {
-            //            tmapfile[m_CurArea].Write16(tileoffset, (ushort)(posInList(tiles, curTilePal)));
+            //            tmapfile.Write16(tileoffset, (ushort)(posInList(tiles, curTilePal)));
             //        }
 
             //        tileoffset += 2;
@@ -272,46 +298,66 @@ namespace SM64DSe
             //}
 
             //Write the new image to file
+            tsetfile = Program.m_ROM.GetFileFromName(txtSelNCG.Text);
+            if (!chkNCGDcmpd.Checked)
+                tsetfile.ForceDecompression();
+            tsetfile.Clear();
             uint tileoffset = 0;
-            for (int my = 0; my < mapsize; my += 8)
+            ushort tileCrap = 0;
+            uint tileNum = 0;
+            for (int my = 0; my < sizeY; my += 8)
             {
-                for (int mx = 0; mx < mapsize; mx += 8)
+                for (int mx = 0; mx < sizeX; mx += 8)
                 {
-                    ushort tilecrap = tmapfile[m_CurArea].Read16(tileoffset);
-                    uint tilenum = (uint)(tilecrap & 0x03FF);
+                    if (usingTMap)
+                    {
+                        tileCrap = tmapfile.Read16(tileoffset);
+                        tileNum = (uint)(tileCrap & 0x03FF);
+                    }
 
                     for (int ty = 0; ty < 8; ty++)
                     {
                         for (int tx = 0; tx < 8; tx++)
                         {
-                            uint totaloffset = (uint)(tilenum * 64 + ty * 8 + tx);//Position of current pixel's entry
-                            byte palentry = (byte)(Array.IndexOf(palette, bmp.GetPixel(mx + tx, my + ty)));
-                            tsetfile.Write8(totaloffset, (byte)(palentry));
+                            if (bpp == 8)
+                            {
+                                uint totaloffset = (uint)(tileNum * 64 + ty * 8 + tx);//Position of current pixel's entry
+                                byte palentry = (byte)(Array.IndexOf(palette, bmp.GetPixel(mx + tx, my + ty)));
+                                tsetfile.Write8(totaloffset, (byte)(palentry));
+                            }
+                            else if (bpp == 4)
+                            {
+                                float totaloffset = (float)((float)(tileNum * 64 + ty * 8 + tx) / 2f);//Address of current pixel
+                                byte palentry = (byte)(Array.IndexOf(palette, bmp.GetPixel(mx + tx, my + ty)));
+                                if (totaloffset % 1 == 0)
+                                {
+                                    // Right 4 bits
+                                    tsetfile.Write8((uint)totaloffset, (byte)palentry);
+                                    //(byte)((tsetfile.Read8((uint)totaloffset) & 0xF0) | palentry));
+                                }
+                                else
+                                {
+                                    // Left 4 bits
+                                    tsetfile.Write8((uint)totaloffset, (byte)((palentry << 4) | (tsetfile.Read8((uint)totaloffset) & 0x0F)));
+                                }
+                            }
                         }
                     }
 
                     tileoffset += 2;
+                    if (!usingTMap)
+                        tileNum++;
                 }
             }
 
             tsetfile.ForceCompression();
-            for (int i = 0; i < tmapfile.Length; i++)
-            {
-                try
-                {
-                    tmapfile[i].ForceCompression();
-                    tmapfile[i].SaveChanges();
-                }
-                catch
-                {
-                    continue;
-                }
-            }
-
-            palfile.SaveChanges();
             tsetfile.SaveChanges();
 
-            RedrawMinimap((LevelEditorForm)Owner);
+            if (!chkNCGDcmpd.Checked)
+                tsetfile.ForceDecompression();
+            if (!chkNSCDcmpd.Checked)
+                tmapfile.ForceDecompression();
+            RedrawMinimap(usingTMap, sizeX, sizeY, bpp);
         }
 
         public void switchBackground(int swapped)
@@ -326,35 +372,70 @@ namespace SM64DSe
             palfile.SaveChanges();
 
             //Swap all palette file entries for the swapped colours in the graphic file
-            uint tileoffset = 0;
-            for (int my = 0; my < mapsize; my += 8)
+            uint tileoffset = 0, tilenum = 0;
+            ushort tilecrap = 0;
+            for (int my = 0; my < sizeY; my += 8)
             {
-                for (int mx = 0; mx < mapsize; mx += 8)
+                for (int mx = 0; mx < sizeX; mx += 8)
                 {
-                    ushort tilecrap = tmapfile[m_CurArea].Read16(tileoffset);
-                    uint tilenum = (uint)(tilecrap & 0x03FF);
+                    if (usingTMap)
+                    {
+                        tilecrap = tmapfile.Read16(tileoffset);
+                        tilenum = (uint)(tilecrap & 0x03FF);
+                    }
 
                     for (int ty = 0; ty < 8; ty++)
                     {
                         for (int tx = 0; tx < 8; tx++)
                         {
-                            uint totaloffset = (uint)(tilenum * 64 + ty * 8 + tx);//Position of current pixel's entry
-                            byte palentry = tsetfile.Read8(totaloffset);
-                            if (palentry == 0)//If the current pixel points to first colour in palette, 
-                                tsetfile.Write8(totaloffset, (byte)(swapped));//point it to the swapped colour
-                            if (palentry == (byte)swapped)//If the current pixel points to the swapped colour in palette, 
-                                tsetfile.Write8(totaloffset, (byte)0);//point it to the first colour
+                            if (bpp == 8)
+                            {
+                                uint totaloffset = (uint)(tilenum * 64 + ty * 8 + tx);//Position of current pixel's entry
+                                byte palentry = tsetfile.Read8(totaloffset);
+                                if (palentry == 0)//If the current pixel points to first colour in palette, 
+                                    tsetfile.Write8(totaloffset, (byte)(swapped));//point it to the swapped colour
+                                if (palentry == (byte)swapped)//If the current pixel points to the swapped colour in palette, 
+                                    tsetfile.Write8(totaloffset, (byte)0);//point it to the first colour
+                            }
+                            else if (bpp == 4)
+                            {
+                                float totaloffset = (float)((float)(tilenum * 64 + ty * 8 + tx) / 2f);//Address of current pixel
+                                byte palentry = 0;
+                                if (totaloffset % 1 == 0)
+                                {
+                                    // Right 4 bits
+                                    palentry = tsetfile.Read8((uint)totaloffset);//Offset of current pixel's entry in palette file
+                                    palentry = (byte)(palentry & 0x0F);// Get 4 right bits
+                                    if (palentry == 0)//If the current pixel points to first colour in palette, 
+                                        tsetfile.Write8((uint)totaloffset, (byte)((tsetfile.Read8((uint)totaloffset) & 0xF0) | swapped));//point it to the swapped colour
+                                    if (palentry == (byte)swapped)//If the current pixel points to the swapped colour in palette, 
+                                        tsetfile.Write8((uint)totaloffset, (byte)((tsetfile.Read8((uint)totaloffset) & 0xF0) | 0));//point it to the first colour
+                                }
+                                else
+                                {
+                                    // Left 4 bits
+                                    palentry = tsetfile.Read8((uint)totaloffset);//Offset of current pixel's entry in palette file
+                                    palentry = (byte)(palentry >> 4);
+                                    if (palentry == 0)//If the current pixel points to first colour in palette, 
+                                        tsetfile.Write8((uint)totaloffset, (byte)((swapped << 4) | (tsetfile.Read8((uint)totaloffset) & 0x0F)));//point it to the swapped colour
+                                    if (palentry == (byte)swapped)//If the current pixel points to the swapped colour in palette, 
+                                        tsetfile.Write8((uint)totaloffset, (byte)(0 | (tsetfile.Read8((uint)totaloffset) & 0x0F)));//point it to the first colour
+                                }
+                            }
                         }
                     }
 
                     tileoffset += 2;
+                    if (!usingTMap)
+                        tilenum++;
                 }
             }
 
             tsetfile.ForceCompression();
             tsetfile.SaveChanges();
 
-            RedrawMinimap((LevelEditorForm)Owner);
+            tsetfile.ForceDecompression();
+            RedrawMinimap(usingTMap, sizeX, sizeY, bpp);
         }
 
         private void btnAreaXX_Click(object sender, EventArgs e)
@@ -368,7 +449,10 @@ namespace SM64DSe
 
                 myself.Checked = true;
                 m_CurArea = (int)myself.Tag;
-                RedrawMinimap((LevelEditorForm)Owner);
+
+                loadMinimapFiles();
+
+                RedrawMinimap(usingTMap, sizeX, sizeY, bpp);
             }
         }
 
@@ -380,11 +464,9 @@ namespace SM64DSe
             m_NumAreas = _owner.m_NumAreas;
             m_CurArea = 0;
 
-            tmapfile = new NitroFile[m_NumAreas];
+            tmapfiles = new NitroFile[m_NumAreas];
 
             txtCoordScale.Text = "" + (_owner.m_Overlay.Read16((uint)0x76) / 1000f);
-
-            cbSizes.Items.Add("512: 128x128"); cbSizes.Items.Add("2048: 256x256");
 
             int i, pos = tsMinimapEditor.Items.IndexOf(tslBeforeAreaBtns) + 1;
             for (i = 0; i < m_NumAreas; i++, pos++)
@@ -396,7 +478,49 @@ namespace SM64DSe
 
             ((ToolStripButton)tsMinimapEditor.Items[pos - i]).Checked = true;
 
-            RedrawMinimap(_owner);
+            for (int j = 1024; j >= 0; j -= 8)
+            {
+                dmnWidth.Items.Add(j);
+                dmnHeight.Items.Add(j);
+            }
+
+            txtZoom.Text = "" + zoom;
+
+            loadMinimapFiles();
+
+            RedrawMinimap(usingTMap, sizeX, sizeY, bpp);
+        }
+
+        private void loadMinimapFiles()
+        {
+
+            palfile = Program.m_ROM.GetFileFromInternalID(_owner.m_LevelSettings.MinimapPalFileID);
+            tsetfile = Program.m_ROM.GetFileFromInternalID(_owner.m_LevelSettings.MinimapTsetFileID);
+            for (int j = 0; j < m_NumAreas; j++)
+            {
+                try
+                {
+                    tmapfiles[j] = (Program.m_ROM.GetFileFromInternalID(_owner.m_MinimapFileIDs[j]));
+                    tmapfiles[j].ForceDecompression();
+                }
+                catch//If the file doesn't exist
+                {
+                    tsMinimapEditor.Items[1 + j].Enabled = false;
+                }
+            }
+
+            tsetfile.ForceDecompression();
+            tmapfile = tmapfiles[m_CurArea];
+
+            usingTMap = true;
+
+            sizeX = sizeY = (int)(Math.Sqrt(tmapfile.m_Data.Length / 2) * 8);// Minimaps are squares
+            bpp = 8;// Bits per pixel is always 8 for the minimaps
+            dmnHeight.Text = dmnWidth.Text = "" + sizeX;
+            cbxBPP.SelectedIndex = 1;
+
+            txtSelNCG.Text = tsetfile.m_Name;
+            txtSelNCL.Text = palfile.m_Name;
         }
 
         private void btnImport_Click(object sender, EventArgs e)
@@ -406,7 +530,14 @@ namespace SM64DSe
             DialogResult result = ofd.ShowDialog();
             if (result == DialogResult.OK)
             {
-                importBMP(ofd.FileName);
+                result = MessageBox.Show("Is this a minimap? (Their map files are different)", "Image Type", MessageBoxButtons.YesNoCancel);
+                if (result != DialogResult.Cancel)
+                {
+                    if (result == DialogResult.Yes)
+                        importBMP(ofd.FileName, true);
+                    else
+                        importBMP(ofd.FileName, false);
+                }
             }
         }
 
@@ -465,17 +596,9 @@ namespace SM64DSe
             return -1;//Not found
         }
 
-        private void btnResize_Click(object sender, EventArgs e)
-        {
-            if (cbSizes.SelectedIndex == 0)
-                resizeMaps(128);
-            else if (cbSizes.SelectedIndex == 1)
-                resizeMaps(256);
-        }
-
         private void resizeMaps(int newMapSize)
         {
-            //Fill current tmapfile to use full mapsize x mapsize
+            //Fill current tmapfiles to use full mapsize x mapsize
             uint addr = 0;
             int curTile = 0;
             int row = (int)(newMapSize / 8);
@@ -487,7 +610,7 @@ namespace SM64DSe
                 count = 0;
                 try
                 {
-                    tmapfile[i].Clear();
+                    tmapfiles[i].Clear();
                     for (int my = 0; my < newMapSize; my += 8)
                     {
                         for (int mx = 0; mx < newMapSize; mx += 8)
@@ -499,16 +622,16 @@ namespace SM64DSe
                                     curTile += row;
                                     count = 0;
                                 }
-                                tmapfile[i].Write16(addr, (ushort)curTile);
-                                //tmapfile[i].Write16(addr, (ushort)0);
+                                tmapfiles[i].Write16(addr, (ushort)curTile);
+                                //tmapfiles[i].Write16(addr, (ushort)0);
                                 curTile++;
                                 count++;
                                 addr += 2;
                             }
                             else//256x256 0, 1, 2, 3...
                             {
-                                tmapfile[i].Write16(addr, (ushort)curTile);
-                                //tmapfile[i].Write16(addr, (ushort)0);
+                                tmapfiles[i].Write16(addr, (ushort)curTile);
+                                //tmapfiles[i].Write16(addr, (ushort)0);
                                 curTile++;
                                 addr += 2;
                             }
@@ -521,12 +644,12 @@ namespace SM64DSe
                 }
             }
 
-            for (int i = 0; i < tmapfile.Length; i++)
+            for (int i = 0; i < tmapfiles.Length; i++)
             {
                 try
                 {
-                    tmapfile[i].ForceCompression();
-                    tmapfile[i].SaveChanges();
+                    tmapfiles[i].ForceCompression();
+                    tmapfiles[i].SaveChanges();
                 }
                 catch
                 {
@@ -534,7 +657,7 @@ namespace SM64DSe
                 }
             }
 
-            RedrawMinimap((LevelEditorForm)Owner);
+            RedrawMinimap(usingTMap, sizeX, sizeY, bpp);
         }
 
         private void btnExport_Click(object sender, EventArgs e)
@@ -545,35 +668,103 @@ namespace SM64DSe
             export.Filter = "Bitmap BMP (.bmp)|*.bmp";//Filter by .obj
             if (export.ShowDialog() == DialogResult.Cancel)
                 return;
-
-            Bitmap bmp = new Bitmap(mapsize, mapsize);
-
-            uint tileoffset = 0;
-            for (int my = 0; my < mapsize; my += 8)
+            try
             {
-                for (int mx = 0; mx < mapsize; mx += 8)
+                sizeX = int.Parse(dmnWidth.Text);
+                sizeY = int.Parse(dmnHeight.Text);
+                bpp = int.Parse(cbxBPP.Items[cbxBPP.SelectedIndex].ToString());
+                Bitmap bmp = LoadImage(usingTMap, sizeX, sizeY, bpp);
+
+                bmp.Save(export.FileName, System.Drawing.Imaging.ImageFormat.Bmp);
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show(ex.Message + ex.Source);
+            }
+        }
+
+        private void btnSelNCG_Click(object sender, EventArgs e)
+        {
+            using (var form = new ROMFileSelect("Please select a Graphic (NCG) file."))
+            {
+                var result = form.ShowDialog();
+                if (result == DialogResult.OK)
                 {
-                    ushort tilecrap = tmapfile[m_CurArea].Read16(tileoffset);
-                    uint tilenum = (uint)(tilecrap & 0x03FF);
-                    //Console.WriteLine("" + tilecrap);
-
-                    for (int ty = 0; ty < 8; ty++)
-                    {
-                        for (int tx = 0; tx < 8; tx++)
-                        {
-                            uint totaloffset = (uint)(tilenum * 64 + ty * 8 + tx);//Address of current pixel
-                            byte palentry = tsetfile.Read8(totaloffset);//Offset of current pixel's entry in palette file
-                            //Palentry is double to get the position of the colour in the palette file
-                            ushort pixel = palfile.Read16((uint)(palentry * 2));//Colour of current pixel from palette file
-                            bmp.SetPixel(mx + tx, my + ty, Helper.BGR15ToColor(pixel));
-                        }
-                    }
-
-                    tileoffset += 2;
+                    txtSelNCG.Text = form.m_SelectedFile;
                 }
             }
+        }
 
-            bmp.Save(export.FileName, System.Drawing.Imaging.ImageFormat.Bmp);
+        private void btnSelNCL_Click(object sender, EventArgs e)
+        {
+            using (var form = new ROMFileSelect("Please select a Palette (NCL) file."))
+            {
+                var result = form.ShowDialog();
+                if (result == DialogResult.OK)
+                {
+                    txtSelNCL.Text = form.m_SelectedFile;
+                }
+            }
+        }
+
+        private void btnSelNSC_Click(object sender, EventArgs e)
+        {
+            using (var form = new ROMFileSelect("Please select a Tile (NSC) file."))
+            {
+                var result = form.ShowDialog();
+                if (result == DialogResult.OK)
+                {
+                    txtSelNSC.Text = form.m_SelectedFile;
+                }
+            }
+        }
+
+        private void btnLoadImage_Click(object sender, EventArgs e)
+        {
+            if (txtSelNCG.Text.Equals("") || txtSelNCL.Text.Equals(""))
+                MessageBox.Show("You must select a Graphic (NCG) and a Palette (NCL) file,");
+            else
+            {
+                try
+                {
+                    tsetfile = Program.m_ROM.GetFileFromName(txtSelNCG.Text);
+                    if (!chkNCGDcmpd.Checked)
+                        tsetfile.ForceDecompression();
+                    palfile = Program.m_ROM.GetFileFromName(txtSelNCL.Text);
+                    if (!txtSelNSC.Text.Equals(""))
+                    {
+                        Program.m_ROM.GetFileFromName(txtSelNSC.Text);
+                        usingTMap = true;
+                    }
+                    else
+                        usingTMap = false;
+                    if (!chkNSCDcmpd.Checked)
+                        tmapfile.ForceDecompression();
+
+                    sizeX = int.Parse(dmnWidth.Text);
+                    sizeY = int.Parse(dmnHeight.Text);
+                    bpp = int.Parse(cbxBPP.Items[cbxBPP.SelectedIndex].ToString());
+
+                    RedrawMinimap(usingTMap, sizeX, sizeY, bpp);
+                }
+                catch (Exception ex)
+                {
+                    MessageBox.Show(ex.Message + ex.Source + "\n\nAn error occured:\nCheck they're all valid files." + 
+                        "\nCheck whether they have/haven't already been decompressed.\nCheck it's a valid size." + 
+                        "\nCheck that you're using the correct bits per pixel.");
+                }
+            }
+        }
+
+        private void txtZoom_TextChanged(object sender, EventArgs e)
+        {
+            try
+            {
+                zoom = int.Parse(txtZoom.Text);
+
+                RedrawMinimap(usingTMap, sizeX, sizeY, bpp);
+            }
+            catch { }
         }
 
     }

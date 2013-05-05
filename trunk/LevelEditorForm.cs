@@ -667,6 +667,7 @@ namespace SM64DSe
                         //btnExportModel.Visible = true;
                         //btnAddTexAnim.Visible = true;
                         //btnRemoveSel.Visible = true;
+                        btnImportOtherModel.Visible = true;
 
                         /*TreeNode node0 = tvObjectList.Nodes.Add("Texture animations");
                         for (int a = 0; a < m_TexAnims.Length; a++)
@@ -1948,8 +1949,7 @@ namespace SM64DSe
 
         private void btnImportModel_Click(object sender, EventArgs e)
         {
-            m_LevelSettings.editLevelBMDKCL = true;//Tell the model importer it's a level we're importing
-            ModelImporter form = new ModelImporter();
+            ModelImporter form = new ModelImporter(Program.m_ROM.GetFileFromInternalID(m_LevelSettings.BMDFileID).m_Name, Program.m_ROM.GetFileFromInternalID(m_LevelSettings.KCLFileID).m_Name);
             if (form.ShowDialog(this) == DialogResult.Cancel)
                 return;
         }
@@ -2263,9 +2263,8 @@ namespace SM64DSe
 
             m_LevelSettings.objBMD = selObjBMDName;
             m_LevelSettings.objKCL = selObjKCLName;
-            m_LevelSettings.editLevelBMDKCL = false;//Tell the importer we're replacing an object, not a level
 
-            ModelImporter form = new ModelImporter();
+            ModelImporter form = new ModelImporter(selObjBMDName, selObjKCLName, ObjectRenderer.currentObjScale);
             if (form != null && !form.m_EarlyClosure)
                 form.Show(this);
         }
@@ -2688,6 +2687,26 @@ namespace SM64DSe
 
             BMD objectBMD = new BMD(m_ROM.GetFileFromName(selObjBMDName));
             exportOBJ(objectBMD);
+        }
+
+        private void btnImportOtherModel_Click(object sender, EventArgs e)
+        {
+            using (var form = new ROMFileSelect("Please select a model (BMD) file to replace."))
+            {
+                var result = form.ShowDialog();
+                if (result == DialogResult.OK)
+                {
+                    String modelName = form.m_SelectedFile;
+                    float scale;
+                    String input = Microsoft.VisualBasic.Interaction.InputBox("Enter a scale for the model - Level Models use 1, most objects use 0.008:", "Scale", "1", 0, 0);
+                    if (float.TryParse(input, out scale) || float.TryParse(input, NumberStyles.Float, new CultureInfo("en-US"), out scale))
+                    {
+                        new ModelImporter(modelName, modelName.Substring(0, modelName.Length - 4) + ".kcl", scale).Show();
+                    }
+                    else
+                        new ModelImporter(modelName, modelName.Substring(0, modelName.Length - 4) + ".kcl").Show();
+                }
+            }
         }
     }
 }
