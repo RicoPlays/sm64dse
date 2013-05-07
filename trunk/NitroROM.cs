@@ -290,7 +290,8 @@ namespace SM64DSe
             if (id < 0xF000)
                 return new NitroFile(this, id);
 
-            string[] narcs = { "ar1", "arc0", "c2d", "cee", "cef", "ceg", "cei", "ces", "en1", "vs1", "vs2", "vs3", "vs4" };
+            string[] narcs = (m_Version == Version.EUR ? new String[]{ "ar1", "arc0", "c2d", "cee", "cef", "ceg", "cei", "ces", "en1", "vs1", "vs2", "vs3", "vs4" }
+                : new String[] { "ar1", "arc0", "c2d", "en1", "vs1", "vs2", "vs3", "vs4" });
             foreach (string narc in narcs)
             {
                 NARC thenarc = new NARC(this, GetFileIDFromName("ARCHIVE/" + narc + ".narc"));

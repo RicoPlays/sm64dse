@@ -39,6 +39,8 @@
             this.label1 = new System.Windows.Forms.Label();
             this.txtCoordScale = new System.Windows.Forms.TextBox();
             this.groupBox1 = new System.Windows.Forms.GroupBox();
+            this.chkNSCDcmp = new System.Windows.Forms.CheckBox();
+            this.chkNCGDcmp = new System.Windows.Forms.CheckBox();
             this.btnLoadImage = new System.Windows.Forms.Button();
             this.btnSelNSC = new System.Windows.Forms.Button();
             this.btnSelNCL = new System.Windows.Forms.Button();
@@ -55,8 +57,6 @@
             this.label3 = new System.Windows.Forms.Label();
             this.txtSelNCG = new System.Windows.Forms.TextBox();
             this.label2 = new System.Windows.Forms.Label();
-            this.chkNCGDcmpd = new System.Windows.Forms.CheckBox();
-            this.chkNSCDcmpd = new System.Windows.Forms.CheckBox();
             this.label8 = new System.Windows.Forms.Label();
             this.txtZoom = new System.Windows.Forms.TextBox();
             ((System.ComponentModel.ISupportInitialize)(this.pbxMinimapGfx)).BeginInit();
@@ -174,8 +174,8 @@
             // 
             // groupBox1
             // 
-            this.groupBox1.Controls.Add(this.chkNSCDcmpd);
-            this.groupBox1.Controls.Add(this.chkNCGDcmpd);
+            this.groupBox1.Controls.Add(this.chkNSCDcmp);
+            this.groupBox1.Controls.Add(this.chkNCGDcmp);
             this.groupBox1.Controls.Add(this.btnLoadImage);
             this.groupBox1.Controls.Add(this.btnSelNSC);
             this.groupBox1.Controls.Add(this.btnSelNCL);
@@ -198,6 +198,30 @@
             this.groupBox1.TabIndex = 11;
             this.groupBox1.TabStop = false;
             this.groupBox1.Text = "Image";
+            // 
+            // chkNSCDcmp
+            // 
+            this.chkNSCDcmp.AutoSize = true;
+            this.chkNSCDcmp.Checked = true;
+            this.chkNSCDcmp.CheckState = System.Windows.Forms.CheckState.Checked;
+            this.chkNSCDcmp.Location = new System.Drawing.Point(169, 99);
+            this.chkNSCDcmp.Name = "chkNSCDcmp";
+            this.chkNSCDcmp.Size = new System.Drawing.Size(85, 17);
+            this.chkNSCDcmp.TabIndex = 17;
+            this.chkNSCDcmp.Text = "Decompress";
+            this.chkNSCDcmp.UseVisualStyleBackColor = true;
+            // 
+            // chkNCGDcmp
+            // 
+            this.chkNCGDcmp.AutoSize = true;
+            this.chkNCGDcmp.Checked = true;
+            this.chkNCGDcmp.CheckState = System.Windows.Forms.CheckState.Checked;
+            this.chkNCGDcmp.Location = new System.Drawing.Point(169, 15);
+            this.chkNCGDcmp.Name = "chkNCGDcmp";
+            this.chkNCGDcmp.Size = new System.Drawing.Size(85, 17);
+            this.chkNCGDcmp.TabIndex = 16;
+            this.chkNCGDcmp.Text = "Decompress";
+            this.chkNCGDcmp.UseVisualStyleBackColor = true;
             // 
             // btnLoadImage
             // 
@@ -339,28 +363,6 @@
             this.label2.TabIndex = 0;
             this.label2.Text = "Graphic NCG";
             // 
-            // chkNCGDcmpd
-            // 
-            this.chkNCGDcmpd.AutoSize = true;
-            this.chkNCGDcmpd.Location = new System.Drawing.Point(119, 15);
-            this.chkNCGDcmpd.Name = "chkNCGDcmpd";
-            this.chkNCGDcmpd.Size = new System.Drawing.Size(135, 17);
-            this.chkNCGDcmpd.TabIndex = 16;
-            this.chkNCGDcmpd.Text = "Already Decompressed";
-            this.chkNCGDcmpd.UseVisualStyleBackColor = true;
-            // 
-            // chkNSCDcmpd
-            // 
-            this.chkNSCDcmpd.AutoSize = true;
-            this.chkNSCDcmpd.Checked = true;
-            this.chkNSCDcmpd.CheckState = System.Windows.Forms.CheckState.Checked;
-            this.chkNSCDcmpd.Location = new System.Drawing.Point(119, 99);
-            this.chkNSCDcmpd.Name = "chkNSCDcmpd";
-            this.chkNSCDcmpd.Size = new System.Drawing.Size(135, 17);
-            this.chkNSCDcmpd.TabIndex = 17;
-            this.chkNSCDcmpd.Text = "Already Decompressed";
-            this.chkNSCDcmpd.UseVisualStyleBackColor = true;
-            // 
             // label8
             // 
             this.label8.AutoSize = true;
@@ -436,8 +438,8 @@
         private System.Windows.Forms.Button btnSelNCL;
         private System.Windows.Forms.Button btnSelNCG;
         private System.Windows.Forms.Button btnLoadImage;
-        private System.Windows.Forms.CheckBox chkNSCDcmpd;
-        private System.Windows.Forms.CheckBox chkNCGDcmpd;
+        private System.Windows.Forms.CheckBox chkNSCDcmp;
+        private System.Windows.Forms.CheckBox chkNCGDcmp;
         private System.Windows.Forms.Label label8;
         private System.Windows.Forms.TextBox txtZoom;
     }

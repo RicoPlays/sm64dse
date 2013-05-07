@@ -53,6 +53,20 @@ namespace SM64DSe
 
         private void RedrawMinimap(Boolean usingTmap, int sizeX, int sizeY, int bpp)
         {
+            tsetfile = Program.m_ROM.GetFileFromName(txtSelNCG.Text);
+            if (chkNCGDcmp.Checked)
+                tsetfile.ForceDecompression();
+            palfile = Program.m_ROM.GetFileFromName(txtSelNCL.Text);
+            if (!txtSelNSC.Text.Equals(""))
+            {
+                usingTMap = true;
+                tmapfile = Program.m_ROM.GetFileFromName(txtSelNSC.Text);
+                if (chkNSCDcmp.Checked)
+                    tmapfile.ForceDecompression();
+            }
+            else
+                usingTMap = false;
+
             Bitmap bmp = LoadImage(usingTMap, sizeX, sizeY, bpp);
 
             pbxMinimapGfx.Image = new Bitmap(bmp, new Size(sizeX * zoom, sizeY * zoom));
@@ -207,8 +221,6 @@ namespace SM64DSe
             if (usingTMap)
             {
                 tmapfile = Program.m_ROM.GetFileFromName(txtSelNSC.Text);
-                if (!chkNSCDcmpd.Checked)
-                    tmapfile.ForceDecompression();
                 tmapfile.Clear();
                 uint addr = 0;
                 int curTile = 0;
@@ -258,7 +270,7 @@ namespace SM64DSe
                         }
                     }// End For
                 }// End If !ReplaceMinimap
-                if (!chkNSCDcmpd.Checked)
+                if (chkNSCDcmp.Checked)
                     tmapfile.ForceCompression();
                 tmapfile.SaveChanges();
             }// End If usingTMap
@@ -299,9 +311,13 @@ namespace SM64DSe
 
             //Write the new image to file
             tsetfile = Program.m_ROM.GetFileFromName(txtSelNCG.Text);
-            if (!chkNCGDcmpd.Checked)
-                tsetfile.ForceDecompression();
             tsetfile.Clear();
+            if (usingTMap)
+            {
+                // It needs read below
+                if (chkNSCDcmp.Checked)
+                    tmapfile.ForceDecompression();
+            }
             uint tileoffset = 0;
             ushort tileCrap = 0;
             uint tileNum = 0;
@@ -350,13 +366,10 @@ namespace SM64DSe
                 }
             }
 
-            tsetfile.ForceCompression();
+            if (chkNCGDcmp.Checked)
+                tsetfile.ForceCompression();
             tsetfile.SaveChanges();
 
-            if (!chkNCGDcmpd.Checked)
-                tsetfile.ForceDecompression();
-            if (!chkNSCDcmpd.Checked)
-                tmapfile.ForceDecompression();
             RedrawMinimap(usingTMap, sizeX, sizeY, bpp);
         }
 
@@ -431,10 +444,10 @@ namespace SM64DSe
                 }
             }
 
-            tsetfile.ForceCompression();
+            if (chkNCGDcmp.Checked)
+                tsetfile.ForceCompression();
             tsetfile.SaveChanges();
 
-            tsetfile.ForceDecompression();
             RedrawMinimap(usingTMap, sizeX, sizeY, bpp);
         }
 
@@ -501,7 +514,6 @@ namespace SM64DSe
                 try
                 {
                     tmapfiles[j] = (Program.m_ROM.GetFileFromInternalID(_owner.m_MinimapFileIDs[j]));
-                    tmapfiles[j].ForceDecompression();
                 }
                 catch//If the file doesn't exist
                 {
@@ -509,8 +521,8 @@ namespace SM64DSe
                 }
             }
 
-            tsetfile.ForceDecompression();
             tmapfile = tmapfiles[m_CurArea];
+            tmapfile.ForceDecompression();// Only to get accurate size below
 
             usingTMap = true;
 
@@ -521,6 +533,7 @@ namespace SM64DSe
 
             txtSelNCG.Text = tsetfile.m_Name;
             txtSelNCL.Text = palfile.m_Name;
+            txtSelNSC.Text = tmapfile.m_Name;
         }
 
         private void btnImport_Click(object sender, EventArgs e)
@@ -727,19 +740,12 @@ namespace SM64DSe
             {
                 try
                 {
-                    tsetfile = Program.m_ROM.GetFileFromName(txtSelNCG.Text);
-                    if (!chkNCGDcmpd.Checked)
-                        tsetfile.ForceDecompression();
-                    palfile = Program.m_ROM.GetFileFromName(txtSelNCL.Text);
                     if (!txtSelNSC.Text.Equals(""))
                     {
-                        Program.m_ROM.GetFileFromName(txtSelNSC.Text);
                         usingTMap = true;
                     }
                     else
                         usingTMap = false;
-                    if (!chkNSCDcmpd.Checked)
-                        tmapfile.ForceDecompression();
 
                     sizeX = int.Parse(dmnWidth.Text);
                     sizeY = int.Parse(dmnHeight.Text);
