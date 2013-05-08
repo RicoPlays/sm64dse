@@ -192,6 +192,7 @@ namespace SM64DSe
                 m_PaletteData = pal;
                 m_TextureName = tn;
                 m_PaletteName = pn;
+                m_TexType = (dstp >> 26) & 0x7;
 
                 m_TextureDataLength = m_TextureData.Length;
                 if ((dstp & 0x1C000000) == 0x14000000)
@@ -205,6 +206,7 @@ namespace SM64DSe
             public string m_TextureName;
             public string m_PaletteName;
             public uint m_TextureID, m_PaletteID;
+            public uint m_TexType;
         }
 
         public class Palette

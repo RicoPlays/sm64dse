@@ -187,18 +187,28 @@ namespace SM64DSe
                     // Write new texture and texture palette data
 
                     // Check if we need to make room for additional data
-                    uint oldTexDataSize = (uint)m_Model.m_Textures.Values.ElementAt(index).m_Data.Length;
-                    uint newTexDataSize = (uint)tex.m_TextureDataLength;
+
+                    // For compressed (type 5) textures, the size of the texture data doesn't count the palette index data.
+                    // The texture data is then directly followed by (size/2) of palette index data.
+
+                    uint oldTexDataSize = (uint)m_Model.m_Textures.Values.ElementAt(index).m_TexDataSize;
+                    if (m_Model.m_Textures.Values.ElementAt(index).m_TexType == 5)
+                        oldTexDataSize += (oldTexDataSize / 2);
+                    uint newTexDataSize = (uint)((tex.m_TextureData.Length + 3) & ~3);
                     uint oldPalDataSize = (uint)m_Model.m_Textures.Values.ElementAt(index).m_PalSize;
-                    uint newPalDataSize = (uint)tex.m_PaletteData.Length;
+                    uint newPalDataSize = (uint)((tex.m_PaletteData.Length + 3) & ~3);
 
                     uint texDataOffset = m_Model.m_File.Read32(m_Model.m_Textures.Values.ElementAt(index).m_EntryOffset + 0x04);
-                    uint palDataOffset = m_Model.m_File.Read32(m_Model.m_Textures.Values.ElementAt(index).m_PalEntryOffset + 0x04);
-
+                    // If necessary, make room for additional texture data
                     if (newTexDataSize > oldTexDataSize)
                         m_Model.AddSpace(texDataOffset + oldTexDataSize, newTexDataSize - oldTexDataSize);
+
+                    uint palDataOffset = m_Model.m_File.Read32(m_Model.m_Textures.Values.ElementAt(index).m_PalEntryOffset + 0x04);
+                    // If necessary, make room for additional palette data
                     if (newPalDataSize > oldPalDataSize)
                         m_Model.AddSpace(palDataOffset + oldPalDataSize, newPalDataSize - oldPalDataSize);
+                    // Reload palette data offset
+                    palDataOffset = m_Model.m_File.Read32(m_Model.m_Textures.Values.ElementAt(index).m_PalEntryOffset + 0x04);
 
                     m_Model.m_File.WriteBlock(texDataOffset, tex.m_TextureData);
 
@@ -213,7 +223,7 @@ namespace SM64DSe
                 }
                 catch (Exception ex)
                 {
-                    MessageBox.Show(ex.Message);
+                    MessageBox.Show(ex.Message + ex.Source + ex.TargetSite + ex.StackTrace);
                 }
             }
             else
