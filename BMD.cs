@@ -53,6 +53,7 @@ namespace SM64DSe
             uint texdataoffset = m_File.Read32(texentry + 0x04);
             uint texdatasize = m_File.Read32(texentry + 0x08);
             uint texparam = m_File.Read32(texentry + 0x10);
+            ret.m_TexDataSize = texdatasize;
             ret.m_Params = texparam;
 
             uint paldataoffset = 0xFFFFFFFF;
@@ -67,6 +68,7 @@ namespace SM64DSe
             ret.m_PalSize = paldatasize;
 
             uint textype = (texparam >> 26) & 0x7;
+            ret.m_TexType = textype;
             if (textype == 0)
                 return null;
 
@@ -972,6 +974,8 @@ namespace SM64DSe
             public uint m_Width, m_Height;
             public uint m_Params; // typically width/height and type
             public byte[] m_Data;
+            public uint m_TexDataSize;
+            public uint m_TexType;
 
             public uint m_EntryOffset, m_PalEntryOffset;
             public uint m_PalOffset, m_PalSize;

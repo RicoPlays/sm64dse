@@ -186,90 +186,27 @@ namespace SM64DSe
                 palfile.Write16((uint)i * 2, 0);
 
             palfile.SaveChanges();
-
-            // If a tile map file is being used and we're editing minimaps,  
-            // get last used tile number (highest) in previous areas so we know where write new data to
-            ushort prevLastTile = 0;
-            if (usingTMap && m_NumAreas > 1)
-            {
-                for (int i = 0; i < m_NumAreas; i++)
-                {
-                    try
-                    {
-                        uint tile = 0;
-                        for (int my = 0; my < sizeY; my += 8)
-                        {
-                            for (int mx = 0; mx < sizeX; mx += 8)
-                            {
-                                ushort tilecrap = tmapfiles[i].Read16(tile);
-                                uint tilenum = (uint)(tilecrap & 0x03FF);
-                                if ((ushort)tilenum > prevLastTile)
-                                    prevLastTile = (ushort)tilenum;
-
-                                tile += 2;
-                            }
-                        }
-                    }
-                    catch
-                    {
-                        continue;
-                    }
-                }
-            }
-
+            
             //Fill current tmapfiles to use full mapsize x mapsize
             if (usingTMap)
             {
                 tmapfile = Program.m_ROM.GetFileFromName(txtSelNSC.Text);
                 tmapfile.Clear();
+                sizeX = bmp.Width;
+                sizeY = bmp.Height;
                 uint addr = 0;
                 int curTile = 0;
-                if (m_NumAreas == 1 || prevLastTile == 0)//If this is going to be the first tile, keep it at zero
-                    curTile = prevLastTile;
-                else//else tiles should start one after the last (highest) one used by previous map
-                    curTile = prevLastTile + 1;
                 int row = (int)(sizeX / 8);
-                int count = 0;
-                if (replaceMinimap)
+
+                for (int my = 0; my < sizeY; my += 8)
                 {
-                    for (int my = 0; my < sizeY; my += 8)
+                    for (int mx = 0; mx < sizeX; mx += 8)
                     {
-                        for (int mx = 0; mx < sizeX; mx += 8)
-                        {
-                            if (row == 16)//128x128 0, 1, 2...14, 15, 32, 33...47, 64...
-                            {
-                                if (count == row)
-                                {
-                                    curTile += row;
-                                    count = 0;
-                                }
-                                //Console.WriteLine("" + curTile);
-                                tmapfile.Write16(addr, (ushort)curTile);
-                                curTile++;
-                                count++;
-                                addr += 2;
-                            }
-                            else//256x256 0, 1, 2, 3...
-                            {
-                                tmapfile.Write16(addr, (ushort)curTile);
-                                curTile++;
-                                addr += 2;
-                            }
-                        }
-                    }// End For
-                }// End If ReplaceMinimap
-                else if (!replaceMinimap)
-                {
-                    for (int my = 0; my < sizeY; my += 8)
-                    {
-                        for (int mx = 0; mx < sizeX; mx += 8)
-                        {
-                            tmapfile.Write16(addr, (ushort)curTile);
-                            curTile++;
-                            addr += 2;
-                        }
-                    }// End For
-                }// End If !ReplaceMinimap
+                        tmapfile.Write16(addr, (ushort)curTile);
+                        curTile++;
+                        addr += 2;
+                    }
+                }// End For
                 if (chkNSCDcmp.Checked)
                     tmapfile.ForceCompression();
                 tmapfile.SaveChanges();
@@ -312,25 +249,12 @@ namespace SM64DSe
             //Write the new image to file
             tsetfile = Program.m_ROM.GetFileFromName(txtSelNCG.Text);
             tsetfile.Clear();
-            if (usingTMap)
-            {
-                // It needs read below
-                if (chkNSCDcmp.Checked)
-                    tmapfile.ForceDecompression();
-            }
             uint tileoffset = 0;
-            ushort tileCrap = 0;
             uint tileNum = 0;
             for (int my = 0; my < sizeY; my += 8)
             {
                 for (int mx = 0; mx < sizeX; mx += 8)
                 {
-                    if (usingTMap)
-                    {
-                        tileCrap = tmapfile.Read16(tileoffset);
-                        tileNum = (uint)(tileCrap & 0x03FF);
-                    }
-
                     for (int ty = 0; ty < 8; ty++)
                     {
                         for (int tx = 0; tx < 8; tx++)
@@ -361,8 +285,7 @@ namespace SM64DSe
                     }
 
                     tileoffset += 2;
-                    if (!usingTMap)
-                        tileNum++;
+                    tileNum++;
                 }
             }
 
@@ -370,7 +293,20 @@ namespace SM64DSe
                 tsetfile.ForceCompression();
             tsetfile.SaveChanges();
 
-            RedrawMinimap(usingTMap, sizeX, sizeY, bpp);
+            // If it's a minimap that's being replaced, fill the tile maps to allow for multiple maps 
+            // and ensure the image's displayed at the right size as you can't change the size of 
+            // a level's minimap - it seems to be hardcoded somewhere (in level header?)
+            if (replaceMinimap)
+            {
+                try
+                {
+                    if (chk128.Checked)
+                        FillMinimapTiles(128);
+                    else if (chk256.Checked)
+                        FillMinimapTiles(256);
+                }
+                catch (Exception ex) { MessageBox.Show(ex.Message + ex.Source + ex.StackTrace); }
+            }
         }
 
         public void switchBackground(int swapped)
@@ -463,9 +399,13 @@ namespace SM64DSe
                 myself.Checked = true;
                 m_CurArea = (int)myself.Tag;
 
-                loadMinimapFiles();
+                try
+                {
+                    loadMinimapFiles();
 
-                RedrawMinimap(usingTMap, sizeX, sizeY, bpp);
+                    RedrawMinimap(usingTMap, sizeX, sizeY, bpp);
+                }
+                catch { myself.Enabled = false; };// The particular tile map doesn't exist
             }
         }
 
@@ -513,7 +453,13 @@ namespace SM64DSe
             {
                 try
                 {
-                    tmapfiles[j] = (Program.m_ROM.GetFileFromInternalID(_owner.m_MinimapFileIDs[j]));
+                    if (_owner.m_MinimapFileIDs[j] != 0)
+                    {
+                        tmapfiles[j] = (Program.m_ROM.GetFileFromInternalID(_owner.m_MinimapFileIDs[j]));
+                        tsMinimapEditor.Items[1 + j].Enabled = true;
+                    }
+                    else
+                        tsMinimapEditor.Items[1 + j].Enabled = false;
                 }
                 catch//If the file doesn't exist
                 {
@@ -530,6 +476,16 @@ namespace SM64DSe
             bpp = 8;// Bits per pixel is always 8 for the minimaps
             dmnHeight.Text = dmnWidth.Text = "" + sizeX;
             cbxBPP.SelectedIndex = 1;
+            if (sizeX == 128)
+            {
+                chk128.Checked = true;
+                chk256.Checked = false;
+            }
+            else if (sizeX == 256)
+            {
+                chk128.Checked = false;
+                chk256.Checked = true;
+            }
 
             txtSelNCG.Text = tsetfile.m_Name;
             txtSelNCL.Text = palfile.m_Name;
@@ -543,14 +499,83 @@ namespace SM64DSe
             DialogResult result = ofd.ShowDialog();
             if (result == DialogResult.OK)
             {
-                result = MessageBox.Show("Is this a minimap? (Their map files are different)", "Image Type", MessageBoxButtons.YesNoCancel);
-                if (result != DialogResult.Cancel)
+                try
                 {
-                    if (result == DialogResult.Yes)
-                        importBMP(ofd.FileName, true);
-                    else
-                        importBMP(ofd.FileName, false);
+                    importBMP(ofd.FileName, chkIsMinimap.Checked);
+
+                    if (chkIsMinimap.Checked)
+                    {
+                        if (chk128.Checked)
+                            sizeX = sizeY = 128;
+                        else if (chk256.Checked)
+                            sizeX = sizeY = 256;
+                    }
+                    RedrawMinimap(usingTMap, sizeX, sizeY, bpp);
                 }
+                catch (Exception ex)
+                {
+                    MessageBox.Show(ex.Message + ex.Source + "\n\nAn error occured:\nCheck they're all valid files." +
+                        "\nCheck whether they have/haven't already been decompressed.\nCheck it's a valid size." +
+                        "\nCheck that you're using the correct bits per pixel.");
+                }
+            }
+        }
+
+        private void FillMinimapTiles(int size)
+        {
+            List<int> validFiles = new List<int>();
+            for (int j = 0; j < m_NumAreas; j++)
+            {
+                try
+                {
+                    if (_owner.m_MinimapFileIDs[j] != 0)
+                    {
+                        tmapfiles[j] = (Program.m_ROM.GetFileFromInternalID(_owner.m_MinimapFileIDs[j]));
+                        validFiles.Add(j);
+                    }
+                }
+                catch { }// Doesn't exist
+            }
+            for (int i = 0; i < validFiles.Count; i++)
+            {
+                try { tmapfiles[validFiles[i]].Clear(); }
+                catch { continue; }
+
+                uint addr = 0;
+                int curTile = 0;
+                int row = (int)(size / 8);
+                // Images are arranged left to right, top to bottom. Eg. for 128x128 maps:
+                // If imported image is 256 x 256,
+                // | 1 | 2 |
+                // | 3 | 4 |
+                    
+                // If it's 384 x 384,
+                // | 1 | 2 | 3 |
+                // | 4 | 5 | 6 |
+                // | 7 | 8 | 9 |
+
+                int numInRow = sizeX / size;
+                curTile += (i < numInRow) ? (row * i) : (row * (i - numInRow)) + ((row * row * numInRow) * (i / numInRow));
+                int count = 0;
+                for (int my = 0; my < size; my += 8)
+                {
+                    for (int mx = 0; mx < size; mx += 8)
+                    {
+                        if (count == row && validFiles.Count > 1)
+                        {
+                            curTile += row;
+                            count = 0;
+                        }
+                        tmapfiles[validFiles[i]].Write16(addr, (ushort)curTile);
+                        curTile++;
+                        count++;
+                        addr += 2;
+                    }
+                }// End For
+
+                if (chkNSCDcmp.Checked)
+                    tmapfiles[validFiles[i]].ForceCompression();
+                tmapfiles[validFiles[i]].SaveChanges();
             }
         }
 
@@ -607,70 +632,6 @@ namespace SM64DSe
                 }
             }
             return -1;//Not found
-        }
-
-        private void resizeMaps(int newMapSize)
-        {
-            //Fill current tmapfiles to use full mapsize x mapsize
-            uint addr = 0;
-            int curTile = 0;
-            int row = (int)(newMapSize / 8);
-            int count = 0;
-            for (int i = 0; i < m_NumAreas; i++)
-            {
-                curTile = 0;
-                addr = 0;
-                count = 0;
-                try
-                {
-                    tmapfiles[i].Clear();
-                    for (int my = 0; my < newMapSize; my += 8)
-                    {
-                        for (int mx = 0; mx < newMapSize; mx += 8)
-                        {
-                            if (row == 16)//128x128 0, 1, 2...14, 15, 32, 33...47, 64...
-                            {
-                                if (count == row)
-                                {
-                                    curTile += row;
-                                    count = 0;
-                                }
-                                tmapfiles[i].Write16(addr, (ushort)curTile);
-                                //tmapfiles[i].Write16(addr, (ushort)0);
-                                curTile++;
-                                count++;
-                                addr += 2;
-                            }
-                            else//256x256 0, 1, 2, 3...
-                            {
-                                tmapfiles[i].Write16(addr, (ushort)curTile);
-                                //tmapfiles[i].Write16(addr, (ushort)0);
-                                curTile++;
-                                addr += 2;
-                            }
-                        }
-                    }
-                }
-                catch
-                {
-                    continue;
-                }
-            }
-
-            for (int i = 0; i < tmapfiles.Length; i++)
-            {
-                try
-                {
-                    tmapfiles[i].ForceCompression();
-                    tmapfiles[i].SaveChanges();
-                }
-                catch
-                {
-                    continue;
-                }
-            }
-
-            RedrawMinimap(usingTMap, sizeX, sizeY, bpp);
         }
 
         private void btnExport_Click(object sender, EventArgs e)
@@ -771,6 +732,22 @@ namespace SM64DSe
                 RedrawMinimap(usingTMap, sizeX, sizeY, bpp);
             }
             catch { }
+        }
+
+        private void chk128_CheckedChanged(object sender, EventArgs e)
+        {
+            if (chk128.Checked)
+                chk256.Checked = false;
+            else
+                chk256.Checked = true;
+        }
+
+        private void chk256_CheckedChanged(object sender, EventArgs e)
+        {
+            if (chk256.Checked)
+                chk128.Checked = false;
+            else
+                chk128.Checked = true;
         }
 
     }
