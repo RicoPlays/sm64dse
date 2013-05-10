@@ -7,6 +7,7 @@ using System.Linq;
 using System.Text;
 using System.Windows.Forms;
 using System.Xml;
+using System.IO;
 
 namespace SM64DSe
 {
@@ -583,7 +584,7 @@ namespace SM64DSe
             settings.IndentChars = "  ";
             settings.NewLineChars = "\r\n";
             settings.NewLineHandling = NewLineHandling.Replace;
-            using (XmlWriter writer = XmlWriter.Create("AdditionalPatches.xml", settings))
+            using (XmlWriter writer = XmlWriter.Create(Path.Combine(Application.StartupPath, "AdditionalPatches.xml"), settings))
             {
                 writer.WriteStartDocument();
                 writer.WriteStartElement("Patches");
@@ -710,7 +711,7 @@ namespace SM64DSe
             List<uint> EURRestore = new List<uint>(), USv1Restore = new List<uint>(), USv2Restore = new List<uint>(), JAPRestore = new List<uint>();
 
             // Create an XML reader for this file.
-            using (XmlReader reader = XmlReader.Create("AdditionalPatches.xml"))
+            using (XmlReader reader = XmlReader.Create(Path.Combine(Application.StartupPath, "AdditionalPatches.xml")))
             {
 
                 reader.MoveToContent();
