@@ -636,7 +636,7 @@ namespace SM64DSe
             point1 = originPoint;
             /*
             Collision Tools v0.6 by blank
-            v0 = outputVertices[t.vertex_index] //The given vertex
+            v0 = vertices[t.vertex_index] //The given vertex
             v2 = v0 + cross(n,a)*t.length/dot(cross(n,a),c)
             v1 = v0 + cross(n,b)*t.length/dot(cross(n,b),c)
             */
