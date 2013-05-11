@@ -55,6 +55,7 @@
             this.toolStripMenuItem2 = new System.Windows.Forms.ToolStripMenuItem();
             this.toolStripMenuItem3 = new System.Windows.Forms.ToolStripMenuItem();
             this.toolStripMenuItem4 = new System.Windows.Forms.ToolStripMenuItem();
+            this.btnImportOtherModel = new System.Windows.Forms.ToolStripButton();
             this.glLevelView = new SM64DSe.HaxxGLControl();
             this.tsViewActions = new System.Windows.Forms.ToolStrip();
             this.btnDumpOverlay = new System.Windows.Forms.ToolStripButton();
@@ -87,7 +88,7 @@
             this.btnStarAll = new System.Windows.Forms.ToolStripButton();
             this.ssStatusBar = new System.Windows.Forms.StatusStrip();
             this.slStatusLabel = new System.Windows.Forms.ToolStripStatusLabel();
-            this.btnImportOtherModel = new System.Windows.Forms.ToolStripButton();
+            this.btnExportOtherModel = new System.Windows.Forms.ToolStripButton();
             ((System.ComponentModel.ISupportInitialize)(this.spcMainContainer)).BeginInit();
             this.spcMainContainer.Panel1.SuspendLayout();
             this.spcMainContainer.Panel2.SuspendLayout();
@@ -129,7 +130,7 @@
             // 
             this.spcLeftPanel.Dock = System.Windows.Forms.DockStyle.Fill;
             this.spcLeftPanel.FixedPanel = System.Windows.Forms.FixedPanel.Panel2;
-            this.spcLeftPanel.Location = new System.Drawing.Point(0, 132);
+            this.spcLeftPanel.Location = new System.Drawing.Point(0, 154);
             this.spcLeftPanel.Name = "spcLeftPanel";
             this.spcLeftPanel.Orientation = System.Windows.Forms.Orientation.Horizontal;
             // 
@@ -140,8 +141,8 @@
             // spcLeftPanel.Panel2
             // 
             this.spcLeftPanel.Panel2.Controls.Add(this.pgObjectProperties);
-            this.spcLeftPanel.Size = new System.Drawing.Size(264, 354);
-            this.spcLeftPanel.SplitterDistance = 95;
+            this.spcLeftPanel.Size = new System.Drawing.Size(264, 332);
+            this.spcLeftPanel.SplitterDistance = 73;
             this.spcLeftPanel.TabIndex = 1;
             // 
             // tvObjectList
@@ -151,7 +152,7 @@
             this.tvObjectList.HideSelection = false;
             this.tvObjectList.Location = new System.Drawing.Point(0, 0);
             this.tvObjectList.Name = "tvObjectList";
-            this.tvObjectList.Size = new System.Drawing.Size(264, 95);
+            this.tvObjectList.Size = new System.Drawing.Size(264, 73);
             this.tvObjectList.TabIndex = 0;
             this.tvObjectList.TabStop = false;
             this.tvObjectList.DrawNode += new System.Windows.Forms.DrawTreeNodeEventHandler(this.tvObjectList_DrawNode);
@@ -183,11 +184,12 @@
             this.btnAddPathNodes,
             this.btnAddPath,
             this.btnAddMisc,
-            this.btnImportOtherModel});
+            this.btnImportOtherModel,
+            this.btnExportOtherModel});
             this.tsEditActions.LayoutStyle = System.Windows.Forms.ToolStripLayoutStyle.Flow;
             this.tsEditActions.Location = new System.Drawing.Point(0, 0);
             this.tsEditActions.Name = "tsEditActions";
-            this.tsEditActions.Size = new System.Drawing.Size(264, 132);
+            this.tsEditActions.Size = new System.Drawing.Size(264, 154);
             this.tsEditActions.TabIndex = 0;
             this.tsEditActions.Text = "toolStrip1";
             // 
@@ -392,6 +394,15 @@
             this.toolStripMenuItem4.Size = new System.Drawing.Size(162, 22);
             this.toolStripMenuItem4.Tag = "14";
             this.toolStripMenuItem4.Text = "Unkown Type 14";
+            // 
+            // btnImportOtherModel
+            // 
+            this.btnImportOtherModel.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Text;
+            this.btnImportOtherModel.ImageTransparentColor = System.Drawing.Color.Magenta;
+            this.btnImportOtherModel.Name = "btnImportOtherModel";
+            this.btnImportOtherModel.Size = new System.Drawing.Size(115, 19);
+            this.btnImportOtherModel.Text = "Import other model";
+            this.btnImportOtherModel.Click += new System.EventHandler(this.btnImportOtherModel_Click);
             // 
             // glLevelView
             // 
@@ -754,14 +765,14 @@
             this.slStatusLabel.Paint += new System.Windows.Forms.PaintEventHandler(this.slStatusLabel_Paint);
             this.slStatusLabel.TextChanged += new System.EventHandler(this.slStatusLabel_TextChanged);
             // 
-            // btnImportOtherModel
+            // btnExportOtherModel
             // 
-            this.btnImportOtherModel.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Text;
-            this.btnImportOtherModel.ImageTransparentColor = System.Drawing.Color.Magenta;
-            this.btnImportOtherModel.Name = "btnImportOtherModel";
-            this.btnImportOtherModel.Size = new System.Drawing.Size(115, 19);
-            this.btnImportOtherModel.Text = "Import other model";
-            this.btnImportOtherModel.Click += new System.EventHandler(this.btnImportOtherModel_Click);
+            this.btnExportOtherModel.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Text;
+            this.btnExportOtherModel.ImageTransparentColor = System.Drawing.Color.Magenta;
+            this.btnExportOtherModel.Name = "btnExportOtherModel";
+            this.btnExportOtherModel.Size = new System.Drawing.Size(112, 19);
+            this.btnExportOtherModel.Text = "Export other model";
+            this.btnExportOtherModel.Click += new System.EventHandler(this.btnExportOtherModel_Click);
             // 
             // LevelEditorForm
             // 
@@ -859,6 +870,7 @@
         private System.Windows.Forms.ToolStripMenuItem toolStripMenuItem3;
         private System.Windows.Forms.ToolStripMenuItem toolStripMenuItem4;
         private System.Windows.Forms.ToolStripButton btnImportOtherModel;
+        private System.Windows.Forms.ToolStripButton btnExportOtherModel;
 
 
     }

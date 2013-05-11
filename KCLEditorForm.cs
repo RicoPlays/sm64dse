@@ -9,6 +9,7 @@ using System.Windows.Forms;
 using OpenTK;
 using OpenTK.Graphics.OpenGL;
 using System.Globalization;
+using System.IO;
 
 namespace SM64DSe
 {
@@ -27,6 +28,8 @@ namespace SM64DSe
 
         NitroFile kclFile;
 
+        Dictionary<string, int> matColTypes;
+
         public KCLEditorForm(NitroFile kclIn)
         {
             InitializeComponent();
@@ -36,12 +39,11 @@ namespace SM64DSe
             cmbPolygonMode.Items.Add("Wireframe");
             cmbPolygonMode.Items.Add("Fill");
             cmbPolygonMode.Items.Add("Fill Back");
+            matColTypes = new Dictionary<string, int>();
         }
 
         public void loadKCL(NitroFile kcl)
         {
-            //NitroFile kcl = Program.m_ROM.GetFileFromName("data/stage/main_castle/main_castle.kcl");
-
             points = new List<Vector3>();
             vectors = new List<Vector3>();
             planes = new List<ColFace>();
@@ -422,6 +424,197 @@ namespace SM64DSe
             glModelView.Refresh();
         }
 
+        private void btnExportToOBJ_Click(object sender, EventArgs e)
+        {
+            ExportKCLToOBJ();
+        }
+
+        public void ExportKCLToOBJ()
+        {
+            string output = "";
+            string mtllib = "";
+            CultureInfo usa = new CultureInfo("en-US");//Need to ensure 1.23 not 1,23 when floatVar.ToString() used - use floatVar.ToString(usa)
+            SaveFileDialog saveOBJ = new SaveFileDialog();
+            saveOBJ.FileName = "CollisionMap";//Default name
+            saveOBJ.DefaultExt = ".obj";//Default file extension
+            saveOBJ.Filter = "Wavefront OBJ (.obj)|*.obj";//Filter by .obj
+            if (saveOBJ.ShowDialog() == DialogResult.Cancel)
+                return;
+            StreamWriter outfile = new StreamWriter(saveOBJ.FileName);
+            StreamWriter outMTL = new StreamWriter(saveOBJ.FileName.Substring(0, saveOBJ.FileName.Length - 4) + ".mtl");
+            string dir = Path.GetDirectoryName(saveOBJ.FileName);
+            string filename = Path.GetFileNameWithoutExtension(saveOBJ.FileName);
+
+            List<int> types = new List<int>();
+            for (int i = 0; i < planes.Count; i++)
+            {
+                if (!types.Contains(planes[i].type))
+                    types.Add(planes[i].type);
+            }
+
+            output += Program.AppTitle + Program.AppVersion + "\n\n";
+
+            output += "mtllib " + filename + ".mtl" + "\n\n";
+
+            for (int i = 0; i < types.Count; i++)
+            {
+                mtllib += "newmtl material_" + types[i] + "\n";
+                mtllib += "Ka 1 1 1\n";
+                mtllib += "Kd " + (colours[types[i]].R / 255.0f).ToString(usa) + " " + (colours[types[i]].G / 255.0f).ToString(usa) + " " + 
+                    (colours[types[i]].B / 255.0f).ToString(usa) + "\n";
+                mtllib += "Ks 1 1 1\n";
+                mtllib += "Ns 1\n";
+                mtllib += "d 1\n";
+                mtllib += "illum 2\n\n";
+            }
+
+            // Write all vertices and normals to file
+            List<Vector3> outputVertices = new List<Vector3>();
+            List<Vector3> outputNormals = new List<Vector3>();
+            for (int i = 0; i < planes.Count; i++)
+            {
+                if (!outputVertices.Contains(planes[i].point1))
+                    outputVertices.Add(planes[i].point1);
+                if (!outputVertices.Contains(planes[i].point2))
+                    outputVertices.Add(planes[i].point2);
+                if (!outputVertices.Contains(planes[i].point3))
+                    outputVertices.Add(planes[i].point3);
+
+                if (!outputNormals.Contains(planes[i].normal))
+                    outputNormals.Add(planes[i].normal);
+            }
+            for (int i = 0; i < outputVertices.Count; i++)
+                output += "v " + outputVertices[i].X.ToString(usa) + " " + outputVertices[i].Y.ToString(usa) + " " + outputVertices[i].Z.ToString(usa) + "\n";
+                
+            for (int i = 0; i < outputNormals.Count; i++)
+                output += "vn " + outputNormals[i].X.ToString(usa) + " " + outputNormals[i].Y.ToString(usa) + " " +
+                    outputNormals[i].Z.ToString(usa) + "\n";
+
+            // Write all faces to file per-collision type (indices start at 1)
+            for (int i = 0; i < types.Count; i++)
+            {
+                output += "# Collision Type " + i + "\n";
+                output += "usemtl material_" + i + "\n";
+                for (int j = 0; j < planes.Count; j++)
+                {
+                    if (planes[j].type == types[i])
+                    {
+                        output += "f " + (outputVertices.IndexOf(planes[j].point1) + 1) + "//" + (outputNormals.IndexOf(planes[j].normal) + 1) + " " +
+                            (outputVertices.IndexOf(planes[j].point2) + 1) + "//" + (outputNormals.IndexOf(planes[j].normal) + 1) + " " +
+                            (outputVertices.IndexOf(planes[j].point3) + 1) + "//" + (outputNormals.IndexOf(planes[j].normal) + 1) + "\n";
+                    }
+                }
+            }
+
+            // Save file
+            outfile.Write(output);
+            outfile.Close();
+            outMTL.Write(mtllib);
+            outMTL.Close();
+        }
+
+        private void btnOpen_Click(object sender, EventArgs e)
+        {
+            using (var form = new ROMFileSelect("Please select a collision map (KCL) file to open."))
+            {
+                var result = form.ShowDialog();
+                if (result == DialogResult.OK)
+                {
+                    loadKCL(Program.m_ROM.GetFileFromName(form.m_SelectedFile));
+                }
+            }
+        }
+
+        private void btnOpenOBJ_Click(object sender, EventArgs e)
+        {
+            OpenFileDialog ofd = new OpenFileDialog();
+            ofd.Filter = "Wavefront OBJ (.obj)|*.obj";
+            if (ofd.ShowDialog() == DialogResult.OK)
+            {
+                txtOBJName.Text = ofd.FileName;
+                getMatNames(ofd.FileName);
+                populateColTypes();
+            }
+        }
+
+        private void getMatNames(String name)
+        {
+            Stream fs = File.OpenRead(name);
+            StreamReader sr = new StreamReader(fs);
+
+            CultureInfo usahax = new CultureInfo("en-US");
+
+            string curline;
+            while ((curline = sr.ReadLine()) != null)
+            {
+                curline = curline.Trim();
+
+                // skip empty lines and comments
+                if (curline.Length < 1) continue;
+                if (curline[0] == '#') continue;
+
+                string[] parts = curline.Split(new char[] { ' ' }, StringSplitOptions.RemoveEmptyEntries);
+                if (parts.Length < 1) continue;
+
+                if (parts[0].Equals("usemtl"))
+                {
+                    if (parts.Length < 2) continue;
+                    if (!matColTypes.ContainsKey(parts[1]))
+                        matColTypes.Add(parts[1], 0);
+                }
+            }
+
+            sr.Close();
+        }
+
+        private void populateColTypes()
+        {
+            gridColTypes.ColumnCount = 2;
+            gridColTypes.Columns[0].HeaderText = "Material";
+            gridColTypes.Columns[1].HeaderText = "Col. Type";
+
+            int numMats = matColTypes.Count;
+            gridColTypes.RowCount = numMats;
+            for (int i = 0; i < numMats; i++)
+            {
+                gridColTypes.Rows[i].Cells[0].Value = matColTypes.Keys.ElementAt(i);
+                gridColTypes.Rows[i].Cells[1].Value = matColTypes.Values.ElementAt(i);
+            }
+        }
+
+        private void btnImportColMap_Click(object sender, EventArgs e)
+        {
+            float scale;
+            if (!(float.TryParse(txtScale.Text, out scale) || float.TryParse(txtScale.Text, NumberStyles.Float, new CultureInfo("en-US"), out scale)))
+            {
+                MessageBox.Show("Please enter a valid float value for scale, eg. 1.23");
+            }
+            float faceSizeThreshold;
+            if (!(float.TryParse(txtThreshold.Text, out faceSizeThreshold) || float.TryParse(txtThreshold.Text, NumberStyles.Float, new CultureInfo("en-US"), out faceSizeThreshold)))
+            {
+                MessageBox.Show("Please enter a valid float value, eg. 1.23");
+            }
+
+            try
+            {
+                ObjToKcl.ConvertToKcl(txtOBJName.Text, ref kclFile, scale, faceSizeThreshold, matColTypes);
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show(ex.Message + ex.Source + ex.StackTrace);
+            }
+
+            loadKCL(kclFile);
+        }
+
+        private void btnAssignTypes_Click(object sender, EventArgs e)
+        {
+            for (int i = 0; i < gridColTypes.RowCount; i++)
+            {
+                matColTypes[gridColTypes.Rows[i].Cells[0].Value.ToString()] = int.Parse(gridColTypes.Rows[i].Cells[1].Value.ToString());
+            }
+        }
+
     }
 
     public class ColFace
@@ -443,7 +636,7 @@ namespace SM64DSe
             point1 = originPoint;
             /*
             Collision Tools v0.6 by blank
-            v0 = vertices[t.vertex_index] //The given vertex
+            v0 = outputVertices[t.vertex_index] //The given vertex
             v2 = v0 + cross(n,a)*t.length/dot(cross(n,a),c)
             v1 = v0 + cross(n,b)*t.length/dot(cross(n,b),c)
             */

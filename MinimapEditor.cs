@@ -176,6 +176,7 @@ namespace SM64DSe
             }
 
             //Write new palette
+            palfile = Program.m_ROM.GetFileFromName(txtSelNCL.Text);
             palfile.Clear();
             for (int i = 0; i < palette.Length; i++)
             {
@@ -311,6 +312,7 @@ namespace SM64DSe
 
         public void switchBackground(int swapped)
         {
+            palfile = Program.m_ROM.GetFileFromName(txtSelNCL.Text);
             //The background colour is the first colour stored in the palette
             ushort first = palfile.Read16((uint)0);//Read the first colour in the palette file
             ushort swappedColour = palfile.Read16((uint)(swapped * 2));//Read the colour to be swapped
@@ -321,6 +323,9 @@ namespace SM64DSe
             palfile.SaveChanges();
 
             //Swap all palette file entries for the swapped colours in the graphic file
+            tsetfile = Program.m_ROM.GetFileFromName(txtSelNCG.Text);
+            if (chkNCGDcmp.Checked)
+                tsetfile.ForceDecompression();
             uint tileoffset = 0, tilenum = 0;
             ushort tilecrap = 0;
             for (int my = 0; my < sizeY; my += 8)
