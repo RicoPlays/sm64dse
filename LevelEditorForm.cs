@@ -2567,7 +2567,7 @@ namespace SM64DSe
                         string[] v_vt = new string[levelModelToExport.m_ModelChunks[i].m_MatGroups[j].m_Geometry[k].m_VertexList.Count];
                         //Type of face - 0  Separate Triangle(s), 1  Separate Quadliteral(s), 2  Triangle Strips, 3  Quadliteral Strips
                         uint polyType = levelModelToExport.m_ModelChunks[i].m_MatGroups[j].m_Geometry[k].m_PolyType;
-                        //Get indices of all outputVertices and texture outputVertices in face (index starts at 1)
+                        //Get indices of all vertices and texture vertices in face (index starts at 1)
                         for (int m = 0; m < levelModelToExport.m_ModelChunks[i].m_MatGroups[j].m_Geometry[k].m_VertexList.Count; m++)
                         {
                             v_vt[m] = (lastIndexOfV3(vertices, levelModelToExport.m_ModelChunks[i].m_MatGroups[j].m_Geometry[k].m_VertexList[m].m_Position) + 1) +
@@ -2581,7 +2581,7 @@ namespace SM64DSe
                                     {
                                         output += "f " + v_vt[0] + " " + v_vt[1] + " " + v_vt[2] + "\n";
                                     }
-                                    else if (v_vt.Length > 3 && (float)v_vt.Length % 3 == 0.0f)//Eg. 9 outputVertices in 3 triangles
+                                    else if (v_vt.Length > 3 && (float)v_vt.Length % 3 == 0.0f)//Eg. 9 vertices in 3 triangles
                                     {
                                         int numFaces = v_vt.Length / 3;
                                         for (int a = 0, b = 0; a < numFaces; a++, b = b + 3)
@@ -2597,7 +2597,7 @@ namespace SM64DSe
                                     {
                                         output += "f " + v_vt[0] + " " + v_vt[1] + " " + v_vt[2] + " " + v_vt[3] + "\n";
                                     }
-                                    else if (v_vt.Length > 4 && (float)v_vt.Length % 4 == 0.0f)//Eg. 8 outputVertices in 2 quadrilaterals
+                                    else if (v_vt.Length > 4 && (float)v_vt.Length % 4 == 0.0f)//Eg. 8 vertices in 2 quadrilaterals
                                     {
                                         int numFaces = v_vt.Length / 4;
                                         for (int a = 0, b = 0; a < numFaces; a++, b = b + 4)
@@ -2609,12 +2609,12 @@ namespace SM64DSe
                                 }
                             case 2://Triangle Strips
                                 {
-                                    //3+(N-1) outputVertices per N triangles
+                                    //3+(N-1) vertices per N triangles
                                     //(N-3)+1 Triangles per N Vertices
                                     int numFaces = v_vt.Length - 2;
                                     if (v_vt.Length < 3)//Should never be
                                         break;
-                                    //Convert all faces with more than 3 outputVertices to ones with only 3
+                                    //Convert all faces with more than 3 vertices to ones with only 3
                                     for (int n = 0; n < numFaces; n++)
                                     {
                                         if (n % 2 == 0)
@@ -2627,7 +2627,7 @@ namespace SM64DSe
                                 }
                             case 3://Quadrilateral Strips
                                 {
-                                    //4+(N-1)*2 outputVertices per N quads
+                                    //4+(N-1)*2 vertices per N quads
                                     //((N-4)/2) + 1 Quads. per N Vertices
                                     int numFaces = ((v_vt.Length - 4) / 2) + 1;
                                     if (v_vt.Length < 4)//Should never be
