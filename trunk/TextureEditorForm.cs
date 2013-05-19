@@ -217,7 +217,7 @@ namespace SM64DSe
                         m_Model.m_File.WriteBlock(palDataOffset, tex.m_PaletteData);
                     }
 
-                    m_Model.m_File.SaveChanges();
+                    //m_Model.m_File.SaveChanges();
 
                     loadTextures();
                 }
@@ -230,6 +230,11 @@ namespace SM64DSe
             {
                 MessageBox.Show("Please select a texture first.");
             }
+        }
+
+        private void btnSave_Click(object sender, EventArgs e)
+        {
+            m_Model.m_File.SaveChanges();
         }
     }
 }
