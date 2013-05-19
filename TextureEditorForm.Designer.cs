@@ -35,6 +35,7 @@
             this.btnReplaceSelected = new System.Windows.Forms.Button();
             this.btnExport = new System.Windows.Forms.Button();
             this.btnExportAll = new System.Windows.Forms.Button();
+            this.btnSave = new System.Windows.Forms.Button();
             ((System.ComponentModel.ISupportInitialize)(this.pbxTexture)).BeginInit();
             this.SuspendLayout();
             // 
@@ -103,11 +104,22 @@
             this.btnExportAll.UseVisualStyleBackColor = true;
             this.btnExportAll.Click += new System.EventHandler(this.btnExportAll_Click);
             // 
+            // btnSave
+            // 
+            this.btnSave.Location = new System.Drawing.Point(141, 223);
+            this.btnSave.Name = "btnSave";
+            this.btnSave.Size = new System.Drawing.Size(75, 23);
+            this.btnSave.TabIndex = 7;
+            this.btnSave.Text = "Save";
+            this.btnSave.UseVisualStyleBackColor = true;
+            this.btnSave.Click += new System.EventHandler(this.btnSave_Click);
+            // 
             // TextureEditorForm
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.ClientSize = new System.Drawing.Size(546, 262);
+            this.Controls.Add(this.btnSave);
             this.Controls.Add(this.btnExportAll);
             this.Controls.Add(this.btnExport);
             this.Controls.Add(this.btnReplaceSelected);
@@ -132,5 +144,6 @@
         private System.Windows.Forms.Button btnReplaceSelected;
         private System.Windows.Forms.Button btnExport;
         private System.Windows.Forms.Button btnExportAll;
+        private System.Windows.Forms.Button btnSave;
     }
 }

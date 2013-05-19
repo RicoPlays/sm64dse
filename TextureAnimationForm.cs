@@ -751,13 +751,15 @@ namespace SM64DSe
                 //Make room for new material name
                 string matName = "MaterialName";
                 uint newHdr = (uint)(_owner.m_TexAnims[lbxArea.SelectedIndex][lbxTexAnim.Items.Count - 1].m_Offset + 28);
+                //Make room for new header
+                AddSpace((uint)(newHdr), 28);
+
                 uint newMatOffset = (uint)(_owner.m_TexAnims[lbxArea.SelectedIndex][lbxTexAnim.Items.Count - 1].m_MatNameOffset + _owner.m_TexAnims[lbxArea.SelectedIndex][lbxTexAnim.Items.Count - 1].m_MatName.Length + 1);
+                //Increase number of animations
                 _owner.m_Overlay.Write32((uint)(_owner.m_TexAnims[lbxArea.SelectedIndex][0].m_TexAnimHeaderOffset + 0x10), (uint)(lbxTexAnim.Items.Count + 1));
                 AddSpace(newMatOffset, (int)(matName.ToCharArray().Length + 1));
                 
-                //Make room for new header
-                AddSpace((uint)(newHdr), 28);
-                //Increase number of animations
+                
                 //Write material name offset
                 _owner.m_Overlay.WritePointer((uint)(newHdr + 0x04), newMatOffset);
                 //Write material name and write scale, rotation and tranlsation start index and size
