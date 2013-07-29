@@ -908,12 +908,9 @@ namespace SM64DSe
                             catch
                             {
                                 curmaterial = "default_white";
-                                if (m_Materials.Count == 0)
-                                {
-                                    MessageBox.Show("No material library has been specified, yet faces are still set to use \n" +
+                                MessageBox.Show("No material library has been specified, yet faces are still set to use \n" +
                                         "a material. A default white material will be used instead.");
-                                    addWhiteMat();
-                                }
+                                addWhiteMat();
                                 mat = (MaterialDef)m_Materials[curmaterial];
                             }
                             FaceDef face = new FaceDef();

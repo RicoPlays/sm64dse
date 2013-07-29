@@ -29,7 +29,7 @@ namespace SM64DSe
         // haxx: debugging shit is enabled if this contains 'private beta'
         public static string AppVersion = "v2.1x PRIVATE BETA";
 
-        public static string ServerURL = "http://kuribo64.cjb.net/";
+        public static string ServerURL = "http://kuribo64.net/";
 
         public static string m_ROMPath;
         public static NitroROM m_ROM;

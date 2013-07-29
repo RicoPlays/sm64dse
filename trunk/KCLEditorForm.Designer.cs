@@ -66,14 +66,14 @@
             this.toolStripSeparator1 = new System.Windows.Forms.ToolStripSeparator();
             this.btnExportToOBJ = new System.Windows.Forms.ToolStripButton();
             this.cmbPolygonMode = new System.Windows.Forms.ComboBox();
-            ((System.ComponentModel.ISupportInitialize)(this.splitContainer1)).BeginInit();
+            //((System.ComponentModel.ISupportInitialize)(this.splitContainer1)).BeginInit();
             this.splitContainer1.Panel1.SuspendLayout();
             this.splitContainer1.Panel2.SuspendLayout();
             this.splitContainer1.SuspendLayout();
             this.tabDetailsImport.SuspendLayout();
             this.tpgDetails.SuspendLayout();
             this.tpgImport.SuspendLayout();
-            ((System.ComponentModel.ISupportInitialize)(this.gridColTypes)).BeginInit();
+            //((System.ComponentModel.ISupportInitialize)(this.gridColTypes)).BeginInit();
             this.toolStrip1.SuspendLayout();
             this.SuspendLayout();
             // 
@@ -492,14 +492,14 @@
             this.Text = "KCL Editor";
             this.splitContainer1.Panel1.ResumeLayout(false);
             this.splitContainer1.Panel2.ResumeLayout(false);
-            ((System.ComponentModel.ISupportInitialize)(this.splitContainer1)).EndInit();
+            //((System.ComponentModel.ISupportInitialize)(this.splitContainer1)).EndInit();
             this.splitContainer1.ResumeLayout(false);
             this.tabDetailsImport.ResumeLayout(false);
             this.tpgDetails.ResumeLayout(false);
             this.tpgDetails.PerformLayout();
             this.tpgImport.ResumeLayout(false);
             this.tpgImport.PerformLayout();
-            ((System.ComponentModel.ISupportInitialize)(this.gridColTypes)).EndInit();
+            //((System.ComponentModel.ISupportInitialize)(this.gridColTypes)).EndInit();
             this.toolStrip1.ResumeLayout(false);
             this.toolStrip1.PerformLayout();
             this.ResumeLayout(false);

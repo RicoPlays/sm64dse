@@ -122,7 +122,7 @@ namespace SM64DSe
                             ret.m_Data[_out] = blue;
                             ret.m_Data[_out + 1] = green;
                             ret.m_Data[_out + 2] = red;
-                            ret.m_Data[_out + 3] = (byte)(((texels & 0x03) != 0) ? 0xFF : zero_alpha);
+                            ret.m_Data[_out + 3] = (byte)(((texels & 0x03) != 0) ? (byte) 0xFF : zero_alpha);
 
                             color = m_File.Read16((uint)(paldataoffset + ((texels >> 1) & 0x6)));
                             red = (byte)((color & 0x001F) << 3);
@@ -132,7 +132,7 @@ namespace SM64DSe
                             ret.m_Data[_out + 4] = blue;
                             ret.m_Data[_out + 5] = green;
                             ret.m_Data[_out + 6] = red;
-                            ret.m_Data[_out + 7] = (byte)(((texels & 0x0C) != 0) ? 0xFF : zero_alpha);
+                            ret.m_Data[_out + 7] = (byte)(((texels & 0x0C) != 0) ? (byte) 0xFF : zero_alpha);
 
                             color = m_File.Read16((uint)(paldataoffset + ((texels >> 3) & 0x6)));
                             red = (byte)((color & 0x001F) << 3);
@@ -142,7 +142,7 @@ namespace SM64DSe
                             ret.m_Data[_out + 8] = blue;
                             ret.m_Data[_out + 9] = green;
                             ret.m_Data[_out + 10] = red;
-                            ret.m_Data[_out + 11] = (byte)(((texels & 0x30) != 0) ? 0xFF : zero_alpha);
+                            ret.m_Data[_out + 11] = (byte)(((texels & 0x30) != 0) ? (byte) 0xFF : zero_alpha);
 
                             color = m_File.Read16((uint)(paldataoffset + ((texels >> 5) & 0x6)));
                             red = (byte)((color & 0x001F) << 3);
@@ -152,7 +152,7 @@ namespace SM64DSe
                             ret.m_Data[_out + 12] = blue;
                             ret.m_Data[_out + 13] = green;
                             ret.m_Data[_out + 14] = red;
-                            ret.m_Data[_out + 15] = (byte)(((texels & 0xC0) != 0) ? 0xFF : zero_alpha);
+                            ret.m_Data[_out + 15] = (byte)(((texels & 0xC0) != 0) ? (byte) 0xFF : zero_alpha);
                         }
                     }
                     break;
@@ -171,7 +171,7 @@ namespace SM64DSe
                             ret.m_Data[_out] = blue;
                             ret.m_Data[_out + 1] = green;
                             ret.m_Data[_out + 2] = red;
-                            ret.m_Data[_out + 3] = (byte)(((texels & 0x0F) != 0) ? 0xFF : zero_alpha);
+                            ret.m_Data[_out + 3] = (byte)(((texels & 0x0F) != 0) ? (byte) 0xFF : zero_alpha);
 
                             color = m_File.Read16((uint)(paldataoffset + ((texels >> 3) & 0x1E)));
                             red = (byte)((color & 0x001F) << 3);
@@ -181,7 +181,7 @@ namespace SM64DSe
                             ret.m_Data[_out + 4] = blue;
                             ret.m_Data[_out + 5] = green;
                             ret.m_Data[_out + 6] = red;
-                            ret.m_Data[_out + 7] = (byte)(((texels & 0xF0) != 0) ? 0xFF : zero_alpha);
+                            ret.m_Data[_out + 7] = (byte)(((texels & 0xF0) != 0) ? (byte) 0xFF : zero_alpha);
                         }
                     }
                     break;
@@ -200,7 +200,7 @@ namespace SM64DSe
                             ret.m_Data[_out] = blue;
                             ret.m_Data[_out + 1] = green;
                             ret.m_Data[_out + 2] = red;
-                            ret.m_Data[_out + 3] = (byte)((texel != 0) ? 0xFF : zero_alpha);
+                            ret.m_Data[_out + 3] = (byte)((texel != 0) ? (byte) 0xFF : zero_alpha);
                         }
                     }
                     break;
@@ -338,7 +338,7 @@ namespace SM64DSe
                             ret.m_Data[_out] = blue;
                             ret.m_Data[_out + 1] = green;
                             ret.m_Data[_out + 2] = red;
-                            ret.m_Data[_out + 3] = (byte)(((color & 0x8000) != 0) ? 0xFF : zero_alpha);
+                            ret.m_Data[_out + 3] = (byte)(((color & 0x8000) != 0) ? (byte) 0xFF : zero_alpha);
                         }
                     }
                     break;
@@ -1220,13 +1220,13 @@ namespace SM64DSe
             get { return m_BBox; }
         }
 
-        private float m_ScaleFactor;
-        private uint m_NumModelChunks, m_ModelChunksOffset;
-        private uint m_NumPolyChunks, m_PolyChunksOffset;
-        private uint m_NumTexChunks, m_TexChunksOffset;
-        private uint m_NumPalChunks, m_PalChunksOffset;
-        private uint m_NumMatChunks, m_MatChunksOffset;
-        private uint m_BoneMapOffset;
+        public float m_ScaleFactor;
+        public uint m_NumModelChunks, m_ModelChunksOffset;
+        public uint m_NumPolyChunks, m_PolyChunksOffset;
+        public uint m_NumTexChunks, m_TexChunksOffset;
+        public uint m_NumPalChunks, m_PalChunksOffset;
+        public uint m_NumMatChunks, m_MatChunksOffset;
+        public uint m_BoneMapOffset;
 
         public Dictionary<string, Texture> m_Textures;
         public ModelChunk[] m_ModelChunks;

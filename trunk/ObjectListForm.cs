@@ -83,7 +83,7 @@ namespace SM64DSe
             }
 
             lbxObjectList.Items.Insert(326, "511 - Minimap change");
-            lbxObjectList.SelectedIndex = (ObjectID == 511) ? 326 : ObjectID;
+            lbxObjectList.SelectedIndex = (ObjectID == 511) ? (ushort) 326 : ObjectID;
         }
 
         private void lbxObjectList_DoubleClick(object sender, EventArgs e)

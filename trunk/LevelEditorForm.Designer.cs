@@ -89,11 +89,11 @@
             this.ssStatusBar = new System.Windows.Forms.StatusStrip();
             this.slStatusLabel = new System.Windows.Forms.ToolStripStatusLabel();
             this.btnExportOtherModel = new System.Windows.Forms.ToolStripButton();
-            ((System.ComponentModel.ISupportInitialize)(this.spcMainContainer)).BeginInit();
+            //((System.ComponentModel.ISupportInitialize)(this.spcMainContainer)).BeginInit();
             this.spcMainContainer.Panel1.SuspendLayout();
             this.spcMainContainer.Panel2.SuspendLayout();
             this.spcMainContainer.SuspendLayout();
-            ((System.ComponentModel.ISupportInitialize)(this.spcLeftPanel)).BeginInit();
+            //((System.ComponentModel.ISupportInitialize)(this.spcLeftPanel)).BeginInit();
             this.spcLeftPanel.Panel1.SuspendLayout();
             this.spcLeftPanel.Panel2.SuspendLayout();
             this.spcLeftPanel.SuspendLayout();
@@ -790,11 +790,11 @@
             this.spcMainContainer.Panel1.PerformLayout();
             this.spcMainContainer.Panel2.ResumeLayout(false);
             this.spcMainContainer.Panel2.PerformLayout();
-            ((System.ComponentModel.ISupportInitialize)(this.spcMainContainer)).EndInit();
+            //((System.ComponentModel.ISupportInitialize)(this.spcMainContainer)).EndInit();
             this.spcMainContainer.ResumeLayout(false);
             this.spcLeftPanel.Panel1.ResumeLayout(false);
             this.spcLeftPanel.Panel2.ResumeLayout(false);
-            ((System.ComponentModel.ISupportInitialize)(this.spcLeftPanel)).EndInit();
+            //((System.ComponentModel.ISupportInitialize)(this.spcLeftPanel)).EndInit();
             this.spcLeftPanel.ResumeLayout(false);
             this.tsEditActions.ResumeLayout(false);
             this.tsEditActions.PerformLayout();

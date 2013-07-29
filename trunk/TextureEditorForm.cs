@@ -60,6 +60,8 @@ namespace SM64DSe
 
                 pbxTexture.Image = new Bitmap(tex);
                 pbxTexture.Refresh();
+
+                lblPalette.Text = "Palette " + currentTexture.m_PalID;
             }
         }
 
@@ -176,7 +178,7 @@ namespace SM64DSe
                     m_Model.m_File.Write32(curoffset + 0x10, tex.m_DSTexParam);
 
                     // Update palette entry
-                    if (tex.m_PaletteData != null)
+                    if (tex.m_PaletteData != null && !chkNewPalette.Checked)
                     {
                         curoffset = m_Model.m_Textures.Values.ElementAt(index).m_PalEntryOffset;
 
@@ -203,18 +205,59 @@ namespace SM64DSe
                     if (newTexDataSize > oldTexDataSize)
                         m_Model.AddSpace(texDataOffset + oldTexDataSize, newTexDataSize - oldTexDataSize);
 
-                    uint palDataOffset = m_Model.m_File.Read32(m_Model.m_Textures.Values.ElementAt(index).m_PalEntryOffset + 0x04);
-                    // If necessary, make room for additional palette data
-                    if (newPalDataSize > oldPalDataSize)
-                        m_Model.AddSpace(palDataOffset + oldPalDataSize, newPalDataSize - oldPalDataSize);
-                    // Reload palette data offset
-                    palDataOffset = m_Model.m_File.Read32(m_Model.m_Textures.Values.ElementAt(index).m_PalEntryOffset + 0x04);
-
                     m_Model.m_File.WriteBlock(texDataOffset, tex.m_TextureData);
 
-                    if (tex.m_PaletteData != null)
+                    if (!chkNewPalette.Checked) // If we're editing an existing palette
                     {
-                        m_Model.m_File.WriteBlock(palDataOffset, tex.m_PaletteData);
+                        uint palDataOffset = m_Model.m_File.Read32(m_Model.m_Textures.Values.ElementAt(index).m_PalEntryOffset + 0x04);
+                        // If necessary, make room for additional palette data
+                        if (newPalDataSize > oldPalDataSize)
+                            m_Model.AddSpace(palDataOffset + oldPalDataSize, newPalDataSize - oldPalDataSize);
+                        // Reload palette data offset
+                        palDataOffset = m_Model.m_File.Read32(m_Model.m_Textures.Values.ElementAt(index).m_PalEntryOffset + 0x04);
+
+                        if (tex.m_PaletteData != null)
+                        {
+                            m_Model.m_File.WriteBlock(palDataOffset, tex.m_PaletteData);
+                        }
+                    }
+                    else if (chkNewPalette.Checked)
+                    {
+                        String newPalName = lbxTextures.Items[index].ToString() + "_new";
+
+                        uint newHdrOff = m_Model.m_PalChunksOffset + (m_Model.m_NumPalChunks * 16);
+                        m_Model.AddSpace(newHdrOff, 16);
+                        uint newPalNameOff = m_Model.m_File.Read32(m_Model.m_Textures.Values.ElementAt(m_Model.m_Textures.Values.Count - 1).m_PalEntryOffset);
+                        while (m_Model.m_File.Read8(newPalNameOff) != 0)
+                            newPalNameOff += 1;
+                        m_Model.AddSpace((uint)newPalNameOff, (uint)newPalName.Length + 1);
+                        m_Model.m_File.WriteString(newPalNameOff, newPalName, 0);
+                        m_Model.m_File.Write32(newHdrOff, newPalNameOff);
+                        uint newPalOff = m_Model.m_Textures.Values.ElementAt(m_Model.m_Textures.Values.Count - 1).m_PalOffset +
+                            m_Model.m_Textures.Values.ElementAt(m_Model.m_Textures.Values.Count - 1).m_PalSize;
+                        m_Model.AddSpace(newPalOff, (uint)tex.m_PaletteData.Length);
+                        m_Model.m_File.Write32(newHdrOff + 0x04, newPalOff);
+                        m_Model.m_File.Write32(newHdrOff + 0x08, (uint)tex.m_PaletteData.Length);
+                        m_Model.m_File.Write32(newHdrOff + 0x0C, 0xFFFFFFFF);
+
+                        m_Model.m_File.WriteBlock(newPalOff, tex.m_PaletteData);
+
+                        // Set the material's palette ID to the new palette
+                        for (int i = 0; i < m_Model.m_ModelChunks.Length; i++)
+                        {
+                            for (int j = 0; j < m_Model.m_ModelChunks[i].m_MatGroups.Length; j++)
+                            {
+                                if (m_Model.m_ModelChunks[i].m_MatGroups[j].m_Texture.m_TexName == lbxTextures.Items[index].ToString())
+                                {
+                                    uint palID = m_Model.m_File.Read32(0x1C);
+                                    uint matEntryOff = m_Model.m_File.Read32(0x28) + (m_Model.m_ModelChunks[i].m_MatGroups[j].m_ID * 48);
+                                    m_Model.m_File.Write32(matEntryOff + 0x08, palID);
+                                }
+                            }
+                        }
+
+                        // Update number of palettes
+                        m_Model.m_File.Write32(0x1C, m_Model.m_File.Read32(0x1C) + 1);
                     }
 
                     //m_Model.m_File.SaveChanges();
