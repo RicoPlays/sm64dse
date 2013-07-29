@@ -36,6 +36,8 @@
             this.btnExport = new System.Windows.Forms.Button();
             this.btnExportAll = new System.Windows.Forms.Button();
             this.btnSave = new System.Windows.Forms.Button();
+            this.chkNewPalette = new System.Windows.Forms.CheckBox();
+            this.lblPalette = new System.Windows.Forms.Label();
             ((System.ComponentModel.ISupportInitialize)(this.pbxTexture)).BeginInit();
             this.SuspendLayout();
             // 
@@ -76,7 +78,7 @@
             // 
             // btnReplaceSelected
             // 
-            this.btnReplaceSelected.Location = new System.Drawing.Point(16, 223);
+            this.btnReplaceSelected.Location = new System.Drawing.Point(16, 227);
             this.btnReplaceSelected.Name = "btnReplaceSelected";
             this.btnReplaceSelected.Size = new System.Drawing.Size(113, 23);
             this.btnReplaceSelected.TabIndex = 4;
@@ -86,7 +88,7 @@
             // 
             // btnExport
             // 
-            this.btnExport.Location = new System.Drawing.Point(289, 223);
+            this.btnExport.Location = new System.Drawing.Point(287, 227);
             this.btnExport.Name = "btnExport";
             this.btnExport.Size = new System.Drawing.Size(75, 23);
             this.btnExport.TabIndex = 5;
@@ -96,7 +98,7 @@
             // 
             // btnExportAll
             // 
-            this.btnExportAll.Location = new System.Drawing.Point(370, 223);
+            this.btnExportAll.Location = new System.Drawing.Point(368, 227);
             this.btnExportAll.Name = "btnExportAll";
             this.btnExportAll.Size = new System.Drawing.Size(75, 23);
             this.btnExportAll.TabIndex = 6;
@@ -106,7 +108,7 @@
             // 
             // btnSave
             // 
-            this.btnSave.Location = new System.Drawing.Point(141, 223);
+            this.btnSave.Location = new System.Drawing.Point(141, 227);
             this.btnSave.Name = "btnSave";
             this.btnSave.Size = new System.Drawing.Size(75, 23);
             this.btnSave.TabIndex = 7;
@@ -114,11 +116,32 @@
             this.btnSave.UseVisualStyleBackColor = true;
             this.btnSave.Click += new System.EventHandler(this.btnSave_Click);
             // 
+            // chkNewPalette
+            // 
+            this.chkNewPalette.AutoSize = true;
+            this.chkNewPalette.Location = new System.Drawing.Point(16, 204);
+            this.chkNewPalette.Name = "chkNewPalette";
+            this.chkNewPalette.Size = new System.Drawing.Size(84, 17);
+            this.chkNewPalette.TabIndex = 8;
+            this.chkNewPalette.Text = "New Palette";
+            this.chkNewPalette.UseVisualStyleBackColor = true;
+            // 
+            // lblPalette
+            // 
+            this.lblPalette.AutoSize = true;
+            this.lblPalette.Location = new System.Drawing.Point(223, 30);
+            this.lblPalette.Name = "lblPalette";
+            this.lblPalette.Size = new System.Drawing.Size(40, 13);
+            this.lblPalette.TabIndex = 9;
+            this.lblPalette.Text = "Palette";
+            // 
             // TextureEditorForm
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.ClientSize = new System.Drawing.Size(546, 262);
+            this.Controls.Add(this.lblPalette);
+            this.Controls.Add(this.chkNewPalette);
             this.Controls.Add(this.btnSave);
             this.Controls.Add(this.btnExportAll);
             this.Controls.Add(this.btnExport);
@@ -145,5 +168,7 @@
         private System.Windows.Forms.Button btnExport;
         private System.Windows.Forms.Button btnExportAll;
         private System.Windows.Forms.Button btnSave;
+        private System.Windows.Forms.CheckBox chkNewPalette;
+        private System.Windows.Forms.Label lblPalette;
     }
 }

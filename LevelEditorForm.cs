@@ -2494,7 +2494,7 @@ namespace SM64DSe
                     //Specify specular colour co-efficient - RGB 0-1
                     mtllib += "Ns " + levelModelToExport.m_ModelChunks[i].m_MatGroups[j].m_SpeEmiColors.ToString(usa) + "\n";
                     //Specify transparency - RGB Alpha channel 0-1
-                    mtllib += "d " + (levelModelToExport.m_ModelChunks[i].m_MatGroups[j].m_AmbientColor.A / 255.0f).ToString(usa) + "\n";
+                    mtllib += "d " + (levelModelToExport.m_ModelChunks[i].m_MatGroups[j].m_Geometry[0].m_VertexList[0].m_Color.A / 255.0f).ToString(usa) + "\n";
                     //Specify texture type 0 - 10
                     //uint textype = (currentTexture.m_Params >> 26) & 0x7;
                     mtllib += "illum 2\n";

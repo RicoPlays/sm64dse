@@ -2,11 +2,11 @@
 
 <!--
 	Super Mario 64 DS Object Info Database
-	built on 06/23/2011 15:34:10 for SM64DS Editor
-	Thanks to Nikolaj, Presto99, sightlight, SuperWhomp256 for their contributions!
+	built on 05/21/2013 04:37:40 for SM64DS Editor
+	Thanks to Benjamin, Nikolaj, Presto99, sightlight, SuperWhomp256 for their contributions!
 -->
 
-<database timestamp='1308836050'>
+<database timestamp='1369125460'>
 
 	<object id='0'>
 		<category>4</category>
@@ -224,10 +224,10 @@ TODO: figure out parameters.</description>
 
 	<object id='20'>
 		<category>1</category>
-		<name>Bob-omb Buddy</name>
+		<name>Pink Bob-Omb</name>
 		<internalname>RED_BOMBHEI</internalname>
 		<actorid>181</actorid>
-		<description>Can talk.</description>
+		<description>Pink, peaceful Bob-Omb buddy. Tells the associated message when the player talks to them.</description>
 		<bankreq>3=1</bankreq>
 	</object>
 
@@ -268,10 +268,10 @@ TODO: figure out parameters.</description>
 
 	<object id='24'>
 		<category>1</category>
-		<name>Large Block</name>
+		<name>Large orange brick block</name>
 		<internalname>DP_BLOCK_L</internalname>
 		<actorid>16</actorid>
-		<description></description>
+		<description>Larger version of [object=0017].</description>
 		<bankreq>none</bankreq>
 	</object>
 
@@ -382,12 +382,10 @@ This object is unused in the game, but is present in the general purpose test ma
 
 	<object id='36'>
 		<category>1</category>
-		<name>Pile</name>
+		<name>Wooden pole</name>
 		<internalname>PILE</internalname>
 		<actorid>27</actorid>
-		<description>Brown Pile.
-
-Used in Bob-omb Battlefield.</description>
+		<description>Small wooden pole that can be groundpounded to obtain coins.</description>
 		<bankreq>4=3</bankreq>
 	</object>
 
@@ -515,7 +513,7 @@ Used in Bob-omb Battlefield.</description>
 		<name>Loose Chain Chomp</name>
 		<internalname>WANWAN2</internalname>
 		<actorid>337</actorid>
-		<description>The Chain Chomp from VS Main. The internal name of this object (WANWAN2) shows that it is related to Bob-omb Battlefield's Chain Chomp (WANWAN).</description>
+		<description>A Chain Chomp that isn't attached to a pole, and instead wanders around following a set path (and usually carries a Power Star attached to its chain).</description>
 		<bankreq>6=1</bankreq>
 	</object>
 
@@ -560,7 +558,7 @@ Used in Bob-omb Battlefield.</description>
 		<name>Birds</name>
 		<internalname>SBIRD</internalname>
 		<actorid>343</actorid>
-		<description>Birds in Castle Grounds.</description>
+		<description>Birds that fly away when a player walks near them. Mostly decorative.</description>
 		<bankreq>7=2</bankreq>
 	</object>
 
@@ -569,16 +567,16 @@ Used in Bob-omb Battlefield.</description>
 		<name>Fish</name>
 		<internalname>FISH</internalname>
 		<actorid>344</actorid>
-		<description>Fish in Castle Grounds and other levels.</description>
+		<description>Small fish swimming around. Purely decorative.</description>
 		<bankreq>6=1</bankreq>
 	</object>
 
 	<object id='55'>
 		<category>1</category>
-		<name>Butterfly</name>
+		<name>Butterflies</name>
 		<internalname>BUTTERFLY</internalname>
 		<actorid>336</actorid>
-		<description>Butterflies in Castle Grounds.</description>
+		<description>Butterflies flying around. Purely decorative.</description>
 		<bankreq>6=1</bankreq>
 	</object>
 
@@ -649,10 +647,12 @@ Sleeps most of the time, but if a player comes too close, wakes up and starts ch
 
 	<object id='63'>
 		<category>1</category>
-		<name>Star Marker</name>
+		<name>Star marker</name>
 		<internalname>STARBASE</internalname>
 		<actorid>180</actorid>
-		<description>Vertical star silhouette indicating where the star will appear after 8 Red Coins are collected. Does not do anything when touched.</description>
+		<description>Tells where the associated Power Star lands after it spawns.
+
+Optionally, this object can show a horizontal star shadow at its position, usually when the star is spawned by collecting red coins.</description>
 		<bankreq>none</bankreq>
 	</object>
 
@@ -730,10 +730,10 @@ Sleeps most of the time, but if a player comes too close, wakes up and starts ch
 
 	<object id='72'>
 		<category>1</category>
-		<name>BBH Rotating Platform</name>
+		<name>Big Boo's Merry-Go-Round</name>
 		<internalname>MERRYGOROUND</internalname>
 		<actorid>159</actorid>
-		<description>Rotating platform in Big Boo's Haunt.</description>
+		<description>Big Boo's Merry-Go-Round. Rotating platform. Also plays its own music when the player is close enough to it.</description>
 		<bankreq>0=2</bankreq>
 	</object>
 
@@ -1776,10 +1776,12 @@ This might be because she was never intended to talk, but was given this behavio
 
 	<object id='186'>
 		<category>1</category>
-		<name>Warp Pipe</name>
+		<name>Warp pipe</name>
 		<internalname>DOKAN</internalname>
 		<actorid>298</actorid>
-		<description>Takes you to a different area.</description>
+		<description>That green warp pipe from every Mario game.
+
+Does nothing if placed alone. For it to act as an entrance or an exit, the corresponding objects must be placed inside it.</description>
 		<bankreq>none</bankreq>
 	</object>
 
@@ -2325,7 +2327,7 @@ This might be because she was never intended to talk, but was given this behavio
 
 	<object id='247'>
 		<category>2</category>
-		<name>Snufit</name>
+		<name>Snifit</name>
 		<internalname>YUREI_MUCHO</internalname>
 		<actorid>236</actorid>
 		<description>A type of Shy Guy that shoots bullets out of its mouth.</description>
@@ -3003,21 +3005,13 @@ Alone, not a really useful object.</description>
 
 	<object id='321'>
 		<category>4</category>
-		<name>Fire ring?</name>
+		<name>Fire ring</name>
 		<internalname>FIRERING</internalname>
 		<actorid>281</actorid>
-		<description>Possibly a fire ring. However, it seems like this object was meant to be used in one level, and its code/data was deleted along with the level in question for whatever reason, making it unusable.
+		<description>Possibly a fire ring. This object's actor code is contained in an overlay that isn't loaded via the regular system. Possibly, it is loaded and used as a sub-object by another object, and isn't meant to be used alone.
 
-[b]Do not use.[/b]</description>
+[b]Do not use, for it will crash the game.[/b]</description>
 		<bankreq>none</bankreq>
-		<param n='0'>
-			<name></name>
-			<offset></offset>
-			<length></length>
-			<type></type>
-			<values></values>
-			<description></description>
-		</param>
 	</object>
 
 	<object id='322'>

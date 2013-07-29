@@ -87,7 +87,8 @@ namespace SM64DSe
 
         private void tvFiles_AfterSelect(object sender, TreeViewEventArgs e)
         {
-            m_SelectedFile = e.Node.Tag.ToString();
+            try { m_SelectedFile = e.Node.Tag.ToString(); }
+            catch { }
         }
 
         private void btnOK_Click(object sender, EventArgs e)
