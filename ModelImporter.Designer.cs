@@ -57,11 +57,11 @@
             this.ofdLoadModel = new System.Windows.Forms.OpenFileDialog();
             this.tsToolBar.SuspendLayout();
             this.ssStatusBar.SuspendLayout();
-            ((System.ComponentModel.ISupportInitialize)(this.spcMainContainer)).BeginInit();
+            //((System.ComponentModel.ISupportInitialize)(this.spcMainContainer)).BeginInit();
             this.spcMainContainer.Panel1.SuspendLayout();
             this.spcMainContainer.Panel2.SuspendLayout();
             this.spcMainContainer.SuspendLayout();
-            ((System.ComponentModel.ISupportInitialize)(this.gridColTypes)).BeginInit();
+            //((System.ComponentModel.ISupportInitialize)(this.gridColTypes)).BeginInit();
             this.groupBox2.SuspendLayout();
             this.groupBox1.SuspendLayout();
             this.SuspendLayout();
@@ -319,6 +319,7 @@
             this.cbSwapYZ.TabIndex = 4;
             this.cbSwapYZ.Text = "Swap Y and Z";
             this.cbSwapYZ.UseVisualStyleBackColor = true;
+            this.cbSwapYZ.Visible = false;
             this.cbSwapYZ.CheckedChanged += new System.EventHandler(this.cbSwapYZ_CheckedChanged);
             // 
             // tbScale
@@ -342,6 +343,7 @@
             this.cbZMirror.TabIndex = 2;
             this.cbZMirror.Text = "Reverse Z axis";
             this.cbZMirror.UseVisualStyleBackColor = true;
+            this.cbZMirror.Visible = false;
             this.cbZMirror.CheckedChanged += new System.EventHandler(this.cbZMirror_CheckedChanged);
             // 
             // ofdLoadModel
@@ -369,9 +371,9 @@
             this.spcMainContainer.Panel1.ResumeLayout(false);
             this.spcMainContainer.Panel1.PerformLayout();
             this.spcMainContainer.Panel2.ResumeLayout(false);
-            ((System.ComponentModel.ISupportInitialize)(this.spcMainContainer)).EndInit();
+            //System.ComponentModel.ISupportInitialize)(this.spcMainContainer)).EndInit();
             this.spcMainContainer.ResumeLayout(false);
-            ((System.ComponentModel.ISupportInitialize)(this.gridColTypes)).EndInit();
+            //((System.ComponentModel.ISupportInitialize)(this.gridColTypes)).EndInit();
             this.groupBox2.ResumeLayout(false);
             this.groupBox2.PerformLayout();
             this.groupBox1.ResumeLayout(false);

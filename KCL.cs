@@ -212,4 +212,38 @@ namespace SM64DSe
         uint m_PlanesSectionOffset;
         uint m_OctreeSectionOffset;
     }
+
+    // Used by the KCL Editor and KCL Exporter
+    public class ColFace
+    {
+        public float length;
+        public Vector3 point1;
+        public Vector3 point2;
+        public Vector3 point3;
+        public Vector3 normal;
+        public int type;
+        public Vector3 dir1;
+        public Vector3 dir2;
+        public Vector3 dir3;
+
+        public ColFace(float lengthIn, Vector3 originPoint, Vector3 normalIn, Vector3 dir1, Vector3 dir2, Vector3 dir3, int typeIn)
+        {
+            length = lengthIn;
+            normal = normalIn;
+            point1 = originPoint;
+            /*
+            Collision Tools v0.6 by blank
+            v0 = vertices[t.vertex_index] //The given vertex
+            v2 = v0 + cross(n,a)*t.length/dot(cross(n,a),c)
+            v1 = v0 + cross(n,b)*t.length/dot(cross(n,b),c)
+            */
+            point2 = point1 + Vector3.Cross(normal, dir2) * length / Vector3.Dot(Vector3.Cross(normal, dir2), dir3);
+            point3 = point1 + Vector3.Cross(normal, dir1) * length / Vector3.Dot(Vector3.Cross(normal, dir1), dir3);
+
+            type = typeIn;
+            this.dir1 = dir1;
+            this.dir2 = dir2;
+            this.dir3 = dir3;
+        }
+    }
 }

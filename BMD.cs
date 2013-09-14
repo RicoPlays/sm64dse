@@ -692,6 +692,11 @@ namespace SM64DSe
                     Vector3 trans = new Vector3((float)xtrans / 4096.0f, (float)ytrans / 4096.0f, (float)ztrans / 4096.0f);
                     mdchunk.m_Transform = Helper.SRTToMatrix(scale, rot, trans);
 
+                    // Used when exporting bones
+                    mdchunk.m_Scale = new uint[] { (uint)xscale, (uint)yscale, (uint)zscale };
+                    mdchunk.m_Rotation = new ushort[] { (ushort)xrot, (ushort)yrot, (ushort)zrot };
+                    mdchunk.m_Translation = new uint[] { (uint)xtrans, (uint)ytrans, (uint)ztrans };
+
                     // if the chunk has a parent, apply the parent's transform to the chunk's transform.
                     // we don't need to go further than one level because the paren't transform already
                     // went through its parents' transforms.
@@ -701,7 +706,12 @@ namespace SM64DSe
                         int parentchunkid = (int)(c + parent_offset);
                         Matrix4.Mult(ref mdchunk.m_Transform, ref m_ModelChunks[parentchunkid].m_Transform, out mdchunk.m_Transform);
                     }
+                    mdchunk.m_ParentOffset = parent_offset;
                 }
+                // If 0x0A is set to 1 the bone has children, if 0 it doesn't
+                mdchunk.m_HasChildren = (m_File.Read16(mdchunkoffset + 0x0A) == 1);
+
+                mdchunk.m_SiblingOffset = (short)(m_File.Read16(mdchunkoffset + 0x0C));
 
                 uint flags = m_File.Read32(mdchunkoffset + 0x3C);
                 mdchunk.m_Billboard = ((flags & 0x1) == 0x1);
@@ -1077,6 +1087,12 @@ namespace SM64DSe
             public Matrix4 m_Transform;
             public bool m_Billboard;
 
+            public short m_ParentOffset;
+            public short m_SiblingOffset;
+            public bool m_HasChildren;
+            public uint[] m_Scale;
+            public ushort[] m_Rotation;
+            public uint[] m_Translation;
 
             public void PrepareToRender()
             {

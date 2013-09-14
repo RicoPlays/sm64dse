@@ -1,6 +1,8 @@
 ﻿/*
 Module for handling Super Mario 64 DS collision files.
 
+Based on a script by blank.
+
 See http://wiki.tockdom.com/wiki/KCL_%28File_Format%29 for a description of the
 MKW KCL file format.
 */
@@ -20,12 +22,6 @@ namespace SM64DSe
 {
     public static class ObjToKcl
     {
-        //public static void ConvertToKcl(string infile, ref NitroFile kclOut, float scale)
-        //{
-        //    object[] o = read_obj(infile);
-        //    scale *= 1000; //Scale of collision file is 1000 times larger than model file
-        //    write_kcl(kclOut, o[0] as List<Triangle>, 15, 1, scale);
-        //}
         public static void ConvertToKcl(string infile, ref NitroFile kclOut, float scale, float faceSizeThreshold, Dictionary<string, int> matColTypes)
         {
             //faceSizeThreshold is used for getting rid of very small faces below a given size, originally 0.001
