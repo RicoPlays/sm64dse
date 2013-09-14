@@ -63,9 +63,9 @@
             this.chkIsMinimap = new System.Windows.Forms.CheckBox();
             this.chk128 = new System.Windows.Forms.CheckBox();
             this.chk256 = new System.Windows.Forms.CheckBox();
-            ((System.ComponentModel.ISupportInitialize)(this.pbxMinimapGfx)).BeginInit();
+            //((System.ComponentModel.ISupportInitialize)(this.pbxMinimapGfx)).BeginInit();
             this.tsMinimapEditor.SuspendLayout();
-            ((System.ComponentModel.ISupportInitialize)(this.gridPalette)).BeginInit();
+            //((System.ComponentModel.ISupportInitialize)(this.gridPalette)).BeginInit();
             this.groupBox1.SuspendLayout();
             this.SuspendLayout();
             // 
@@ -449,10 +449,10 @@
             this.Name = "MinimapEditor";
             this.Text = "MinimapEditor";
             this.Load += new System.EventHandler(this.MinimapEditor_Load);
-            ((System.ComponentModel.ISupportInitialize)(this.pbxMinimapGfx)).EndInit();
+            //((System.ComponentModel.ISupportInitialize)(this.pbxMinimapGfx)).EndInit();
             this.tsMinimapEditor.ResumeLayout(false);
             this.tsMinimapEditor.PerformLayout();
-            ((System.ComponentModel.ISupportInitialize)(this.gridPalette)).EndInit();
+            //((System.ComponentModel.ISupportInitialize)(this.gridPalette)).EndInit();
             this.groupBox1.ResumeLayout(false);
             this.groupBox1.PerformLayout();
             this.ResumeLayout(false);

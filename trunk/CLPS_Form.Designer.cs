@@ -38,7 +38,7 @@
             this.btnAdd = new System.Windows.Forms.Button();
             this.btnShiftUp = new System.Windows.Forms.Button();
             this.btnShiftDown = new System.Windows.Forms.Button();
-            ((System.ComponentModel.ISupportInitialize)(this.gridCLPSData)).BeginInit();
+            //((System.ComponentModel.ISupportInitialize)(this.gridCLPSData)).BeginInit();
             this.SuspendLayout();
             // 
             // label1
@@ -147,7 +147,7 @@
             this.Controls.Add(this.label1);
             this.Name = "CLPS_Form";
             this.Text = "CLPS Data";
-            ((System.ComponentModel.ISupportInitialize)(this.gridCLPSData)).EndInit();
+            //((System.ComponentModel.ISupportInitialize)(this.gridCLPSData)).EndInit();
             this.ResumeLayout(false);
             this.PerformLayout();
 

@@ -62,7 +62,7 @@
             this.btnEditPatch = new System.Windows.Forms.Button();
             this.btnDeletePatch = new System.Windows.Forms.Button();
             this.label14 = new System.Windows.Forms.Label();
-            ((System.ComponentModel.ISupportInitialize)(this.gridPatches)).BeginInit();
+            //((System.ComponentModel.ISupportInitialize)(this.gridPatches)).BeginInit();
             this.SuspendLayout();
             // 
             // gridPatches
@@ -395,7 +395,7 @@
             this.Name = "AdditionalPatchesForm";
             this.Text = "Additional Patches";
             this.Load += new System.EventHandler(this.AdditionalPatchesForm_Load);
-            ((System.ComponentModel.ISupportInitialize)(this.gridPatches)).EndInit();
+            //((System.ComponentModel.ISupportInitialize)(this.gridPatches)).EndInit();
             this.ResumeLayout(false);
             this.PerformLayout();
 

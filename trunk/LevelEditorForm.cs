@@ -29,6 +29,7 @@ using OpenTK;
 using OpenTK.Graphics.OpenGL;
 using System.IO;
 using System.Globalization;
+using SM64DSe.Exporters;
 
 
 namespace SM64DSe
@@ -2430,247 +2431,10 @@ namespace SM64DSe
 
         private void btnExportLevelModel_Click(object sender, EventArgs e)
         {
-            exportOBJ(new BMD(m_ROM.GetFileFromInternalID(m_LevelSettings.BMDFileID)));
-        }//End Method
+            BMD_Exporter.ExportBMDToOBJ(new BMD(m_ROM.GetFileFromInternalID(m_LevelSettings.BMDFileID)));
 
-        private void exportOBJ(BMD levelModelToExport)
-        {
-            // Custom models store diffuse colour as vertex colour, built-in ones use a material property
-            bool isCustom = true;
-            DialogResult dialogueResult = MessageBox.Show("Is this a custom model?", "Model Export", MessageBoxButtons.YesNo);
-            if (dialogueResult == DialogResult.Yes)
-                isCustom = true;
-            else if (dialogueResult == DialogResult.No)
-                isCustom = false;
-
-            string output = "";
-            string mtllib = "";
-            CultureInfo usa = new CultureInfo("en-US");//Need to ensure 1.23 not 1,23 when floatVar.ToString() used - use floatVar.ToString(usa)
-            SaveFileDialog saveOBJ = new SaveFileDialog();
-            saveOBJ.FileName = "LevelModel_" + LevelID;//Default name
-            saveOBJ.DefaultExt = ".obj";//Default file extension
-            saveOBJ.Filter = "Wavefront OBJ (.obj)|*.obj";//Filter by .obj
-            if (saveOBJ.ShowDialog() == DialogResult.Cancel)
-                return;
-            StreamWriter outfile = new StreamWriter(saveOBJ.FileName);
-            StreamWriter outMTL = new StreamWriter(saveOBJ.FileName.Substring(0, saveOBJ.FileName.Length - 4) + ".mtl");
-            string dir = Path.GetDirectoryName(saveOBJ.FileName);
-            string filename = Path.GetFileNameWithoutExtension(saveOBJ.FileName);
-            List<Vector3> vertices = new List<Vector3>();
-            List<Vector2> texCoords = new List<Vector2>();
-            List<BMD.Texture> textures = new List<BMD.Texture>();
-            output += "mtllib " + filename + ".mtl" + "\n";//Specify name of material library
-            for (int i = 0; i < levelModelToExport.m_ModelChunks.Length; i++)
-            {
-                for (int j = 0; j < levelModelToExport.m_ModelChunks[i].m_MatGroups.Length; j++)
-                {
-                    //For every texture,
-                    BMD.Texture currentTexture = levelModelToExport.m_ModelChunks[i].m_MatGroups[j].m_Texture;
-                    textures.Add(currentTexture);
-                    //Create new material
-                    mtllib += "newmtl " /*+ ((i * 2) + j)*/ + levelModelToExport.m_ModelChunks[i].m_MatGroups[j].m_Name + "\n";
-                    //Specify ambient colour - RGB 0-1
-                    mtllib += "Ka " + (levelModelToExport.m_ModelChunks[i].m_MatGroups[j].m_AmbientColor.R / 255.0f).ToString(usa) +
-                        " " + (levelModelToExport.m_ModelChunks[i].m_MatGroups[j].m_AmbientColor.G / 255.0f).ToString(usa) +
-                        " " + (levelModelToExport.m_ModelChunks[i].m_MatGroups[j].m_AmbientColor.B / 255.0f).ToString(usa) + "\n";
-                    if (!isCustom)
-                    {
-                        //Specify diffuse colour - RGB 0-1 // Built-in Model
-                        mtllib += "Kd " + (levelModelToExport.m_ModelChunks[i].m_MatGroups[j].m_DiffuseColor.R / 255.0f).ToString(usa) +
-                            " " + (levelModelToExport.m_ModelChunks[i].m_MatGroups[j].m_DiffuseColor.G / 255.0f).ToString(usa) +
-                            " " + (levelModelToExport.m_ModelChunks[i].m_MatGroups[j].m_DiffuseColor.B / 255.0f).ToString(usa) + "\n";
-                    }
-                    else if (isCustom)
-                    {
-                        //Specify diffuse colour - RGB 0-1 // Custom Model
-                        mtllib += "Kd " + (levelModelToExport.m_ModelChunks[i].m_MatGroups[j].m_Geometry[0].m_VertexList[0].m_Color.R / 255.0f).ToString(usa) +
-                            " " + (levelModelToExport.m_ModelChunks[i].m_MatGroups[j].m_Geometry[0].m_VertexList[0].m_Color.G / 255.0f).ToString(usa) +
-                            " " + (levelModelToExport.m_ModelChunks[i].m_MatGroups[j].m_Geometry[0].m_VertexList[0].m_Color.B / 255.0f).ToString(usa) + "\n";
-                    }
-                    //Specify specular colour - RGB 0-1
-                    mtllib += "Ks " + (levelModelToExport.m_ModelChunks[i].m_MatGroups[j].m_SpecularColor.R / 255.0f).ToString(usa) +
-                        " " + (levelModelToExport.m_ModelChunks[i].m_MatGroups[j].m_SpecularColor.G / 255.0f).ToString(usa) +
-                        " " + (levelModelToExport.m_ModelChunks[i].m_MatGroups[j].m_SpecularColor.B / 255.0f).ToString(usa) + "\n";
-                    //Specify specular colour co-efficient - RGB 0-1
-                    mtllib += "Ns " + levelModelToExport.m_ModelChunks[i].m_MatGroups[j].m_SpeEmiColors.ToString(usa) + "\n";
-                    //Specify transparency - RGB Alpha channel 0-1
-                    mtllib += "d " + (levelModelToExport.m_ModelChunks[i].m_MatGroups[j].m_Geometry[0].m_VertexList[0].m_Color.A / 255.0f).ToString(usa) + "\n";
-                    //Specify texture type 0 - 10
-                    //uint textype = (currentTexture.m_Params >> 26) & 0x7;
-                    mtllib += "illum 2\n";
-                    if (currentTexture != null)
-                    {
-                        //Specify name of texture image
-                        mtllib += "map_Kd " + currentTexture.m_TexName + ".png" + "\n\n";
-                        //Export the current texture to .PNG
-                        Bitmap lol = new Bitmap((int)currentTexture.m_Width, (int)currentTexture.m_Height);
-
-                        for (int y = 0; y < (int)currentTexture.m_Height; y++)
-                        {
-                            for (int x = 0; x < (int)currentTexture.m_Width; x++)
-                            {
-                                lol.SetPixel(x, y, Color.FromArgb(currentTexture.m_Data[((y * currentTexture.m_Width) + x) * 4 + 3],
-                                 currentTexture.m_Data[((y * currentTexture.m_Width) + x) * 4 + 2],
-                                 currentTexture.m_Data[((y * currentTexture.m_Width) + x) * 4 + 1],
-                                 currentTexture.m_Data[((y * currentTexture.m_Width) + x) * 4]));
-                            }
-                        }
-                        try
-                        {
-                            lol.Save(dir + "/" + currentTexture.m_TexName + ".png", System.Drawing.Imaging.ImageFormat.Png);
-                        }
-                        catch (Exception e)
-                        {
-                            MessageBox.Show("An error occurred while trying to save texture " + currentTexture.m_TexName + ".\n\n " + 
-                                e.Message + "\n" + e.Data + "\n" + e.StackTrace + "\n" + e.Source);
-                        }
-                    }
-                    else
-                        mtllib += "\n\n";
-
-                    for (int k = 0; k < levelModelToExport.m_ModelChunks[i].m_MatGroups[j].m_Geometry.Count; k++)
-                    {
-                        for (int m = 0; m < levelModelToExport.m_ModelChunks[i].m_MatGroups[j].m_Geometry[k].m_VertexList.Count; m++)
-                        {
-                            Vector3 currentPos =
-                                levelModelToExport.m_ModelChunks[i].m_MatGroups[j].m_Geometry[k].m_VertexList[m].m_Position;
-                            //Print out the current vertex co-ordinates
-                            if (!vertices.Contains(currentPos) && currentPos.X.ToString() != "" && currentPos.Y.ToString() != "" && currentPos.Z.ToString() != "")
-                            {
-                                output = output + "v " + currentPos.X.ToString(usa) + " " +
-                                currentPos.Y.ToString(usa) + " " +
-                                currentPos.Z.ToString(usa) + "\n";
-                                vertices.Add(currentPos);
-                            }
-                            Vector2 currentTexCoord =
-                                levelModelToExport.m_ModelChunks[i].m_MatGroups[j].m_Geometry[k].m_VertexList[m].m_TexCoord;
-                            //Print out the current texture co-ordinates
-                            if (!texCoords.Contains(currentTexCoord) && currentTexCoord.X.ToString() != "" && currentTexCoord.Y.ToString() != "")
-                            {
-                                output = output + "vt " + currentTexCoord.X.ToString(usa) + " " +
-                                currentTexCoord.Y.ToString(usa) + "\n";
-                                texCoords.Add(currentTexCoord);
-                            }
-                        }
-                    }
-                }
-            }
-            for (int i = 0; i < levelModelToExport.m_ModelChunks.Length; i++)
-            {
-                for (int j = 0; j < levelModelToExport.m_ModelChunks[i].m_MatGroups.Length; j++)
-                {
-                    //Specify which material as defined in the material lib each set of face(s) is to use
-                    output += "usemtl " + levelModelToExport.m_ModelChunks[i].m_MatGroups[j].m_Name + "\n";
-                    for (int k = 0; k < levelModelToExport.m_ModelChunks[i].m_MatGroups[j].m_Geometry.Count; k++)
-                    {
-                        //Faces
-                        string[] v_vt = new string[levelModelToExport.m_ModelChunks[i].m_MatGroups[j].m_Geometry[k].m_VertexList.Count];
-                        //Type of face - 0  Separate Triangle(s), 1  Separate Quadliteral(s), 2  Triangle Strips, 3  Quadliteral Strips
-                        uint polyType = levelModelToExport.m_ModelChunks[i].m_MatGroups[j].m_Geometry[k].m_PolyType;
-                        //Get indices of all vertices and texture vertices in face (index starts at 1)
-                        for (int m = 0; m < levelModelToExport.m_ModelChunks[i].m_MatGroups[j].m_Geometry[k].m_VertexList.Count; m++)
-                        {
-                            v_vt[m] = (lastIndexOfV3(vertices, levelModelToExport.m_ModelChunks[i].m_MatGroups[j].m_Geometry[k].m_VertexList[m].m_Position) + 1) +
-                                   "/" + (lastIndexOfV2(texCoords, levelModelToExport.m_ModelChunks[i].m_MatGroups[j].m_Geometry[k].m_VertexList[m].m_TexCoord) + 1);
-                        }
-                        switch (polyType)
-                        {
-                            case 0://Separate Triangles
-                                {
-                                    if (v_vt.Length <= 3)//Just 1 triangle
-                                    {
-                                        output += "f " + v_vt[0] + " " + v_vt[1] + " " + v_vt[2] + "\n";
-                                    }
-                                    else if (v_vt.Length > 3 && (float)v_vt.Length % 3 == 0.0f)//Eg. 9 vertices in 3 triangles
-                                    {
-                                        int numFaces = v_vt.Length / 3;
-                                        for (int a = 0, b = 0; a < numFaces; a++, b = b + 3)
-                                        {
-                                            output += "f " + v_vt[b] + " " + v_vt[b + 1] + " " + v_vt[b + 2] + "\n";
-                                        }
-                                    }
-                                    break;
-                                }
-                            case 1://Separate Quadrilaterals
-                                {
-                                    if (v_vt.Length <= 4)//Just 1 quadrilateral
-                                    {
-                                        output += "f " + v_vt[0] + " " + v_vt[1] + " " + v_vt[2] + " " + v_vt[3] + "\n";
-                                    }
-                                    else if (v_vt.Length > 4 && (float)v_vt.Length % 4 == 0.0f)//Eg. 8 vertices in 2 quadrilaterals
-                                    {
-                                        int numFaces = v_vt.Length / 4;
-                                        for (int a = 0, b = 0; a < numFaces; a++, b = b + 4)
-                                        {
-                                            output += "f " + v_vt[b] + " " + v_vt[b + 1] + " " + v_vt[b + 2] + " " + v_vt[b + 3] + "\n";
-                                        }
-                                    }
-                                    break;
-                                }
-                            case 2://Triangle Strips
-                                {
-                                    //3+(N-1) vertices per N triangles
-                                    //(N-3)+1 Triangles per N Vertices
-                                    int numFaces = v_vt.Length - 2;
-                                    if (v_vt.Length < 3)//Should never be
-                                        break;
-                                    //Convert all faces with more than 3 vertices to ones with only 3
-                                    for (int n = 0; n < numFaces; n++)
-                                    {
-                                        if (n % 2 == 0)
-                                            output += "f " + v_vt[n] + " " + v_vt[n + 1] + " " + v_vt[n + 2] + "\n";
-                                        else
-                                            output += "f " + v_vt[n + 2] + " " + v_vt[n + 1] + " " + v_vt[n] + "\n";
-                                        //Because of how normals are defined in triangle strips, every 2nd triangle is clockwise, whereas all others are anti-clockwise
-                                    }
-                                    break;
-                                }
-                            case 3://Quadrilateral Strips
-                                {
-                                    //4+(N-1)*2 vertices per N quads
-                                    //((N-4)/2) + 1 Quads. per N Vertices
-                                    int numFaces = ((v_vt.Length - 4) / 2) + 1;
-                                    if (v_vt.Length < 4)//Should never be
-                                        break;
-                                    for (int n = 0, p = 0; n < numFaces; n++, p = p + 2)
-                                    {
-                                        output += "f " + v_vt[p] + " " + v_vt[p + 1] + " " + v_vt[p + 3] + " " + v_vt[p + 2] + "\n";
-                                    }
-                                    break;
-                                }
-                            default: MessageBox.Show("Unknown polygon type."); break;
-                        }//End polyType switch
-                    }
-                }
-            }
-            outfile.Write(output);
-            outfile.Close();
-            outMTL.Write(mtllib);
-            outMTL.Close();
             slStatusLabel.Text = "Finished exporting level model.";
         }//End Method
-
-        private int lastIndexOfV3(List<Vector3> listIn, Vector3 vectorIn)
-        {
-            int index = 0;
-            for (int i = 0; i < listIn.Count; i++)
-            {
-                if (listIn[i] == vectorIn)
-                    index = i;
-            }
-            return index;
-        }
-
-        private int lastIndexOfV2(List<Vector2> listIn, Vector2 vectorIn)
-        {
-            int index = 0;
-            for (int i = 0; i < listIn.Count; i++)
-            {
-                if (listIn[i] == vectorIn)
-                    index = i;
-            }
-            return index;
-        }
 
         private void btnExportObjectModel_Click(object sender, EventArgs e)
         {
@@ -2687,7 +2451,9 @@ namespace SM64DSe
             string selObjBMDName = ObjectRenderer.currentObjFilename;
 
             BMD objectBMD = new BMD(m_ROM.GetFileFromName(selObjBMDName));
-            exportOBJ(objectBMD);
+            BMD_Exporter.ExportBMDToOBJ(objectBMD);
+
+            slStatusLabel.Text = "Finished exporting model.";
         }
 
         private void btnImportOtherModel_Click(object sender, EventArgs e)
@@ -2718,7 +2484,9 @@ namespace SM64DSe
                 if (result == DialogResult.OK)
                 {
                     BMD objectBMD = new BMD(m_ROM.GetFileFromName(form.m_SelectedFile));
-                    exportOBJ(objectBMD);
+                    BMD_Exporter.ExportBMDToOBJ(objectBMD);
+
+                    slStatusLabel.Text = "Finished exporting model.";
                 }
             }
         }

@@ -6,6 +6,7 @@ using System.Drawing;
 using System.Linq;
 using System.Text;
 using System.Windows.Forms;
+using SM64DSe.Importers;
 
 namespace SM64DSe
 {
@@ -163,7 +164,7 @@ namespace SM64DSe
                     uint ntex = 0, npal = 0;
                     int texsize = 0;
 
-                    ModelImporter.ConvertedTexture tex = _owner.ConvertTexture(ofd.FileName);
+                    BMD_Importer.ConvertedTexture tex = BMD_Importer.ConvertTexture(ofd.FileName);
                     tex.m_TextureID = ntex;
                     tex.m_PaletteID = npal;
                     if (tex.m_TextureData != null) { ntex++; texsize += tex.m_TextureData.Length; }

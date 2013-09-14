@@ -30,6 +30,7 @@ using System.Globalization;
 using System.Security.Cryptography;
 using OpenTK;
 using OpenTK.Graphics.OpenGL;
+using SM64DSe.Importers;
 
 namespace SM64DSe
 {
@@ -48,527 +49,7 @@ namespace SM64DSe
             }
         }
 
-        public class GXDisplayListPacker
-        {
-            public GXDisplayListPacker()
-            {
-                m_CommandList = new List<GXCommand>();
-            }
-
-            public void AddCommand(byte _cmd, uint[] _params)
-            {
-                m_CommandList.Add(new GXCommand(_cmd, _params));
-            }
-            public void AddCommand(byte _cmd)
-            {
-                m_CommandList.Add(new GXCommand(_cmd, new uint[] { }));
-            }
-            public void AddCommand(byte _cmd, uint param1)
-            {
-                m_CommandList.Add(new GXCommand(_cmd, new uint[] { param1 }));
-            }
-            public void AddCommand(byte _cmd, uint param1, uint param2)
-            {
-                m_CommandList.Add(new GXCommand(_cmd, new uint[] { param1, param2 }));
-            }
-
-            public void AddVertexCommand(Vector4 _vtx, Vector4 _prev)
-            {
-                if (_prev.W == 12345678f)
-                {
-                    AddVertexCommand(_vtx);
-                    return;
-                }
-
-                Vector4 vtx = Vector4.Multiply(_vtx, 4096f);
-                Vector4 prev = Vector4.Multiply(_prev, 4096f);
-
-                if (Math.Abs(vtx.X - prev.X) < 1f)
-                {
-                    uint param = (uint)(((ushort)(short)vtx.Y) | (((ushort)(short)vtx.Z) << 16));
-                    AddCommand(0x27, param);
-                }
-                else if (Math.Abs(vtx.Y - prev.Y) < 1f)
-                {
-                    uint param = (uint)(((ushort)(short)vtx.X) | (((ushort)(short)vtx.Z) << 16));
-                    AddCommand(0x26, param);
-                }
-                else if (Math.Abs(vtx.Z - prev.Z) < 1f)
-                {
-                    uint param = (uint)(((ushort)(short)vtx.X) | (((ushort)(short)vtx.Y) << 16));
-                    AddCommand(0x25, param);
-                }
-                else
-                    AddVertexCommand(_vtx);
-            }
-            public void AddVertexCommand(Vector4 _vtx)
-            {
-                Vector4 vtx = Vector4.Multiply(_vtx, 4096f);
-
-                uint x = (uint)vtx.X;
-                uint y = (uint)vtx.Y;
-                uint z = (uint)vtx.Z;
-                if (((x & 0x3F) == 0) && ((y & 0x3F) == 0) && ((z & 0x3F) == 0))
-                {
-                    uint param = (uint)((((ushort)(short)x) >> 6) | (((ushort)(short)y) << 4) | (((ushort)(short)z) << 14));
-                    AddCommand(0x24, param);
-                }
-                else
-                {
-                    uint param1 = (uint)(((ushort)(short)x) | (((ushort)(short)y) << 16));
-                    uint param2 = (uint)((ushort)(short)z);
-                    AddCommand(0x23, param1, param2);
-                }
-            }
-
-            public void AddTexCoordCommand(Vector2 txc)
-            {
-                short s = (short)(txc.X * 16);
-                short t = (short)(txc.Y * 16);
-                uint param = (uint)(((ushort)s) | ((ushort)t) << 16);
-                AddCommand(0x22, param);
-            }
-
-            public void AddColorCommand(Color color)
-            {
-                AddCommand(0x20, Helper.ColorToBGR15(color));
-            }
-
-            public void ClearCommands()
-            {
-                m_CommandList.Clear();
-            }
-
-            public byte[] GetDisplayList()
-            {
-                List<byte> ret = new List<byte>();
-                int numcmd = (m_CommandList.Count + 3) & ~3;
-
-                for (int i = m_CommandList.Count; i < numcmd; i++)
-                    AddCommand(0x00);
-
-                for (int i = 0; i < numcmd; i += 4)
-                {
-                    for (int j = 0; j < 4; j++)
-                        ret.Add(m_CommandList[i + j].m_Command);
-
-                    for (int j = 0; j < 4; j++)
-                    {
-                        foreach (uint param in m_CommandList[i + j].m_Parameters)
-                        {
-                            ret.Add((byte)(param & 0xFF));
-                            ret.Add((byte)((param >> 8) & 0xFF));
-                            ret.Add((byte)((param >> 16) & 0xFF));
-                            ret.Add((byte)(param >> 24));
-                        }
-                    }
-                }
-
-                return ret.ToArray();
-            }
-
-
-            public struct GXCommand
-            {
-                public byte m_Command;
-                public uint[] m_Parameters;
-
-                public GXCommand(byte _cmd, uint[] _params)
-                {
-                    m_Command = _cmd;
-                    m_Parameters = _params;
-                }
-            }
-
-            public List<GXCommand> m_CommandList;
-        }
-
-        public class ConvertedTexture
-        {
-            public ConvertedTexture(uint dstp, byte[] tex, byte[] pal, string tn, string pn)
-            {
-                m_DSTexParam = dstp;
-                m_TextureData = tex;
-                m_PaletteData = pal;
-                m_TextureName = tn;
-                m_PaletteName = pn;
-                m_TexType = (dstp >> 26) & 0x7;
-
-                m_TextureDataLength = m_TextureData.Length;
-                if ((dstp & 0x1C000000) == 0x14000000)
-                    m_TextureDataLength -= (m_TextureDataLength / 3);
-            }
-
-            public uint m_DSTexParam;
-            public byte[] m_TextureData;
-            public byte[] m_PaletteData;
-            public int m_TextureDataLength;
-            public string m_TextureName;
-            public string m_PaletteName;
-            public uint m_TextureID, m_PaletteID;
-            public uint m_TexType;
-        }
-
-        public class Palette
-        {
-            private static int ColorComparer(ushort c1, ushort c2)
-            {
-                int r1 = c1 & 0x1F;
-                int g1 = (c1 >> 5) & 0x1F;
-                int b1 = (c1 >> 10) & 0x1F;
-                int r2 = c2 & 0x1F;
-                int g2 = (c2 >> 5) & 0x1F;
-                int b2 = (c2 >> 10) & 0x1F;
-
-                int tdiff = (r2 - r1) + (g2 - g1) + (b2 - b1);
-                if (tdiff == 0)
-                    return 0;
-                else if (tdiff < 0)
-                    return 1;
-                else
-                    return -1;
-            }
-
-            public Palette(Bitmap bmp, Rectangle region, int depth)
-            {
-                List<ushort> pal = new List<ushort>(depth);
-
-                // 1. get the colors used within the requested region
-                for (int y = region.Top; y < region.Bottom; y++)
-                {
-                    for (int x = region.Left; x < region.Right; x++)
-                    {
-                        ushort col15 = Helper.ColorToBGR15(bmp.GetPixel(x, y));
-                        if (!pal.Contains(col15))
-                            pal.Add(col15);
-                    }
-                }
-
-                // 2. shrink down the palette by removing colors that
-                // are close to others, until it fits within the
-                // requested size
-                pal.Sort(Palette.ColorComparer);
-                int maxdiff = 1;
-                while (pal.Count > depth)
-                {
-                    for (int i = 1; i < pal.Count; )
-                    {
-                        ushort c1 = pal[i - 1];
-                        ushort c2 = pal[i];
-
-                        int r1 = c1 & 0x1F;
-                        int g1 = (c1 >> 5) & 0x1F;
-                        int b1 = (c1 >> 10) & 0x1F;
-                        int r2 = c2 & 0x1F;
-                        int g2 = (c2 >> 5) & 0x1F;
-                        int b2 = (c2 >> 10) & 0x1F;
-
-                        if (Math.Abs(r1 - r2) <= maxdiff && Math.Abs(g1 - g2) <= maxdiff && Math.Abs(b1 - b2) <= maxdiff)
-                        {
-                            ushort cmerged = Helper.BlendColorsBGR15(c1, 1, c2, 1);
-                            pal[i - 1] = cmerged;
-                            pal.RemoveAt(i);
-                        }
-                        else
-                            i++;
-                    }
-
-                    maxdiff++;
-                }
-
-                m_Palette = pal;
-                m_Referenced = new bool[m_Palette.Count];
-                for (int i = 0; i < m_Palette.Count; i++)
-                    m_Referenced[i] = false;
-            }
-
-            public int FindClosestColorID(ushort c)
-            {
-                int r = c & 0x1F;
-                int g = (c >> 5) & 0x1F;
-                int b = (c >> 10) & 0x1F;
-
-                int maxdiff = 1;
-
-                for (; ; )
-                {
-                    for (int i = 0; i < m_Palette.Count; i++)
-                    {
-                        ushort c1 = m_Palette[i];
-                        int r1 = c1 & 0x1F;
-                        int g1 = (c1 >> 5) & 0x1F;
-                        int b1 = (c1 >> 10) & 0x1F;
-
-                        if (Math.Abs(r1 - r) <= maxdiff && Math.Abs(g1 - g) <= maxdiff && Math.Abs(b1 - b) <= maxdiff)
-                        {
-                            m_Referenced[i] = true;
-                            return i;
-                        }
-                    }
-
-                    maxdiff++;
-                }
-            }
-
-            public static bool AreSimilar(Palette p1, Palette p2)
-            {
-                if (p1.m_Palette.Count > p2.m_Palette.Count)
-                    return false;
-
-                for (int i = 0; i < p1.m_Palette.Count; i++)
-                {
-                    ushort c1 = p1.m_Palette[i];
-                    ushort c2 = p2.m_Palette[i];
-
-                    int r1 = c1 & 0x1F;
-                    int g1 = (c1 >> 5) & 0x1F;
-                    int b1 = (c1 >> 10) & 0x1F;
-                    int r2 = c2 & 0x1F;
-                    int g2 = (c2 >> 5) & 0x1F;
-                    int b2 = (c2 >> 10) & 0x1F;
-
-                    if (Math.Abs(r1 - r2) > 1 || Math.Abs(g1 - g2) > 1 || Math.Abs(b1 - b2) > 1)
-                        return false;
-                }
-
-                return true;
-            }
-
-            public List<ushort> m_Palette;
-            public bool[] m_Referenced;
-        }
-
-        public ConvertedTexture ConvertTexture(string filename)
-        {
-            Bitmap bmp = new Bitmap(filename);
-
-            int width = 8, height = 8;
-            int dswidth = 0, dsheight = 0;
-            while (width < bmp.Width) { width *= 2; dswidth++; }
-            while (height < bmp.Height) { height *= 2; dsheight++; }
-
-            // cheap resizing for textures whose dimensions aren't power-of-two
-            if ((width != bmp.Width) || (height != bmp.Height))
-            {
-                Bitmap newbmp = new Bitmap(width, height);
-                Graphics g = Graphics.FromImage(newbmp);
-                g.DrawImage(bmp, new Rectangle(0, 0, width, height));
-                bmp = newbmp;
-            }
-
-            bool alpha = false;
-            for (int y = 0; y < height; y++)
-            {
-                for (int x = 0; x < width; x++)
-                {
-                    int a = bmp.GetPixel(x, y).A;
-                    if (a >= 8 && a <= 248)
-                    {
-                        alpha = true;
-                        break;
-                    }
-                }
-            }
-
-            int textype = 0;
-            byte[] tex = null;
-            byte[] pal = null;
-
-            if (alpha)
-            {
-                // a5i3/a3i5
-                tex = new byte[width * height];
-                Palette _pal = new Palette(bmp, new Rectangle(0, 0, bmp.Width, bmp.Height), 32);
-                int alphamask = 0;
-
-                if (_pal.m_Palette.Count <= 8)
-                {
-                    textype = 6;
-                    alphamask = 0xF8;
-                }
-                else
-                {
-                    textype = 1;
-                    alphamask = 0xE0;
-                }
-
-                for (int y = 0; y < height; y++)
-                {
-                    for (int x = 0; x < width; x++)
-                    {
-                        Color c = bmp.GetPixel(x, y);
-                        ushort bgr15 = Helper.ColorToBGR15(c);
-                        int a = c.A & alphamask;
-
-                        byte val = (byte)(_pal.FindClosestColorID(bgr15) | a);
-                        tex[(y * width) + x] = val;
-                    }
-                }
-
-                pal = new byte[_pal.m_Palette.Count * 2];
-                for (int i = 0; i < _pal.m_Palette.Count; i++)
-                {
-                    pal[i * 2] = (byte)(_pal.m_Palette[i] & 0xFF);
-                    pal[(i * 2) + 1] = (byte)(_pal.m_Palette[i] >> 8);
-                }
-            }
-            else
-            {
-                // type5 - compressed
-                textype = 5;
-                tex = new byte[((width * height) / 16) * 6];
-                List<Palette> pallist = new List<Palette>();
-                List<ushort> paldata = new List<ushort>();
-
-                int texoffset = 0;
-                int palidxoffset = ((width * height) / 16) * 4;
-
-                for (int y = 0; y < height; y += 4)
-                {
-                    for (int x = 0; x < width; x += 4)
-                    {
-                        bool transp = false;
-
-                        for (int y2 = 0; y2 < 4; y2++)
-                        {
-                            for (int x2 = 0; x2 < 4; x2++)
-                            {
-                                Color c = bmp.GetPixel(x + x2, y + y2);
-
-                                if (c.A < 8)
-                                    transp = true;
-                            }
-                        }
-
-                        Palette txpal = new Palette(bmp, new Rectangle(x, y, 4, 4), transp ? 3 : 4);
-                        uint texel = 0;
-                        ushort palidx = (ushort)(transp ? 0x0000 : 0x8000);
-
-                        for (int y2 = 0; y2 < 4; y2++)
-                        {
-                            for (int x2 = 0; x2 < 4; x2++)
-                            {
-                                int px = 0;
-                                Color c = bmp.GetPixel(x + x2, y + y2);
-                                ushort bgr15 = Helper.ColorToBGR15(c);
-
-                                if (transp && c.A < 8)
-                                    px = 3;
-                                else
-                                    px = txpal.FindClosestColorID(bgr15);
-
-                                texel |= (uint)(px << ((2 * x2) + (8 * y2)));
-                            }
-                        }
-
-                        uint paloffset = 0; bool palfound = false;
-                        for (int i = 0; i < pallist.Count; i++)
-                        {
-                            if (Palette.AreSimilar(txpal, pallist[i]))
-                            {
-                                palfound = true;
-                                break;
-                            }
-
-                            paloffset += (uint)pallist[i].m_Palette.Count;
-                            if ((paloffset & 1) != 0) paloffset++;
-                        }
-
-                        paloffset /= 2;
-                        palidx |= (ushort)(paloffset & 0x3FFF);
-
-                        if (!palfound)
-                        {
-                            pallist.Add(txpal);
-
-                            foreach (ushort col in txpal.m_Palette)
-                                paldata.Add(col);
-                            if ((paldata.Count & 1) != 0)
-                                paldata.Add(0x7C1F);
-                        }
-
-                        tex[texoffset] = (byte)(texel & 0xFF);
-                        tex[texoffset + 1] = (byte)((texel >> 8) & 0xFF);
-                        tex[texoffset + 2] = (byte)((texel >> 16) & 0xFF);
-                        tex[texoffset + 3] = (byte)(texel >> 24);
-                        texoffset += 4;
-                        tex[palidxoffset] = (byte)(palidx & 0xFF);
-                        tex[palidxoffset + 1] = (byte)(palidx >> 8);
-                        palidxoffset += 2;
-                    }
-                }
-
-                pal = new byte[paldata.Count * 2];
-                for (int i = 0; i < paldata.Count; i++)
-                {
-                    pal[i * 2] = (byte)(paldata[i] & 0xFF);
-                    pal[(i * 2) + 1] = (byte)(paldata[i] >> 8);
-                }
-            }
-
-            string texname = filename.Substring(filename.LastIndexOf('\\') + 1).Replace('.', '_');
-            string palname = (pal == null) ? null : texname + "_pl";
-
-            uint dstp = (uint)((dswidth << 20) | (dsheight << 23) | (textype << 26));
-            return new ConvertedTexture(dstp, tex, pal, texname, palname);
-        }
-
-        private void ClampRotation(ref float val, float twopi)
-        {
-            if (val > twopi)
-            {
-                while (val > twopi)
-                    val -= twopi;
-            }
-            else if (val < -twopi)
-            {
-                while (val < -twopi)
-                    val += twopi;
-            }
-        }
-
-
-        private bool m_GLLoaded;
-
-        class FaceDef
-        {
-            public int[] m_VtxIndices;
-            public int[] m_TxcIndices;
-            public int[] m_NrmIndices;
-            public string m_MatName;
-        }
-
-        class MaterialDef
-        {
-            public List<FaceDef> m_Faces;
-
-            public Color m_DiffuseColor;
-            public int m_Opacity;
-
-            public bool m_HasTextures;
-
-            public int m_ColType;
-
-            //public byte[] m_DiffuseMap;
-            public string m_DiffuseMapName;
-            public int m_DiffuseMapID;
-            public Vector2 m_DiffuseMapSize;
-
-            // haxx
-            public float m_TexCoordScale;
-        }
-
         private LevelSettings m_LevelSettings;
-
-        // from loaded model
-        private string m_ModelFileName;
-        private string m_ModelPath;
-        private List<Vector4> m_Vertices;
-        private List<Vector2> m_TexCoords;
-        private List<Vector3> m_Normals;
-        private Dictionary<string, MaterialDef> m_Materials;
-        private Dictionary<string, MaterialDef> m_Textures;
-        private bool m_SketchupHack;
 
         // model settings
         private Vector3 m_Scale;
@@ -598,14 +79,16 @@ namespace SM64DSe
         private int m_DisplayList;
         private uint[] m_PickingFrameBuffer;
 
-        // hash
-        private MD5CryptoServiceProvider m_MD5;
+        private BMD m_ImportedModel;
 
         // misc
         private Vector3 m_MarioPosition;
         private float m_MarioRotation;
 
         private String m_BMDName, m_KCLName;
+
+        private bool m_GLLoaded;
+        private bool m_MdlLoaded;
 
         public ModelImporter(String modelName, String kclName, float scale = 1f)
         {
@@ -614,10 +97,13 @@ namespace SM64DSe
             Text = "[EXPERIMENTAL] Model importer - " + Program.AppTitle + " " + Program.AppVersion;
 
             m_GLLoaded = false;
+            m_MdlLoaded = false;
             tbModelName.Text = "None";
 
             m_BMDName = modelName;
             m_KCLName = kclName;
+
+            m_ImportedModel = new BMD(Program.m_ROM.GetFileFromName(m_BMDName));
 
             m_Scale = new Vector3(1f, 1f, 1f);
             m_CustomScale = scale;
@@ -625,321 +111,12 @@ namespace SM64DSe
             m_SwapYZ = false;
 
             m_DisplayList = 0;
-
-            m_MD5 = new MD5CryptoServiceProvider();
-        }
-
-        private string HexString(byte[] crap)
-        {
-            string ret = "";
-            foreach (byte b in crap)
-                ret += b.ToString("X2");
-            return ret;
-        }
-
-        private void addWhiteMat()
-        {
-            MaterialDef mat = new MaterialDef();
-            mat.m_Faces = new List<FaceDef>();
-            mat.m_DiffuseColor = Color.White;
-            mat.m_Opacity = 255;
-            mat.m_HasTextures = false;
-            mat.m_DiffuseMapName = "";
-            mat.m_DiffuseMapID = 0;
-            mat.m_DiffuseMapSize = new Vector2(0f, 0f);
-            m_Materials.Add("default_white", mat);
-        }
-
-
-        private void OBJ_LoadMTL(string filename)
-        {
-            Stream fs;
-            try
-            {
-                fs = File.OpenRead(filename);
-            }
-            catch
-            {
-                MessageBox.Show("Material library not found:\n\n" + filename + "\n\nA default white material will be used instead.");
-                addWhiteMat();
-                return;
-            }
-            StreamReader sr = new StreamReader(fs);
-
-            string curmaterial = "";
-            CultureInfo usahax = new CultureInfo("en-US");
-
-            string imagesNotFound = "";
-
-            string curline;
-            while ((curline = sr.ReadLine()) != null)
-            {
-                curline = curline.Trim();
-
-                // skip empty lines and comments
-                if (curline.Length < 1) continue;
-                if (curline[0] == '#')
-                {
-                    if (curline == "#Materials exported from Google Sketchup")
-                        m_SketchupHack = true;
-
-                    continue;
-                }
-
-                string[] parts = curline.Split(new char[] { ' ' }, StringSplitOptions.RemoveEmptyEntries);
-                if (parts.Length < 1) continue;
-
-                switch (parts[0])
-                {
-                    case "newmtl": // new material definition
-                        {
-                            if (parts.Length < 2) continue;
-                            curmaterial = parts[1];
-
-                            MaterialDef mat = new MaterialDef();
-                            mat.m_Faces = new List<FaceDef>();
-                            mat.m_DiffuseColor = Color.White;
-                            mat.m_Opacity = 255; // oops
-                            mat.m_HasTextures = false;
-                            mat.m_DiffuseMapName = "";
-                            mat.m_DiffuseMapID = 0;
-                            mat.m_DiffuseMapSize = new Vector2(0f, 0f);
-                            mat.m_ColType = 0;
-                            try 
-                            { 
-                                m_Materials.Add(curmaterial, mat); 
-                            }
-                            catch
-                            {
-                                //Duplicate material
-                            }
-                        }
-                        break;
-
-                    case "d":
-                    case "Tr": // opacity
-                        {
-                            if (parts.Length < 2) continue;
-                            float o = float.Parse(parts[1], usahax);
-                            if (m_SketchupHack)
-                                o *= 255;
-
-                            MaterialDef mat = (MaterialDef)m_Materials[curmaterial];
-                            mat.m_Opacity = Math.Max(0, Math.Min(255, (int)(o * 255)));
-                        }
-                        break;
-
-                    case "Kd": // diffuse color
-                        {
-                            if (parts.Length < 4) continue;
-                            float r = float.Parse(parts[1], usahax);
-                            float g = float.Parse(parts[2], usahax);
-                            float b = float.Parse(parts[3], usahax);
-                            Color col = Color.FromArgb((int)(r * 255), (int)(g * 255), (int)(b * 255));
-
-                            MaterialDef mat = (MaterialDef)m_Materials[curmaterial];
-                            mat.m_DiffuseColor = col;
-                        }
-                        break;
-
-                    case "map_Kd":
-                    case "mapKd": // diffuse map (texture)
-                        {
-                            string texname = curline.Substring(parts[0].Length + 1).Trim();
-                            Bitmap tex;
-                            try
-                            {
-                                tex = new Bitmap(m_ModelPath + texname);
-
-                                int width = 8, height = 8;
-                                while (width < tex.Width) width *= 2;
-                                while (height < tex.Height) height *= 2;
-
-                                // cheap resizing for textures whose dimensions aren't power-of-two
-                                if ((width != tex.Width) || (height != tex.Height))
-                                {
-                                    Bitmap newbmp = new Bitmap(width, height);
-                                    Graphics g = Graphics.FromImage(newbmp);
-                                    g.DrawImage(tex, new Rectangle(0, 0, width, height));
-                                    tex = newbmp;
-                                }
-
-                                MaterialDef mat = (MaterialDef)m_Materials[curmaterial];
-                                mat.m_HasTextures = true;
-
-                                byte[] map = new byte[tex.Width * tex.Height * 4];
-                                for (int y = 0; y < tex.Height; y++)
-                                {
-                                    for (int x = 0; x < tex.Width; x++)
-                                    {
-                                        Color pixel = tex.GetPixel(x, y);
-                                        int pos = ((y * tex.Width) + x) * 4;
-
-                                        map[pos] = pixel.B;
-                                        map[pos + 1] = pixel.G;
-                                        map[pos + 2] = pixel.R;
-                                        map[pos + 3] = pixel.A;
-                                    }
-                                }
-                                //System.Drawing.Imaging.BitmapData lol = tex.LockBits(new Rectangle(0, 0, tex.Width, tex.Height), System.Drawing.Imaging.ImageLockMode.ReadOnly, System.Drawing.Imaging.PixelFormat.Format32bppArgb);
-                                //System.Runtime.InteropServices.Marshal.Copy(lol.Scan0, map, 0, tex.Width * tex.Height * 4);
-
-                                string imghash = HexString(m_MD5.ComputeHash(map));
-                                if (m_Textures.ContainsKey(imghash))
-                                {
-                                    MaterialDef mat2 = m_Textures[imghash];
-                                    mat.m_DiffuseMapName = mat2.m_DiffuseMapName;
-                                    mat.m_DiffuseMapID = mat2.m_DiffuseMapID;
-                                    mat.m_DiffuseMapSize = mat2.m_DiffuseMapSize;
-                                    break;
-                                }
-
-                                mat.m_DiffuseMapName = texname;
-                                m_Textures.Add(imghash, mat);
-
-                                mat.m_DiffuseMapSize.X = tex.Width;
-                                mat.m_DiffuseMapSize.Y = tex.Height;
-
-                                mat.m_DiffuseMapID = GL.GenTexture();
-                                GL.BindTexture(TextureTarget.Texture2D, mat.m_DiffuseMapID);
-                                GL.TexImage2D(TextureTarget.Texture2D, 0, PixelInternalFormat.Four, tex.Width, tex.Height,
-                                    0, PixelFormat.Bgra, PixelType.UnsignedByte, map);
-
-                                GL.TexParameter(TextureTarget.Texture2D, TextureParameterName.TextureMinFilter, (int)TextureMinFilter.Nearest);
-                                GL.TexParameter(TextureTarget.Texture2D, TextureParameterName.TextureMagFilter, (int)TextureMagFilter.Nearest);
-
-                                GL.TexParameter(TextureTarget.Texture2D, TextureParameterName.TextureWrapS, (int)TextureWrapMode.Repeat);
-                                GL.TexParameter(TextureTarget.Texture2D, TextureParameterName.TextureWrapT, (int)TextureWrapMode.Repeat);
-                            }
-                            catch
-                            {
-                                imagesNotFound += m_ModelPath + texname + "\n";
-                            }
-                            break;
-                        }
-                }
-            }
-
-            if (!imagesNotFound.Equals(""))
-                MessageBox.Show("The following images were not found:\n\n" + imagesNotFound);
-
-            sr.Close();
-        }
-
-        private void LoadModel_OBJ()
-        {
-            Stream fs = File.OpenRead(m_ModelFileName);
-            StreamReader sr = new StreamReader(fs);
-
-            string curmaterial = "";
-            CultureInfo usahax = new CultureInfo("en-US");
-
-            string curline;
-            while ((curline = sr.ReadLine()) != null)
-            {
-                curline = curline.Trim();
-
-                // skip empty lines and comments
-                if (curline.Length < 1) continue;
-                if (curline[0] == '#') continue;
-
-                string[] parts = curline.Split(new char[] { ' ' }, StringSplitOptions.RemoveEmptyEntries);
-                if (parts.Length < 1) continue;
-
-                switch (parts[0])
-                {
-                    case "mtllib": // material lib file
-                        {
-                            string filename = curline.Substring(parts[0].Length + 1).Trim();
-                            OBJ_LoadMTL(m_ModelPath + filename);
-                        }
-                        break;
-
-                    case "usemtl": // material name
-                        if (parts.Length < 2) continue;
-                        curmaterial = parts[1];
-                        break;
-
-                    case "v": // vertex
-                        {
-                            if (parts.Length < 4) continue;
-                            float x = float.Parse(parts[1], usahax);
-                            float y = float.Parse(parts[2], usahax);
-                            float z = float.Parse(parts[3], usahax);
-                            float w = 1f; //(parts.Length < 5) ? 1f : float.Parse(parts[4], usahax);
-
-                            m_Vertices.Add(new Vector4(x, y, z, w));
-                        }
-                        break;
-
-                    case "vt": // texcoord
-                        {
-                            if (parts.Length < 2) continue;
-                            float s = float.Parse(parts[1], usahax);
-                            float t = (parts.Length < 3) ? 0f : float.Parse(parts[2], usahax);
-
-                            m_TexCoords.Add(new Vector2(s, t));
-                        }
-                        break;
-
-                    case "vn": // normal
-                        {
-                            if (parts.Length < 4) continue;
-                            float x = float.Parse(parts[1], usahax);
-                            float y = float.Parse(parts[2], usahax);
-                            float z = float.Parse(parts[3], usahax);
-
-                            Vector3 vec = new Vector3(x, y, z);
-                            vec.Normalize();
-                            m_Normals.Add(vec);
-                        }
-                        break;
-
-                    case "f": // face
-                        {
-                            if (parts.Length < 4) continue;
-                            int nvtx = parts.Length - 1;
-
-                            MaterialDef mat = new MaterialDef();
-                            try
-                            {
-                                mat = (MaterialDef)m_Materials[curmaterial];
-                            }
-                            catch
-                            {
-                                curmaterial = "default_white";
-                                MessageBox.Show("No material library has been specified, yet faces are still set to use \n" +
-                                        "a material. A default white material will be used instead.");
-                                addWhiteMat();
-                                mat = (MaterialDef)m_Materials[curmaterial];
-                            }
-                            FaceDef face = new FaceDef();
-                            face.m_MatName = curmaterial;
-                            face.m_VtxIndices = new int[nvtx];
-                            face.m_TxcIndices = new int[nvtx];
-                            face.m_NrmIndices = new int[nvtx];
-
-                            for (int i = 0; i < nvtx; i++)
-                            {
-                                string vtx = parts[i + 1];
-                                string[] idxs = vtx.Split(new char[] { '/' });
-
-                                face.m_VtxIndices[i] = int.Parse(idxs[0]) - 1;
-                                face.m_TxcIndices[i] = (mat.m_HasTextures && idxs.Length >= 2 && idxs[1].Length > 0)
-                                    ? (int.Parse(idxs[1]) - 1) : -1;
-                                face.m_NrmIndices[i] = (idxs.Length >= 3) ? (int.Parse(idxs[2]) - 1) : -1;
-                            }
-
-                            mat.m_Faces.Add(face);
-                        }
-                        break;
-                }
-            }
-
-            sr.Close();
         }
 
         public bool m_EarlyClosure;
+
+        private static string m_ModelFileName;
+        private static string m_ModelPath;
 
         private void LoadModel(bool required)
         {
@@ -948,16 +125,12 @@ namespace SM64DSe
                 m_ModelFileName = ofdLoadModel.FileName.Replace('/', '\\');
                 m_ModelPath = m_ModelFileName.Substring(0, m_ModelFileName.LastIndexOf('\\') + 1);
 
-                m_Vertices = new List<Vector4>();
-                m_TexCoords = new List<Vector2>();
-                m_Normals = new List<Vector3>();
-                m_Materials = new Dictionary<string, MaterialDef>();
-                m_Textures = new Dictionary<string, MaterialDef>();
-                m_SketchupHack = false;
-
                 switch (ofdLoadModel.FilterIndex)
                 {
-                    case 1: LoadModel_OBJ(); break;
+                    case 1:
+                        m_ImportedModel = BMD_Importer.LoadModel_OBJ(m_ImportedModel, m_ModelFileName, m_ModelPath, m_Scale);
+                        m_MdlLoaded = true;
+                        break;
                 }
                 PrerenderModel();
 
@@ -978,12 +151,12 @@ namespace SM64DSe
             gridColTypes.Columns[0].HeaderText = "Material";
             gridColTypes.Columns[1].HeaderText = "Col. Type";
 
-            int numMats = m_Materials.Count;
+            int numMats = BMD_Importer.m_Materials.Count;
             gridColTypes.RowCount = numMats;
             for (int i = 0; i < numMats; i++)
             {
-                gridColTypes.Rows[i].Cells[0].Value = m_Materials.Keys.ElementAt(i);
-                gridColTypes.Rows[i].Cells[1].Value = m_Materials.Values.ElementAt(i).m_ColType;
+                gridColTypes.Rows[i].Cells[0].Value = BMD_Importer.m_Materials.Keys.ElementAt(i);
+                gridColTypes.Rows[i].Cells[1].Value = BMD_Importer.m_Materials.Values.ElementAt(i).m_ColType;
             }
         }
 
@@ -1063,90 +236,44 @@ namespace SM64DSe
             GL.CallList(mheaddl[1]);
             GL.PopMatrix();
 
-            GL.Disable(EnableCap.Lighting);
-            GL.PushMatrix();
-            if (m_ZMirror)
+            if (m_MdlLoaded)
             {
-                GL.Scale(m_Scale.X, m_Scale.Y, -m_Scale.Z);
-                GL.FrontFace(FrontFaceDirection.Cw);
-            }
-            else
-            {
-                GL.Scale(m_Scale);
-                GL.FrontFace(FrontFaceDirection.Ccw);
-            }
-
-            foreach (MaterialDef mat in m_Materials.Values)
-            {
-                if (mat.m_Opacity < 255) continue;
-
-                GL.Color4(Color.FromArgb(mat.m_Opacity, mat.m_DiffuseColor));
-                GL.BindTexture(TextureTarget.Texture2D, mat.m_DiffuseMapID);
-
-                foreach (FaceDef face in mat.m_Faces)
+                GL.Disable(EnableCap.Lighting);
+                GL.PushMatrix();
+                if (m_ZMirror)
                 {
-                    switch (face.m_VtxIndices.Length)
-                    {
-                        case 3: GL.Begin(BeginMode.Triangles); break;
-                        case 4: GL.Begin(BeginMode.Quads); break;
-                        default: GL.Begin(BeginMode.TriangleFan); break;
-                    }
-
-                    for (int i = 0; i < face.m_VtxIndices.Length; i++)
-                    {
-                        int vtx = face.m_VtxIndices[i];
-                        int txc = face.m_TxcIndices[i];
-                        int nrm = face.m_NrmIndices[i];
-
-                        if (txc > -1) GL.TexCoord2(m_TexCoords[txc]);
-                        //if (nrm > -1) GL.Normal3(m_Normals[nrm]);
-                        if (m_SwapYZ)
-                            GL.Vertex4(m_Vertices[vtx].X, m_Vertices[vtx].Z, m_Vertices[vtx].Y, m_Vertices[vtx].W);
-                        else
-                            GL.Vertex4(m_Vertices[vtx]);
-                    }
-
-                    GL.End();
+                    GL.Scale(m_Scale.X, m_Scale.Y, -m_Scale.Z);
+                    GL.FrontFace(FrontFaceDirection.Cw);
                 }
-            }
-
-            foreach (MaterialDef mat in m_Materials.Values)
-            {
-                if (mat.m_Opacity == 255) continue;
-
-                GL.Color4(Color.FromArgb(mat.m_Opacity, mat.m_DiffuseColor));
-                GL.BindTexture(TextureTarget.Texture2D, mat.m_DiffuseMapID);
-
-                foreach (FaceDef face in mat.m_Faces)
+                else
                 {
-                    switch (face.m_VtxIndices.Length)
-                    {
-                        case 3: GL.Begin(BeginMode.Triangles); break;
-                        case 4: GL.Begin(BeginMode.Quads); break;
-                        default: GL.Begin(BeginMode.TriangleFan); break;
-                    }
-
-                    for (int i = 0; i < face.m_VtxIndices.Length; i++)
-                    {
-                        int vtx = face.m_VtxIndices[i];
-                        int txc = face.m_TxcIndices[i];
-                        int nrm = face.m_NrmIndices[i];
-
-                        if (txc > -1) GL.TexCoord2(m_TexCoords[txc]);
-                        //if (nrm > -1) GL.Normal3(m_Normals[nrm]);
-                        if (m_SwapYZ)
-                            GL.Vertex4(m_Vertices[vtx].X, m_Vertices[vtx].Z, m_Vertices[vtx].Y, m_Vertices[vtx].W);
-                        else
-                            GL.Vertex4(m_Vertices[vtx]);
-                    }
-
-                    GL.End();
+                    GL.Scale(m_Scale);
+                    GL.FrontFace(FrontFaceDirection.Ccw);
                 }
+
+                m_ImportedModel.PrepareToRender();
+
+                // Render model converted to BMD
+                int[] dl = new int[2];
+
+                dl[0] = GL.GenLists(1);
+                GL.NewList(dl[0], ListMode.Compile);
+                m_ImportedModel.Render(RenderMode.Opaque, 1f);
+                //GL.EndList();
+
+                dl[1] = GL.GenLists(1);
+                GL.NewList(dl[1], ListMode.Compile);
+                m_ImportedModel.Render(RenderMode.Translucent, 1f);
+                GL.EndList();
+
+                GL.PopMatrix();
+
+                //GL.EndList();
+
+                //GL.CallList(dl[0]);
+                //GL.CallList(dl[1]);
+                // End
             }
-
-            GL.PopMatrix();
-
-            GL.EndList();
 
             if (m_PDisplayList == 0)
                 m_PDisplayList = GL.GenLists(1);
@@ -1166,452 +293,6 @@ namespace SM64DSe
 
             GL.EndList();
         }
-
-        private void ImportModel()
-        {
-            int b = 0;
-            GXDisplayListPacker dlpacker = new GXDisplayListPacker();
-
-            NitroFile bmd = Program.m_ROM.GetFileFromName(m_BMDName);
-            bmd.Clear();
-
-            Vector4[] scaledvtxs = new Vector4[m_Vertices.Count];
-            for (int i = 0; i < m_Vertices.Count; i++)
-            {
-                if (m_SwapYZ)
-                    scaledvtxs[i] = new Vector4(m_Vertices[i].X * m_Scale.X, m_Vertices[i].Z * m_Scale.Y, m_Vertices[i].Y * (m_ZMirror ? -m_Scale.Z : m_Scale.Z), m_Vertices[i].W);
-                else
-                    scaledvtxs[i] = new Vector4(m_Vertices[i].X * m_Scale.X, m_Vertices[i].Y * m_Scale.Y, m_Vertices[i].Z * (m_ZMirror ? -m_Scale.Z : m_Scale.Z), m_Vertices[i].W);
-            }
-
-            float largest = 0f;
-            foreach (Vector4 vec in scaledvtxs)
-            {
-                if (vec.X > largest) largest = vec.X;
-                if (vec.Y > largest) largest = vec.Y;
-                if (vec.Z > largest) largest = vec.Z;
-
-                if (-vec.X > largest) largest = -vec.X;
-                if (-vec.Y > largest) largest = -vec.Y;
-                if (-vec.Z > largest) largest = -vec.Z;
-            }
-
-            float scale = 1f; uint scaleval = 0;
-            while (largest > (32767f / 4096f))
-            {
-                scaleval++;
-                scale /= 2f;
-                largest /= 2f;
-            }
-
-            if (scaleval > 31)
-            {
-                MessageBox.Show("Your model is too large to be imported. Try scaling it down.", Program.AppTitle, MessageBoxButtons.OK, MessageBoxIcon.Error);
-                return;
-            }
-
-            for (int i = 0; i < scaledvtxs.Length; i++)
-            {
-                scaledvtxs[i].X *= scale;
-                scaledvtxs[i].Y *= scale;
-                scaledvtxs[i].Z *= scale;
-            }
-
-            Dictionary<string, ConvertedTexture> textures = new Dictionary<string, ConvertedTexture>();
-            uint ntex = 0, npal = 0;
-            int texsize = 0;
-            foreach (KeyValuePair<string, MaterialDef> _mat in m_Materials)
-            {
-                MaterialDef mat = _mat.Value;
-                string matname = _mat.Key;
-
-                if (mat.m_DiffuseMapName != "")
-                {
-                    if (!textures.ContainsKey(mat.m_DiffuseMapName))
-                    {
-                        ConvertedTexture tex = ConvertTexture(m_ModelPath + mat.m_DiffuseMapName);
-                        tex.m_TextureID = ntex;
-                        tex.m_PaletteID = npal;
-                        if (tex.m_TextureData != null) { ntex++; texsize += tex.m_TextureData.Length; }
-                        if (tex.m_PaletteData != null) { npal++; texsize += tex.m_PaletteData.Length; }
-                        textures.Add(mat.m_DiffuseMapName, tex);
-                    }
-                }
-            }
-
-            if (texsize >= 49152)
-            {
-                if (MessageBox.Show("Your textures would occupy more than 48k of VRAM.\nThis could cause glitches or freezes.\n\nImport anyway?",
-                    Program.AppTitle, MessageBoxButtons.YesNo, MessageBoxIcon.Warning, MessageBoxDefaultButton.Button2) == DialogResult.No)
-                    return;
-            }
-
-            bmd.Write32(0x00, scaleval);
-
-            uint curoffset = 0x3C;
-            bmd.Write32(0x0C, (uint)m_Materials.Count);
-            bmd.Write32(0x10, curoffset);
-
-            uint dllistoffset = curoffset;
-            curoffset += (uint)(m_Materials.Count * 8);
-
-            // build display lists
-            b = 0;
-            foreach (MaterialDef mat in m_Materials.Values)
-            {
-                bmd.Write32(dllistoffset, 1);
-                bmd.Write32(dllistoffset + 0x4, curoffset);
-                dllistoffset += 0x8;
-
-                Vector2 tcscale = mat.m_DiffuseMapSize;
-
-                float largesttc = 0f;
-                foreach (FaceDef face in mat.m_Faces)
-                {
-                    foreach (int txci in face.m_TxcIndices)
-                    {
-                        if (txci < 0) continue;
-                        Vector2 txc = Vector2.Multiply(m_TexCoords[txci], tcscale);
-                        if (Math.Abs(txc.X) > largesttc) largesttc = Math.Abs(txc.X);
-                        if (Math.Abs(txc.Y) > largesttc) largesttc = Math.Abs(txc.Y);
-                    }
-                }
-                float _tcscale = largesttc / (32767f / 16f);
-                if (_tcscale > 1f)
-                {
-                    _tcscale = (float)Math.Ceiling(_tcscale * 4096f) / 4096f;
-                    mat.m_TexCoordScale = _tcscale;
-                    Vector2.Divide(ref tcscale, _tcscale, out tcscale);
-                }
-                else
-                    mat.m_TexCoordScale = 0f;
-
-                dlpacker.ClearCommands();
-                int lastface = -1;
-                Vector4 lastvtx = new Vector4(0f, 0f, 0f, 12345678f);
-                foreach (FaceDef face in mat.m_Faces)
-                {
-                    int nvtx = face.m_VtxIndices.Length;
-
-                    if (nvtx != lastface || lastface > 4)
-                    {
-                        uint vtxtype = 0;
-                        switch (nvtx)
-                        {
-                            case 1:
-                            case 2:
-                            case 3: vtxtype = 0; break;
-                            case 4: vtxtype = 1; break;
-                            default: vtxtype = 2; break;
-                        }
-
-                        if (lastface != -1) dlpacker.AddCommand(0x41);
-                        dlpacker.AddCommand(0x40, vtxtype);
-                        if (lastface == -1) dlpacker.AddCommand(0x14, 0);
-
-                        lastface = nvtx;
-                    }
-
-                    dlpacker.AddColorCommand(mat.m_DiffuseColor);
-
-                    switch (nvtx)
-                    {
-                        case 1: // point
-                            {
-                                Vector4 vtx = scaledvtxs[face.m_VtxIndices[0]];
-                                int txc = face.m_TxcIndices[0];
-
-                                if (txc > -1) dlpacker.AddTexCoordCommand(Vector2.Multiply(m_TexCoords[txc], tcscale));
-                                dlpacker.AddVertexCommand(vtx, lastvtx);
-                                if (txc > -1) dlpacker.AddTexCoordCommand(Vector2.Multiply(m_TexCoords[txc], tcscale));
-                                dlpacker.AddVertexCommand(vtx, vtx);
-                                if (txc > -1) dlpacker.AddTexCoordCommand(Vector2.Multiply(m_TexCoords[txc], tcscale));
-                                dlpacker.AddVertexCommand(vtx, vtx);
-                                lastvtx = vtx;
-                            }
-                            break;
-
-                        case 2: // line
-                            {
-                                Vector4 vtx1 = scaledvtxs[face.m_VtxIndices[0]];
-                                int txc1 = face.m_TxcIndices[0];
-                                Vector4 vtx2 = scaledvtxs[face.m_VtxIndices[1]];
-                                int txc2 = face.m_TxcIndices[1];
-
-                                if (txc1 > -1) dlpacker.AddTexCoordCommand(Vector2.Multiply(m_TexCoords[txc1], tcscale));
-                                dlpacker.AddVertexCommand(vtx1, lastvtx);
-                                if (txc2 > -1) dlpacker.AddTexCoordCommand(Vector2.Multiply(m_TexCoords[txc2], tcscale));
-                                dlpacker.AddVertexCommand(vtx2, vtx1);
-                                if (txc2 > -1) dlpacker.AddTexCoordCommand(Vector2.Multiply(m_TexCoords[txc2], tcscale));
-                                dlpacker.AddVertexCommand(vtx2, vtx2);
-                                lastvtx = vtx2;
-                            }
-                            break;
-
-                        case 3: // triangle
-                            {
-                                Vector4 vtx1 = scaledvtxs[face.m_VtxIndices[0]];
-                                int txc1 = face.m_TxcIndices[0];
-                                Vector4 vtx2 = scaledvtxs[face.m_VtxIndices[1]];
-                                int txc2 = face.m_TxcIndices[1];
-                                Vector4 vtx3 = scaledvtxs[face.m_VtxIndices[2]];
-                                int txc3 = face.m_TxcIndices[2];
-
-                                if (txc1 > -1) dlpacker.AddTexCoordCommand(Vector2.Multiply(m_TexCoords[txc1], tcscale));
-                                dlpacker.AddVertexCommand(vtx1, lastvtx);
-                                if (m_ZMirror)
-                                {
-                                    if (txc3 > -1) dlpacker.AddTexCoordCommand(Vector2.Multiply(m_TexCoords[txc3], tcscale));
-                                    dlpacker.AddVertexCommand(vtx3, vtx1);
-                                    if (txc2 > -1) dlpacker.AddTexCoordCommand(Vector2.Multiply(m_TexCoords[txc2], tcscale));
-                                    dlpacker.AddVertexCommand(vtx2, vtx3);
-                                    lastvtx = vtx2;
-                                }
-                                else
-                                {
-                                    if (txc2 > -1) dlpacker.AddTexCoordCommand(Vector2.Multiply(m_TexCoords[txc2], tcscale));
-                                    dlpacker.AddVertexCommand(vtx2, vtx1);
-                                    if (txc3 > -1) dlpacker.AddTexCoordCommand(Vector2.Multiply(m_TexCoords[txc3], tcscale));
-                                    dlpacker.AddVertexCommand(vtx3, vtx2);
-                                    lastvtx = vtx3;
-                                }
-                            }
-                            break;
-
-                        case 4: // quad
-                            {
-                                Vector4 vtx1 = scaledvtxs[face.m_VtxIndices[0]];
-                                int txc1 = face.m_TxcIndices[0];
-                                Vector4 vtx2 = scaledvtxs[face.m_VtxIndices[1]];
-                                int txc2 = face.m_TxcIndices[1];
-                                Vector4 vtx3 = scaledvtxs[face.m_VtxIndices[2]];
-                                int txc3 = face.m_TxcIndices[2];
-                                Vector4 vtx4 = scaledvtxs[face.m_VtxIndices[3]];
-                                int txc4 = face.m_TxcIndices[3];
-
-                                if (txc1 > -1) dlpacker.AddTexCoordCommand(Vector2.Multiply(m_TexCoords[txc1], tcscale));
-                                dlpacker.AddVertexCommand(vtx1, lastvtx);
-                                if (m_ZMirror)
-                                {
-                                    if (txc4 > -1) dlpacker.AddTexCoordCommand(Vector2.Multiply(m_TexCoords[txc4], tcscale));
-                                    dlpacker.AddVertexCommand(vtx4, vtx1);
-                                    if (txc3 > -1) dlpacker.AddTexCoordCommand(Vector2.Multiply(m_TexCoords[txc3], tcscale));
-                                    dlpacker.AddVertexCommand(vtx3, vtx4);
-                                    if (txc2 > -1) dlpacker.AddTexCoordCommand(Vector2.Multiply(m_TexCoords[txc2], tcscale));
-                                    dlpacker.AddVertexCommand(vtx2, vtx3);
-                                    lastvtx = vtx2;
-                                }
-                                else
-                                {
-                                    if (txc2 > -1) dlpacker.AddTexCoordCommand(Vector2.Multiply(m_TexCoords[txc2], tcscale));
-                                    dlpacker.AddVertexCommand(vtx2, vtx1);
-                                    if (txc3 > -1) dlpacker.AddTexCoordCommand(Vector2.Multiply(m_TexCoords[txc3], tcscale));
-                                    dlpacker.AddVertexCommand(vtx3, vtx2);
-                                    if (txc4 > -1) dlpacker.AddTexCoordCommand(Vector2.Multiply(m_TexCoords[txc4], tcscale));
-                                    dlpacker.AddVertexCommand(vtx4, vtx3);
-                                    lastvtx = vtx4;
-                                }
-                            }
-                            break;
-
-                        default: // whatever (import as triangle strip)
-                            {
-                                // todo
-                            }
-                            break;
-                    }
-                }
-                dlpacker.AddCommand(0x41);
-                byte[] dlist = dlpacker.GetDisplayList();
-
-                bmd.Write32(curoffset, 1);
-                bmd.Write32(curoffset + 0x4, curoffset + 0x10);
-                bmd.Write32(curoffset + 0x8, (uint)dlist.Length);
-                bmd.Write32(curoffset + 0xC, curoffset + 0x14);
-                curoffset += 0x10;
-
-                bmd.Write32(curoffset, 0);
-                curoffset += 0x4;
-
-                bmd.WriteBlock(curoffset, dlist);
-                curoffset += (uint)dlist.Length;
-
-                b++;
-            }
-
-            bmd.Write32(0x2C, curoffset);
-            bmd.Write16(curoffset, 0);
-            curoffset += 2;
-            curoffset = (uint)((curoffset + 3) & ~3);
-
-            // build bones
-            bmd.Write32(0x4, 1);
-            bmd.Write32(0x8, curoffset);
-
-            uint bextraoffset = (uint)(curoffset + (0x40 * 1));
-
-            {
-                bmd.Write32(curoffset + 0x00, 0); // bone ID
-                bmd.Write32(curoffset + 0x08, 0);
-                bmd.Write32(curoffset + 0x0C, 0);
-                bmd.Write32(curoffset + 0x10, 0x00001000);
-                bmd.Write32(curoffset + 0x14, 0x00001000);
-                bmd.Write32(curoffset + 0x18, 0x00001000);
-                bmd.Write16(curoffset + 0x1C, 0x0000);
-                bmd.Write16(curoffset + 0x1E, 0x0000);
-                bmd.Write16(curoffset + 0x20, 0x0000);
-                bmd.Write16(curoffset + 0x22, 0);
-                bmd.Write32(curoffset + 0x24, 0);
-                bmd.Write32(curoffset + 0x28, 0);
-                bmd.Write32(curoffset + 0x2C, 0);
-                bmd.Write32(curoffset + 0x30, (uint)m_Materials.Count);
-                bmd.Write32(curoffset + 0x3C, 0);
-
-                bmd.Write32(curoffset + 0x34, bextraoffset);
-                for (byte j = 0; j < m_Materials.Count; j++)
-                {
-                    bmd.Write8(bextraoffset, j);
-                    bextraoffset++;
-                }
-
-                bmd.Write32(curoffset + 0x38, bextraoffset);
-                for (byte j = 0; j < m_Materials.Count; j++)
-                {
-                    bmd.Write8(bextraoffset, j);
-                    bextraoffset++;
-                }
-
-                bmd.Write32(curoffset + 0x04, bextraoffset);
-                bmd.WriteString(bextraoffset, "r0", 0);
-                bextraoffset += 3;
-
-                curoffset += 0x40;
-            }
-            curoffset = (uint)((bextraoffset + 3) & ~3);
-
-            // build materials
-            bmd.Write32(0x24, (uint)m_Materials.Count);
-            bmd.Write32(0x28, curoffset);
-
-            uint mextraoffset = (uint)(curoffset + (0x30 * m_Materials.Count));
-
-            foreach (KeyValuePair<string, MaterialDef> _mat in m_Materials)
-            {
-                MaterialDef mat = _mat.Value;
-                string matname = _mat.Key;
-
-                uint texid = 0xFFFFFFFF, palid = 0xFFFFFFFF;
-                uint texrepeat = 0;
-                uint texscale = 0x00001000;
-                if (textures.ContainsKey(mat.m_DiffuseMapName))
-                {
-                    ConvertedTexture tex = textures[mat.m_DiffuseMapName];
-                    texid = tex.m_TextureID;
-                    palid = (tex.m_PaletteData != null) ? tex.m_PaletteID : 0xFFFFFFFF;
-
-                    texrepeat = 0x00030000;
-
-                    if (mat.m_TexCoordScale > 0f)
-                    {
-                        texrepeat |= 0x40000000;
-                        texscale = (uint)(int)(mat.m_TexCoordScale * 4096);
-                    }
-                }
-
-                uint alpha = (uint)(mat.m_Opacity >> 3);
-                uint polyattr = 0x00000080 | (alpha << 16);
-                // if (alpha < 0x1F) polyattr |= 0x40;
-
-                bmd.Write32(curoffset + 0x04, texid);
-                bmd.Write32(curoffset + 0x08, palid);
-                bmd.Write32(curoffset + 0x0C, texscale);
-                bmd.Write32(curoffset + 0x10, texscale);
-                bmd.Write16(curoffset + 0x14, 0x0000);
-                bmd.Write16(curoffset + 0x16, 0);
-                bmd.Write32(curoffset + 0x18, 0x00000000);
-                bmd.Write32(curoffset + 0x1C, 0x00000000);
-                bmd.Write32(curoffset + 0x20, texrepeat);
-                bmd.Write32(curoffset + 0x24, polyattr);
-                bmd.Write32(curoffset + 0x28, 0x00000000);
-                bmd.Write32(curoffset + 0x2C, 0x00000000);
-
-                bmd.Write32(curoffset + 0x00, mextraoffset);
-                bmd.WriteString(mextraoffset, matname, 0);
-                mextraoffset += (uint)(matname.Length + 1);
-
-                curoffset += 0x30;
-            }
-            curoffset = (uint)((mextraoffset + 3) & ~3);
-
-            uint texoffset = curoffset;
-            bmd.Write32(0x14, ntex);
-            bmd.Write32(0x18, texoffset);
-
-            // Offset to texture names
-            uint textraoffset = (uint)(texoffset + (0x14 * ntex));
-
-            // Write texture entries
-            foreach (ConvertedTexture tex in textures.Values)
-            {
-                curoffset = (uint)(texoffset + (0x14 * tex.m_TextureID));
-
-                bmd.Write32(curoffset + 0x08, (uint)tex.m_TextureDataLength);
-                bmd.Write16(curoffset + 0x0C, (ushort)(8 << (int)((tex.m_DSTexParam >> 20) & 0x7)));
-                bmd.Write16(curoffset + 0x0E, (ushort)(8 << (int)((tex.m_DSTexParam >> 23) & 0x7)));
-                bmd.Write32(curoffset + 0x10, tex.m_DSTexParam);
-
-                bmd.Write32(curoffset + 0x00, textraoffset);
-                bmd.WriteString(textraoffset, tex.m_TextureName, 0);
-                textraoffset += (uint)(tex.m_TextureName.Length + 1);
-            }
-            curoffset = (uint)((textraoffset + 3) & ~3);
-
-            uint paloffset = curoffset;
-            bmd.Write32(0x1C, npal);
-            bmd.Write32(0x20, paloffset);
-
-            // Offset to palette names
-            uint pextraoffset = (uint)(paloffset + (0x10 * npal));
-
-            // Write texture palette entries
-            foreach (ConvertedTexture tex in textures.Values)
-            {
-                if (tex.m_PaletteData == null)
-                    continue;
-                curoffset = (uint)(paloffset + (0x10 * tex.m_PaletteID));
-
-                bmd.Write32(curoffset + 0x08, (uint)tex.m_PaletteData.Length);
-                bmd.Write32(curoffset + 0x0C, 0xFFFFFFFF);
-
-                bmd.Write32(curoffset + 0x00, pextraoffset);
-                bmd.WriteString(pextraoffset, tex.m_PaletteName, 0);
-                pextraoffset += (uint)(tex.m_PaletteName.Length + 1);
-            }
-            curoffset = (uint)((pextraoffset + 3) & ~3);
-
-            // this must point to the texture data block
-            bmd.Write32(0x38, curoffset);
-
-            // Write texture and texture palette data
-            foreach (ConvertedTexture tex in textures.Values)
-            {
-                bmd.WriteBlock(curoffset, tex.m_TextureData);
-                bmd.Write32((uint)(texoffset + (0x14 * tex.m_TextureID) + 0x4), curoffset);
-                curoffset += (uint)tex.m_TextureData.Length;
-                curoffset = (uint)((curoffset + 3) & ~3);
-
-                if (tex.m_PaletteData != null)
-                {
-                    bmd.WriteBlock(curoffset, tex.m_PaletteData);
-                    bmd.Write32((uint)(paloffset + (0x10 * tex.m_PaletteID) + 0x4), curoffset);
-                    curoffset += (uint)tex.m_PaletteData.Length;
-                    curoffset = (uint)((curoffset + 3) & ~3);
-                }
-            }
-
-            bmd.SaveChanges();
-        }
-
 
         private bool vectorInList(List<Vector3> l, Vector3 p)
         {
@@ -1738,7 +419,15 @@ namespace SM64DSe
 
         private void btnOpenModel_Click(object sender, EventArgs e)
         {
-            LoadModel(false);
+            try
+            {
+                LoadModel(false);
+                slStatus.Text = "The above is a preview of how your model will appear. No changes have been made yet.";
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show(ex.Message + "\n\n" + ex.StackTrace);
+            }
         }
 
         private void btnImport_Click(object sender, EventArgs e)
@@ -1754,23 +443,28 @@ namespace SM64DSe
                 catch { MessageBox.Show(txtThreshold.Text + "\nis not a valid float value. Please enter a value in format 0.123"); return; }
             }
             Dictionary<string, int> matColTypes = new Dictionary<string, int>();
-            for (int i = 0; i < m_Materials.Count; i++)
+            for (int i = 0; i < BMD_Importer.m_Materials.Count; i++)
             {
-                matColTypes[m_Materials.Keys.ElementAt(i)] = m_Materials.Values.ElementAt(i).m_ColType;
+                matColTypes[BMD_Importer.m_Materials.Keys.ElementAt(i)] = BMD_Importer.m_Materials.Values.ElementAt(i).m_ColType;
             }
             NitroFile kcl;//This'll hold the KCL file that is to be replaced, either a level's or an object's
             //If it's an object it'll be scaled down - need to get back to original value
+            slStatus.Text = "Importing model...";
             originalScale = m_Scale;
-            m_Scale = m_Scale * (1 / m_CustomScale);
-            PrerenderModel();
+            float scale = m_Scale.X;
+            if (m_CustomScale != 1)
+             scale = (m_Scale.X / m_CustomScale);
+            m_Scale = new Vector3(scale, scale, scale);
             glModelView.Refresh();
-            ImportModel();
+            m_ImportedModel = BMD_Importer.LoadModel_OBJ(m_ImportedModel, m_ModelFileName, m_ModelPath, m_Scale);
+            BMD_Importer.SaveModelChanges();
 
             m_Scale = originalScale;//Back to previous scale for collision as it's not affected like model's scale
             PrerenderModel();
             glModelView.Refresh();
             if (cbGenerateCollision.Checked)
             {
+                slStatus.Text = "Importing collision map... This may take a few minutes, please be patient.";
                 try
                 {
                     kcl = Program.m_ROM.GetFileFromName(m_KCLName);
@@ -1781,8 +475,27 @@ namespace SM64DSe
                     MessageBox.Show("This object has no collision data, however the model will still be imported.");
                 }
             }
+            slStatus.Text = "Finished importing.";
 
-            ((LevelEditorForm)Owner).UpdateLevelModel();
+            refreshScale(1f);
+            tbScale.Text = "1";
+
+            try { ((LevelEditorForm)Owner).UpdateLevelModel(); }
+            catch { }
+        }
+
+        private static void ClampRotation(ref float val, float twopi)
+        {
+            if (val > twopi)
+            {
+                while (val > twopi)
+                    val -= twopi;
+            }
+            else if (val < -twopi)
+            {
+                while (val < -twopi)
+                    val += twopi;
+            }
         }
 
         private void glModelView_MouseDown(object sender, MouseEventArgs e)
@@ -1944,10 +657,15 @@ namespace SM64DSe
             float val;
             if (float.TryParse(tbScale.Text, out val) || float.TryParse(tbScale.Text, NumberStyles.Float, new CultureInfo("en-US"), out val))
             {
-                m_Scale = new Vector3(val, val, val);
-                PrerenderModel();
-                glModelView.Refresh();
+                refreshScale(val);
             }
+        }
+
+        private void refreshScale(float val)
+        {
+            m_Scale = new Vector3(val, val, val);
+            PrerenderModel();
+            glModelView.Refresh();
         }
 
         private void ModelImporter_FormClosed(object sender, FormClosedEventArgs e)
@@ -1957,7 +675,7 @@ namespace SM64DSe
             GL.DeleteLists(m_PDisplayList, 1);
             GL.DeleteLists(m_DisplayList, 1);
 
-            foreach (MaterialDef mat in m_Materials.Values)
+            foreach (BMD_Importer.MaterialDef mat in BMD_Importer.m_Materials.Values)
                 GL.DeleteTexture(mat.m_DiffuseMapID);
 
             ModelCache.RemoveModel(m_MarioHeadModel);
@@ -1983,7 +701,7 @@ namespace SM64DSe
         {
             for (int i = 0; i < gridColTypes.RowCount; i++)
             {
-                m_Materials.Values.ElementAt(i).m_ColType = int.Parse(gridColTypes.Rows[i].Cells[1].Value.ToString());
+                BMD_Importer.m_Materials.Values.ElementAt(i).m_ColType = int.Parse(gridColTypes.Rows[i].Cells[1].Value.ToString());
             }
         }
 

@@ -38,7 +38,7 @@
             this.btnSave = new System.Windows.Forms.Button();
             this.chkNewPalette = new System.Windows.Forms.CheckBox();
             this.lblPalette = new System.Windows.Forms.Label();
-            ((System.ComponentModel.ISupportInitialize)(this.pbxTexture)).BeginInit();
+            //((System.ComponentModel.ISupportInitialize)(this.pbxTexture)).BeginInit();
             this.SuspendLayout();
             // 
             // label1
@@ -125,6 +125,8 @@
             this.chkNewPalette.TabIndex = 8;
             this.chkNewPalette.Text = "New Palette";
             this.chkNewPalette.UseVisualStyleBackColor = true;
+            this.chkNewPalette.Visible = false;
+            this.chkNewPalette.Enabled = false;
             // 
             // lblPalette
             // 
@@ -152,7 +154,7 @@
             this.Controls.Add(this.label1);
             this.Name = "TextureEditorForm";
             this.Text = "TextureEditorForm";
-            ((System.ComponentModel.ISupportInitialize)(this.pbxTexture)).EndInit();
+            //((System.ComponentModel.ISupportInitialize)(this.pbxTexture)).EndInit();
             this.ResumeLayout(false);
             this.PerformLayout();
 
