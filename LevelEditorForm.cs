@@ -1071,7 +1071,7 @@ namespace SM64DSe
                         obj = new EntranceObject(m_Overlay, offset, (int)uniqueid, layer, maxid + 1);
                     }
                     break;
-                case 2: parentnode = "parent" + (1 + getPathNodeParentIDFromOffset(offset)); obj = new PathPointObject(m_Overlay, offset, (int)uniqueid); break;
+                case 2: parentnode = "parent" + (1 + m_CurrentPathID); obj = new PathPointObject(m_Overlay, offset, (int)uniqueid); break;
                 case 3: parentnode = "parent0"; obj = new PathObject(m_Overlay, offset, (int)uniqueid); break;
                 case 4: obj = new ViewObject(m_Overlay, offset, (int)uniqueid); break;
                 case 5: obj = new SimpleObject(m_Overlay, offset, (int)uniqueid, layer, area); break;
@@ -2310,6 +2310,7 @@ namespace SM64DSe
             }
         }
 
+        private int m_CurrentPathID = -1;
         void btnAddPathNodes_DropDownItemClicked(object sender, System.Windows.Forms.ToolStripItemClickedEventArgs e)
         {
             uint type0 = 2;
@@ -2320,16 +2321,22 @@ namespace SM64DSe
 
             // Parse path to which node is to be added
             String chosenPath = e.ClickedItem.Text;
-            int parentNode = int.Parse(chosenPath.Substring(17, chosenPath.Length - 17));
+            m_CurrentPathID = int.Parse(chosenPath.Substring(17, chosenPath.Length - 17));
 
             IEnumerable<LevelObject> paths = m_LevelObjects.Values.Where(obj0 => (obj0.m_Type) == 3);
             IEnumerable<LevelObject> pathNodes = m_LevelObjects.Values.Where(obj0 => (obj0.m_Type) == 2);
-            uint lastNodeInPathOff = pathNodes.ElementAt(paths.ElementAt(parentNode).Parameters[0] + (paths.ElementAt(parentNode).Parameters[1] - 1)).m_Offset;
+            long lastNodeInPathOff = -1;
+            try
+            {
+                lastNodeInPathOff = pathNodes.ElementAt(paths.ElementAt(m_CurrentPathID).Parameters[0] +
+                    (paths.ElementAt(m_CurrentPathID).Parameters[1] - 1)).m_Offset;
+            }
+            catch { }
 
             // Update start indices and lengths of paths
-            for (int i = parentNode; i < paths.Count(); i++)
+            for (int i = m_CurrentPathID; i < paths.Count(); i++)
             {
-                if (i == parentNode)
+                if (i == m_CurrentPathID)
                 {
                     // Increase length of parent path
                     paths.ElementAt(i).Parameters[1] += 1;
@@ -2342,7 +2349,8 @@ namespace SM64DSe
                 paths.ElementAt(i).GenerateProperties();
             }
 
-            LevelObject obj = AddObject(type, id, 0, 0, (int)lastNodeInPathOff + 6);
+            // If possible, create object after last node in path
+            LevelObject obj = AddObject(type, id, 0, 0, ((lastNodeInPathOff != -1) ? ((int)lastNodeInPathOff + 6) : -1));
             obj.GenerateProperties();
             pgObjectProperties.SelectedObject = obj.m_Properties;
 
