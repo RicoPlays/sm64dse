@@ -1,0 +1,50 @@
+#summary Explanation of how exporting and importing of bones works in SM64DSe
+
+*Introduction*
+
+Models in SM64DS are often split up into different chunks, 'bones'. This allows each chunk, such as an arm 
+to be animated separately. Each bone has a set of transformations that must be applied to it for it to be 
+displayed properly.
+(Please see BMD documentation for more information.)
+
+
+*Exporting*
+
+When exporting, the bones' transformations are applied so the model looks 'normal' when editing. The model 
+is split up into its different chunks using the OBJ "o" command. Each bone can then be edited separately 
+within the 3D modelling program, eg. Blender. The model can be edited as normal and more bones added if 
+wanted.
+
+Information about each bone is stored in the .bones file created when exporting. This is linked to the .obj 
+file with the line "bonelib FILENAME.bones" at the top of the .obj file. <br>
+The .bones file contains the following 
+data on each bone:<br>
+_newbone_: this tells the importer a new bone is being defined and gives the bone name, like the newmtl command in 
+the material library<br>
+_parent_offset_: Offset in bones the current bone's parent<br>
+_has_children_: Whether or not the bone has child bones, 0 - no, 1 - yes<br>
+_sibling_offset_: Offset in bones to the current bone's next sibling. <br>These three fields are used to determine the 
+bones' hierarchical structure<br>
+_scale_: X, Y and Z Scale transformation of the current bone. (32-bit signed, 20:12 fixed point. Think GX command 0x1B)<br>
+_rotation_: X, Y and Z Rotation transformation of the current bone. (16-bit signed, 0x0400 = 90°)<br>
+_translation_: X, Y and Z Translation of the current bone. (32-bit signed, 20:12 fixed point. Think GX command 0x1C)<br>
+These last three fields are stored in hexadecimal format.
+
+Important Notes<br>
+- When editing, do not scale your model as this will affect how it appears and how animation works. This isn't really a 
+problem with models without animation.<br>
+- Please note that exporting is not perfect when assigning faces to the correct bone due to how BMD files are structured 
+so some manual fixing may be required before re-importing.<br>
+
+An example of what an exported model looks like can be found <a href ="http://s16.postimg.org/7gfod037n/Exported_Model_Whomp.png">here</a> (Textures also not perfect due to OBJ limitations).
+
+*Importing*
+
+When importing the bones' transformations are applied in reverse so that they are restored to their original state and 
+their transformations can be applied again. This is necessary to allow the animation to work. Make sure the .bones is 
+set at the top of the .obj file if you are re-importing bones. <br>
+The bones are then written to the BMD file using the 
+information in the .bones file. If not found default values are used and your model will still import though animation 
+won't be working. <br>
+Bones are distinguished in your .obj file using the "o" command, eg. "o bone_01" marks the beginning 
+of bone_01's vertices and faces. If no "o" commands are present, the model is treated as one large bone.
