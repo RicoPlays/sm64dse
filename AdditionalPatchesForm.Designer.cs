@@ -62,7 +62,10 @@
             this.btnEditPatch = new System.Windows.Forms.Button();
             this.btnDeletePatch = new System.Windows.Forms.Button();
             this.label14 = new System.Windows.Forms.Label();
-            //((System.ComponentModel.ISupportInitialize)(this.gridPatches)).BeginInit();
+            this.txtApplyToFile = new System.Windows.Forms.TextBox();
+            this.btnSelectFile = new System.Windows.Forms.Button();
+            this.chkApplyToFile = new System.Windows.Forms.CheckBox();
+            this.label15 = new System.Windows.Forms.Label();
             this.SuspendLayout();
             // 
             // gridPatches
@@ -352,12 +355,51 @@
             this.label14.Text = "Note: When editing a patch, make sure it\'s not applied to ensure restore data is " +
                 "correctly generated.";
             // 
+            // txtApplyToFile
+            // 
+            this.txtApplyToFile.Location = new System.Drawing.Point(420, 336);
+            this.txtApplyToFile.Name = "txtApplyToFile";
+            this.txtApplyToFile.Size = new System.Drawing.Size(168, 20);
+            this.txtApplyToFile.TabIndex = 35;
+            // 
+            // btnSelectFile
+            // 
+            this.btnSelectFile.Location = new System.Drawing.Point(594, 334);
+            this.btnSelectFile.Name = "btnSelectFile";
+            this.btnSelectFile.Size = new System.Drawing.Size(30, 23);
+            this.btnSelectFile.TabIndex = 36;
+            this.btnSelectFile.Text = "...";
+            this.btnSelectFile.UseVisualStyleBackColor = true;
+            this.btnSelectFile.Click += new System.EventHandler(this.btnSelectFile_Click);
+            // 
+            // chkApplyToFile
+            // 
+            this.chkApplyToFile.AutoSize = true;
+            this.chkApplyToFile.Location = new System.Drawing.Point(420, 319);
+            this.chkApplyToFile.Name = "chkApplyToFile";
+            this.chkApplyToFile.Size = new System.Drawing.Size(90, 17);
+            this.chkApplyToFile.TabIndex = 37;
+            this.chkApplyToFile.Text = "Apply To File:";
+            this.chkApplyToFile.UseVisualStyleBackColor = true;
+            // 
+            // label15
+            // 
+            this.label15.Location = new System.Drawing.Point(417, 359);
+            this.label15.Name = "label15";
+            this.label15.Size = new System.Drawing.Size(201, 34);
+            this.label15.TabIndex = 38;
+            this.label15.Text = "Note: Addresses should be relative to the start of the file selected.";
+            // 
             // AdditionalPatchesForm
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.AutoScroll = true;
             this.ClientSize = new System.Drawing.Size(636, 660);
+            this.Controls.Add(this.label15);
+            this.Controls.Add(this.chkApplyToFile);
+            this.Controls.Add(this.btnSelectFile);
+            this.Controls.Add(this.txtApplyToFile);
             this.Controls.Add(this.label14);
             this.Controls.Add(this.btnDeletePatch);
             this.Controls.Add(this.btnEditPatch);
@@ -395,7 +437,6 @@
             this.Name = "AdditionalPatchesForm";
             this.Text = "Additional Patches";
             this.Load += new System.EventHandler(this.AdditionalPatchesForm_Load);
-            //((System.ComponentModel.ISupportInitialize)(this.gridPatches)).EndInit();
             this.ResumeLayout(false);
             this.PerformLayout();
 
@@ -437,5 +478,9 @@
         private System.Windows.Forms.Button btnEditPatch;
         private System.Windows.Forms.Button btnDeletePatch;
         private System.Windows.Forms.Label label14;
+        private System.Windows.Forms.TextBox txtApplyToFile;
+        private System.Windows.Forms.Button btnSelectFile;
+        private System.Windows.Forms.CheckBox chkApplyToFile;
+        private System.Windows.Forms.Label label15;
     }
 }

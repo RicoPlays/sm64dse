@@ -11,6 +11,8 @@ using OpenTK.Graphics.OpenGL;
 using System.Globalization;
 using System.IO;
 using SM64DSe.Exporters;
+using System.Text.RegularExpressions;
+using System.Xml;
 
 namespace SM64DSe
 {
@@ -166,9 +168,9 @@ namespace SM64DSe
 
             m_PixelFactorX = ((2f * (float)Math.Tan((35f * Math.PI) / 180f) * ratio) / (float)(glModelView.Width));
             m_PixelFactorY = ((2f * (float)Math.Tan((35f * Math.PI) / 180f)) / (float)(glModelView.Height));
-            
+
             GL.LineWidth(2.0f);
-            
+
             m_CamRotation = new Vector2(0.0f, (float)Math.PI / 8.0f);
             m_CamTarget = new Vector3(0.0f, 0.0f, 0.0f);
             m_CamDistance = 1.0f;
@@ -205,7 +207,7 @@ namespace SM64DSe
             GL.LoadMatrix(ref m_CamMatrix);
 
             GL.Flush();
-            
+
             GL.ClearColor(0.0f, 0.0f, 0.125f, 1.0f);
             GL.Clear(ClearBufferMask.ColorBufferBit | ClearBufferMask.DepthBufferBit);
 
@@ -215,7 +217,7 @@ namespace SM64DSe
             for (int i = 0; i < planes.Count; i++)
             {
                 Color planeColour = colours[planes[i].type];
-                
+
                 GL.Begin(BeginMode.Triangles);
                 GL.Color3(planeColour);
                 GL.Vertex3(planes[i].point1 / 5);
@@ -270,29 +272,29 @@ namespace SM64DSe
             if (m_MouseDown != MouseButtons.None)
             {
                 if (m_MouseDown == MouseButtons.Right)
-                    {
-                        if (m_UpsideDown)
-                            xdelta = -xdelta;
+                {
+                    if (m_UpsideDown)
+                        xdelta = -xdelta;
 
-                        m_CamRotation.X -= xdelta * 0.002f;
-                        m_CamRotation.Y -= ydelta * 0.002f;
+                    m_CamRotation.X -= xdelta * 0.002f;
+                    m_CamRotation.Y -= ydelta * 0.002f;
 
-                        ClampRotation(ref m_CamRotation.X, (float)Math.PI * 2.0f);
-                        ClampRotation(ref m_CamRotation.Y, (float)Math.PI * 2.0f);
-                    }
-                    else if (m_MouseDown == MouseButtons.Left)
-                    {
-                        xdelta *= 0.005f;
-                        ydelta *= 0.005f;
+                    ClampRotation(ref m_CamRotation.X, (float)Math.PI * 2.0f);
+                    ClampRotation(ref m_CamRotation.Y, (float)Math.PI * 2.0f);
+                }
+                else if (m_MouseDown == MouseButtons.Left)
+                {
+                    xdelta *= 0.005f;
+                    ydelta *= 0.005f;
 
-                        m_CamTarget.X -= xdelta * (float)Math.Sin(m_CamRotation.X);
-                        m_CamTarget.X -= ydelta * (float)Math.Cos(m_CamRotation.X) * (float)Math.Sin(m_CamRotation.Y);
-                        m_CamTarget.Y += ydelta * (float)Math.Cos(m_CamRotation.Y);
-                        m_CamTarget.Z += xdelta * (float)Math.Cos(m_CamRotation.X);
-                        m_CamTarget.Z -= ydelta * (float)Math.Sin(m_CamRotation.X) * (float)Math.Sin(m_CamRotation.Y);
-                    }
+                    m_CamTarget.X -= xdelta * (float)Math.Sin(m_CamRotation.X);
+                    m_CamTarget.X -= ydelta * (float)Math.Cos(m_CamRotation.X) * (float)Math.Sin(m_CamRotation.Y);
+                    m_CamTarget.Y += ydelta * (float)Math.Cos(m_CamRotation.Y);
+                    m_CamTarget.Z += xdelta * (float)Math.Cos(m_CamRotation.X);
+                    m_CamTarget.Z -= ydelta * (float)Math.Sin(m_CamRotation.X) * (float)Math.Sin(m_CamRotation.Y);
+                }
 
-                    UpdateCamera();
+                UpdateCamera();
             }
 
             glModelView.Refresh();
@@ -445,16 +447,28 @@ namespace SM64DSe
         private void btnOpenOBJ_Click(object sender, EventArgs e)
         {
             OpenFileDialog ofd = new OpenFileDialog();
-            ofd.Filter = "Wavefront OBJ (.obj)|*.obj";
+            ofd.Filter = "Supported Models (*.obj, *.dae)|*.obj;*.dae";
             if (ofd.ShowDialog() == DialogResult.OK)
             {
-                txtOBJName.Text = ofd.FileName;
-                getMatNames(ofd.FileName);
+                txtModelName.Text = ofd.FileName;
+                String modelFormat = ofd.FileName.Substring(ofd.FileName.Length - 3, 3).ToLower();
+                switch (modelFormat)
+                {
+                    case "obj":
+                        getMatNames_OBJ(ofd.FileName);
+                        break;
+                    case "dae":
+                        getMatNames_DAE(ofd.FileName);
+                        break;
+                    default:
+                        getMatNames_OBJ(ofd.FileName);
+                        break;
+                }
                 populateColTypes();
             }
         }
 
-        private void getMatNames(String name)
+        private void getMatNames_OBJ(String name)
         {
             Stream fs = File.OpenRead(name);
             StreamReader sr = new StreamReader(fs);
@@ -482,6 +496,28 @@ namespace SM64DSe
             }
 
             sr.Close();
+        }
+
+        private void getMatNames_DAE(String name)
+        {
+            using (XmlReader reader = XmlReader.Create(name))
+            {
+                reader.MoveToContent();
+
+                while (reader.Read())
+                {
+                    if (reader.NodeType.Equals(XmlNodeType.Element))
+                    {
+                        if (reader.LocalName.Equals("effect"))
+                        {
+                            // Get the material name by removeing "-effect" from the end of the effect node's ID
+                            String material_name = Regex.Replace(reader.GetAttribute("id"), @"-effect$", String.Empty);
+                            if (!matColTypes.ContainsKey(material_name))
+                                matColTypes.Add(material_name, 0);
+                        }
+                    }
+                }
+            }
         }
 
         private void populateColTypes()
@@ -514,7 +550,7 @@ namespace SM64DSe
 
             try
             {
-                ObjToKcl.ConvertToKcl(txtOBJName.Text, ref kclFile, scale, faceSizeThreshold, matColTypes);
+                KCL_Importer.ConvertToKCL(txtModelName.Text, ref kclFile, scale, faceSizeThreshold, matColTypes);
             }
             catch (Exception ex)
             {

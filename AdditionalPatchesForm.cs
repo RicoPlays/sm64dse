@@ -212,6 +212,8 @@ namespace SM64DSe
                 if (i != m_Patches[gridPatches.SelectedRows[0].Index].m_PatchDataJAP.Count() - 1)
                     txtJAPDataSizes.Text += ",";
             }
+            chkApplyToFile.Checked = m_Patches[gridPatches.SelectedRows[0].Index].m_FileToPatch != null;
+            if (chkApplyToFile.Checked) txtApplyToFile.Text = m_Patches[gridPatches.SelectedRows[0].Index].m_FileToPatch;
         }
 
         private void clearTextBoxes()
@@ -229,6 +231,8 @@ namespace SM64DSe
             txtUSv1DataSizes.Text = "";
             txtUSv2DataSizes.Text = "";
             txtJAPDataSizes.Text = "";
+            txtApplyToFile.Text = "";
+            chkApplyToFile.Checked = false;
         }
 
         private void btnDeletePatch_Click(object sender, EventArgs e)
@@ -265,6 +269,8 @@ namespace SM64DSe
             List<int> EURDataSizes = new List<int>(), USv1DataSizes = new List<int>(), USv2DataSizes = new List<int>(), JAPDataSizes = new List<int>();
             List<uint> EURDataValues = new List<uint>(), USv1DataValues = new List<uint>(), USv2DataValues = new List<uint>(), JAPDataValues = new List<uint>();
             List<uint> EURRestore = new List<uint>(), USv1Restore = new List<uint>(), USv2Restore = new List<uint>(), JAPRestore = new List<uint>();
+            bool isFileToPatch = chkApplyToFile.Checked;
+            String fileToPatch = (isFileToPatch) ? txtApplyToFile.Text : null;
             
             for (int i = 0; i < txtEURPatchAddresses.Text.Split(',').Length; i++)
                 if (txtEURPatchAddresses.Text != "") EURAddresses.Add((uint)int.Parse(txtEURPatchAddresses.Text.Split(',')[i], System.Globalization.NumberStyles.HexNumber));
@@ -293,18 +299,22 @@ namespace SM64DSe
 
             // Generate the restore data by reading the current data at the addresses to be patched
             Program.m_ROM.BeginRW();
+            NitroFile file = (isFileToPatch) ? Program.m_ROM.GetFileFromName(fileToPatch) : null;
             for (int i = 0; i < EURAddresses.Count; i++)
             {
                 switch (EURDataSizes[i])
                 {
                     case 8:
-                        EURRestore.Add(Program.m_ROM.Read8(EURAddresses[i]));
+                        if (!isFileToPatch) EURRestore.Add(Program.m_ROM.Read8(EURAddresses[i]));
+                        else EURRestore.Add(file.Read8(EURAddresses[i]));
                         break;
                     case 16:
-                        EURRestore.Add(Program.m_ROM.Read16(EURAddresses[i]));
+                        if (!isFileToPatch) EURRestore.Add(Program.m_ROM.Read16(EURAddresses[i]));
+                        else EURRestore.Add(file.Read16(EURAddresses[i]));
                         break;
                     case 32:
-                        EURRestore.Add(Program.m_ROM.Read32(EURAddresses[i]));
+                        if (!isFileToPatch) EURRestore.Add(Program.m_ROM.Read32(EURAddresses[i]));
+                        else EURRestore.Add(file.Read32(EURAddresses[i]));
                         break;
                 }
             }
@@ -313,13 +323,16 @@ namespace SM64DSe
                 switch (USv1DataSizes[i])
                 {
                     case 8:
-                        USv1Restore.Add(Program.m_ROM.Read8(USv1Addresses[i]));
+                        if (!isFileToPatch) USv1Restore.Add(Program.m_ROM.Read8(USv1Addresses[i]));
+                        else USv1Restore.Add(file.Read8(USv1Addresses[i]));
                         break;
                     case 16:
-                        USv1Restore.Add(Program.m_ROM.Read16(USv1Addresses[i]));
+                        if (!isFileToPatch) USv1Restore.Add(Program.m_ROM.Read16(USv1Addresses[i]));
+                        else USv1Restore.Add(file.Read16(USv1Addresses[i]));
                         break;
                     case 32:
-                        USv1Restore.Add(Program.m_ROM.Read32(USv1Addresses[i]));
+                        if (!isFileToPatch) USv1Restore.Add(Program.m_ROM.Read32(USv1Addresses[i]));
+                        else USv1Restore.Add(file.Read32(USv1Addresses[i]));
                         break;
                 }
             }
@@ -328,13 +341,16 @@ namespace SM64DSe
                 switch (USv2DataSizes[i])
                 {
                     case 8:
-                        USv2Restore.Add(Program.m_ROM.Read8(USv2Addresses[i]));
+                        if (!isFileToPatch) USv2Restore.Add(Program.m_ROM.Read8(USv2Addresses[i]));
+                        else USv2Restore.Add(file.Read8(USv2Addresses[i]));
                         break;
                     case 16:
-                        USv2Restore.Add(Program.m_ROM.Read16(USv2Addresses[i]));
+                        if (!isFileToPatch) USv2Restore.Add(Program.m_ROM.Read16(USv2Addresses[i]));
+                        else USv2Restore.Add(file.Read16(USv2Addresses[i]));
                         break;
                     case 32:
-                        USv2Restore.Add(Program.m_ROM.Read32(USv2Addresses[i]));
+                        if (!isFileToPatch) USv2Restore.Add(Program.m_ROM.Read32(USv2Addresses[i]));
+                        else USv2Restore.Add(file.Read32(USv2Addresses[i]));
                         break;
                 }
             }
@@ -343,13 +359,16 @@ namespace SM64DSe
                 switch (JAPDataSizes[i])
                 {
                     case 8:
-                        JAPRestore.Add(Program.m_ROM.Read8(JAPAddresses[i]));
+                        if (!isFileToPatch) JAPRestore.Add(Program.m_ROM.Read8(JAPAddresses[i]));
+                        else JAPRestore.Add(file.Read8(JAPAddresses[i]));
                         break;
                     case 16:
-                        JAPRestore.Add(Program.m_ROM.Read16(JAPAddresses[i]));
+                        if (!isFileToPatch) JAPRestore.Add(Program.m_ROM.Read16(JAPAddresses[i]));
+                        else JAPRestore.Add(file.Read16(JAPAddresses[i]));
                         break;
                     case 32:
-                        JAPRestore.Add(Program.m_ROM.Read32(JAPAddresses[i]));
+                        if (!isFileToPatch) JAPRestore.Add(Program.m_ROM.Read32(JAPAddresses[i]));
+                        else JAPRestore.Add(file.Read32(JAPAddresses[i]));
                         break;
                 }
             }
@@ -372,11 +391,11 @@ namespace SM64DSe
             if (editingIndex == -1)
                 m_Patches.Add(new Patch(name, EURAddresses.ToArray(), USv1Addresses.ToArray(), USv2Addresses.ToArray(),
                 JAPAddresses.ToArray(), EURSizeValue, USv1SizeValue, USv2SizeValue, JAPSizeValue, EURRestore.ToArray(),
-                USv1Restore.ToArray(), USv2Restore.ToArray(), JAPRestore.ToArray()));
+                USv1Restore.ToArray(), USv2Restore.ToArray(), JAPRestore.ToArray(), fileToPatch));
             else
                 m_Patches[editingIndex] = new Patch(name, EURAddresses.ToArray(), USv1Addresses.ToArray(), USv2Addresses.ToArray(),
                 JAPAddresses.ToArray(), EURSizeValue, USv1SizeValue, USv2SizeValue, JAPSizeValue, EURRestore.ToArray(),
-                USv1Restore.ToArray(), USv2Restore.ToArray(), JAPRestore.ToArray());
+                USv1Restore.ToArray(), USv2Restore.ToArray(), JAPRestore.ToArray(), fileToPatch);
 
             // Write the updated patches to XML
             Patch.PatchToXML(m_Patches);
@@ -384,6 +403,18 @@ namespace SM64DSe
             // Reload the list of patches
             m_Patches = Patch.XMLToPatch();
             fillTable();
+        }
+
+        private void btnSelectFile_Click(object sender, EventArgs e)
+        {
+            using (var form = new ROMFileSelect("Please select a file to open."))
+            {
+                var result = form.ShowDialog();
+                if (result == DialogResult.OK)
+                {
+                    txtApplyToFile.Text = form.m_SelectedFile;
+                }
+            }
         }
     }
 
@@ -402,13 +433,15 @@ namespace SM64DSe
         public uint[] m_RestoreDataUSv1;
         public uint[] m_RestoreDataUSv2;
         public uint[] m_RestoreDataJAP;
+        public String m_FileToPatch;// Optionally you can specify the patch be applied to a particular file (addresses relative to start)
+        private bool m_IsFileToPatch;
 
         bool m_IsApplied;
         public bool[] m_VersionSupport = new bool[] { false, false, false, false };// Whether each region is supported, EUR, USv1, USv2, JAP
 
         public Patch(String name, uint[] patchAddrEUR, uint[] patchAddrUSv1, uint[] patchAddrUSv2, uint[] patchAddrJAP, Tuple<int, uint>[] patchDataEUR,
             Tuple<int, uint>[] patchDataUSv1, Tuple<int, uint>[] patchDataUSv2, Tuple<int, uint>[] patchDataJAP, uint[] restoreEUR,
-            uint[] restoreUSv1, uint[] restoreUSv2, uint[] restoreJAP)
+            uint[] restoreUSv1, uint[] restoreUSv2, uint[] restoreJAP, String fileToPatch = null)
         {
             m_PatchName = name;
             m_PatchAddrEUR = patchAddrEUR;
@@ -423,6 +456,8 @@ namespace SM64DSe
             m_RestoreDataUSv1 = restoreUSv1;
             m_RestoreDataUSv2 = restoreUSv2;
             m_RestoreDataJAP = restoreJAP;
+            m_IsFileToPatch = (!(fileToPatch == null || fileToPatch.Equals("")));
+            m_FileToPatch = (m_IsFileToPatch) ? fileToPatch : null;
 
             m_VersionSupport = new bool[] { (patchAddrEUR.Length > 0), (patchAddrUSv1.Length > 0), (patchAddrUSv2.Length > 0), (patchAddrJAP.Length > 0) };
         }
@@ -461,21 +496,29 @@ namespace SM64DSe
                 testAddr = m_PatchAddrJAP.ElementAt(0);
             }
 
+            NitroFile fileToPatch = (m_IsFileToPatch) ? Program.m_ROM.GetFileFromName(m_FileToPatch) : null;
+
             if (testSize != 0)
             {
                 switch (testSize)
                 {
                         // If the data found at the first patch address equals the data to patch, it's already been applied
                     case 8:
-                        if (rom.Read8(testAddr) == (byte)dataTest.Item2)
+                        if (!m_IsFileToPatch && rom.Read8(testAddr) == (byte)dataTest.Item2)
+                            applied = true;
+                        else if (m_IsFileToPatch && fileToPatch.Read8(testAddr) == (byte)dataTest.Item2)
                             applied = true;
                         break;
                     case 16:
-                        if (rom.Read16(testAddr) == (ushort)dataTest.Item2)
+                        if (!m_IsFileToPatch && rom.Read16(testAddr) == (ushort)dataTest.Item2)
+                            applied = true;
+                        else if (m_IsFileToPatch && fileToPatch.Read16(testAddr) == (ushort)dataTest.Item2)
                             applied = true;
                         break;
                     case 32:
-                        if (rom.Read32(testAddr) == (uint)dataTest.Item2)
+                        if (!m_IsFileToPatch && rom.Read32(testAddr) == (uint)dataTest.Item2)
+                            applied = true;
+                        else if (m_IsFileToPatch && fileToPatch.Read32(testAddr) == (uint)dataTest.Item2)
                             applied = true;
                         break;
                 }
@@ -510,22 +553,29 @@ namespace SM64DSe
                     break;
             }
 
+            NitroFile fileToPatch = (m_IsFileToPatch) ? Program.m_ROM.GetFileFromName(m_FileToPatch) : null;
+
             // Write the specified values of the specified sizes at the specified addresses
             for (int i = 0; i < addresses.Length; i++)
             {
                 switch (sizesValues.ElementAt(i).Item1)
                 {
                     case 8:
-                        rom.Write8(addresses[i], (byte)sizesValues.ElementAt(i).Item2);
+                        if (!m_IsFileToPatch) rom.Write8(addresses[i], (byte)sizesValues.ElementAt(i).Item2);
+                        else if (m_IsFileToPatch) fileToPatch.Write8(addresses[i], (byte)sizesValues.ElementAt(i).Item2);
                         break;
                     case 16:
-                        rom.Write16(addresses[i], (ushort)sizesValues.ElementAt(i).Item2);
+                        if (!m_IsFileToPatch) rom.Write16(addresses[i], (ushort)sizesValues.ElementAt(i).Item2);
+                        else if (m_IsFileToPatch) fileToPatch.Write16(addresses[i], (ushort)sizesValues.ElementAt(i).Item2);
                         break;
                     case 32:
-                        rom.Write32(addresses[i], (uint)sizesValues.ElementAt(i).Item2);
+                        if (!m_IsFileToPatch) rom.Write32(addresses[i], (uint)sizesValues.ElementAt(i).Item2);
+                        else if (m_IsFileToPatch) fileToPatch.Write32(addresses[i], (uint)sizesValues.ElementAt(i).Item2);
                         break;
                 }
             }
+            if (fileToPatch != null)
+                fileToPatch.SaveChanges();
         }
 
         public void RemovePatch(NitroROM rom)
@@ -558,22 +608,29 @@ namespace SM64DSe
                     break;
             }
 
+            NitroFile fileToPatch = (m_IsFileToPatch) ? Program.m_ROM.GetFileFromName(m_FileToPatch) : null;
+
             // Write the specified values of the specified sizes at the specified addresses
             for (int i = 0; i < addresses.Length; i++)
             {
                 switch (sizesValues.ElementAt(i).Item1)
                 {
                     case 8:
-                        rom.Write8(addresses[i], (byte)restoreData[i]);
+                        if (!m_IsFileToPatch) rom.Write8(addresses[i], (byte)restoreData[i]);
+                        else if (m_IsFileToPatch) fileToPatch.Write8(addresses[i], (byte)restoreData[i]);
                         break;
                     case 16:
-                        rom.Write16(addresses[i], (ushort)restoreData[i]);
+                        if (!m_IsFileToPatch) rom.Write16(addresses[i], (ushort)restoreData[i]);
+                        else if (m_IsFileToPatch) fileToPatch.Write16(addresses[i], (ushort)restoreData[i]);
                         break;
                     case 32:
-                        rom.Write32(addresses[i], (uint)restoreData[i]);
+                        if (!m_IsFileToPatch) rom.Write32(addresses[i], (uint)restoreData[i]);
+                        else if (m_IsFileToPatch) fileToPatch.Write32(addresses[i], (uint)restoreData[i]);
                         break;
                 }
             }
+            if (fileToPatch != null)
+                fileToPatch.SaveChanges();
         }
 
         public static void PatchToXML(List<Patch> patches)
@@ -594,6 +651,9 @@ namespace SM64DSe
                     writer.WriteStartElement("Patch");
 
                     writer.WriteElementString("PatchName", patch.m_PatchName);
+
+                    if (patch.m_IsFileToPatch)
+                        writer.WriteElementString("FileToPatch", patch.m_FileToPatch);
 
                     if (patch.m_PatchAddrEUR.Count() != 0)
                     {
@@ -709,6 +769,7 @@ namespace SM64DSe
             List<int> EURDataSizes = new List<int>(), USv1DataSizes = new List<int>(), USv2DataSizes = new List<int>(), JAPDataSizes = new List<int>();
             List<uint> EURDataValues = new List<uint>(), USv1DataValues = new List<uint>(), USv2DataValues = new List<uint>(), JAPDataValues = new List<uint>();
             List<uint> EURRestore = new List<uint>(), USv1Restore = new List<uint>(), USv2Restore = new List<uint>(), JAPRestore = new List<uint>();
+            String fileToPatch = "";
 
             // Create an XML reader for this file.
             using (XmlReader reader = XmlReader.Create(Path.Combine(Application.StartupPath, "AdditionalPatches.xml")))
@@ -727,6 +788,10 @@ namespace SM64DSe
                             case "PatchName":
                                 reader.MoveToContent();
                                 name = reader.ReadElementContentAsString();
+                                break;
+                            case "FileToPatch":
+                                reader.MoveToContent();
+                                fileToPatch = reader.ReadElementContentAsString();
                                 break;
                             case "EURAddresses":
                                 while (reader.Read())
@@ -887,12 +952,13 @@ namespace SM64DSe
                                 JAPSizeValue[i] = new Tuple<int, uint>(JAPDataSizes.ElementAt(i), JAPDataValues.ElementAt(i));
                             patches.Add(new Patch(name, EURAddresses.ToArray(), USv1Addresses.ToArray(), USv2Addresses.ToArray(), 
                                 JAPAddresses.ToArray(), EURSizeValue, USv1SizeValue, USv2SizeValue, JAPSizeValue, EURRestore.ToArray(), 
-                                USv1Restore.ToArray(), USv2Restore.ToArray(), JAPRestore.ToArray()));
+                                USv1Restore.ToArray(), USv2Restore.ToArray(), JAPRestore.ToArray(), fileToPatch));
                             // Reset lists for next patch
                             EURAddresses.Clear(); USv1Addresses.Clear(); USv2Addresses.Clear(); JAPAddresses.Clear();
                             EURDataSizes.Clear(); USv1DataSizes.Clear(); USv2DataSizes.Clear(); JAPDataSizes.Clear();
                             EURDataValues.Clear(); USv1DataValues.Clear(); USv2DataValues.Clear(); JAPDataValues.Clear();
                             EURRestore.Clear(); USv1Restore.Clear(); USv2Restore.Clear(); JAPRestore.Clear();
+                            fileToPatch = "";
                         }
                     }
                 }

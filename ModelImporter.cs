@@ -117,6 +117,7 @@ namespace SM64DSe
 
         private static string m_ModelFileName;
         private static string m_ModelPath;
+        private static string m_ModelFormat = "obj";
 
         private void LoadModel(bool required)
         {
@@ -124,14 +125,12 @@ namespace SM64DSe
             {
                 m_ModelFileName = ofdLoadModel.FileName.Replace('/', '\\');
                 m_ModelPath = m_ModelFileName.Substring(0, m_ModelFileName.LastIndexOf('\\') + 1);
+                m_ModelFormat = ofdLoadModel.FileName.Substring(ofdLoadModel.FileName.Length - 3, 3).ToLower(); ;
 
-                switch (ofdLoadModel.FilterIndex)
-                {
-                    case 1:
-                        m_ImportedModel = BMD_Importer.LoadModel_OBJ(m_ImportedModel, m_ModelFileName, m_ModelPath, m_Scale);
-                        m_MdlLoaded = true;
-                        break;
-                }
+                m_ImportedModel = BMD_Importer.ConvertToBMD(m_ImportedModel, m_ModelFileName, m_ModelPath, m_Scale);
+
+                m_MdlLoaded = true;
+
                 PrerenderModel();
 
                 populateColTypes();
@@ -453,10 +452,10 @@ namespace SM64DSe
             originalScale = m_Scale;
             float scale = m_Scale.X;
             if (m_CustomScale != 1)
-             scale = (m_Scale.X / m_CustomScale);
+                scale = (m_Scale.X / m_CustomScale);
             m_Scale = new Vector3(scale, scale, scale);
             glModelView.Refresh();
-            m_ImportedModel = BMD_Importer.LoadModel_OBJ(m_ImportedModel, m_ModelFileName, m_ModelPath, m_Scale);
+            m_ImportedModel = BMD_Importer.ConvertToBMD(m_ImportedModel, m_ModelFileName, m_ModelPath, m_Scale);
             BMD_Importer.SaveModelChanges();
 
             m_Scale = originalScale;//Back to previous scale for collision as it's not affected like model's scale
@@ -468,7 +467,7 @@ namespace SM64DSe
                 try
                 {
                     kcl = Program.m_ROM.GetFileFromName(m_KCLName);
-                    ObjToKcl.ConvertToKcl(m_ModelFileName, ref kcl, m_Scale.X, faceSizeThreshold, matColTypes);
+                    KCL_Importer.ConvertToKCL(m_ModelFileName, ref kcl, m_Scale.X, faceSizeThreshold, matColTypes);
                 }
                 catch
                 {
