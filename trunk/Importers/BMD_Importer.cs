@@ -1,6 +1,7 @@
 ﻿/* This class allows the importing of models to BMD format.
  * Currently supported:
  *  Wavefront OBJ
+ *  COLLADA DAE
  * 
 */
 
@@ -15,6 +16,8 @@ using System.Windows.Forms;
 using System.Globalization;
 using OpenTK.Graphics.OpenGL;
 using System.Security.Cryptography;
+using System.Xml;
+using System.Text.RegularExpressions;
 
 namespace SM64DSe.Importers
 {
@@ -316,6 +319,7 @@ namespace SM64DSe.Importers
             public int[] m_VtxIndices;
             public int[] m_TxcIndices;
             public int[] m_NrmIndices;
+            public int[] m_ColIndices;
             public string m_MatName;
             public int m_BoneID;
         }
@@ -547,13 +551,21 @@ namespace SM64DSe.Importers
             mat.m_DiffuseMapName = "";
             mat.m_DiffuseMapID = 0;
             mat.m_DiffuseMapSize = new Vector2(0f, 0f);
+            mat.m_Name = "defult_white";
             m_Materials.Add("default_white", mat);
+        }
+
+        private static void addWhiteMat(String bone)
+        {
+            addWhiteMat();
+            m_Bones[bone].m_Materials.Add("default_white", m_Materials["default_white"].copyAllButFaces());
         }
 
         // from loaded model
         public static List<Vector4> m_Vertices;
         public static List<Vector2> m_TexCoords;
         public static List<Vector3> m_Normals;
+        public static List<Color> m_Colours;
         public static Dictionary<string, MaterialDef> m_Materials;
         public static Dictionary<string, MaterialDef> m_Textures;
         public static Dictionary<string, BoneForImport> m_Bones;
@@ -736,7 +748,217 @@ namespace SM64DSe.Importers
             sr.Close();
         }
 
-        private static void OBJ_LoadBones(String filename)
+        private static void DAE_LoadMTL(String filename)
+        {
+            Stream fs;
+            try
+            {
+                fs = File.OpenRead(filename);
+            }
+            catch
+            {
+                MessageBox.Show("Material library not found:\n\n" + filename + "\n\nA default white material will be used instead.");
+                addWhiteMat();
+                return;
+            }
+            StreamReader sr = new StreamReader(fs);
+
+            string curmaterial = "";
+            CultureInfo usahax = new CultureInfo("en-US");
+
+            string imagesNotFound = "";
+
+            Dictionary<string, string> textureNames = new Dictionary<string, string>();
+
+            // Get a list of texture names first, in case a meterial references one not yet read in
+            using (XmlReader reader = XmlReader.Create(filename))
+            {
+                reader.MoveToContent();
+
+                while (reader.Read())
+                {
+                    if (reader.NodeType.Equals(XmlNodeType.Element))
+                    {
+                        switch (reader.LocalName)
+                        {
+                            case "image":
+                                {
+                                    String name = reader.GetAttribute("id");
+                                    String value = "";
+                                    while (reader.Read())
+                                    {
+                                        reader.MoveToContent();
+                                        if (reader.LocalName.Equals("init_from"))
+                                        {
+                                            value = reader.ReadElementContentAsString();
+                                        }
+                                        else
+                                            break;
+                                    }
+                                    textureNames.Add(name, value);
+                                }
+                                break;
+                        }
+                    }
+                }
+            }
+
+            using (XmlReader reader = XmlReader.Create(filename))
+            {
+                reader.MoveToContent();
+
+                while (reader.Read())
+                {
+                    if (reader.NodeType.Equals(XmlNodeType.Element))
+                    {
+                        switch (reader.LocalName)
+                        {
+                            case "effect":
+                                {
+                                    // Get the material name by removeing "-effect" from the end of the effect node's ID
+                                    String material_name = Regex.Replace(reader.GetAttribute("id"), @"-effect$", String.Empty);
+                                    curmaterial = material_name;
+
+                                    MaterialDef mat = new MaterialDef();
+                                    mat.m_ID = m_Materials.Count;
+                                    mat.m_Name = curmaterial;
+                                    mat.m_Faces = new List<FaceDef>();
+                                    mat.m_DiffuseColor = Color.White;
+                                    mat.m_Opacity = 255;
+                                    mat.m_HasTextures = false;
+                                    mat.m_DiffuseMapName = "";
+                                    mat.m_DiffuseMapID = 0;
+                                    mat.m_DiffuseMapSize = new Vector2(0f, 0f);
+                                    mat.m_ColType = 0;
+                                    try
+                                    {
+                                        m_Materials.Add(curmaterial, mat);
+                                    }
+                                    catch { /*Duplicate material*/ }
+                                }
+                                break;
+                            case "diffuse":
+                                while (reader.Read())
+                                {
+                                    reader.MoveToContent();
+                                    if (reader.LocalName.Equals("color"))
+                                    {
+                                        String value = reader.ReadElementContentAsString();
+                                        String[] rgba = value.Split(' ');
+                                        float r = float.Parse(rgba[0], usahax);
+                                        float g = float.Parse(rgba[1], usahax);
+                                        float b = float.Parse(rgba[2], usahax);
+                                        float a = float.Parse(rgba[3], usahax);
+                                        Color col = Color.FromArgb((int)(a * 255), (int)(r * 255), (int)(g * 255), (int)(b * 255));
+
+                                        MaterialDef mat = (MaterialDef)m_Materials[curmaterial];
+                                        mat.m_DiffuseColor = col;
+                                    }
+                                    else if (reader.LocalName.Equals("texture"))
+                                    {
+                                        string texname = textureNames[Regex.Replace(reader.GetAttribute("texture"), @"-sampler$", String.Empty)];
+                                        Bitmap tex;
+                                        try
+                                        {
+                                            tex = new Bitmap(m_ModelPath + texname);
+
+                                            int width = 8, height = 8;
+                                            while (width < tex.Width) width *= 2;
+                                            while (height < tex.Height) height *= 2;
+
+                                            // cheap resizing for textures whose dimensions aren't power-of-two
+                                            if ((width != tex.Width) || (height != tex.Height))
+                                            {
+                                                Bitmap newbmp = new Bitmap(width, height);
+                                                Graphics g = Graphics.FromImage(newbmp);
+                                                g.DrawImage(tex, new Rectangle(0, 0, width, height));
+                                                tex = newbmp;
+                                            }
+
+                                            MaterialDef mat = (MaterialDef)m_Materials[curmaterial];
+                                            mat.m_HasTextures = true;
+
+                                            byte[] map = new byte[tex.Width * tex.Height * 4];
+                                            for (int y = 0; y < tex.Height; y++)
+                                            {
+                                                for (int x = 0; x < tex.Width; x++)
+                                                {
+                                                    Color pixel = tex.GetPixel(x, y);
+                                                    int pos = ((y * tex.Width) + x) * 4;
+
+                                                    map[pos] = pixel.B;
+                                                    map[pos + 1] = pixel.G;
+                                                    map[pos + 2] = pixel.R;
+                                                    map[pos + 3] = pixel.A;
+                                                }
+                                            }
+                                            //System.Drawing.Imaging.BitmapData lol = tex.LockBits(new Rectangle(0, 0, tex.Width, tex.Height), System.Drawing.Imaging.ImageLockMode.ReadOnly, System.Drawing.Imaging.PixelFormat.Format32bppArgb);
+                                            //System.Runtime.InteropServices.Marshal.Copy(lol.Scan0, map, 0, tex.Width * tex.Height * 4);
+
+                                            string imghash = HexString(m_MD5.ComputeHash(map));
+                                            if (m_Textures.ContainsKey(imghash))
+                                            {
+                                                MaterialDef mat2 = m_Textures[imghash];
+                                                mat.m_DiffuseMapName = mat2.m_DiffuseMapName;
+                                                mat.m_DiffuseMapID = mat2.m_DiffuseMapID;
+                                                mat.m_DiffuseMapSize = mat2.m_DiffuseMapSize;
+                                                break;
+                                            }
+
+                                            mat.m_DiffuseMapName = texname;
+                                            m_Textures.Add(imghash, mat);
+
+                                            mat.m_DiffuseMapSize.X = tex.Width;
+                                            mat.m_DiffuseMapSize.Y = tex.Height;
+
+                                            mat.m_DiffuseMapID = GL.GenTexture();
+                                            GL.BindTexture(TextureTarget.Texture2D, mat.m_DiffuseMapID);
+                                            GL.TexImage2D(TextureTarget.Texture2D, 0, PixelInternalFormat.Four, tex.Width, tex.Height,
+                                                0, PixelFormat.Bgra, PixelType.UnsignedByte, map);
+
+                                            GL.TexParameter(TextureTarget.Texture2D, TextureParameterName.TextureMinFilter, (int)TextureMinFilter.Nearest);
+                                            GL.TexParameter(TextureTarget.Texture2D, TextureParameterName.TextureMagFilter, (int)TextureMagFilter.Nearest);
+
+                                            GL.TexParameter(TextureTarget.Texture2D, TextureParameterName.TextureWrapS, (int)TextureWrapMode.Repeat);
+                                            GL.TexParameter(TextureTarget.Texture2D, TextureParameterName.TextureWrapT, (int)TextureWrapMode.Repeat);
+                                        }
+                                        catch
+                                        {
+                                            imagesNotFound += m_ModelPath + texname + "\n";
+                                        }
+                                        break;
+                                    }
+                                    else
+                                        break;
+                                }
+                                break;
+                            case "transparency":
+                                while (reader.Read())
+                                {
+                                    reader.MoveToContent();
+                                    if (reader.LocalName.Equals("float"))
+                                    {
+                                        float o = float.Parse(reader.ReadElementContentAsString(), usahax);
+
+                                        MaterialDef mat = (MaterialDef)m_Materials[curmaterial];
+                                        mat.m_Opacity = Math.Max(0, Math.Min(255, (int)(o * 255)));
+                                    }
+                                    else
+                                        break;
+                                }
+                                break;
+                        }
+                    }
+                }
+            }
+
+            if (!imagesNotFound.Equals(""))
+                MessageBox.Show("The following images were not found:\n\n" + imagesNotFound);
+
+            sr.Close();
+        }
+
+        private static void LoadBoneDefinitions(String filename)
         {
             Stream fs;
             try
@@ -911,8 +1133,11 @@ namespace SM64DSe.Importers
                             }
                             m_Bones[currentBone].m_RootBone = rootBone;
                             m_Bones[currentBone].m_ParentOffset = parent_offset;
-                            m_Bones[currentBone].m_ParentBone = m_Bones.Values.ElementAt(getBoneIndex(currentBone) + parent_offset).m_Name;
-                            m_Bones[m_Bones[currentBone].m_ParentBone].m_HasChildren = true;// All but last bone set to has children
+                            if (parent_offset < 0)
+                            {
+                                m_Bones[currentBone].m_ParentBone = m_Bones.Values.ElementAt(getBoneIndex(currentBone) + parent_offset).m_Name;
+                                m_Bones[m_Bones[currentBone].m_ParentBone].m_HasChildren = true;// All but last bone set to has children
+                            }
                             foundObjects = true;
                         }
                         break;
@@ -922,6 +1147,79 @@ namespace SM64DSe.Importers
             sr.Close();
 
             return foundObjects;
+        }
+
+        /* Creates a list of bones based on geometry node names found in DAE file and assigns them 
+         * default values. These will be replaced if a bone definition file is found.
+         * By default there is one root parent bone and every other bone is a child bone with one child (until the end)
+         */
+        private static bool DAE_LoadDefaultBones(String modelFileName)
+        {
+            bool foundObjects = false;
+
+            string currentBone = "";
+            string rootBone = "";
+
+            // Create an XML reader for this file.
+            using (XmlReader reader = XmlReader.Create(modelFileName))
+            {
+                reader.MoveToContent();
+
+                while (reader.Read())
+                {
+                    if (reader.NodeType.Equals(XmlNodeType.Element))
+                    {
+                        switch (reader.LocalName)
+                        {
+                            case "geometry":
+                                String mesh_name = reader.GetAttribute("name");
+                                currentBone = mesh_name;
+                                m_Bones.Add(currentBone, new BoneForImport(currentBone, 0, currentBone, 0, false));
+                                short parent_offset = -1;
+                                if ("".Equals(rootBone))
+                                {
+                                    rootBone = currentBone;
+                                    parent_offset = 0;
+                                }
+                                m_Bones[currentBone].m_RootBone = rootBone;
+                                m_Bones[currentBone].m_ParentOffset = parent_offset;
+                                if (parent_offset < 0)
+                                {
+                                    m_Bones[currentBone].m_ParentBone = m_Bones.Values.ElementAt(getBoneIndex(currentBone) + parent_offset).m_Name;
+                                    m_Bones[m_Bones[currentBone].m_ParentBone].m_HasChildren = true;// All but last bone set to has children
+                                }
+                                foundObjects = true;
+                                break;
+                        }
+                    }
+                }
+            }
+
+            return foundObjects;
+        }
+
+        private static String getClosestMaterialMatch(String mat)
+        {
+            String matName = mat;
+
+            if (m_Materials.ContainsKey(matName))
+                return mat;
+            else
+            {
+                int numMaterials = m_Materials.Count;
+                int i = 0;
+                while (i < numMaterials)
+                {
+                    if (!m_Materials.ContainsKey(matName))
+                        matName = matName.Substring(0, matName.Length - 1);
+                    else
+                        return matName;
+
+                    numMaterials++;
+                }
+            }
+            // Shouldn't reach
+            return mat;
         }
 
         // hash
@@ -994,7 +1292,7 @@ namespace SM64DSe.Importers
                     case "bonelib": // bone definitions file
                         {
                             string filename = curline.Substring(parts[0].Length + 1).Trim();
-                            OBJ_LoadBones(m_ModelPath + filename);
+                            LoadBoneDefinitions(m_ModelPath + filename);
                         }
                         break;
 
@@ -1096,6 +1394,291 @@ namespace SM64DSe.Importers
             sr.Close();
 
             ImportModel(m_Scale, false);
+
+            return m_ImportedModel;
+        }
+
+        public static BMD LoadModel_DAE(BMD model, String modelFileName, String modelPath, Vector3 m_Scale)
+        {
+            m_ImportedModel = model;
+
+            m_Vertices = new List<Vector4>();
+            m_TexCoords = new List<Vector2>();
+            m_Normals = new List<Vector3>();
+            m_Colours = new List<Color>();
+            m_Materials = new Dictionary<string, MaterialDef>();
+            m_Textures = new Dictionary<string, MaterialDef>();
+            m_Bones = new Dictionary<string, BoneForImport>();
+            m_SketchupHack = false;
+
+            m_ModelFileName = modelFileName;
+            m_ModelPath = modelPath;
+
+            m_MD5 = new MD5CryptoServiceProvider();
+
+            string curmaterial = "";
+            CultureInfo usahax = new CultureInfo("en-US");
+
+            bool foundObjects = DAE_LoadDefaultBones(modelFileName);
+            string currentBone = "";
+            if (!foundObjects)
+            {
+                currentBone = "default_bone_name";
+                m_Bones.Add(currentBone, new BoneForImport(currentBone, 0, currentBone, 0, false));
+            }
+
+            DAE_LoadMTL(modelFileName);
+
+            using (XmlReader reader = XmlReader.Create(modelFileName))
+            {
+                reader.MoveToContent();
+
+                List<float> currentVertices = new List<float>();
+                List<float> currentTexCoords = new List<float>();
+                List<float> currentNormals = new List<float>();
+                List<float> currentColours = new List<float>();
+                float[][] raw = new float[4][];
+                int vertexIndex = -1;
+                int normalIndex = -1;
+                int texCoordIndex = -1;
+                int colourIndex = -1;
+                int[] vcount = null;
+                bool isTriangles = false;
+                int ind = 0;
+
+                while (reader.Read())
+                {
+                    if (reader.NodeType.Equals(XmlNodeType.Element))
+                    {
+                        switch (reader.LocalName)
+                        {
+                            case "bonelib":
+                                // <bonelib value="[FILENAME of .bones file]">
+                                LoadBoneDefinitions(m_ModelPath + reader.GetAttribute("value"));
+                                break;
+                            case "geometry":
+                                currentBone = reader.GetAttribute("name");
+                                m_Bones[currentBone].m_Name = currentBone;
+                                currentVertices = new List<float>();
+                                currentTexCoords = new List<float>();
+                                currentNormals = new List<float>();
+                                currentColours = new List<float>();
+                                raw = new float[4][];
+                                vertexIndex = -1;
+                                normalIndex = -1;
+                                texCoordIndex = -1;
+                                colourIndex = -1;
+                                vcount = null;
+                                isTriangles = false;
+                                ind = 0;
+                                break;
+                            case "float_array":
+                                {
+                                    String values = reader.ReadElementContentAsString();
+                                    String[] split = values.Split(' ');
+                                    float[] float_values = new float[split.Length];
+                                    for (int i = 0; i < split.Length; i++)
+                                        float_values[i] = float.Parse(split[i], usahax);
+                                    raw[ind] = float_values;
+
+                                    // Read components of vertices, normals, texture co-ordinates and vertex colours
+                                    // Assuming they appear in this order
+                                    switch (ind)
+                                    {
+                                        // Vertices
+                                        case 0:
+                                            for (int i = 0; i < raw[0].Length; i += 3)
+                                            {
+                                                currentVertices.Add(raw[0][i]);
+                                                currentVertices.Add(raw[0][i + 1]);
+                                                currentVertices.Add(raw[0][i + 2]);
+                                            }
+                                            break;
+                                        // Normals
+                                        case 1:
+                                            for (int i = 0; i < raw[1].Length; i += 3)
+                                            {
+                                                currentNormals.Add(raw[1][i]);
+                                                currentNormals.Add(raw[1][i + 1]);
+                                                currentNormals.Add(raw[1][i + 2]);
+                                            }
+                                            break;
+                                        // Texture Co-ordinates
+                                        case 2:
+                                            for (int i = 0; i < raw[2].Length; i += 2)
+                                            {
+                                                currentTexCoords.Add(raw[2][i]);
+                                                currentTexCoords.Add(raw[2][i + 1]);
+                                            }
+                                            break;
+                                        // Vertex Colours
+                                        case 3:
+                                            for (int i = 0; i < raw[3].Length; i += 3)
+                                            {
+                                                currentColours.Add(raw[3][i]);
+                                                currentColours.Add(raw[3][i + 1]);
+                                                currentColours.Add(raw[3][i + 2]);
+                                            }
+                                            break;
+                                    }
+
+                                    ind++;
+                                }
+                                break;
+                            case "triangles":
+                            case "polylist":
+                                {
+                                    curmaterial = reader.GetAttribute("material");
+                                    // DAE models exported with Blender add a number starting at 1 for each geometry node 
+                                    // to the end of the value given for material
+                                    if (curmaterial == null) { addWhiteMat(currentBone); curmaterial = "default_white"; }
+                                    curmaterial = getClosestMaterialMatch(curmaterial);
+                                    // The parent bone should have a list of all materials used by itself and its children
+                                    if (!m_Bones[m_Bones[currentBone].m_RootBone].m_Materials.ContainsKey(curmaterial))
+                                        m_Bones[m_Bones[currentBone].m_RootBone].m_Materials.Add(curmaterial, m_Materials[curmaterial].copyAllButFaces());
+                                    if (!m_Bones[currentBone].m_Materials.ContainsKey(curmaterial))
+                                        m_Bones[currentBone].m_Materials.Add(curmaterial, m_Materials[curmaterial].copyAllButFaces());
+                                    int numFaces = int.Parse(reader.GetAttribute("count"));
+                                    vcount = new int[numFaces];
+                                    isTriangles = (reader.LocalName.Equals("triangles")) ? true : false;
+                                }
+                                break;
+                            case "input":
+                                {
+                                    switch (reader.GetAttribute("semantic"))
+                                    {
+                                        case "VERTEX":
+                                            vertexIndex = int.Parse(reader.GetAttribute("offset"));
+                                            break;
+                                        case "NORMAL":
+                                            normalIndex = int.Parse(reader.GetAttribute("offset"));
+                                            break;
+                                        case "TEXCOORD":
+                                            texCoordIndex = int.Parse(reader.GetAttribute("offset"));
+                                            break;
+                                        case "COLOR":
+                                            colourIndex = int.Parse(reader.GetAttribute("offset"));
+                                            break;
+                                    }
+                                }
+                                break;
+                                // The number of vertices in each face
+                            case "vcount":
+                                {
+                                    String values = reader.ReadElementContentAsString();
+                                    String[] split = values.Split(new string[] { " " }, StringSplitOptions.RemoveEmptyEntries);
+                                    for (int i = 0; i < split.Length; i++)
+                                    {
+                                        vcount[i] = int.Parse(split[i]);
+                                    }
+                                }
+                                break;
+                            // Face definitions
+                            case "p":
+                                {
+                                    String values = reader.ReadElementContentAsString();
+                                    String[] split = values.Split(' ');
+
+                                    int vtxInd = 0;
+                                    int vcountInd = 0;
+                                    // Faces must include vertices, normals and texture co-ordinates with
+                                    // optional colours
+                                    int inputCount = 0;
+                                    if (vertexIndex != -1) inputCount++; if (normalIndex != -1) inputCount++;
+                                    if (texCoordIndex != -1) inputCount++; if (colourIndex != -1) inputCount++;
+                                    while (vtxInd < split.Length)
+                                    {
+                                        MaterialDef mat = (MaterialDef)m_Bones[currentBone].m_Materials[curmaterial];
+                                        int nvtx = (!isTriangles) ? vcount[vcountInd] : 3;
+
+                                        FaceDef face = new FaceDef();
+                                        face.m_MatName = curmaterial;
+                                        face.m_VtxIndices = new int[nvtx];
+                                        face.m_TxcIndices = new int[nvtx];
+                                        face.m_NrmIndices = new int[nvtx];
+                                        face.m_ColIndices = (inputCount == 4) ? new int[nvtx] : null;
+                                        face.m_BoneID = getBoneIndex(currentBone);
+
+                                        // For each vertex defined in face
+                                        for (int i = 0; i < nvtx; i += 1)
+                                        {
+                                            face.m_VtxIndices[i] = int.Parse(split[vtxInd + vertexIndex]) + m_Vertices.Count;
+                                            if (normalIndex != -1 ) 
+                                                face.m_NrmIndices[i] = int.Parse(split[vtxInd + normalIndex]) + m_Normals.Count;
+                                            if (texCoordIndex != -1) 
+                                                face.m_TxcIndices[i] = int.Parse(split[vtxInd + texCoordIndex]) + m_TexCoords.Count;
+                                            if (inputCount > 3 && colourIndex != -1)
+                                                face.m_ColIndices[i] = int.Parse(split[vtxInd + colourIndex]) + m_Colours.Count;
+
+                                            vtxInd += inputCount;
+                                        }
+                                        /* Example of a typical triangle
+                                         * 0  0  0      2  1  3     3  2  2
+                                         * V1 N1 T1     V2 N2 T2    V3 N3 T3
+                                         * 
+                                         * V<n> are the indices of the triangles vertex positions,
+                                         * N<n> are its normal indices
+                                         * and T<n> are its texture co-ordinate indices
+                                         */
+
+                                        // If the material has no textures set the texture co-ordinate indices to -1
+                                        if (!m_Bones[currentBone].m_Materials[curmaterial].m_HasTextures)
+                                            face.m_TxcIndices = Enumerable.Repeat(-1, nvtx).ToArray();
+
+                                        m_Bones[currentBone].m_Materials[curmaterial] = mat;
+                                        m_Bones[currentBone].m_Materials[curmaterial].m_Faces.Add(face);
+
+                                        vcountInd++;
+                                    }
+                                }
+                                break;
+                        }
+                    }
+                    else if (reader.NodeType.Equals(XmlNodeType.EndElement))
+                    {
+                        if (reader.LocalName.Equals("geometry"))
+                        {
+                            // Build vertices, normals, texture co-ordinates and colours from the 
+                            // component values read earlier
+                            for (int i = 0; i < currentVertices.Count; i += 3)
+                                m_Vertices.Add(new Vector4(currentVertices[i], currentVertices[i + 1], currentVertices[i + 2], 1f));
+                            for (int i = 0; i < currentNormals.Count; i += 3)
+                            {
+                                Vector3 vec = new Vector3(currentNormals[i], currentNormals[i + 1], currentNormals[i + 2]);
+                                vec.Normalize();
+                                m_Normals.Add(vec);
+                            }
+                            for (int i = 0; i < currentTexCoords.Count; i += 2)
+                                m_TexCoords.Add(new Vector2(currentTexCoords[i], currentTexCoords[i + 1]));
+                            for (int i = 0; i < currentColours.Count; i += 3)
+                                m_Colours.Add(Color.FromArgb((int)(currentColours[i] * 255f), (int)(currentColours[i + 1] * 255f),
+                                                    (int)(currentColours[i + 2] * 255f)));
+                        }
+                    }
+                }
+            }
+
+            ImportModel(m_Scale, false);
+
+            return m_ImportedModel;
+        }
+
+        public static BMD ConvertToBMD(BMD model, String modelFileName, String modelPath, Vector3 m_Scale)
+        {
+            string modelFormat = modelFileName.Substring(modelFileName.Length - 3, 3).ToLower();
+
+            switch (modelFormat)
+            {
+                case "obj":
+                    m_ImportedModel = LoadModel_OBJ(model, modelFileName, modelPath, m_Scale);
+                    break;
+                case "dae":
+                    m_ImportedModel = LoadModel_DAE(model, modelFileName, modelPath, m_Scale);
+                    break;
+                default:
+                    m_ImportedModel = LoadModel_OBJ(model, modelFileName, modelPath, m_Scale);
+                    break;
+            }
 
             return m_ImportedModel;
         }
@@ -1291,10 +1874,11 @@ namespace SM64DSe.Importers
                                         Vector4 vtx = scaledvtxs[face.m_VtxIndices[0]];
                                         int txc = face.m_TxcIndices[0];
 
+                                        if (face.m_ColIndices != null) dlpacker.AddColorCommand(m_Colours[face.m_ColIndices[0]]);
                                         if (txc > -1) dlpacker.AddTexCoordCommand(Vector2.Multiply(m_TexCoords[txc], tcscale));
-                                        dlpacker.AddVertexCommand(vtx, lastvtx);
+                                        if (face.m_ColIndices != null) dlpacker.AddVertexCommand(vtx, lastvtx);
                                         if (txc > -1) dlpacker.AddTexCoordCommand(Vector2.Multiply(m_TexCoords[txc], tcscale));
-                                        dlpacker.AddVertexCommand(vtx, vtx);
+                                        if (face.m_ColIndices != null) dlpacker.AddVertexCommand(vtx, vtx);
                                         if (txc > -1) dlpacker.AddTexCoordCommand(Vector2.Multiply(m_TexCoords[txc], tcscale));
                                         dlpacker.AddVertexCommand(vtx, vtx);
                                         lastvtx = vtx;
@@ -1308,10 +1892,13 @@ namespace SM64DSe.Importers
                                         Vector4 vtx2 = scaledvtxs[face.m_VtxIndices[1]];
                                         int txc2 = face.m_TxcIndices[1];
 
+                                        if (face.m_ColIndices != null) dlpacker.AddColorCommand(m_Colours[face.m_ColIndices[0]]);
                                         if (txc1 > -1) dlpacker.AddTexCoordCommand(Vector2.Multiply(m_TexCoords[txc1], tcscale));
                                         dlpacker.AddVertexCommand(vtx1, lastvtx);
+                                        if (face.m_ColIndices != null) dlpacker.AddColorCommand(m_Colours[face.m_ColIndices[1]]);
                                         if (txc2 > -1) dlpacker.AddTexCoordCommand(Vector2.Multiply(m_TexCoords[txc2], tcscale));
                                         dlpacker.AddVertexCommand(vtx2, vtx1);
+                                        if (face.m_ColIndices != null) dlpacker.AddColorCommand(m_Colours[face.m_ColIndices[2]]);
                                         if (txc2 > -1) dlpacker.AddTexCoordCommand(Vector2.Multiply(m_TexCoords[txc2], tcscale));
                                         dlpacker.AddVertexCommand(vtx2, vtx2);
                                         lastvtx = vtx2;
@@ -1327,20 +1914,25 @@ namespace SM64DSe.Importers
                                         Vector4 vtx3 = scaledvtxs[face.m_VtxIndices[2]];
                                         int txc3 = face.m_TxcIndices[2];
 
+                                        if (face.m_ColIndices != null) dlpacker.AddColorCommand(m_Colours[face.m_ColIndices[0]]);
                                         if (txc1 > -1) dlpacker.AddTexCoordCommand(Vector2.Multiply(m_TexCoords[txc1], tcscale));
                                         dlpacker.AddVertexCommand(vtx1, lastvtx);
                                         if (m_ZMirror)
                                         {
+                                            if (face.m_ColIndices != null) dlpacker.AddColorCommand(m_Colours[face.m_ColIndices[2]]);
                                             if (txc3 > -1) dlpacker.AddTexCoordCommand(Vector2.Multiply(m_TexCoords[txc3], tcscale));
                                             dlpacker.AddVertexCommand(vtx3, vtx1);
+                                            if (face.m_ColIndices != null) dlpacker.AddColorCommand(m_Colours[face.m_ColIndices[1]]);
                                             if (txc2 > -1) dlpacker.AddTexCoordCommand(Vector2.Multiply(m_TexCoords[txc2], tcscale));
                                             dlpacker.AddVertexCommand(vtx2, vtx3);
                                             lastvtx = vtx2;
                                         }
                                         else
                                         {
+                                            if (face.m_ColIndices != null) dlpacker.AddColorCommand(m_Colours[face.m_ColIndices[1]]);
                                             if (txc2 > -1) dlpacker.AddTexCoordCommand(Vector2.Multiply(m_TexCoords[txc2], tcscale));
                                             dlpacker.AddVertexCommand(vtx2, vtx1);
+                                            if (face.m_ColIndices != null) dlpacker.AddColorCommand(m_Colours[face.m_ColIndices[2]]);
                                             if (txc3 > -1) dlpacker.AddTexCoordCommand(Vector2.Multiply(m_TexCoords[txc3], tcscale));
                                             dlpacker.AddVertexCommand(vtx3, vtx2);
                                             lastvtx = vtx3;
@@ -1359,24 +1951,31 @@ namespace SM64DSe.Importers
                                         Vector4 vtx4 = scaledvtxs[face.m_VtxIndices[3]];
                                         int txc4 = face.m_TxcIndices[3];
 
+                                        if (face.m_ColIndices != null) dlpacker.AddColorCommand(m_Colours[face.m_ColIndices[0]]);
                                         if (txc1 > -1) dlpacker.AddTexCoordCommand(Vector2.Multiply(m_TexCoords[txc1], tcscale));
                                         dlpacker.AddVertexCommand(vtx1, lastvtx);
                                         if (m_ZMirror)
                                         {
+                                            if (face.m_ColIndices != null) dlpacker.AddColorCommand(m_Colours[face.m_ColIndices[3]]);
                                             if (txc4 > -1) dlpacker.AddTexCoordCommand(Vector2.Multiply(m_TexCoords[txc4], tcscale));
                                             dlpacker.AddVertexCommand(vtx4, vtx1);
+                                            if (face.m_ColIndices != null) dlpacker.AddColorCommand(m_Colours[face.m_ColIndices[2]]);
                                             if (txc3 > -1) dlpacker.AddTexCoordCommand(Vector2.Multiply(m_TexCoords[txc3], tcscale));
                                             dlpacker.AddVertexCommand(vtx3, vtx4);
+                                            if (face.m_ColIndices != null) dlpacker.AddColorCommand(m_Colours[face.m_ColIndices[1]]);
                                             if (txc2 > -1) dlpacker.AddTexCoordCommand(Vector2.Multiply(m_TexCoords[txc2], tcscale));
                                             dlpacker.AddVertexCommand(vtx2, vtx3);
                                             lastvtx = vtx2;
                                         }
                                         else
                                         {
+                                            if (face.m_ColIndices != null) dlpacker.AddColorCommand(m_Colours[face.m_ColIndices[1]]);
                                             if (txc2 > -1) dlpacker.AddTexCoordCommand(Vector2.Multiply(m_TexCoords[txc2], tcscale));
                                             dlpacker.AddVertexCommand(vtx2, vtx1);
+                                            if (face.m_ColIndices != null) dlpacker.AddColorCommand(m_Colours[face.m_ColIndices[2]]);
                                             if (txc3 > -1) dlpacker.AddTexCoordCommand(Vector2.Multiply(m_TexCoords[txc3], tcscale));
                                             dlpacker.AddVertexCommand(vtx3, vtx2);
+                                            if (face.m_ColIndices != null) dlpacker.AddColorCommand(m_Colours[face.m_ColIndices[3]]);
                                             if (txc4 > -1) dlpacker.AddTexCoordCommand(Vector2.Multiply(m_TexCoords[txc4], tcscale));
                                             dlpacker.AddVertexCommand(vtx4, vtx3);
                                             lastvtx = vtx4;

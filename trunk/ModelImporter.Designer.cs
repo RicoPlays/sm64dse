@@ -348,7 +348,7 @@
             // 
             // ofdLoadModel
             // 
-            this.ofdLoadModel.Filter = "Wavefront (*.obj)|*.obj";
+            this.ofdLoadModel.Filter = "Supported Models (*.obj, *.dae)|*.obj;*.dae";
             this.ofdLoadModel.Title = "Load model file...";
             // 
             // ModelImporter

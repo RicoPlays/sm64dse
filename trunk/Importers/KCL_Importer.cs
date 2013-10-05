@@ -5,6 +5,10 @@ Based on a script by blank.
 
 See http://wiki.tockdom.com/wiki/KCL_%28File_Format%29 for a description of the
 MKW KCL file format.
+ 
+Currently supported:
+ Wavefront OBJ
+ 
 */
 
 using System;
@@ -17,15 +21,29 @@ using System.Collections.ObjectModel;
 using System.Globalization;
 using System.Drawing;
 using System.Collections.Specialized;
+using System.Xml;
 
 namespace SM64DSe
 {
-    public static class ObjToKcl
+    public static class KCL_Importer
     {
-        public static void ConvertToKcl(string infile, ref NitroFile kclOut, float scale, float faceSizeThreshold, Dictionary<string, int> matColTypes)
+        public static void ConvertToKCL(string infile, ref NitroFile kclOut, float scale, float faceSizeThreshold, Dictionary<string, int> matColTypes)
         {
             //faceSizeThreshold is used for getting rid of very small faces below a given size, originally 0.001
-            object[] o = read_obj(infile, faceSizeThreshold, matColTypes);
+            string modelFormat = infile.Substring(infile.Length - 3, 3).ToLower();
+            object[] o = null;
+            switch (modelFormat)
+            {
+                case "obj":
+                    o = read_obj(infile, faceSizeThreshold, matColTypes);
+                    break;
+                case "dae":
+                    o = read_dae(infile, faceSizeThreshold, matColTypes);
+                    break;
+                default:
+                    o = read_obj(infile, faceSizeThreshold, matColTypes);
+                    break;
+            }
             scale *= 1000; //Scale of collision file is 1000 times larger than model file
             write_kcl(kclOut, o[0] as List<Triangle>, 15, 1, scale);
         }
@@ -51,24 +69,19 @@ namespace SM64DSe
 
                 string[] parts = curline.Split(new char[] { ' ' }, StringSplitOptions.RemoveEmptyEntries);
                 if (parts.Length < 1) continue;
-                int face = 0;
                 int curr_group = 0;
                 switch (parts[0])
                 {
-                    case "mtllib": // material lib file
-                        {
-
-                        }
-                        break;
-
                     case "usemtl": // material name
-                        if (parts.Length < 2) continue;
-                        group_name = parts[1];
-                        if (!group_names.Contains(group_name))
                         {
-                            group_names.Add(group_name);
+                            if (parts.Length < 2) continue;
+                            group_name = parts[1];
+                            if (!group_names.Contains(group_name))
+                            {
+                                group_names.Add(group_name);
+                            }
+                            curr_group = group_names.IndexOf(group_name);
                         }
-                        curr_group = group_names.IndexOf(group_name);
                         break;
 
                     case "v": // vertex
@@ -78,31 +91,25 @@ namespace SM64DSe
                             float y = float.Parse(parts[2], usahax);
                             float z = float.Parse(parts[3], usahax);
 
-                            
+
                             vertices.Add(new Vertex(x, y, z));
                         }
                         break;
 
-                    case "vt": // texcoord
+                    /*case "vn": // normal
                         {
+                            if (parts.Length < 4) continue;
+                            float x = float.Parse(parts[1], usahax);
+                            float y = float.Parse(parts[2], usahax);
+                            float z = float.Parse(parts[3], usahax);
 
+                            Normals.Add(new Vector3(x, y, z));
+
+                            //Vector3 vec = new Vector3(x, y, z);
+                            //vec.Normalize();
+                            //m_Normals.Add(vec);
                         }
-                        break;
-
-                    //case "vn": // normal
-                    //    {
-                    //        if (parts.Length < 4) continue;
-                    //        float x = float.Parse(parts[1], usahax);
-                    //        float y = float.Parse(parts[2], usahax);
-                    //        float z = float.Parse(parts[3], usahax);
-
-                    //        Normals.Add(new Vector3(x, y, z));
-
-                    //        //Vector3 vec = new Vector3(x, y, z);
-                    //        //vec.Normalize();
-                    //        //m_Normals.Add(vec);
-                    //    }
-                    //    break;
+                        break;*/
 
                     case "f": // face
                         {
@@ -113,13 +120,195 @@ namespace SM64DSe
 
                             //Below line gets rid of faces that are too small, original 0.001
                             if (cross(v.sub(u), w.sub(u)).norm_sq() < faceSizeThreshold) { continue; } //#TODO: find a better solution
-                                triangles.Add(new Triangle(u, v, w, matColTypes[group_name]));
+                            triangles.Add(new Triangle(u, v, w, matColTypes[group_name]));
                         }
                         break;
                 }
             }
 
             sr.Close();
+            return new object[] { triangles };
+        }
+
+        private static object[] read_dae(string filename, float faceSizeThreshold, Dictionary<string, int> matColTypes)
+        {
+            List<Vertex> vertices = new List<Vertex>();
+            List<Triangle> triangles = new List<Triangle>();
+            List<string> group_names = new List<string>();
+
+            string group_name = "";
+            CultureInfo usahax = new CultureInfo("en-US");
+
+            using (XmlReader reader = XmlReader.Create(filename))
+            {
+                reader.MoveToContent();
+
+                List<float> currentVertices = new List<float>();
+                float[][] raw = new float[1][];
+                int vertexIndex = -1;
+                int normalIndex = -1;
+                int texCoordIndex = -1;
+                int colourIndex = -1;
+                int[] vcount = null;
+                bool isTriangles = false;
+                int currentVertexCount = 0;
+                int ind = 0;
+                int curr_group = 0;
+
+                while (reader.Read())
+                {
+                    if (reader.NodeType.Equals(XmlNodeType.Element))
+                    {
+                        switch (reader.LocalName)
+                        {
+                            case "geometry":
+                                currentVertices = new List<float>();
+                                raw = new float[4][];
+                                vertexIndex = -1;
+                                vcount = null;
+                                isTriangles = false;
+                                ind = 0;
+                                break;
+                            case "float_array":
+                                {
+                                    String values = reader.ReadElementContentAsString();
+                                    String[] split = values.Split(' ');
+                                    float[] float_values = new float[split.Length];
+                                    for (int i = 0; i < split.Length; i++)
+                                        float_values[i] = float.Parse(split[i], usahax);
+                                    raw[ind] = float_values;
+
+                                    // Read components of vertices, assuming vertices is first
+                                    switch (ind)
+                                    {
+                                        // Vertices
+                                        case 0:
+                                            for (int i = 0; i < raw[0].Length; i += 3)
+                                            {
+                                                currentVertices.Add(raw[0][i]);
+                                                currentVertices.Add(raw[0][i + 1]);
+                                                currentVertices.Add(raw[0][i + 2]);
+
+                                                vertices.Add(new Vertex(raw[0][i], raw[0][i + 1], raw[0][i + 2]));
+                                            }
+                                            currentVertexCount = raw[0].Length / 3;
+                                            break;
+                                    }
+
+                                    ind++;
+                                }
+                                break;
+                            case "triangles":
+                            case "polylist":
+                                {
+                                    group_name = reader.GetAttribute("material");
+                                    // DAE models exported with Blender add a number starting at 1 for each geometry node 
+                                    // to the end of the value given for material
+                                    if (!matColTypes.ContainsKey(group_name))
+                                    {
+                                        for (int i = 0; i < matColTypes.Count; i++)
+                                        {
+                                            group_name = group_name.Substring(0, group_name.Length - 1);
+
+                                            if (matColTypes.ContainsKey(group_name))
+                                                break;
+                                        }
+                                    }
+                                    if (!group_names.Contains(group_name))
+                                    {
+                                        group_names.Add(group_name);
+                                    }
+                                    curr_group = group_names.IndexOf(group_name);
+                                    int numFaces = int.Parse(reader.GetAttribute("count"));
+                                    vcount = new int[numFaces];
+                                    isTriangles = (reader.LocalName.Equals("triangles")) ? true : false;
+                                }
+                                break;
+                            case "input":
+                                {
+                                    // Get the offset of the vertex positions within each face
+                                    // Although ignored, we still need to know if normals, texture co-ordinates and colours are included
+                                    switch (reader.GetAttribute("semantic"))
+                                    {
+                                        case "VERTEX":
+                                            vertexIndex = int.Parse(reader.GetAttribute("offset"));
+                                            break;
+                                        case "NORMAL":
+                                            normalIndex = int.Parse(reader.GetAttribute("offset"));
+                                            break;
+                                        case "TEXCOORD":
+                                            texCoordIndex = int.Parse(reader.GetAttribute("offset"));
+                                            break;
+                                        case "COLOR":
+                                            colourIndex = int.Parse(reader.GetAttribute("offset"));
+                                            break;
+                                    }
+                                }
+                                break;
+                            // The number of vertices in each face
+                            case "vcount":
+                                {
+                                    String values = reader.ReadElementContentAsString();
+                                    String[] split = values.Split(new string[] { " " }, StringSplitOptions.RemoveEmptyEntries);
+                                    for (int i = 0; i < split.Length; i++)
+                                    {
+                                        vcount[i] = int.Parse(split[i]);
+                                    }
+                                }
+                                break;
+                            // Face definitions
+                            // NOTE: Only supports triangulated meshes at present
+                            case "p":
+                                {
+                                    String values = reader.ReadElementContentAsString();
+                                    String[] split = values.Split(' ');
+
+                                    int vtxInd = 0;
+                                    int vcountInd = 0;
+                                    // Faces must include vertices, normals and texture co-ordinates with
+                                    // optional colours
+                                    int inputCount = 0;
+                                    if (vertexIndex != -1) inputCount++; if (normalIndex != -1) inputCount++;
+                                    if (texCoordIndex != -1) inputCount++; if (colourIndex != -1) inputCount++;
+                                    while (vtxInd < split.Length)
+                                    {
+                                        int nvtx = (!isTriangles) ? vcount[vcountInd] : 3;
+                                        int[] vtxIndices = new int[nvtx];
+
+                                        // For each vertex defined in face
+                                        for (int i = 0; i < nvtx; i += 1)
+                                        {
+                                            vtxIndices[i] = int.Parse(split[vtxInd + vertexIndex]) + (vertices.Count - currentVertexCount);
+
+                                            vtxInd += inputCount;
+                                        }
+
+                                        Vertex u = vertices[vtxIndices[0]];
+                                        Vertex v = vertices[vtxIndices[1]];
+                                        Vertex w = vertices[vtxIndices[2]];
+
+                                        //Below line gets rid of faces that are too small, original 0.001
+                                        if (cross(v.sub(u), w.sub(u)).norm_sq() > faceSizeThreshold)//#TODO: find a better solution
+                                            triangles.Add(new Triangle(u, v, w, matColTypes[group_name]));
+
+                                        /* Example of a typical triangle
+                                         * 0  0  0      2  1  3     3  2  2
+                                         * V1 N1 T1     V2 N2 T2    V3 N3 T3
+                                         * 
+                                         * V<n> are the indices of the triangles vertex positions,
+                                         * N<n> are its normal indices
+                                         * and T<n> are its texture co-ordinate indices
+                                         */
+
+                                        vcountInd++;
+                                    }
+                                }
+                                break;
+                        }
+                    }
+                }
+            }
+
             return new object[] { triangles };
         }
 
@@ -149,7 +338,7 @@ namespace SM64DSe
                 Vector b = unit(cross(t.v.sub(t.u), t.n));
                 Vector c = unit(cross(t.w.sub(t.v), t.n));
 
-                f.length = new FixedPoint(dot(t.v.sub(t.u), c), 1/65536f);
+                f.length = new FixedPoint(dot(t.v.sub(t.u), c), 1 / 65536f);
                 f.vertex_index = (ushort)vertex_welder.add(t.u);
                 f.normal_index = (ushort)normal_welder.add(t.n);
                 f.a_index = (ushort)normal_welder.add(a);
@@ -219,7 +408,7 @@ namespace SM64DSe
             kcl.Write32(0x24, (uint)(~((int)octree.width_y - 1) & 0xFFFFFFFF));
             kcl.Write32(0x28, (uint)(~((int)octree.width_z - 1) & 0xFFFFFFFF));
             kcl.Write32(0x2C, (uint)(Math.Log(octree.base_width, 2)));
-            kcl.Write32(0x30, (uint)(Math.Log(octree.nx,2)));
+            kcl.Write32(0x30, (uint)(Math.Log(octree.nx, 2)));
             kcl.Write32(0x34, (uint)(Math.Log(octree.nx, 2)) + (uint)(Math.Log(octree.ny, 2)));
 
             kcl.SaveChanges();
@@ -228,7 +417,7 @@ namespace SM64DSe
 
         public static float dot(Vector a, Vector b)
         {
-            return a.x.theValue*b.x.theValue + a.y.theValue*b.y.theValue + a.z.theValue*b.z.theValue;
+            return a.x.theValue * b.x.theValue + a.y.theValue * b.y.theValue + a.z.theValue * b.z.theValue;
         }
 
         public static float dot(Vector a, Vertex b)
@@ -243,8 +432,8 @@ namespace SM64DSe
 
         public static Vector cross(Vector a, Vector b)//Vector, Vector > Vector
         {
-            return new Vector(a.y.theValue*b.z.theValue - a.z.theValue*b.y.theValue, a.z.theValue*b.x.theValue - a.x.theValue*b.z.theValue, 
-                a.x.theValue*b.y.theValue - a.y.theValue*b.x.theValue);
+            return new Vector(a.y.theValue * b.z.theValue - a.z.theValue * b.y.theValue, a.z.theValue * b.x.theValue - a.x.theValue * b.z.theValue,
+                a.x.theValue * b.y.theValue - a.y.theValue * b.x.theValue);
         }
 
         public static Vector cross(Vertex a, Vertex b)//Vertex, Vertex > Vector
@@ -274,7 +463,7 @@ namespace SM64DSe
               presented here:
               http://fileadmin.cs.lth.se/cs/Personal/Tomas_Akenine-Moller/code/tribox3.txt
             */
-            
+
             Vertex u = triangle.u.sub(centre);
             Vertex v = triangle.v.sub(centre);
             Vertex w = triangle.w.sub(centre);
@@ -288,8 +477,8 @@ namespace SM64DSe
 
             // Test for separation along the axis normal to the face of the triangle
 
-            float d = dot(n,u);
-            float r = half_width*(Math.Abs(n.x.theValue) + Math.Abs(n.y.theValue) + Math.Abs(n.z.theValue));
+            float d = dot(n, u);
+            float r = half_width * (Math.Abs(n.x.theValue) + Math.Abs(n.y.theValue) + Math.Abs(n.z.theValue));
             if (d < -r || d > r) return false;
 
             // Test for separation along the axes parallel to the cross products of the
@@ -306,20 +495,20 @@ namespace SM64DSe
 
         public static bool edge_axis_test(float a1, float a2, float b1, float b2, float c1, float c2, float hw)
         {
-            float p = a1*b1 + a2*b2;
-            float q = a1*c1 + a2*c2;
-            float r = hw*(Math.Abs(a1) + Math.Abs(a2));
+            float p = a1 * b1 + a2 * b2;
+            float q = a1 * c1 + a2 * c2;
+            float r = hw * (Math.Abs(a1) + Math.Abs(a2));
             return max(p, q) < -r || min(p, q) > r;
         }
 
         public static bool edge_test(Vertex v0, Vertex v1, Vertex v2, float hw)
         {
             Vertex e = v1.sub(v0);
-            if (edge_axis_test(e.z.theValue, -e.y.theValue, v0.y.theValue, v0.z.theValue, v2.y.theValue, v2.z.theValue, hw)) 
+            if (edge_axis_test(e.z.theValue, -e.y.theValue, v0.y.theValue, v0.z.theValue, v2.y.theValue, v2.z.theValue, hw))
                 return true;
-            if (edge_axis_test(-e.z.theValue, e.x.theValue, v0.x.theValue, v0.z.theValue, v2.x.theValue, v2.z.theValue, hw)) 
+            if (edge_axis_test(-e.z.theValue, e.x.theValue, v0.x.theValue, v0.z.theValue, v2.x.theValue, v2.z.theValue, hw))
                 return true;
-            if (edge_axis_test(e.y.theValue, -e.x.theValue, v0.x.theValue, v0.y.theValue, v2.x.theValue, v2.y.theValue, hw)) 
+            if (edge_axis_test(e.y.theValue, -e.x.theValue, v0.x.theValue, v0.y.theValue, v2.x.theValue, v2.y.theValue, hw))
                 return true;
             return false;
         }
@@ -394,21 +583,21 @@ namespace SM64DSe
         public Face() { }
 
     }//End Face class
-	
-	public class Vertex
-	{
+
+    public class Vertex
+    {
         //Uses signed 32 bit integers
         public FixedPoint x;
         public FixedPoint y;
         public FixedPoint z;
         public float scale = (1 / 64f);
-		
-		public Vertex()
-		{
+
+        public Vertex()
+        {
             this.x = new FixedPoint(0f, scale);
             this.y = new FixedPoint(0f, scale);
             this.z = new FixedPoint(0f, scale);
-		}
+        }
 
         public Vertex(float x, float y, float z)
         {
@@ -425,27 +614,27 @@ namespace SM64DSe
             this.z = new FixedPoint(z, scale);
         }
 
-        public Vertex add (Vertex other)
+        public Vertex add(Vertex other)
         {
             return new Vertex(this.x.theValue + other.x.theValue, this.y.theValue + other.y.theValue, this.z.theValue + other.z.theValue);
         }
 
-        public Vertex sub (Vertex other)
+        public Vertex sub(Vertex other)
         {
             return new Vertex(this.x.theValue - other.x.theValue, this.y.theValue - other.y.theValue, this.z.theValue - other.z.theValue);
         }
 
-        public Vertex mul (float scalar)
+        public Vertex mul(float scalar)
         {
             return new Vertex(this.x.theValue * scalar, this.y.theValue * scalar, this.z.theValue * scalar);
         }
 
-        public Vertex rmul (float scalar)
+        public Vertex rmul(float scalar)
         {
             return new Vertex(scalar * this.x.theValue, scalar * this.y.theValue, scalar * this.z.theValue);
         }
 
-        public Vertex truediv (float scalar)
+        public Vertex truediv(float scalar)
         {
             return new Vertex(this.x.theValue / scalar, this.y.theValue / scalar, this.z.theValue / scalar);
         }
@@ -492,7 +681,7 @@ namespace SM64DSe
             return (float)Math.Sqrt(this.norm_sq());
         }
 
-	}//End Vertex class
+    }//End Vertex class
 
     public class Vector
     {
@@ -501,13 +690,13 @@ namespace SM64DSe
         public FixedPoint y;
         public FixedPoint z;
         public float scale = (1 / 1024f);
-		
-		public Vector()
-		{
+
+        public Vector()
+        {
             this.x = new FixedPoint(0f, scale);
             this.y = new FixedPoint(0f, scale);
             this.z = new FixedPoint(0f, scale);
-		}
+        }
 
         public Vector(float x, float y, float z)
         {
@@ -524,27 +713,27 @@ namespace SM64DSe
             this.z = new FixedPoint(z, scale);
         }
 
-        public Vector add (Vector other)
+        public Vector add(Vector other)
         {
             return new Vector(this.x.theValue + other.x.theValue, this.y.theValue + other.y.theValue, this.z.theValue + other.z.theValue);
         }
 
-        public Vector sub (Vector other)
+        public Vector sub(Vector other)
         {
             return new Vector(this.x.theValue - other.x.theValue, this.y.theValue - other.y.theValue, this.z.theValue - other.z.theValue);
         }
 
-        public Vector mul (float scalar)
+        public Vector mul(float scalar)
         {
             return new Vector(this.x.theValue * scalar, this.y.theValue * scalar, this.z.theValue * scalar);
         }
 
-        public Vector rmul (float scalar)
+        public Vector rmul(float scalar)
         {
             return new Vector(scalar * this.x.theValue, scalar * this.y.theValue, scalar * this.z.theValue);
         }
 
-        public Vector truediv (float scalar)
+        public Vector truediv(float scalar)
         {
             return new Vector(this.x.theValue / scalar, this.y.theValue / scalar, this.z.theValue / scalar);
         }
@@ -611,7 +800,7 @@ namespace SM64DSe
             this.u = u;
             this.v = v;
             this.w = w;
-            this.n = ObjToKcl.unit(ObjToKcl.cross(v.sub(u), w.sub(u)));
+            this.n = KCL_Importer.unit(KCL_Importer.cross(v.sub(u), w.sub(u)));
             this.group = group;
         }
     }//End Triangle class
@@ -648,7 +837,7 @@ namespace SM64DSe
 
         public int vertex_hash(int ix, int iy, int iz)
         {
-            int result = (int)(ix*this.magic_x + iy*this.magic_y + iz*this.magic_z) % this.num_buckets;
+            int result = (int)(ix * this.magic_x + iy * this.magic_y + iz * this.magic_z) % this.num_buckets;
             if (result < 0)
                 result *= (-1);
             return result;
@@ -667,7 +856,7 @@ namespace SM64DSe
             {
                 for (int iy = min_iy; iy < max_iy + 1; iy++)
                 {
-                    for (int iz = min_iz; iz < max_iz + 1; iz ++)
+                    for (int iz = min_iz; iz < max_iz + 1; iz++)
                     {
                         foreach (int index in this.buckets[(int)this.vertex_hash(ix, iy, iz)])
                         {
@@ -732,7 +921,7 @@ namespace SM64DSe
         public float min_width;
         public List<int> indices = new List<int>();
 
-        public bool is_leaf =  false;
+        public bool is_leaf = false;
 
         public List<Octree> children = new List<Octree>();
 
@@ -751,25 +940,25 @@ namespace SM64DSe
 
             foreach (Triangle t in triangles)
             {
-                float min_x0 = ObjToKcl.min(ObjToKcl.min(t.u.x.theValue, t.v.x.theValue, t.w.x.theValue));
+                float min_x0 = KCL_Importer.min(KCL_Importer.min(t.u.x.theValue, t.v.x.theValue, t.w.x.theValue));
                 if (min_x0 < min_x) min_x = min_x0;
-                float min_y0 = ObjToKcl.min(ObjToKcl.min(t.u.y.theValue, t.v.y.theValue, t.w.y.theValue));
+                float min_y0 = KCL_Importer.min(KCL_Importer.min(t.u.y.theValue, t.v.y.theValue, t.w.y.theValue));
                 if (min_y0 < min_y) min_y = min_y0;
-                float min_z0 = ObjToKcl.min(ObjToKcl.min(t.u.z.theValue, t.v.z.theValue, t.w.z.theValue));
+                float min_z0 = KCL_Importer.min(KCL_Importer.min(t.u.z.theValue, t.v.z.theValue, t.w.z.theValue));
                 if (min_z0 < min_z) min_z = min_z0;
-                float max_x0 = ObjToKcl.max(ObjToKcl.max(t.u.x.theValue, t.v.x.theValue, t.w.x.theValue));
+                float max_x0 = KCL_Importer.max(KCL_Importer.max(t.u.x.theValue, t.v.x.theValue, t.w.x.theValue));
                 if (max_x0 > max_x) max_x = max_x0;
-                float max_y0 = ObjToKcl.max(ObjToKcl.max(t.u.y.theValue, t.v.y.theValue, t.w.y.theValue));
+                float max_y0 = KCL_Importer.max(KCL_Importer.max(t.u.y.theValue, t.v.y.theValue, t.w.y.theValue));
                 if (max_y0 > max_y) max_y = max_y0;
-                float max_z0 = ObjToKcl.max(ObjToKcl.max(t.u.z.theValue, t.v.z.theValue, t.w.z.theValue));
+                float max_z0 = KCL_Importer.max(KCL_Importer.max(t.u.z.theValue, t.v.z.theValue, t.w.z.theValue));
                 if (max_z0 > max_z) max_z = max_z0;
             }
 
-            this.width_x = (float)Math.Pow(2, (int)(Math.Ceiling(Math.Log(ObjToKcl.max(max_x - min_x, min_width), 2))));
-            this.width_y = (float)Math.Pow(2, (int)(Math.Ceiling(Math.Log(ObjToKcl.max(max_y - min_y, min_width), 2))));
-            this.width_z = (float)Math.Pow(2, (int)(Math.Ceiling(Math.Log(ObjToKcl.max(max_z - min_z, min_width), 2))));
-            this.base_width = ObjToKcl.min(width_x, width_y, width_z);
-            this.bas = new Vertex(min_x,min_y,min_z);
+            this.width_x = (float)Math.Pow(2, (int)(Math.Ceiling(Math.Log(KCL_Importer.max(max_x - min_x, min_width), 2))));
+            this.width_y = (float)Math.Pow(2, (int)(Math.Ceiling(Math.Log(KCL_Importer.max(max_y - min_y, min_width), 2))));
+            this.width_z = (float)Math.Pow(2, (int)(Math.Ceiling(Math.Log(KCL_Importer.max(max_z - min_z, min_width), 2))));
+            this.base_width = KCL_Importer.min(width_x, width_y, width_z);
+            this.bas = new Vertex(min_x, min_y, min_z);
 
             this.nx = (int)Math.Floor(this.width_x / this.base_width);
             this.ny = (int)Math.Floor(this.width_y / this.base_width);
@@ -785,7 +974,7 @@ namespace SM64DSe
                 {
                     for (int i = 0; i < this.nx; i++)
                     {
-                        this.children.Add(new Octree(this.bas.add((new Vertex(i, j, k)).mul(this.base_width)), this.base_width, 
+                        this.children.Add(new Octree(this.bas.add((new Vertex(i, j, k)).mul(this.base_width)), this.base_width,
                             ind, this.triangles, this.max_triangles, this.min_width));
                     }
                 }
@@ -800,16 +989,16 @@ namespace SM64DSe
             this.triangles = triangles;
             this.max_triangles = max_triangles;
             this.min_width = min_width;
-            
+
             this.width_x /= 2f;
             this.width_y /= 2f;
             this.width_z /= 2f;
-            this.base_width = ObjToKcl.min(width_x, width_y, width_z);
+            this.base_width = KCL_Importer.min(width_x, width_y, width_z);
             this.bas = new Vertex(width / 2f, width / 2f, width / 2f);
 
             foreach (int i in indices)
             {
-                if (ObjToKcl.tribox_overlap(this.triangles[i], centre, width / 2f))
+                if (KCL_Importer.tribox_overlap(this.triangles[i], centre, width / 2f))
                 {
                     this.indices.Add(i);
                 }
@@ -915,7 +1104,7 @@ namespace SM64DSe
                 }
                 branch_base += (uint)(4 * (branch.children.Count));
             }
-            
+
             list_offsets_ind.RemoveAt(list_offsets_ind.Count - 1);
             list_offsets_addr.RemoveAt(list_offsets_addr.Count - 1);
 

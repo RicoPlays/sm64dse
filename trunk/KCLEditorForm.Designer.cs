@@ -55,8 +55,8 @@
             this.gridColTypes = new System.Windows.Forms.DataGridView();
             this.txtThreshold = new System.Windows.Forms.TextBox();
             this.label2 = new System.Windows.Forms.Label();
-            this.btnOpenOBJ = new System.Windows.Forms.Button();
-            this.txtOBJName = new System.Windows.Forms.TextBox();
+            this.btnOpenModel = new System.Windows.Forms.Button();
+            this.txtModelName = new System.Windows.Forms.TextBox();
             this.label1 = new System.Windows.Forms.Label();
             this.lbxPlanes = new System.Windows.Forms.ListBox();
             this.glModelView = new OpenTK.GLControl();
@@ -66,14 +66,12 @@
             this.toolStripSeparator1 = new System.Windows.Forms.ToolStripSeparator();
             this.btnExportToOBJ = new System.Windows.Forms.ToolStripButton();
             this.cmbPolygonMode = new System.Windows.Forms.ComboBox();
-            //((System.ComponentModel.ISupportInitialize)(this.splitContainer1)).BeginInit();
             this.splitContainer1.Panel1.SuspendLayout();
             this.splitContainer1.Panel2.SuspendLayout();
             this.splitContainer1.SuspendLayout();
             this.tabDetailsImport.SuspendLayout();
             this.tpgDetails.SuspendLayout();
             this.tpgImport.SuspendLayout();
-            //((System.ComponentModel.ISupportInitialize)(this.gridColTypes)).BeginInit();
             this.toolStrip1.SuspendLayout();
             this.SuspendLayout();
             // 
@@ -296,15 +294,15 @@
             this.tpgImport.Controls.Add(this.gridColTypes);
             this.tpgImport.Controls.Add(this.txtThreshold);
             this.tpgImport.Controls.Add(this.label2);
-            this.tpgImport.Controls.Add(this.btnOpenOBJ);
-            this.tpgImport.Controls.Add(this.txtOBJName);
+            this.tpgImport.Controls.Add(this.btnOpenModel);
+            this.tpgImport.Controls.Add(this.txtModelName);
             this.tpgImport.Controls.Add(this.label1);
             this.tpgImport.Location = new System.Drawing.Point(4, 22);
             this.tpgImport.Name = "tpgImport";
             this.tpgImport.Padding = new System.Windows.Forms.Padding(3);
             this.tpgImport.Size = new System.Drawing.Size(234, 250);
             this.tpgImport.TabIndex = 1;
-            this.tpgImport.Text = "Import OBJ";
+            this.tpgImport.Text = "Import Model";
             this.tpgImport.UseVisualStyleBackColor = true;
             // 
             // txtScale
@@ -372,31 +370,31 @@
             this.label2.TabIndex = 3;
             this.label2.Text = "Drop faces below:";
             // 
-            // btnOpenOBJ
+            // btnOpenModel
             // 
-            this.btnOpenOBJ.Location = new System.Drawing.Point(73, 2);
-            this.btnOpenOBJ.Name = "btnOpenOBJ";
-            this.btnOpenOBJ.Size = new System.Drawing.Size(30, 23);
-            this.btnOpenOBJ.TabIndex = 2;
-            this.btnOpenOBJ.Text = "...";
-            this.btnOpenOBJ.UseVisualStyleBackColor = true;
-            this.btnOpenOBJ.Click += new System.EventHandler(this.btnOpenOBJ_Click);
+            this.btnOpenModel.Location = new System.Drawing.Point(73, 2);
+            this.btnOpenModel.Name = "btnOpenModel";
+            this.btnOpenModel.Size = new System.Drawing.Size(30, 23);
+            this.btnOpenModel.TabIndex = 2;
+            this.btnOpenModel.Text = "...";
+            this.btnOpenModel.UseVisualStyleBackColor = true;
+            this.btnOpenModel.Click += new System.EventHandler(this.btnOpenOBJ_Click);
             // 
-            // txtOBJName
+            // txtModelName
             // 
-            this.txtOBJName.Location = new System.Drawing.Point(109, 4);
-            this.txtOBJName.Name = "txtOBJName";
-            this.txtOBJName.Size = new System.Drawing.Size(119, 20);
-            this.txtOBJName.TabIndex = 1;
+            this.txtModelName.Location = new System.Drawing.Point(109, 4);
+            this.txtModelName.Name = "txtModelName";
+            this.txtModelName.Size = new System.Drawing.Size(119, 20);
+            this.txtModelName.TabIndex = 1;
             // 
             // label1
             // 
             this.label1.AutoSize = true;
             this.label1.Location = new System.Drawing.Point(-3, 7);
             this.label1.Name = "label1";
-            this.label1.Size = new System.Drawing.Size(30, 13);
+            this.label1.Size = new System.Drawing.Size(67, 13);
             this.label1.TabIndex = 0;
-            this.label1.Text = "OBJ:";
+            this.label1.Text = "OBJ or DAE:";
             // 
             // lbxPlanes
             // 
@@ -422,6 +420,7 @@
             this.glModelView.MouseDown += new System.Windows.Forms.MouseEventHandler(this.glModelView_MouseDown);
             this.glModelView.MouseMove += new System.Windows.Forms.MouseEventHandler(this.glModelView_MouseMove);
             this.glModelView.MouseUp += new System.Windows.Forms.MouseEventHandler(this.glModelView_MouseUp);
+            this.glModelView.MouseWheel += new System.Windows.Forms.MouseEventHandler(this.glModelView_MouseWheel);
             this.glModelView.Resize += new System.EventHandler(this.glModelView_Resize);
             // 
             // toolStrip1
@@ -492,14 +491,12 @@
             this.Text = "KCL Editor";
             this.splitContainer1.Panel1.ResumeLayout(false);
             this.splitContainer1.Panel2.ResumeLayout(false);
-            //((System.ComponentModel.ISupportInitialize)(this.splitContainer1)).EndInit();
             this.splitContainer1.ResumeLayout(false);
             this.tabDetailsImport.ResumeLayout(false);
             this.tpgDetails.ResumeLayout(false);
             this.tpgDetails.PerformLayout();
             this.tpgImport.ResumeLayout(false);
             this.tpgImport.PerformLayout();
-            //((System.ComponentModel.ISupportInitialize)(this.gridColTypes)).EndInit();
             this.toolStrip1.ResumeLayout(false);
             this.toolStrip1.PerformLayout();
             this.ResumeLayout(false);
@@ -539,8 +536,8 @@
         private System.Windows.Forms.TabPage tpgImport;
         private System.Windows.Forms.TextBox txtThreshold;
         private System.Windows.Forms.Label label2;
-        private System.Windows.Forms.Button btnOpenOBJ;
-        private System.Windows.Forms.TextBox txtOBJName;
+        private System.Windows.Forms.Button btnOpenModel;
+        private System.Windows.Forms.TextBox txtModelName;
         private System.Windows.Forms.Label label1;
         private System.Windows.Forms.DataGridView gridColTypes;
         private System.Windows.Forms.Button btnImportColMap;
