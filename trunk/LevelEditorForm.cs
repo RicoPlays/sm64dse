@@ -634,7 +634,7 @@ namespace SM64DSe
             }
         }
 
-        private void RefreshObjects(int layer)
+        public void RefreshObjects(int layer)
         {
             IEnumerable<LevelObject> pathNodes = m_LevelObjects.Values.Where(obj => (obj.m_Type) == 2 && (obj.m_Layer) == layer);
             IEnumerable<LevelObject> paths = m_LevelObjects.Values.Where(obj => (obj.m_Type) == 3 && (obj.m_Layer) == layer);
@@ -685,6 +685,7 @@ namespace SM64DSe
                         btnRemoveSel.Visible = true;
                         btnReplaceObjModel.Visible = true;
                         btnExportObjectModel.Visible = true;
+                        btnOffsetAllCoords.Visible = true;
 
                         TreeNode node0 = tvObjectList.Nodes.Add("parent0", "Objects");
 
@@ -2497,6 +2498,11 @@ namespace SM64DSe
                     slStatusLabel.Text = "Finished exporting model.";
                 }
             }
+        }
+
+        private void btnOffsetAllCoords_Click(object sender, EventArgs e)
+        {
+            new OffsetAllObjectCoordsForm().Show(this);
         }
     }
 }

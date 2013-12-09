@@ -47,7 +47,7 @@ namespace SM64DSe
                 case 7: ret = new NormalBMDRenderer("data/normal_obj/obj_updnlift/obj_updnlift.bmd", 0.008f); break;
                 case 8: ret = new NormalBMDRenderer("data/special_obj/hs_updown_lift/hs_updown_lift.bmd", 0.008f); break;
                 case 9: ret = new NormalBMDRenderer("data/normal_obj/obj_pathlift/obj_pathlift.bmd", 0.008f); break;
-                //case 10: ret = new NormalBMDRenderer("data/enemy/wanwan/wanwan.bmd", 0.008f); break;
+                //case 10: ret = new NormalBMDRenderer("data/enemy/wanwan/wanwan.bmd", 0.008f); break; CHAIN CHOMP
                 // 11 -- CAMERA_TAG -- non-graphical
                 case 12: ret = new NormalBMDRenderer("data/normal_obj/obj_seesaw/obj_seesaw.bmd", 0.008f); break;
                 case 13: ret = new NormalBMDRenderer("data/enemy/iron_ball/iron_ball.bmd", 0.008f); break;
@@ -85,23 +85,28 @@ namespace SM64DSe
                 case 45: ret = new NormalBMDRenderer("data/special_obj/b_ana_shutter/b_ana_shutter.bmd", 0.008f); break;
                 case 46: ret = new NormalBMDRenderer("data/special_obj/cv_shutter/cv_shutter.bmd", 0.008f); break;
                 case 47: ret = new NormalBMDRenderer("data/special_obj/cv_news_lift/cv_news_lift.bmd", 0.008f); break;
-                    // 48-49
+                //case 48: ret = new NormalBMDRenderer("data/enemy/wanwan/wanwan.bmd", 0.008f); break; CHAIN CHOMP LOOSE
+                case 49: ret = new NormalBMDRenderer("data/normal_obj/oneup_kinoko/oneup_kinoko.bmd", 0.008f); break;
                 case 50: ret = new NormalBMDRenderer("data/normal_obj/obj_cannon/houdai.bmd", 0.008f); break;
                 case 51: ret = new NormalBMDRenderer("data/special_obj/b_wan_shutter/b_wan_shutter.bmd", 0.008f); break;
-                    // 52-55
+                case 52: ret = new NormalBMDRenderer("data/enemy/water_bomb/water_bomb.bmd", 0.008f); break;
+                //case 53: ret = new NormalBMDRenderer("data/normal_obj/birds/birds.bmd", 0.008f); break;
+                    // 54  FISH
+                //case 55: ret = new NormalBMDRenderer("data/normal_obj/butterfly/butterfly.bmd", 0.008f); break;
                 case 56: ret = new NormalBMDRenderer("data/enemy/bombking/bomb_king.bmd", 0.008f); break;
                 case 57: ret = new NormalBMDRenderer("data/enemy/snowman/snowman_model.bmd", 0.008f); break;
                 case 58: ret = new NormalBMDRenderer("data/enemy/piano/piano.bmd", 0.008f); break;
                 case 59: ret = new NormalBMDRenderer("data/enemy/pakkun/pakkun_model.bmd", 0.008f); break;
-                    // 60
+                    // 60 STAR CAMERA
                 case 61: ret = new NormalBMDRenderer("data/normal_obj/star/obj_star.bmd", 0.008f); break;
                 case 62: ret = new NormalBMDRenderer("data/normal_obj/star/obj_star_silver.bmd", 0.008f); break;
-                    // 63
+                    // 63 STAR MARKER
                 case 64: ret = new NormalBMDRenderer("data/enemy/battan/battan.bmd", 0.008f); break;
                 case 65: ret = new NormalBMDRenderer("data/enemy/battan_king/battan_king.bmd", 0.008f); break;
                 case 66: ret = new NormalBMDRenderer("data/enemy/dosune/dosune.bmd", 0.008f); break;
                 case 67: ret = new NormalBMDRenderer("data/enemy/teresa/teresa.bmd", 0.008f); break;
-                    // 68-69
+                case 68: ret = new NormalBMDRenderer("data/enemy/boss_teresa/boss_teresa.bmd", 0.008f); break;
+                    // 69 ICON TERESA
                 //case 70: ret = new NormalBMDRenderer("data/special_obj/th_kaidan/th_kaidan.bmd", 0.008f); break;
                 case 71: ret = new NormalBMDRenderer("data/special_obj/th_hondana/th_hondana.bmd", 0.008f); break;
                 case 72: ret = new NormalBMDRenderer("data/special_obj/th_mery_go/th_mery_go.bmd", 0.008f); break;
@@ -116,7 +121,8 @@ namespace SM64DSe
                 case 81: ret = new NormalBMDRenderer("data/enemy/peach/peach_high.bmd", 0.008f); break;
                 case 82: ret = new NormalBMDRenderer("data/special_obj/kb2_stage/kb2_stage.bmd", 0.008f); break;
                 case 83: ret = new Koopa3bgRenderer(obj.Parameters[0] & 0xFF); break;
-                    // 84-85
+                case 84: ret = new NormalBMDRenderer("data/enemy/nokonoko/shell_green.bmd", 0.008f); break;
+                case 85: ret = new NormalBMDRenderer("data/enemy/hojiro/hojiro.bmd", 0.008f); break;
                 case 86: ret = new NormalBMDRenderer("data/special_obj/ct_mecha_obj01/ct_mecha_obj01.bmd", 0.008f); break;
                 case 87: ret = new NormalBMDRenderer("data/special_obj/ct_mecha_obj02/ct_mecha_obj02.bmd", 0.008f); break;
                 case 88: ret = new NormalBMDRenderer("data/special_obj/ct_mecha_obj03/ct_mecha_obj03.bmd", 0.008f); break;
@@ -148,7 +154,11 @@ namespace SM64DSe
                 case 114: ret = new NormalBMDRenderer("data/special_obj/rc_kaiten/rc_kaiten.bmd", 0.008f); break;
                 case 115: ret = new NormalBMDRenderer("data/special_obj/rc_guruguru/rc_guruguru.bmd", 0.008f); break;
                 case 116: ret = new NormalBMDRenderer("data/special_obj/sl_ice_brock/sl_ice_brock.bmd", 0.008f); break;
-                    // 117-121
+                case 117: ret = new NormalBMDRenderer("data/special_obj/hm_maruta/hm_maruta.bmd", 0.008f); break;
+                case 118: ret = new NormalBMDRenderer("data/special_obj/tt_obj_futa/tt_obj_futa.bmd", 0.008f); break;
+                case 119: ret = new NormalBMDRenderer("data/special_obj/tt_obj_water/tt_obj_water.bmd", 0.008f); break;
+                case 120: ret = new NormalBMDRenderer("data/special_obj/td_obj_futa/td_obj_futa.bmd", 0.008f); break;
+                case 121: ret = new NormalBMDRenderer("data/special_obj/td_obj_water/td_obj_water.bmd", 0.008f); break;
                 case 122: ret = new NormalBMDRenderer("data/special_obj/wc_obj07/wc_obj07.bmd", 0.008f); break;
                 case 123: ret = new NormalBMDRenderer("data/special_obj/wc_obj01/wc_obj01.bmd", 0.008f); break;
                 case 124: ret = new NormalBMDRenderer("data/special_obj/wc_obj02/wc_obj02.bmd", 0.008f); break;
@@ -170,25 +180,35 @@ namespace SM64DSe
                 case 140: ret = new NormalBMDRenderer("data/special_obj/fl_uki_ki/fl_uki_ki.bmd", 0.008f); break;
                 case 141: ret = new NormalBMDRenderer("data/special_obj/fl_kuzure/fl_kuzure.bmd", 0.008f); break;
                 case 142: ret = new NormalBMDRenderer("data/special_obj/fm_battan/fm_battan.bmd", 0.008f); break;
-                    // 143-145
+                    // 143-144
+                case 145: ret = new NormalBMDRenderer("data/enemy/manta/manta.bmd", 0.008f); break;
                 case 146: ret = new NormalBMDRenderer("data/enemy/spider/spider.bmd", 0.008f); break;
-                    // 147
+                case 147: ret = new NormalBMDRenderer("data/enemy/togezo/togezo.bmd", 0.008f); break;
                 case 148: ret = new NormalBMDRenderer("data/enemy/jugem/jugem.bmd", 0.008f); break;
                 case 149: ret = new NormalBMDRenderer("data/enemy/gamaguchi/gamaguchi.bmd", 0.008f); break;
                 case 150: ret = new NormalBMDRenderer("data/enemy/eyekun/eyekun.bmd", 0.008f); break;
-                    // 151
+                case 151: ret = new NormalBMDRenderer("data/enemy/eyekun/eyekun.bmd", 0.016f); break;
                 case 152: ret = new NormalBMDRenderer("data/enemy/batta_block/batta_block.bmd", 0.008f); break;
-                    // 153-156
+                case 153: ret = new DoubleRenderer("data/enemy/birikyu/birikyu.bmd", "data/enemy/birikyu/birikyu_elec.bmd", 0.008f); break;
+                case 154: ret = new NormalBMDRenderer("data/special_obj/hm_basket/hm_basket.bmd", 0.008f); break;
+                case 155: ret = new NormalBMDRenderer("data/enemy/monkey/monkey.bmd", 0.008f); break;
+                    // 156 UKIKI (STAR)
                 case 157: ret = new NormalBMDRenderer("data/enemy/penguin/penguin_child.bmd", 0.002f); break;
-                    // 158
+                case 158: ret = new NormalBMDRenderer("data/enemy/penguin/penguin.bmd", 0.008f); break;
                 case 159: ret = new NormalBMDRenderer("data/enemy/penguin/penguin.bmd", 0.008f); break;
-                    // 160
+                case 160: ret = new NormalBMDRenderer("data/enemy/penguin/penguin.bmd", 0.008f); break;
                 case 161: ret = new NormalBMDRenderer("data/enemy/keronpa/keronpa.bmd", 0.008f); break;
-                    // 162-166
+                case 162: ret = new BigSnowmanRenderer(); break;
+                case 163: ret = new NormalBMDRenderer("data/enemy/big_snowman/big_snowman_head.bmd", 0.008f); break;
+                case 164: ret = new NormalBMDRenderer("data/enemy/big_snowman/big_snowman_body.bmd", 0.008f); break;
+                    // 165 SNOWMAN BREATH
+                case 166: ret = new NormalBMDRenderer("data/enemy/pukupuku/pukupuku.bmd", 0.008f); break;
                 case 167: ret = new NormalBMDRenderer("data/special_obj/c2_hari_short/c2_hari_short.bmd", 0.008f); break;
                 case 168: ret = new NormalBMDRenderer("data/special_obj/c2_hari_long/c2_hari_long.bmd", 0.008f); break;
                 case 169: ret = new NormalBMDRenderer("data/special_obj/c2_huriko/c2_huriko.bmd", 0.008f); break;
-                    // 170-172
+                case 170: ret = new NormalBMDRenderer("data/enemy/menbo/menbo.bmd", 0.008f); break;
+                //case 171: ret = new NormalBMDRenderer("data/special_obj/casket/casket.bmd", 0.008f); break; BIG BOO'S HAUNT COFFIN, off-centre
+                case 172: ret = new NormalBMDRenderer("data/enemy/hyuhyu/hyuhyu.bmd", 0.008f); break;
                 case 173: ret = new NormalBMDRenderer("data/special_obj/b_si_so/b_si_so.bmd", 0.008f); break;
                 case 174: ret = new NormalBMDRenderer("data/special_obj/km1_shiso/km1_shiso.bmd", 0.008f); break;
                 case 175: ret = new NormalBMDRenderer("data/special_obj/km1_dorifu/km1_dorifu0.bmd", 0.008f); break;
@@ -206,7 +226,7 @@ namespace SM64DSe
                 case 187: ret = new NormalBMDRenderer("data/normal_obj/obj_yajirusi_l/yajirusi_l.bmd", 0.008f); break;
                 case 188: ret = new NormalBMDRenderer("data/normal_obj/obj_yajirusi_r/yajirusi_r.bmd", 0.008f); break;
                 case 189: ret = new NormalBMDRenderer("data/enemy/propeller_heyho/propeller_heyho.bmd", 0.008f); break;
-                // 190 -- KILLER -- TODO
+                case 190: ret = new DoubleRenderer("data/enemy/killer/killer_body.bmd", "data/enemy/killer/killer_face.bmd", 0.008f); break;
                 case 191: ret = new NormalBMDRenderer("data/special_obj/kb1_ball/kb1_ball.bmd", 0.008f); break;
                 case 192: ret = new NormalBMDRenderer("data/special_obj/hs_moon/hs_moon.bmd", 0.008f); break;
                 case 193: ret = new NormalBMDRenderer("data/special_obj/hs_star/hs_star.bmd", 0.008f); break;
@@ -246,8 +266,7 @@ namespace SM64DSe
                 case 227: ret = new NormalBMDRenderer("data/special_obj/km3_kaitendai/km3_kaitendai.bmd", 0.008f); break;
                 case 228: ret = new NormalBMDRenderer("data/special_obj/c0_switch/c0_switch.bmd", 0.008f); break;
                 case 229: ret = new NormalBMDRenderer("data/special_obj/sm_lift/sm_lift.bmd", 0.008f); break;
-                //case 230: ret = new NormalBMDRenderer("data/special_obj/fl_log/fl_log.bmd", 0.008f); break;
-                    // 230
+                // case 230: ret = new NormalBMDRenderer("data/special_obj/fl_log/fl_log.bmd", 0.008f); break; // WRONG
                 case 231: ret = new NormalBMDRenderer("data/special_obj/th_lift/th_lift.bmd", 0.008f); break;
                 case 232: ret = new NormalBMDRenderer("data/special_obj/cv_ud_lift/cv_ud_lift.bmd", 0.008f); break;
                 case 233: ret = new NormalBMDRenderer("data/special_obj/rc_rift02/rc_rift02.bmd", 0.008f); break;
@@ -255,7 +274,9 @@ namespace SM64DSe
                 case 235: ret = new NormalBMDRenderer("data/special_obj/km3_rift/km3_rift.bmd", 0.008f); break;
                 case 236: ret = new NormalBMDRenderer("data/enemy/koopa_bomb/koopa_bomb.bmd", 0.008f); break;
                 case 237: ret = new NormalBMDRenderer("data/enemy/mip/mip.bmd", 0.008f); break;
-                    // 238-240
+                    // 238 RABBIT KEY
+                case 239: ret = new NormalBMDRenderer("data/enemy/owl/owl.bmd", 0.008f); break;
+                case 240: ret = new NormalBMDRenderer("data/enemy/donketu/donketu.bmd", 0.008f); break;
                 case 241: ret = new NormalBMDRenderer("data/enemy/donketu/boss_donketu.bmd", 0.008f); break;
                 case 242: ret = new ToxboxRenderer(); break;
                 // 243 -- BAR -- non-graphical
@@ -266,32 +287,37 @@ namespace SM64DSe
                 case 248: ret = new NormalBMDRenderer("data/enemy/choropu/choropu.bmd", 0.008f); break;
                 case 249: ret = new NormalBMDRenderer("data/enemy/choropu/rock.bmd", 0.008f); break;
                 case 250: ret = new NormalBMDRenderer("data/enemy/basabasa/basabasa.bmd", 0.008f); break;
-                    // 251
+                case 251: ret = new NormalBMDRenderer("data/enemy/popoi/popoi.bmd", 0.008f); break;
                 case 252: ret = new NormalBMDRenderer("data/enemy/jango/jango.bmd", 0.008f); break;
-                    // 253-254
+                case 253: ret = new PokeyRenderer(); break;
+                    // 254 MARIO CAP
                 case 255: ret = new FlPuzzleRenderer(obj.Parameters[0] & 0xFF); break;
                 // 256 -- FL_COIN -- non-graphical
-                    // 257-258
+                case 257: ret = new NormalBMDRenderer("data/enemy/dossy/dossy.bmd", 0.008f); break;
+                    // 258 DOSSY CAP
                 case 259: ret = new NormalBMDRenderer("data/enemy/huwahuwa/huwahuwa_model.bmd", 0.008f); break;
                 case 260: ret = new NormalBMDRenderer("data/special_obj/ki_slide_box/ki_slide_box.bmd", 0.008f); break;
-                    // 216-261
+                case 261: ret = new NormalBMDRenderer("data/enemy/moray/moray.bmd", 0.008f); break;
                 case 262: ret = new NormalBMDRenderer("data/normal_obj/obj_kumo/obj_kumo.bmd", 0.008f); break;
-                    // 263-272
+                case 263: ret = new NormalBMDRenderer("data/normal_obj/obj_shell/obj_shell.bmd", 0.008f); break;
+                    // 264-272
                 case 273: ret = new C1TrapRenderer(); break;
                 case 274: ret = new NormalBMDRenderer("data/special_obj/c1_hikari/c1_hikari.bmd", 0.008f); break;
                 case 275: ret = new NormalBMDRenderer("data/special_obj/c1_peach/c1_peach.bmd", 0.008f); break;
                 case 276: ret = new NormalBMDRenderer("data/special_obj/rc_carpet/rc_carpet.bmd", 0.008f); break;
-                    // 277-278
-                // 279 -- IWANTE -- TODO
-                //case 280: ret = new NormalBMDRenderer("data/enemy/hanachan/hanachan.bmd", 0.008f); break;
+                // case 277: ret = new NormalBMDRenderer("data/normal_obj/koopa_key/koopa_key.bmd", 0.016f); break;
+                    // 278
+                case 279: ret = new NormalBMDRenderer("data/enemy/iwante/iwante_dummy.bmd", 0.008f); break; // TODO: Show as hands?
+                case 280: ret = new WigglerRenderer(); break;
                 case 281: ret = new NormalBMDRenderer("data/enemy/nokonoko/nokonoko.bmd", 0.01f); break;
                 case 282: ret = new NormalBMDRenderer("data/normal_obj/obj_race_flag/obj_race_flag.bmd", 0.008f); break;
                 case 283: ret = new NormalBMDRenderer("data/special_obj/t_basket/t_basket.bmd", 0.008f); break;
                 case 284: ret = new NormalBMDRenderer("data/normal_obj/obj_block/broken_block_ll.bmd", 0.008f); break;
                 case 285: ret = new NormalBMDRenderer("data/normal_obj/obj_block/ice_block_ll.bmd", 0.008f); break;
                     // 286-289
-                case 290: ret = new NormalBMDRenderer("data/enemy/king_ice_donketu/king_ice_donketu_model.bmd", 0.008f); break;
-                    // 291-292
+                case 290: ret = new NormalBMDRenderer("data/enemy/donketu/ice_donketu.bmd", 0.008f); break;
+                case 291: ret = new NormalBMDRenderer("data/enemy/king_ice_donketu/king_ice_donketu_model.bmd", 0.008f); break;
+                case 292: ret = new NormalBMDRenderer("data/normal_obj/t_box/t_box.bmd", 0.008f); break;
                 case 293: ret = new NormalBMDRenderer("data/special_obj/mc_water/mc_water.bmd", 0.008f); break;
                 case 294: ret = new NormalBMDRenderer("data/enemy/chair/chair.bmd", 0.008f); break;
                 case 295: ret = new NormalBMDRenderer("data/special_obj/mc_metalnet/mc_metalnet.bmd", 0.008f); break;
@@ -301,11 +327,17 @@ namespace SM64DSe
                 case 299: ret = new NormalBMDRenderer("data/enemy/donkaku/donkaku.bmd", 0.008f); break;
                 case 300: ret = new NormalBMDRenderer("data/enemy/donguru/donguru.bmd", 0.008f); break;
                 case 301: ret = new NormalBMDRenderer("data/enemy/horuhei/horuhei.bmd", 0.008f); break;
-                    // 302
+                case 302: ret = new NormalBMDRenderer("data/normal_obj/scale_up_kinoko/scale_up_kinoko.bmd", 0.008f); break;
                 case 303: ret = new NormalBMDRenderer("data/special_obj/c0_water/c0_water.bmd", 0.008f); break;
                 // 304 -- SECRET_COIN -- non-graphical
                 case 305: ret = new NormalBMDRenderer("data/normal_obj/b_coin_switch/b_coin_switch.bmd", 0.008f); break;
-                    // 306-319
+                    // 306-311
+                case 312: ret = new NormalBMDRenderer("data/enemy/pakkun/pakkun_model.bmd", 0.016f); break;
+                case 313: ret = new NormalBMDRenderer("data/enemy/pakkun/pakkun_model.bmd", 0.004f); break;
+                case 314: ret = new NormalBMDRenderer("data/enemy/pakkun/pakkun_model.bmd", 0.008f); break;
+                    // 315-317
+                case 318: ret = new NormalBMDRenderer("data/normal_obj/water_tatumaki/water_tatumaki.bmd", 0.008f); break;
+                    // 319
                 case 320: ret = new NormalBMDRenderer("data/enemy/sand_tornado/sand_tornado.bmd", 0.008f); break;
                     // 321-325
 
@@ -733,6 +765,128 @@ namespace SM64DSe
         {
             string filename = "data/special_obj/fl_puzzle/fl_14_" + npart.ToString("D2") + ".bmd";
             Construct(filename, 0.008f);
+        }
+    }
+
+    class BigSnowmanRenderer : DoubleRenderer
+    {
+        public BigSnowmanRenderer() : base("data/enemy/big_snowman/big_snowman_body.bmd", "data/enemy/big_snowman/big_snowman_head.bmd", 1f) { }
+
+        public override void Render(RenderMode mode)
+        {
+            GL.Scale(0.012f, 0.012f, 0.012f);
+            GL.Translate(0f, 5f, 0f);
+            m_PrimaryRenderer.Render(mode);
+
+            GL.Translate(0f, 25f, 0f);
+            m_SecondaryRenderer.Render(mode);
+        }
+    }
+
+    class PokeyRenderer : ObjectRenderer
+    {
+        private NormalBMDRenderer m_HeadRenderer, m_BodyRenderer;
+
+        public PokeyRenderer()
+        {
+            m_HeadRenderer = new NormalBMDRenderer("data/enemy/sanbo/sanbo_head.bmd", 1f);
+            m_BodyRenderer = new NormalBMDRenderer("data/enemy/sanbo/sanbo_body.bmd", 1f);
+        }
+
+        public override void Release()
+        {
+            m_HeadRenderer.Release();
+            m_BodyRenderer.Release();
+        }
+
+        public override bool GottaRender(RenderMode mode)
+        {
+            return m_HeadRenderer.GottaRender(mode) || m_BodyRenderer.GottaRender(mode);
+        }
+
+        public override void Render(RenderMode mode)
+        {
+            GL.Scale(0.008f, 0.008f, 0.008f);
+            GL.Translate(0f, 5f, 0f);
+            m_BodyRenderer.Render(mode);
+            GL.Translate(0f, 15f, 0f);
+            m_BodyRenderer.Render(mode);
+            GL.Translate(0f, 15f, 0f);
+            m_BodyRenderer.Render(mode);
+            GL.Translate(0f, 15f, 0f);
+            m_BodyRenderer.Render(mode);
+
+            GL.Translate(0f, 15f, 0f);
+            m_HeadRenderer.Render(mode);
+        }
+    }
+
+    class WigglerRenderer : ObjectRenderer
+    {
+        private NormalBMDRenderer m_HeadRenderer;
+        private NormalBMDRenderer[] m_BodyRenderer = new NormalBMDRenderer[4];
+
+        public WigglerRenderer()
+        {
+            m_HeadRenderer = new NormalBMDRenderer("data/enemy/hanachan/hanachan_head.bmd", 1f);
+            for (int i = 0; i < 4; i++)
+                m_BodyRenderer[i] = new NormalBMDRenderer("data/enemy/hanachan/hanachan_body0" + (i + 1) + ".bmd", 1f);
+        }
+
+        public override void Release()
+        {
+            m_HeadRenderer.Release();
+            foreach (NormalBMDRenderer renderer in m_BodyRenderer)
+                renderer.Release();
+        }
+
+        public override bool GottaRender(RenderMode mode)
+        {
+            return m_HeadRenderer.GottaRender(mode);
+        }
+
+        public override void Render(RenderMode mode)
+        {
+            GL.Scale(0.008f, 0.008f, 0.008f);
+
+            m_HeadRenderer.Render(mode);
+
+            foreach (NormalBMDRenderer renderer in m_BodyRenderer)
+            {
+                GL.Translate(0f, 0f, -15f);
+                renderer.Render(mode);
+            }
+        }
+    }
+
+    class DoubleRenderer : ObjectRenderer
+    {
+        protected NormalBMDRenderer m_PrimaryRenderer, m_SecondaryRenderer;
+        float scale;
+
+        public DoubleRenderer(String first, String second, float scale)
+        {
+            m_PrimaryRenderer = new NormalBMDRenderer(first, 1f);
+            m_SecondaryRenderer = new NormalBMDRenderer(second, 1f);
+            this.scale = scale;
+        }
+
+        public override void Release()
+        {
+            m_PrimaryRenderer.Release();
+            m_SecondaryRenderer.Release();
+        }
+
+        public override bool GottaRender(RenderMode mode)
+        {
+            return m_SecondaryRenderer.GottaRender(mode) || m_PrimaryRenderer.GottaRender(mode);
+        }
+
+        public override void Render(RenderMode mode)
+        {
+            GL.Scale(scale, scale, scale);
+            m_PrimaryRenderer.Render(mode);
+            m_SecondaryRenderer.Render(mode);
         }
     }
 

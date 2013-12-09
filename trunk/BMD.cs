@@ -29,7 +29,7 @@ namespace SM64DSe
 {
     public class BMD
     {
-        private Texture ReadTexture(uint texid, uint palid)
+        public Texture ReadTexture(uint texid, uint palid)
         {
             uint texentry = m_TexChunksOffset + (texid * 20);
             uint palentry = (palid == 0xFFFFFFFF) ? 0xFFFFFFFF : (m_PalChunksOffset + (palid * 16));
@@ -353,7 +353,7 @@ namespace SM64DSe
                         ret.m_Data[((y * ret.m_Width) + x) * 4]));
             lol.Save(ret.m_TexName + ".png", System.Drawing.Imaging.ImageFormat.Png);*/
 
-            m_Textures.Add(texkey, ret);
+            m_Textures[texname] = ret;
             return ret;
         }
         bool lolol = false;
@@ -638,19 +638,23 @@ namespace SM64DSe
             }
             m_NumTexChunks = m_File.Read32(0x14);
             m_TexChunksOffset = m_File.Read32(0x18);
+            m_TextureIDs = new Dictionary<string, uint>();
             AddPointer(0x18);
             for (int i = 0; i < m_NumTexChunks; i++)
             {
                 AddPointer((uint)(m_TexChunksOffset + (i * 20) + 0));
                 AddPointer((uint)(m_TexChunksOffset + (i * 20) + 4));
+                m_TextureIDs.Add(m_File.ReadString(m_File.Read32((uint)(m_TexChunksOffset + (20 * i))), 0), (uint)i);
             }
             m_NumPalChunks = m_File.Read32(0x1C);
             m_PalChunksOffset = m_File.Read32(0x20);
+            m_PaletteIDs = new Dictionary<string, uint>();
             AddPointer(0x20);
             for (int i = 0; i < m_NumPalChunks; i++)
             {
                 AddPointer((uint)(m_PalChunksOffset + (i * 16) + 0));
                 AddPointer((uint)(m_PalChunksOffset + (i * 16) + 4));
+                m_PaletteIDs.Add(m_File.ReadString(m_File.Read32((uint)(m_PalChunksOffset + (16 * i))), 0), (uint)i);
             }
             m_NumMatChunks = m_File.Read32(0x24);
             m_MatChunksOffset = m_File.Read32(0x28);
@@ -882,13 +886,6 @@ namespace SM64DSe
             return rendered_something;
         }
 
-        // Doesn't use ReadPointer, but Read32
-        public struct PointerReference
-        {
-            public PointerReference(uint _ref, uint _ptr) { m_ReferenceAddr = _ref; m_PointerAddr = _ptr; }
-            public uint m_ReferenceAddr; // where the pointer is stored
-            public uint m_PointerAddr; // where the pointer points
-        }
         public List<PointerReference> m_PointerList;
 
         public void AddPointer(uint _ref)
@@ -1245,8 +1242,140 @@ namespace SM64DSe
         public uint m_BoneMapOffset;
 
         public Dictionary<string, Texture> m_Textures;
+        public Dictionary<string, uint> m_TextureIDs;
+        public Dictionary<string, uint> m_PaletteIDs;
         public ModelChunk[] m_ModelChunks;
 
         private Vertex m_CurVertex;
+    }
+
+    // Doesn't use ReadPointer, but Read32
+    public struct PointerReference
+    {
+        public PointerReference(uint _ref, uint _ptr) { m_ReferenceAddr = _ref; m_PointerAddr = _ptr; }
+        public uint m_ReferenceAddr; // where the pointer is stored
+        public uint m_PointerAddr; // where the pointer points
+    }
+
+    // BTP files contain data to allow animating textures by replacing them with others in a sequence
+    public class BTP
+    {
+        private NitroFile m_File;
+        private BMD m_Model;
+        private uint m_NumTextureNames, m_TextureNamesOffset;
+        private uint m_NumPaletteNames, m_PaletteNamesOffset;
+        private uint m_FrameChangesOffset;
+        private uint m_FrameTextureIDsOffset;
+        private uint m_FramePaletteIDsOffset;
+        private uint m_MaterialNamesOffset;
+        private String[] m_TextureNames;
+        private String[] m_PaletteNames;
+
+        public String m_FileName;
+        public List<PointerReference> m_PointerList;
+
+        public BTP(NitroFile file, BMD model)
+        {
+            this.m_File = file;
+            this.m_FileName = file.m_Name;
+            this.m_Model = model;
+
+            m_NumTextureNames = m_File.Read16(0x02);
+            m_TextureNamesOffset = m_File.Read32(0x04);
+            m_TextureNames = new String[m_NumTextureNames];
+
+            m_NumPaletteNames = m_File.Read16(0x08);
+            m_PaletteNamesOffset = m_File.Read32(0x0C);
+            m_PaletteNames = new String[m_NumPaletteNames];
+
+            m_FrameChangesOffset = m_File.Read32(0x10);
+            m_FrameTextureIDsOffset = m_File.Read32(0x14);
+            m_FramePaletteIDsOffset = m_File.Read32(0x18);
+
+            m_MaterialNamesOffset = m_File.Read32(0x20);
+
+            for (int i = 0; i < m_NumTextureNames; i++)
+            {
+                m_TextureNames[i] = m_File.ReadString(m_File.Read32(m_TextureNamesOffset + 0x04 + (uint)(i * 8)), 0);
+            }
+
+            for (int i = 0; i < m_NumPaletteNames; i++)
+            {
+                m_PaletteNames[i] = m_File.ReadString(m_File.Read32(m_PaletteNamesOffset + 0x04 + (uint)(i * 8)), 0);
+            }
+        }
+
+        public void ReadBMDTextures()
+        {
+            // The ID's may not match up incrementally, need to look more at BTP format
+            for (int i = 0; i < m_NumTextureNames; i++)
+            {
+                m_Model.ReadTexture(m_Model.m_TextureIDs[m_TextureNames[i]], m_Model.m_PaletteIDs[m_PaletteNames[i]]);
+            }
+        }
+
+        public void AddPointer(uint _ref)
+        {
+            uint _ptr = m_File.Read32(_ref);
+            m_PointerList.Add(new PointerReference(_ref, _ptr));
+        }
+
+        private void RemovePointer(uint _ref)
+        {
+            for (int i = 0; i < m_PointerList.Count; )
+            {
+                if (m_PointerList[i].m_ReferenceAddr == _ref)
+                    m_PointerList.RemoveAt(i);
+                else
+                    i++;
+            }
+        }
+
+        public void AddSpace(uint offset, uint amount)
+        {
+            // move the data
+            byte[] block = m_File.ReadBlock(offset, (uint)(m_File.m_Data.Length - offset));
+            m_File.WriteBlock(offset + amount, block);
+
+            // write zeroes in the newly created space
+            for (int i = 0; i < amount; i++)
+                m_File.Write8((uint)(offset + i), 0);
+
+            // update the pointers
+            for (int i = 0; i < m_PointerList.Count; i++)
+            {
+                PointerReference ptrref = m_PointerList[i];
+                if (ptrref.m_ReferenceAddr >= offset)
+                    ptrref.m_ReferenceAddr += amount;
+                if (ptrref.m_PointerAddr >= offset)
+                {
+                    ptrref.m_PointerAddr += amount;
+                    m_File.Write32(ptrref.m_ReferenceAddr, ptrref.m_PointerAddr);
+                }
+                m_PointerList[i] = ptrref;
+            }
+        }
+
+        public void RemoveSpace(uint offset, uint amount)
+        {
+            // move the data
+            byte[] block = m_File.ReadBlock(offset + amount, (uint)(m_File.m_Data.Length - offset - amount));
+            m_File.WriteBlock(offset, block);
+            Array.Resize(ref m_File.m_Data, (int)(m_File.m_Data.Length - amount));
+
+            // update the pointers
+            for (int i = 0; i < m_PointerList.Count; i++)
+            {
+                PointerReference ptrref = m_PointerList[i];
+                if (ptrref.m_ReferenceAddr >= (offset + amount))
+                    ptrref.m_ReferenceAddr -= amount;
+                if (ptrref.m_PointerAddr >= (offset + amount))
+                {
+                    ptrref.m_PointerAddr -= amount;
+                    m_File.Write32(ptrref.m_ReferenceAddr, ptrref.m_PointerAddr);
+                }
+                m_PointerList[i] = ptrref;
+            }
+        }
     }
 }

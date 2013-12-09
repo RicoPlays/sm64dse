@@ -439,7 +439,8 @@ namespace SM64DSe
                 var result = form.ShowDialog();
                 if (result == DialogResult.OK)
                 {
-                    loadKCL(Program.m_ROM.GetFileFromName(form.m_SelectedFile));
+                    kclFile = (Program.m_ROM.GetFileFromName(form.m_SelectedFile));
+                    loadKCL(kclFile);
                 }
             }
         }

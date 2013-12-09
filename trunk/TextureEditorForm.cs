@@ -13,6 +13,7 @@ namespace SM64DSe
     public partial class TextureEditorForm : Form
     {
         BMD m_Model;
+        BTP m_BTP;
 
         ModelImporter _owner;
 
@@ -31,39 +32,79 @@ namespace SM64DSe
             // Reload the model
             m_Model = new BMD(m_Model.m_File);
 
+            if (m_BTP != null)
+            {
+                try
+                {
+                    NitroFile file = Program.m_ROM.GetFileFromName(m_BTP.m_FileName);
+                    m_BTP = new BTP(file, m_Model);
+                    m_BTP.ReadBMDTextures();
+                }
+                catch (Exception ex) { MessageBox.Show("Error loading BTP:\n" + ex.Message + "\n" + ex.Source); }
+            }
+            
             lbxTextures.Items.Clear();
 
-            for (int i = 0; i < m_Model.m_Textures.Values.Count; i++)
+            for (int i = 0; i < m_Model.m_TextureIDs.Keys.Count; i++)
             {
-                lbxTextures.Items.Add(m_Model.m_Textures.Values.ElementAt(i).m_TexName);
+                lbxTextures.Items.Add(m_Model.m_TextureIDs.Keys.ElementAt(i));
+            }
+
+            lbxPalettes.Items.Clear();
+
+            for (int i = 0; i < m_Model.m_PaletteIDs.Keys.Count; i++)
+            {
+                lbxPalettes.Items.Add(m_Model.m_PaletteIDs.Keys.ElementAt(i));
             }
         }
 
         private void lbxTextures_SelectedIndexChanged(object sender, EventArgs e)
         {
-            if (lbxTextures.SelectedIndex != -1)
+            if (lbxTextures.SelectedIndex == -1)
+                return;
+            if (m_Model.m_Textures.ContainsKey(lbxTextures.SelectedItem.ToString()))
             {
-                int index = lbxTextures.SelectedIndex;
-                BMD.Texture currentTexture = m_Model.m_Textures.Values.ElementAt(index);
-
-                Bitmap tex = new Bitmap((int)currentTexture.m_Width, (int)currentTexture.m_Height);
-
-                for (int y = 0; y < (int)currentTexture.m_Height; y++)
-                {
-                    for (int x = 0; x < (int)currentTexture.m_Width; x++)
-                    {
-                        tex.SetPixel(x, y, Color.FromArgb(currentTexture.m_Data[((y * currentTexture.m_Width) + x) * 4 + 3],
-                         currentTexture.m_Data[((y * currentTexture.m_Width) + x) * 4 + 2],
-                         currentTexture.m_Data[((y * currentTexture.m_Width) + x) * 4 + 1],
-                         currentTexture.m_Data[((y * currentTexture.m_Width) + x) * 4]));
-                    }
-                }
-
-                pbxTexture.Image = new Bitmap(tex);
-                pbxTexture.Refresh();
-
-                lblPalette.Text = "Palette " + currentTexture.m_PalID;
+                lbxPalettes.SelectedIndex = (int)m_Model.m_Textures[lbxTextures.SelectedItem.ToString()].m_PalID;
             }
+            if (lbxPalettes.SelectedIndex != -1)
+            {
+                BMD.Texture currentTexture = m_Model.ReadTexture(m_Model.m_TextureIDs[lbxTextures.SelectedItem.ToString()],
+                    m_Model.m_PaletteIDs[lbxPalettes.SelectedItem.ToString()]);
+
+                LoadBitmap(currentTexture);
+            }
+        }
+
+        private void lbxPalettes_SelectedIndexChanged(object sender, EventArgs e)
+        {
+            if (lbxTextures.SelectedIndex != -1 && lbxPalettes.SelectedIndex != -1)
+            {
+                BMD.Texture currentTexture = m_Model.ReadTexture(m_Model.m_TextureIDs[lbxTextures.SelectedItem.ToString()],
+                    m_Model.m_PaletteIDs[lbxPalettes.SelectedItem.ToString()]);
+
+                LoadBitmap(currentTexture);
+            }
+        }
+
+        private void LoadBitmap(BMD.Texture currentTexture)
+        {
+            Bitmap tex = new Bitmap((int)currentTexture.m_Width, (int)currentTexture.m_Height);
+
+            for (int y = 0; y < (int)currentTexture.m_Height; y++)
+            {
+                for (int x = 0; x < (int)currentTexture.m_Width; x++)
+                {
+                    tex.SetPixel(x, y, Color.FromArgb(currentTexture.m_Data[((y * currentTexture.m_Width) + x) * 4 + 3],
+                     currentTexture.m_Data[((y * currentTexture.m_Width) + x) * 4 + 2],
+                     currentTexture.m_Data[((y * currentTexture.m_Width) + x) * 4 + 1],
+                     currentTexture.m_Data[((y * currentTexture.m_Width) + x) * 4]));
+                }
+            }
+
+            pbxTexture.Image = new Bitmap(tex);
+            pbxTexture.Refresh();
+
+            lblPalette.Text = "Palette " + currentTexture.m_PalID;
         }
 
         private void btnExportAll_Click(object sender, EventArgs e)
@@ -78,28 +119,7 @@ namespace SM64DSe
                 {
                     BMD.Texture currentTexture = m_Model.m_Textures.Values.ElementAt(i);
 
-                    Bitmap tex = new Bitmap((int)currentTexture.m_Width, (int)currentTexture.m_Height);
-
-                    for (int y = 0; y < (int)currentTexture.m_Height; y++)
-                    {
-                        for (int x = 0; x < (int)currentTexture.m_Width; x++)
-                        {
-                            tex.SetPixel(x, y, Color.FromArgb(currentTexture.m_Data[((y * currentTexture.m_Width) + x) * 4 + 3],
-                             currentTexture.m_Data[((y * currentTexture.m_Width) + x) * 4 + 2],
-                             currentTexture.m_Data[((y * currentTexture.m_Width) + x) * 4 + 1],
-                             currentTexture.m_Data[((y * currentTexture.m_Width) + x) * 4]));
-                        }
-                    }
-
-                    try
-                    {
-                        tex.Save(folderName + "/" + currentTexture.m_TexName + ".png", System.Drawing.Imaging.ImageFormat.Png);
-                    }
-                    catch (Exception ex)
-                    {
-                        MessageBox.Show("An error occurred while trying to save texture " + currentTexture.m_TexName + ".\n\n " +
-                            ex.Message + "\n" + ex.Data + "\n" + ex.StackTrace + "\n" + ex.Source);
-                    }
+                    SaveTextureAsPNG(currentTexture, folderName + "/" + currentTexture.m_TexName + ".png");
                 }
                 MessageBox.Show("Successfully exported " + m_Model.m_Textures.Values.Count + " texture(s) to:\n" + folderName);
             }
@@ -118,32 +138,37 @@ namespace SM64DSe
                 if (export.ShowDialog() == DialogResult.Cancel)
                     return;
 
-                Bitmap tex = new Bitmap((int)currentTexture.m_Width, (int)currentTexture.m_Height);
-
-                for (int y = 0; y < (int)currentTexture.m_Height; y++)
-                {
-                    for (int x = 0; x < (int)currentTexture.m_Width; x++)
-                    {
-                        tex.SetPixel(x, y, Color.FromArgb(currentTexture.m_Data[((y * currentTexture.m_Width) + x) * 4 + 3],
-                         currentTexture.m_Data[((y * currentTexture.m_Width) + x) * 4 + 2],
-                         currentTexture.m_Data[((y * currentTexture.m_Width) + x) * 4 + 1],
-                         currentTexture.m_Data[((y * currentTexture.m_Width) + x) * 4]));
-                    }
-                }
-
-                try
-                {
-                    tex.Save(export.FileName, System.Drawing.Imaging.ImageFormat.Png);
-                }
-                catch (Exception ex)
-                {
-                    MessageBox.Show("An error occurred while trying to save texture " + currentTexture.m_TexName + ".\n\n " +
-                        ex.Message + "\n" + ex.Data + "\n" + ex.StackTrace + "\n" + ex.Source);
-                }
+                SaveTextureAsPNG(currentTexture, export.FileName);
             }
             else
             {
                 MessageBox.Show("Please select a texture first.");
+            }
+        }
+
+        private static void SaveTextureAsPNG(BMD.Texture currentTexture, String fileName)
+        {
+            Bitmap tex = new Bitmap((int)currentTexture.m_Width, (int)currentTexture.m_Height);
+
+            for (int y = 0; y < (int)currentTexture.m_Height; y++)
+            {
+                for (int x = 0; x < (int)currentTexture.m_Width; x++)
+                {
+                    tex.SetPixel(x, y, Color.FromArgb(currentTexture.m_Data[((y * currentTexture.m_Width) + x) * 4 + 3],
+                     currentTexture.m_Data[((y * currentTexture.m_Width) + x) * 4 + 2],
+                     currentTexture.m_Data[((y * currentTexture.m_Width) + x) * 4 + 1],
+                     currentTexture.m_Data[((y * currentTexture.m_Width) + x) * 4]));
+                }
+            }
+
+            try
+            {
+                tex.Save(fileName, System.Drawing.Imaging.ImageFormat.Png);
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show("An error occurred while trying to save texture " + currentTexture.m_TexName + ".\n\n " +
+                    ex.Message + "\n" + ex.Data + "\n" + ex.StackTrace + "\n" + ex.Source);
             }
         }
 
@@ -161,14 +186,9 @@ namespace SM64DSe
 
                 try
                 {
-                    uint ntex = 0, npal = 0;
-                    int texsize = 0;
-
                     BMD_Importer.ConvertedTexture tex = BMD_Importer.ConvertTexture(ofd.FileName);
-                    tex.m_TextureID = ntex;
-                    tex.m_PaletteID = npal;
-                    if (tex.m_TextureData != null) { ntex++; texsize += tex.m_TextureData.Length; }
-                    if (tex.m_PaletteData != null) { npal++; texsize += tex.m_PaletteData.Length; }
+                    tex.m_TextureID = (uint)index;
+                    tex.m_PaletteID = (uint)lbxPalettes.SelectedIndex;
 
                     // Update texture entry
                     uint curoffset = m_Model.m_Textures.Values.ElementAt(index).m_EntryOffset;
@@ -261,7 +281,7 @@ namespace SM64DSe
                         m_Model.m_File.Write32(0x1C, m_Model.m_File.Read32(0x1C) + 1);
                     }
 
-                    //m_Model.m_File.SaveChanges();
+                    m_Model.m_File.SaveChanges();
 
                     loadTextures();
                 }
@@ -280,5 +300,25 @@ namespace SM64DSe
         {
             m_Model.m_File.SaveChanges();
         }
+
+        private void btnLoadBTP_Click(object sender, EventArgs e)
+        {
+            using (var form = new ROMFileSelect("Please select a BTP file to load."))
+            {
+                var result = form.ShowDialog();
+                if (result == DialogResult.OK)
+                {
+                    try
+                    {
+                        NitroFile file = Program.m_ROM.GetFileFromName(form.m_SelectedFile);
+                        m_BTP = new BTP(file, m_Model);
+
+                        loadTextures();
+                    }
+                    catch (Exception ex) { MessageBox.Show("Error loading BTP:\n" + ex.Message + "\n" + ex.Source); }
+                }
+            }
+        }
+
     }
 }

@@ -56,6 +56,7 @@
             this.toolStripMenuItem3 = new System.Windows.Forms.ToolStripMenuItem();
             this.toolStripMenuItem4 = new System.Windows.Forms.ToolStripMenuItem();
             this.btnImportOtherModel = new System.Windows.Forms.ToolStripButton();
+            this.btnExportOtherModel = new System.Windows.Forms.ToolStripButton();
             this.glLevelView = new SM64DSe.HaxxGLControl();
             this.tsViewActions = new System.Windows.Forms.ToolStrip();
             this.btnDumpOverlay = new System.Windows.Forms.ToolStripButton();
@@ -88,7 +89,7 @@
             this.btnStarAll = new System.Windows.Forms.ToolStripButton();
             this.ssStatusBar = new System.Windows.Forms.StatusStrip();
             this.slStatusLabel = new System.Windows.Forms.ToolStripStatusLabel();
-            this.btnExportOtherModel = new System.Windows.Forms.ToolStripButton();
+            this.btnOffsetAllCoords = new System.Windows.Forms.ToolStripButton();
             //((System.ComponentModel.ISupportInitialize)(this.spcMainContainer)).BeginInit();
             this.spcMainContainer.Panel1.SuspendLayout();
             this.spcMainContainer.Panel2.SuspendLayout();
@@ -185,7 +186,8 @@
             this.btnAddPath,
             this.btnAddMisc,
             this.btnImportOtherModel,
-            this.btnExportOtherModel});
+            this.btnExportOtherModel,
+            this.btnOffsetAllCoords});
             this.tsEditActions.LayoutStyle = System.Windows.Forms.ToolStripLayoutStyle.Flow;
             this.tsEditActions.Location = new System.Drawing.Point(0, 0);
             this.tsEditActions.Name = "tsEditActions";
@@ -403,6 +405,15 @@
             this.btnImportOtherModel.Size = new System.Drawing.Size(115, 19);
             this.btnImportOtherModel.Text = "Import other model";
             this.btnImportOtherModel.Click += new System.EventHandler(this.btnImportOtherModel_Click);
+            // 
+            // btnExportOtherModel
+            // 
+            this.btnExportOtherModel.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Text;
+            this.btnExportOtherModel.ImageTransparentColor = System.Drawing.Color.Magenta;
+            this.btnExportOtherModel.Name = "btnExportOtherModel";
+            this.btnExportOtherModel.Size = new System.Drawing.Size(112, 19);
+            this.btnExportOtherModel.Text = "Export other model";
+            this.btnExportOtherModel.Click += new System.EventHandler(this.btnExportOtherModel_Click);
             // 
             // glLevelView
             // 
@@ -765,14 +776,14 @@
             this.slStatusLabel.Paint += new System.Windows.Forms.PaintEventHandler(this.slStatusLabel_Paint);
             this.slStatusLabel.TextChanged += new System.EventHandler(this.slStatusLabel_TextChanged);
             // 
-            // btnExportOtherModel
+            // btnOffsetAllCoords
             // 
-            this.btnExportOtherModel.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Text;
-            this.btnExportOtherModel.ImageTransparentColor = System.Drawing.Color.Magenta;
-            this.btnExportOtherModel.Name = "btnExportOtherModel";
-            this.btnExportOtherModel.Size = new System.Drawing.Size(112, 19);
-            this.btnExportOtherModel.Text = "Export other model";
-            this.btnExportOtherModel.Click += new System.EventHandler(this.btnExportOtherModel_Click);
+            this.btnOffsetAllCoords.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Text;
+            this.btnOffsetAllCoords.ImageTransparentColor = System.Drawing.Color.Magenta;
+            this.btnOffsetAllCoords.Name = "btnOffsetAllCoords";
+            this.btnOffsetAllCoords.Size = new System.Drawing.Size(106, 19);
+            this.btnOffsetAllCoords.Text = "Offset All Co-ords";
+            this.btnOffsetAllCoords.Click += new System.EventHandler(this.btnOffsetAllCoords_Click);
             // 
             // LevelEditorForm
             // 
@@ -871,6 +882,7 @@
         private System.Windows.Forms.ToolStripMenuItem toolStripMenuItem4;
         private System.Windows.Forms.ToolStripButton btnImportOtherModel;
         private System.Windows.Forms.ToolStripButton btnExportOtherModel;
+        private System.Windows.Forms.ToolStripButton btnOffsetAllCoords;
 
 
     }

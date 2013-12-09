@@ -717,9 +717,9 @@ namespace SM64DSe
         {
             switch (field)
             {
-                case "X position": Position.X = (float)newval; break;
-                case "Y position": Position.Y = (float)newval; break;
-                case "Z position": Position.Z = (float)newval; break;
+                case "X position": Position.X = (float)newval; return 1;
+                case "Y position": Position.Y = (float)newval; return 1;
+                case "Z position": Position.Z = (float)newval; return 1;
             }
             return 0;
         }

@@ -115,4 +115,30 @@ namespace SM64DSe
             return ret;
         }
     }
+
+    // Taken from http://stackoverflow.com/questions/1440392/use-byte-as-key-in-dictionary
+    // By user: JaredPar
+
+    public class ByteArrayComparer : IEqualityComparer<byte[]>
+    {
+        public bool Equals(byte[] left, byte[] right)
+        {
+            if (left == null || right == null)
+            {
+                return left == right;
+            }
+            return left.SequenceEqual(right);
+        }
+        public int GetHashCode(byte[] key)
+        {
+            if (key == null)
+                throw new ArgumentNullException("key");
+            int sum = 0;
+            foreach (byte cur in key)
+            {
+                sum = 33 * sum + cur;
+            }
+            return sum;
+        }
+    }
 }

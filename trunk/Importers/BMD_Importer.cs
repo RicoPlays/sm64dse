@@ -542,6 +542,8 @@ namespace SM64DSe.Importers
 
         private static void addWhiteMat()
         {
+            if (m_Materials.ContainsKey("default_white"))
+                return;
             MaterialDef mat = new MaterialDef();
             mat.m_ID = m_Materials.Count;
             mat.m_Faces = new List<FaceDef>();
@@ -1206,16 +1208,16 @@ namespace SM64DSe.Importers
                 return mat;
             else
             {
-                int numMaterials = m_Materials.Count;
+                int matNameLength = mat.Length;
                 int i = 0;
-                while (i < numMaterials)
+                while (i < matNameLength)
                 {
                     if (!m_Materials.ContainsKey(matName))
                         matName = matName.Substring(0, matName.Length - 1);
                     else
                         return matName;
 
-                    numMaterials++;
+                    i++;
                 }
             }
             // Shouldn't reach
@@ -1453,7 +1455,7 @@ namespace SM64DSe.Importers
                         switch (reader.LocalName)
                         {
                             case "bonelib":
-                                // <bonelib value="[FILENAME of .bones file]">
+                                // <bonelib value="[FILENAME of .bones file]"/>
                                 LoadBoneDefinitions(m_ModelPath + reader.GetAttribute("value"));
                                 break;
                             case "geometry":
@@ -1562,7 +1564,7 @@ namespace SM64DSe.Importers
                                     }
                                 }
                                 break;
-                                // The number of vertices in each face
+                            // The number of vertices in each face
                             case "vcount":
                                 {
                                     String values = reader.ReadElementContentAsString();
@@ -1603,9 +1605,9 @@ namespace SM64DSe.Importers
                                         for (int i = 0; i < nvtx; i += 1)
                                         {
                                             face.m_VtxIndices[i] = int.Parse(split[vtxInd + vertexIndex]) + m_Vertices.Count;
-                                            if (normalIndex != -1 ) 
+                                            if (normalIndex != -1)
                                                 face.m_NrmIndices[i] = int.Parse(split[vtxInd + normalIndex]) + m_Normals.Count;
-                                            if (texCoordIndex != -1) 
+                                            if (texCoordIndex != -1)
                                                 face.m_TxcIndices[i] = int.Parse(split[vtxInd + texCoordIndex]) + m_TexCoords.Count;
                                             if (inputCount > 3 && colourIndex != -1)
                                                 face.m_ColIndices[i] = int.Parse(split[vtxInd + colourIndex]) + m_Colours.Count;
@@ -1780,6 +1782,8 @@ namespace SM64DSe.Importers
             uint dllistoffset = curoffset;
             curoffset += (uint)(m_Materials.Count * 8);
 
+            int lastColourARGB = -1;
+
             // build display lists
             b = 0;
             foreach (MaterialDef mat in m_Materials.Values)
@@ -1874,7 +1878,11 @@ namespace SM64DSe.Importers
                                         Vector4 vtx = scaledvtxs[face.m_VtxIndices[0]];
                                         int txc = face.m_TxcIndices[0];
 
-                                        if (face.m_ColIndices != null) dlpacker.AddColorCommand(m_Colours[face.m_ColIndices[0]]);
+                                        if (face.m_ColIndices != null && m_Colours[face.m_ColIndices[0]].ToArgb() != lastColourARGB)
+                                        {
+                                            dlpacker.AddColorCommand(m_Colours[face.m_ColIndices[0]]);
+                                            lastColourARGB = m_Colours[face.m_ColIndices[0]].ToArgb();
+                                        }
                                         if (txc > -1) dlpacker.AddTexCoordCommand(Vector2.Multiply(m_TexCoords[txc], tcscale));
                                         if (face.m_ColIndices != null) dlpacker.AddVertexCommand(vtx, lastvtx);
                                         if (txc > -1) dlpacker.AddTexCoordCommand(Vector2.Multiply(m_TexCoords[txc], tcscale));
@@ -1892,10 +1900,18 @@ namespace SM64DSe.Importers
                                         Vector4 vtx2 = scaledvtxs[face.m_VtxIndices[1]];
                                         int txc2 = face.m_TxcIndices[1];
 
-                                        if (face.m_ColIndices != null) dlpacker.AddColorCommand(m_Colours[face.m_ColIndices[0]]);
+                                        if (face.m_ColIndices != null && m_Colours[face.m_ColIndices[0]].ToArgb() != lastColourARGB)
+                                        {
+                                            dlpacker.AddColorCommand(m_Colours[face.m_ColIndices[0]]);
+                                            lastColourARGB = m_Colours[face.m_ColIndices[0]].ToArgb();
+                                        }
                                         if (txc1 > -1) dlpacker.AddTexCoordCommand(Vector2.Multiply(m_TexCoords[txc1], tcscale));
                                         dlpacker.AddVertexCommand(vtx1, lastvtx);
-                                        if (face.m_ColIndices != null) dlpacker.AddColorCommand(m_Colours[face.m_ColIndices[1]]);
+                                        if (face.m_ColIndices != null && m_Colours[face.m_ColIndices[1]].ToArgb() != lastColourARGB)
+                                        {
+                                            dlpacker.AddColorCommand(m_Colours[face.m_ColIndices[1]]);
+                                            lastColourARGB = m_Colours[face.m_ColIndices[1]].ToArgb();
+                                        }
                                         if (txc2 > -1) dlpacker.AddTexCoordCommand(Vector2.Multiply(m_TexCoords[txc2], tcscale));
                                         dlpacker.AddVertexCommand(vtx2, vtx1);
                                         if (face.m_ColIndices != null) dlpacker.AddColorCommand(m_Colours[face.m_ColIndices[2]]);
@@ -1914,25 +1930,45 @@ namespace SM64DSe.Importers
                                         Vector4 vtx3 = scaledvtxs[face.m_VtxIndices[2]];
                                         int txc3 = face.m_TxcIndices[2];
 
-                                        if (face.m_ColIndices != null) dlpacker.AddColorCommand(m_Colours[face.m_ColIndices[0]]);
+                                        if (face.m_ColIndices != null && m_Colours[face.m_ColIndices[0]].ToArgb() != lastColourARGB)
+                                        {
+                                            dlpacker.AddColorCommand(m_Colours[face.m_ColIndices[0]]);
+                                            lastColourARGB = m_Colours[face.m_ColIndices[0]].ToArgb();
+                                        }
                                         if (txc1 > -1) dlpacker.AddTexCoordCommand(Vector2.Multiply(m_TexCoords[txc1], tcscale));
                                         dlpacker.AddVertexCommand(vtx1, lastvtx);
                                         if (m_ZMirror)
                                         {
-                                            if (face.m_ColIndices != null) dlpacker.AddColorCommand(m_Colours[face.m_ColIndices[2]]);
+                                            if (face.m_ColIndices != null && m_Colours[face.m_ColIndices[2]].ToArgb() != lastColourARGB)
+                                            {
+                                                dlpacker.AddColorCommand(m_Colours[face.m_ColIndices[2]]);
+                                                lastColourARGB = m_Colours[face.m_ColIndices[2]].ToArgb();
+                                            }
                                             if (txc3 > -1) dlpacker.AddTexCoordCommand(Vector2.Multiply(m_TexCoords[txc3], tcscale));
                                             dlpacker.AddVertexCommand(vtx3, vtx1);
-                                            if (face.m_ColIndices != null) dlpacker.AddColorCommand(m_Colours[face.m_ColIndices[1]]);
+                                            if (face.m_ColIndices != null && m_Colours[face.m_ColIndices[1]].ToArgb() != lastColourARGB)
+                                            {
+                                                dlpacker.AddColorCommand(m_Colours[face.m_ColIndices[1]]);
+                                                lastColourARGB = m_Colours[face.m_ColIndices[1]].ToArgb();
+                                            }
                                             if (txc2 > -1) dlpacker.AddTexCoordCommand(Vector2.Multiply(m_TexCoords[txc2], tcscale));
                                             dlpacker.AddVertexCommand(vtx2, vtx3);
                                             lastvtx = vtx2;
                                         }
                                         else
                                         {
-                                            if (face.m_ColIndices != null) dlpacker.AddColorCommand(m_Colours[face.m_ColIndices[1]]);
+                                            if (face.m_ColIndices != null && m_Colours[face.m_ColIndices[1]].ToArgb() != lastColourARGB)
+                                            {
+                                                dlpacker.AddColorCommand(m_Colours[face.m_ColIndices[1]]);
+                                                lastColourARGB = m_Colours[face.m_ColIndices[1]].ToArgb();
+                                            }
                                             if (txc2 > -1) dlpacker.AddTexCoordCommand(Vector2.Multiply(m_TexCoords[txc2], tcscale));
                                             dlpacker.AddVertexCommand(vtx2, vtx1);
-                                            if (face.m_ColIndices != null) dlpacker.AddColorCommand(m_Colours[face.m_ColIndices[2]]);
+                                            if (face.m_ColIndices != null && m_Colours[face.m_ColIndices[2]].ToArgb() != lastColourARGB)
+                                            {
+                                                dlpacker.AddColorCommand(m_Colours[face.m_ColIndices[2]]);
+                                                lastColourARGB = m_Colours[face.m_ColIndices[2]].ToArgb();
+                                            }
                                             if (txc3 > -1) dlpacker.AddTexCoordCommand(Vector2.Multiply(m_TexCoords[txc3], tcscale));
                                             dlpacker.AddVertexCommand(vtx3, vtx2);
                                             lastvtx = vtx3;
@@ -1951,31 +1987,59 @@ namespace SM64DSe.Importers
                                         Vector4 vtx4 = scaledvtxs[face.m_VtxIndices[3]];
                                         int txc4 = face.m_TxcIndices[3];
 
-                                        if (face.m_ColIndices != null) dlpacker.AddColorCommand(m_Colours[face.m_ColIndices[0]]);
+                                        if (face.m_ColIndices != null && m_Colours[face.m_ColIndices[0]].ToArgb() != lastColourARGB)
+                                        {
+                                            dlpacker.AddColorCommand(m_Colours[face.m_ColIndices[0]]);
+                                            lastColourARGB = m_Colours[face.m_ColIndices[0]].ToArgb();
+                                        }
                                         if (txc1 > -1) dlpacker.AddTexCoordCommand(Vector2.Multiply(m_TexCoords[txc1], tcscale));
                                         dlpacker.AddVertexCommand(vtx1, lastvtx);
                                         if (m_ZMirror)
                                         {
-                                            if (face.m_ColIndices != null) dlpacker.AddColorCommand(m_Colours[face.m_ColIndices[3]]);
+                                            if (face.m_ColIndices != null && m_Colours[face.m_ColIndices[3]].ToArgb() != lastColourARGB)
+                                            {
+                                                dlpacker.AddColorCommand(m_Colours[face.m_ColIndices[3]]);
+                                                lastColourARGB = m_Colours[face.m_ColIndices[3]].ToArgb();
+                                            }
                                             if (txc4 > -1) dlpacker.AddTexCoordCommand(Vector2.Multiply(m_TexCoords[txc4], tcscale));
                                             dlpacker.AddVertexCommand(vtx4, vtx1);
-                                            if (face.m_ColIndices != null) dlpacker.AddColorCommand(m_Colours[face.m_ColIndices[2]]);
+                                            if (face.m_ColIndices != null && m_Colours[face.m_ColIndices[2]].ToArgb() != lastColourARGB)
+                                            {
+                                                dlpacker.AddColorCommand(m_Colours[face.m_ColIndices[2]]);
+                                                lastColourARGB = m_Colours[face.m_ColIndices[2]].ToArgb();
+                                            }
                                             if (txc3 > -1) dlpacker.AddTexCoordCommand(Vector2.Multiply(m_TexCoords[txc3], tcscale));
                                             dlpacker.AddVertexCommand(vtx3, vtx4);
-                                            if (face.m_ColIndices != null) dlpacker.AddColorCommand(m_Colours[face.m_ColIndices[1]]);
+                                            if (face.m_ColIndices != null && m_Colours[face.m_ColIndices[1]].ToArgb() != lastColourARGB)
+                                            {
+                                                dlpacker.AddColorCommand(m_Colours[face.m_ColIndices[1]]);
+                                                lastColourARGB = m_Colours[face.m_ColIndices[1]].ToArgb();
+                                            }
                                             if (txc2 > -1) dlpacker.AddTexCoordCommand(Vector2.Multiply(m_TexCoords[txc2], tcscale));
                                             dlpacker.AddVertexCommand(vtx2, vtx3);
                                             lastvtx = vtx2;
                                         }
                                         else
                                         {
-                                            if (face.m_ColIndices != null) dlpacker.AddColorCommand(m_Colours[face.m_ColIndices[1]]);
+                                            if (face.m_ColIndices != null && m_Colours[face.m_ColIndices[1]].ToArgb() != lastColourARGB)
+                                            {
+                                                dlpacker.AddColorCommand(m_Colours[face.m_ColIndices[1]]);
+                                                lastColourARGB = m_Colours[face.m_ColIndices[1]].ToArgb();
+                                            }
                                             if (txc2 > -1) dlpacker.AddTexCoordCommand(Vector2.Multiply(m_TexCoords[txc2], tcscale));
                                             dlpacker.AddVertexCommand(vtx2, vtx1);
-                                            if (face.m_ColIndices != null) dlpacker.AddColorCommand(m_Colours[face.m_ColIndices[2]]);
+                                            if (face.m_ColIndices != null && m_Colours[face.m_ColIndices[2]].ToArgb() != lastColourARGB)
+                                            {
+                                                dlpacker.AddColorCommand(m_Colours[face.m_ColIndices[2]]);
+                                                lastColourARGB = m_Colours[face.m_ColIndices[2]].ToArgb();
+                                            }
                                             if (txc3 > -1) dlpacker.AddTexCoordCommand(Vector2.Multiply(m_TexCoords[txc3], tcscale));
                                             dlpacker.AddVertexCommand(vtx3, vtx2);
-                                            if (face.m_ColIndices != null) dlpacker.AddColorCommand(m_Colours[face.m_ColIndices[3]]);
+                                            if (face.m_ColIndices != null && m_Colours[face.m_ColIndices[3]].ToArgb() != lastColourARGB)
+                                            {
+                                                dlpacker.AddColorCommand(m_Colours[face.m_ColIndices[3]]);
+                                                lastColourARGB = m_Colours[face.m_ColIndices[3]].ToArgb();
+                                            }
                                             if (txc4 > -1) dlpacker.AddTexCoordCommand(Vector2.Multiply(m_TexCoords[txc4], tcscale));
                                             dlpacker.AddVertexCommand(vtx4, vtx3);
                                             lastvtx = vtx4;

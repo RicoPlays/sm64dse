@@ -28,7 +28,7 @@
         /// </summary>
         private void InitializeComponent()
         {
-            System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle3 = new System.Windows.Forms.DataGridViewCellStyle();
+            System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle1 = new System.Windows.Forms.DataGridViewCellStyle();
             this.label1 = new System.Windows.Forms.Label();
             this.txtNumEntries = new System.Windows.Forms.TextBox();
             this.btnCopy = new System.Windows.Forms.Button();
@@ -84,9 +84,9 @@
             this.gridCLPSData.Location = new System.Drawing.Point(15, 110);
             this.gridCLPSData.MultiSelect = false;
             this.gridCLPSData.Name = "gridCLPSData";
-            dataGridViewCellStyle3.ForeColor = System.Drawing.Color.Black;
-            this.gridCLPSData.RowsDefaultCellStyle = dataGridViewCellStyle3;
-            this.gridCLPSData.Size = new System.Drawing.Size(367, 150);
+            dataGridViewCellStyle1.ForeColor = System.Drawing.Color.Black;
+            this.gridCLPSData.RowsDefaultCellStyle = dataGridViewCellStyle1;
+            this.gridCLPSData.Size = new System.Drawing.Size(451, 150);
             this.gridCLPSData.StandardTab = true;
             this.gridCLPSData.TabIndex = 6;
             this.gridCLPSData.CellEndEdit += new System.Windows.Forms.DataGridViewCellEventHandler(this.gridCLPSData_CellEndEdit);
@@ -113,7 +113,7 @@
             // 
             // btnShiftUp
             // 
-            this.btnShiftUp.Location = new System.Drawing.Point(388, 156);
+            this.btnShiftUp.Location = new System.Drawing.Point(472, 157);
             this.btnShiftUp.Name = "btnShiftUp";
             this.btnShiftUp.Size = new System.Drawing.Size(22, 23);
             this.btnShiftUp.TabIndex = 9;
@@ -123,7 +123,7 @@
             // 
             // btnShiftDown
             // 
-            this.btnShiftDown.Location = new System.Drawing.Point(388, 185);
+            this.btnShiftDown.Location = new System.Drawing.Point(472, 186);
             this.btnShiftDown.Name = "btnShiftDown";
             this.btnShiftDown.Size = new System.Drawing.Size(22, 23);
             this.btnShiftDown.TabIndex = 10;
@@ -135,7 +135,7 @@
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(439, 312);
+            this.ClientSize = new System.Drawing.Size(506, 312);
             this.Controls.Add(this.btnShiftDown);
             this.Controls.Add(this.btnShiftUp);
             this.Controls.Add(this.btnAdd);

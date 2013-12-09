@@ -93,6 +93,7 @@
     <Compile Include="AnimationEditorForm.Designer.cs">
       <DependentUpon>AnimationEditorForm.cs</DependentUpon>
     </Compile>
+    <Compile Include="BiDictionaryOneToOne.cs" />
     <Compile Include="BMD.cs" />
     <Compile Include="CLPS_Form.cs">
       <SubType>Form</SubType>
@@ -144,6 +145,12 @@
     </Compile>
     <Compile Include="ModelImporter.Designer.cs">
       <DependentUpon>ModelImporter.cs</DependentUpon>
+    </Compile>
+    <Compile Include="OffsetAllObjectCoordsForm.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="OffsetAllObjectCoordsForm.Designer.cs">
+      <DependentUpon>OffsetAllObjectCoordsForm.cs</DependentUpon>
     </Compile>
     <Compile Include="ProgressDialog.cs">
       <SubType>Form</SubType>
@@ -220,6 +227,9 @@
     <EmbeddedResource Include="ObjectListForm.resx">
       <DependentUpon>ObjectListForm.cs</DependentUpon>
       <SubType>Designer</SubType>
+    </EmbeddedResource>
+    <EmbeddedResource Include="OffsetAllObjectCoordsForm.resx">
+      <DependentUpon>OffsetAllObjectCoordsForm.cs</DependentUpon>
     </EmbeddedResource>
     <EmbeddedResource Include="ProgressDialog.resx">
       <DependentUpon>ProgressDialog.cs</DependentUpon>
@@ -305,6 +315,7 @@
     <Content Include="app.ico" />
     <Content Include="Documentation\bca_format.txt" />
     <Content Include="Documentation\bmd_format.txt" />
+    <Content Include="Documentation\btp_format.txt" />
     <Content Include="Documentation\kcl_format.txt" />
     <Content Include="Documentation\SM64DS Level Format Doc v2.1x.txt" />
     <Content Include="Documentation\SM64DS Text Editing.txt" />

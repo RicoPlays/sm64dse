@@ -1,0 +1,53 @@
+SM64DS BTP (BMD Texture Sequence Animation) format
+
+Fiachra
+2013/11/25
+
+Starts with 36 byte header
+
+0x00	2	Number of frames
+0x02	2	Number of textures
+0x04	4	Address of Texture Headers start
+0x08	2	Number of palettes
+0x0A	2	Unknown, seems to always be zeroe
+0x0C	4	Address of Palette Headers start
+0x10	4	Address of "Frames Changes" section
+0x14	4	Address of Texture ID's (probably) used in 'Start Frames', series of ushorts
+0x18	4	Address of Palette ID's (probably) used in 'Start Frames', series of ushorts
+0x1C	2	Whether to play the animation?, 0 for false, 1 for true, anything else causes crash
+0x1E	2	Unknown, seems to always be zero
+0x20	4	Address of Material Headers start
+
+Data
+
+8 byte texture headers
+	0x00	2	FFFF
+	0x02	2	zero
+	0x04	4	address of null-terminated texture name
+
+8 byte palette headers
+	0x00	2	FFFF
+	0x02	2	zero
+	0x04	4	Address of null-terminated palette name
+	
+Frame Changes
+	List of frame numbers at which the next texture is to be shown, 
+	frame numbers start at zero, 
+	series of ushorts
+
+Texture ID's
+	List of the texture ID's to be used in each 'texture change', 
+	ID's are the (zero-based) index of the texture headers, 
+	series of ushorts
+
+Palette ID's
+	List of the palette ID's to be used in each 'texture change', 
+	ID's are the (zero-based) index of the palette headers, 
+	series of ushorts
+
+12 byte material headers
+	0x00	2	FFFF
+	0x02	2	zero
+	0x04	4	Address of the null-terminated material name
+	0x08	4	Unknown
+

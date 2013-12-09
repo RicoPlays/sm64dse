@@ -774,7 +774,6 @@ namespace SM64DSe
             // Create an XML reader for this file.
             using (XmlReader reader = XmlReader.Create(Path.Combine(Application.StartupPath, "AdditionalPatches.xml")))
             {
-
                 reader.MoveToContent();
 
                 while (reader.Read())
