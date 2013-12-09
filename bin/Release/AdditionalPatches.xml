@@ -450,4 +450,17 @@
       <Value>26</Value>
     </JAPRestoreData>
   </Patch>
+  <Patch>
+    <PatchName>Change Level Loaded on 'Exit Course'. Replace the data value with the ID of the level you want loaded.</PatchName>
+    <EURAddresses>
+      <Address>168824</Address>
+    </EURAddresses>
+    <EURPatchData>
+      <Size>8</Size>
+      <Value>3</Value>
+    </EURPatchData>
+    <EURRestoreData>
+      <Value>2</Value>
+    </EURRestoreData>
+  </Patch>
 </Patches>

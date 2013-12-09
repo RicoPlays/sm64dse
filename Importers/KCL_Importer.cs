@@ -202,11 +202,12 @@ namespace SM64DSe
                             case "polylist":
                                 {
                                     group_name = reader.GetAttribute("material");
+                                    int matNameLength = group_name.Length;
                                     // DAE models exported with Blender add a number starting at 1 for each geometry node 
                                     // to the end of the value given for material
                                     if (!matColTypes.ContainsKey(group_name))
                                     {
-                                        for (int i = 0; i < matColTypes.Count; i++)
+                                        for (int i = 0; i < matNameLength; i++)
                                         {
                                             group_name = group_name.Substring(0, group_name.Length - 1);
 

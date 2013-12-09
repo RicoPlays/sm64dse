@@ -218,7 +218,11 @@ TODO: figure out parameters.</description>
 		<name>Bob-Omb</name>
 		<internalname>BOMBHEI</internalname>
 		<actorid>206</actorid>
-		<description>That bomb enemy from SMB2. Can be picked up and thrown. If grabbed underwater, the player can carry it like a green Koopa Shell. Even though shell swimming has a timer, the Bob-omb will explode before the time is up. It can also be thrown underwater.</description>
+		<description>That bomb enemy from SMB2. Can be picked up and thrown. If grabbed underwater, the player can carry it like a green Koopa Shell. Even though shell swimming has a timer, the Bob-omb will explode before the time is up. It can also be thrown underwater.
+		
+Parameter1:
+1 = Doesn't walk (it still moves it's legs and can be kicked).
+5 = Chases Player and then explodes.</description>
 		<bankreq>none</bankreq>
 	</object>
 
@@ -325,7 +329,21 @@ TODO: figure out parameters.</description>
 		<name>Red ? Block</name>
 		<internalname>HATENA_BLOCK</internalname>
 		<actorid>20</actorid>
-		<description>Releases a Power Flower when it explodes.</description>
+		<description>Releases a Power Flower when it explodes.
+		
+Parameter 1:
+Contents:
+0 = Nothing
+101 = Star
+300 = 3 coins
+500 = 5 coins
+FF00 = Single coin
+FF02 = 1-up Mushroom
+FF03 = Green Shell
+FF04 = Super Mushroom
+FF05 = Wingcap for Mario / Power Flower for rest
+FF06 = Power Flower
+FF07 = Lit Bob-omb for Mario / Power Flower for rest</description>
 		<bankreq>none</bankreq>
 	</object>
 
@@ -334,7 +352,18 @@ TODO: figure out parameters.</description>
 		<name>Yellow Item Block</name>
 		<internalname>ITEM_BLOCK</internalname>
 		<actorid>21</actorid>
-		<description>Can award coins, 1UPs, a Star, or a Koopa Shell.</description>
+		<description>Can award coins, 1UPs, a Star, or a Koopa Shell.
+		
+Parameter1:
+Contains:
+0 = Nothing
+1 = Star
+2 = 1-up (fades away quickly)
+3 = Green Shell (fades away quickly)
+4 = Super Mushroom (fades away quickly)
+5 = Feather for Mario / Nothing for everyone else
+6 = Power Flower
+7 = Angry Bob-omb</description>
 		<bankreq>none</bankreq>
 	</object>
 
@@ -394,7 +423,9 @@ This object is unused in the game, but is present in the general purpose test ma
 		<name>Coin</name>
 		<internalname>COIN</internalname>
 		<actorid>288</actorid>
-		<description>Standard, yellow coin. Every 50 coins collected earn the player one life upon successfully finishing the stage.</description>
+		<description>Standard, yellow coin. Every 50 coins collected earn the player one life upon successfully finishing the stage.
+		
+Set Parameter 1 to 75 to make them appear permanently until collected otherwise they only last a few seconds.</description>
 		<bankreq>none</bankreq>
 	</object>
 
@@ -405,7 +436,9 @@ This object is unused in the game, but is present in the general purpose test ma
 		<actorid>289</actorid>
 		<description>Worth two yellow coins. When 8 red coins are collected, a star appears.
 
-[b]Important note:[/b] Do not place more than 8 red coins in a level. Collecting more than 8 red coins freezes the game.</description>
+[b]Important note:[/b] Do not place more than 8 red coins in a level. Collecting more than 8 red coins freezes the game.
+
+For Red Coins Stars, set Parameter 1 to the Star ID followed by 1.</description>
 		<bankreq>none</bankreq>
 	</object>
 
@@ -414,7 +447,10 @@ This object is unused in the game, but is present in the general purpose test ma
 		<name>Blue coin</name>
 		<internalname>BLUE_COIN</internalname>
 		<actorid>290</actorid>
-		<description>Worth 5 yellow coins. Appears when ground-pounding an associated [object=0131], or when killing certain enemies.</description>
+		<description>Worth 5 yellow coins. Appears when ground-pounding an associated [object=0131], or when killing certain enemies.
+		
+Set Parameter 1 to 1 if they are to be used with a Blue Coin Switch.
+		</description>
 		<bankreq>none</bankreq>
 	</object>
 
@@ -451,7 +487,10 @@ This object is unused in the game, but is present in the general purpose test ma
 		<name>Painting</name>
 		<internalname>PICTURE_GATE</internalname>
 		<actorid>307</actorid>
-		<description>Jump-through paintings in the castle.</description>
+		<description>Jump-through paintings in the castle.
+
+Parameter1:
+Painting/Size</description>
 		<bankreq>2=4</bankreq>
 	</object>
 
@@ -460,7 +499,9 @@ This object is unused in the game, but is present in the general purpose test ma
 		<name>Red ! Switch</name>
 		<internalname>HANSWITCH</internalname>
 		<actorid>11</actorid>
-		<description>When pressed, makes Red ? Blocks become solid and usable.</description>
+		<description>When pressed, makes Red ? Blocks become solid and usable.
+		
+Set Parameter 1 to FF02 and Parameter 1 of the (ID 25) SW_BLOCK_L bricks to FF00.</description>
 		<bankreq>none</bankreq>
 	</object>
 
@@ -469,7 +510,10 @@ This object is unused in the game, but is present in the general purpose test ma
 		<name>Star Switch</name>
 		<internalname>STAR_SWITCH</internalname>
 		<actorid>12</actorid>
-		<description>Makes a star inside a cage appear.</description>
+		<description>Makes a star inside a cage appear.
+		
+The fist two digits of Parameter 1 give the time limit (seconds / 2 possibly) and the second two give the ID of the Star.
+		</description>
 		<bankreq>none</bankreq>
 	</object>
 
@@ -632,7 +676,7 @@ Sleeps most of the time, but if a player comes too close, wakes up and starts ch
 		<name>Power Star</name>
 		<internalname>STAR</internalname>
 		<actorid>178</actorid>
-		<description>Adds 1 star to the player's star counter when collected. Not all secret Stars end the level.</description>
+		<description>Adds 1 star to the player's star counter when collected. Not all secret Stars end the level. Setting Paramater 1 to a number from 1 - 7 will set it as that star for the current level.</description>
 		<bankreq>none</bankreq>
 	</object>
 
@@ -652,7 +696,14 @@ Sleeps most of the time, but if a player comes too close, wakes up and starts ch
 		<actorid>180</actorid>
 		<description>Tells where the associated Power Star lands after it spawns.
 
-Optionally, this object can show a horizontal star shadow at its position, usually when the star is spawned by collecting red coins.</description>
+Optionally, this object can show a horizontal star shadow at its position, usually when the star is spawned by collecting red coins.
+
+Switch Star: Set Parameter 1 to 6 followed by the number of the Star (act) it is for.
+
+Red Coins: Set Parameter 1 to the ID of the Star it is for.
+
+When an object will make it appear: Set Parameter 1 to 2 followed by the Star ID.
+</description>
 		<bankreq>none</bankreq>
 	</object>
 
@@ -679,7 +730,7 @@ Optionally, this object can show a horizontal star shadow at its position, usual
 		<name>Thwomp</name>
 		<internalname>DOSUN</internalname>
 		<actorid>161</actorid>
-		<description></description>
+		<description>An angry stone that smashes the ground, then returns to it's initial position.</description>
 		<bankreq>4=3</bankreq>
 	</object>
 
@@ -853,7 +904,10 @@ This might be because she was never intended to talk, but was given this behavio
 		<name>Koopa Shell</name>
 		<internalname>SHELL</internalname>
 		<actorid>285</actorid>
-		<description>The green Koopa Shell can be ridden on/under water and on land, while its red counterpart can be hit to send it flying across the ground. Red shells can be eaten by Yoshi to allow him to breathe fire. Green shells can be eaten by Yoshi, then spat out to travel as a Red Shell does when hit.</description>
+		<description>The green Koopa Shell can be ridden on/under water and on land, while its red counterpart can be hit to send it flying across the ground. Red shells can be eaten by Yoshi to allow him to breathe fire. Green shells can be eaten by Yoshi, then spat out to travel as a Red Shell does when hit.
+		
+Set Parameter 1 to 10 for underwater riding.
+		</description>
 		<bankreq>none</bankreq>
 		<param n='0'>
 			<name>Color</name>
@@ -1050,7 +1104,7 @@ This might be because she was never intended to talk, but was given this behavio
 		<name>Sliding Pole</name>
 		<internalname>WL_POLELIFT</internalname>
 		<actorid>89</actorid>
-		<description>Sliding poles that appear in Dire Dire Docks.</description>
+		<description>Sliding poles that appear in Dire Dire Docks. Parameter 1 gives the ID (zero-based index) of the path the pole is to follow.</description>
 		<bankreq>7=19</bankreq>
 	</object>
 
@@ -1104,7 +1158,7 @@ This might be because she was never intended to talk, but was given this behavio
 		<name></name>
 		<internalname>RC_TIKUWA</internalname>
 		<actorid>126</actorid>
-		<description></description>
+		<description>Platform that begins to fall after the player walks on it, from Rainbow Ride.</description>
 		<bankreq>7=29</bankreq>
 	</object>
 
@@ -1113,7 +1167,7 @@ This might be because she was never intended to talk, but was given this behavio
 		<name></name>
 		<internalname>RC_BURANKO</internalname>
 		<actorid>127</actorid>
-		<description></description>
+		<description>Swinging pendulum-like platform from Rainbow Ride.</description>
 		<bankreq>7=29</bankreq>
 	</object>
 
@@ -1122,7 +1176,7 @@ This might be because she was never intended to talk, but was given this behavio
 		<name></name>
 		<internalname>RC_SEESAW</internalname>
 		<actorid>128</actorid>
-		<description></description>
+		<description>Seesaw platform from Rainbow Ride.</description>
 		<bankreq>5=2</bankreq>
 	</object>
 
@@ -1131,7 +1185,9 @@ This might be because she was never intended to talk, but was given this behavio
 		<name></name>
 		<internalname>RC_KAITEN</internalname>
 		<actorid>129</actorid>
-		<description></description>
+		<description>Spinning platform (Y axis) from Rainbow Ride.
+Parameter 1 should be FFFF.
+Parameter 3 should be 0 for Counter-Clockwise, FEC9 for Clockwise.</description>
 		<bankreq>7=29</bankreq>
 	</object>
 
@@ -1140,7 +1196,7 @@ This might be because she was never intended to talk, but was given this behavio
 		<name></name>
 		<internalname>RC_GURUGURU</internalname>
 		<actorid>132</actorid>
-		<description></description>
+		<description>Clockwise spinning platform with 'arms' from Rainbow Ride.</description>
 		<bankreq>7=29</bankreq>
 	</object>
 
@@ -1167,7 +1223,9 @@ This might be because she was never intended to talk, but was given this behavio
 		<name></name>
 		<internalname>TT_FUTA</internalname>
 		<actorid>104</actorid>
-		<description></description>
+		<description>Breakable rock at entrance to Wiggler's Cave in Tiny Huge Island - Tiny.
+Use FFFF.
+		</description>
 		<bankreq>7=26</bankreq>
 	</object>
 
@@ -1176,7 +1234,9 @@ This might be because she was never intended to talk, but was given this behavio
 		<name></name>
 		<internalname>TT_WATER</internalname>
 		<actorid>105</actorid>
-		<description></description>
+		<description>Water above entrance to Wiggler's Cave. Lowers and disappears when entrance broken. 
+Use FFFF.
+		</description>
 		<bankreq>7=26</bankreq>
 	</object>
 
@@ -1185,7 +1245,9 @@ This might be because she was never intended to talk, but was given this behavio
 		<name></name>
 		<internalname>TD_FUTA</internalname>
 		<actorid>106</actorid>
-		<description></description>
+		<description>Tiny Huge Island - Huge breakable entrance to Wiggler's Cave. Disappears when entrance broken in Tiny island. 
+Use FFFF.
+		</description>
 		<bankreq>7=25</bankreq>
 	</object>
 
@@ -1194,7 +1256,9 @@ This might be because she was never intended to talk, but was given this behavio
 		<name></name>
 		<internalname>TD_WATER</internalname>
 		<actorid>107</actorid>
-		<description></description>
+		<description>Tiny Huge Island - Huge water above entrance to Wiggler's Cave. Lowers and disappears when entrance broken in Tiny island. 
+Use FFFF.
+		</description>
 		<bankreq>7=25</bankreq>
 	</object>
 
@@ -1734,7 +1798,7 @@ This might be because she was never intended to talk, but was given this behavio
 		<name></name>
 		<internalname>KI_HASIRA</internalname>
 		<actorid>58</actorid>
-		<description></description>
+		<description>Pillar of rock that falls over on Player from JRB.</description>
 		<bankreq>7=9</bankreq>
 	</object>
 
@@ -1743,7 +1807,7 @@ This might be because she was never intended to talk, but was given this behavio
 		<name></name>
 		<internalname>KI_HASIRA_DAI</internalname>
 		<actorid>59</actorid>
-		<description></description>
+		<description>A rock triangle only solid on top from JRB. [Unused?]</description>
 		<bankreq>none</bankreq>
 	</object>
 
@@ -1758,7 +1822,7 @@ This might be because she was never intended to talk, but was given this behavio
 
 	<object id='184'>
 		<category>1</category>
-		<name></name>
+		<name>A piece of rock used as decoration in Jolly Rodger Bay. Lit. Name = Something_Rock.</name>
 		<internalname>KI_IWA</internalname>
 		<actorid>61</actorid>
 		<description></description>
@@ -1808,7 +1872,9 @@ Does nothing if placed alone. For it to act as an entrance or an exit, the corre
 		<name>Fly Guy</name>
 		<internalname>PROPELLER_HEYHO</internalname>
 		<actorid>232</actorid>
-		<description>Flying Shy Guy that swoops down to attack the player.</description>
+		<description>Flying Shy Guy that swoops down to attack the player.
+Set Parameter 1 to 0 for swoop-to-attack behaviour.
+Set Parameter 1 to 1 to also spit fire at Player.</description>
 		<bankreq>1=2</bankreq>
 	</object>
 
@@ -1886,10 +1952,10 @@ Does nothing if placed alone. For it to act as an entrance or an exit, the corre
 
 	<object id='198'>
 		<category>1</category>
-		<name></name>
+		<name>Stood-up plank</name>
 		<internalname>BK_BOTAOSI</internalname>
 		<actorid>44</actorid>
-		<description></description>
+		<description>If kicked, it will fall flat, ignoring all collision. From Whomp's Fortress.</description>
 		<bankreq>7=8</bankreq>
 	</object>
 
@@ -1898,7 +1964,7 @@ Does nothing if placed alone. For it to act as an entrance or an exit, the corre
 		<name></name>
 		<internalname>BK_DOWN_B</internalname>
 		<actorid>45</actorid>
-		<description></description>
+		<description>Falling bridge blocks from Whomp's Fortress.</description>
 		<bankreq>7=8</bankreq>
 	</object>
 
@@ -1907,7 +1973,7 @@ Does nothing if placed alone. For it to act as an entrance or an exit, the corre
 		<name></name>
 		<internalname>BK_FUTA</internalname>
 		<actorid>46</actorid>
-		<description></description>
+		<description>Breakable block at bottom of Tower from Whomp's Fortress.</description>
 		<bankreq>none</bankreq>
 	</object>
 
@@ -1931,10 +1997,10 @@ Does nothing if placed alone. For it to act as an entrance or an exit, the corre
 
 	<object id='203'>
 		<category>1</category>
-		<name></name>
+		<name>Tower</name>
 		<internalname>BK_TOWER</internalname>
 		<actorid>49</actorid>
-		<description></description>
+		<description>Large tower from Whomp's Fortress.</description>
 		<bankreq>none</bankreq>
 	</object>
 
@@ -1997,7 +2063,7 @@ Does nothing if placed alone. For it to act as an entrance or an exit, the corre
 		<name></name>
 		<internalname>TH_DOWN_B</internalname>
 		<actorid>66</actorid>
-		<description></description>
+		<description>Fragile Bridge (Big Boo's Haunt)</description>
 		<bankreq>0=2</bankreq>
 	</object>
 
@@ -2177,7 +2243,7 @@ Does nothing if placed alone. For it to act as an entrance or an exit, the corre
 		<name></name>
 		<internalname>PROPELLER_HEYHO_FIRE</internalname>
 		<actorid>233</actorid>
-		<description></description>
+		<description>Fireball shot by Fly Guys with Parameter 1 set to 1.</description>
 		<bankreq>none</bankreq>
 	</object>
 
@@ -2294,7 +2360,8 @@ Does nothing if placed alone. For it to act as an entrance or an exit, the corre
 		<name>Invisible Pole</name>
 		<internalname>BAR</internalname>
 		<actorid>287</actorid>
-		<description>A pole. However, it is invisible.</description>
+		<description>A pole. However, it is invisible.
+The last two digits in Parameter are the height * 100 (in hex).</description>
 		<bankreq>none</bankreq>
 	</object>
 
@@ -2312,7 +2379,7 @@ Does nothing if placed alone. For it to act as an entrance or an exit, the corre
 		<name>Pushable block</name>
 		<internalname>PUSHBLOCK</internalname>
 		<actorid>192</actorid>
-		<description>A large metal block that the player can push.</description>
+		<description>A large metal block that the player can push. Can't be pushed off edge of platform, no ground detection.</description>
 		<bankreq>none</bankreq>
 	</object>
 
@@ -2327,7 +2394,7 @@ Does nothing if placed alone. For it to act as an entrance or an exit, the corre
 
 	<object id='247'>
 		<category>2</category>
-		<name>Snifit</name>
+		<name>Snufit</name>
 		<internalname>YUREI_MUCHO</internalname>
 		<actorid>236</actorid>
 		<description>A type of Shy Guy that shoots bullets out of its mouth.</description>
@@ -2456,7 +2523,11 @@ Does nothing if placed alone. For it to act as an entrance or an exit, the corre
 		<name>Unagi the Eel</name>
 		<internalname>MORAY</internalname>
 		<actorid>242</actorid>
-		<description>A giant eel in Jolly Roger Bay. It swims around, but takes 3 life points if touched.</description>
+		<description>A giant eel in Jolly Roger Bay. It swims around, but takes 3 life points if touched.
+		
+Set Parameter 1 to 2 followed by the path ID then 00 if it is to behave as in 'CAN THE EEL COME OUT TO PLAY'.
+Set Parameter 1 to F followed by the path ID then 00 if it is to swim about following a path.
+		</description>
 		<bankreq>7=9</bankreq>
 	</object>
 
@@ -2591,7 +2662,8 @@ Does nothing if placed alone. For it to act as an entrance or an exit, the corre
 		<name></name>
 		<internalname>RC_CARPET</internalname>
 		<actorid>130</actorid>
-		<description></description>
+		<description>Flying Carpet from Rainbow Ride.
+Parameter 1: First two digits should be 06, second to specify the path ID (zero-based index) the carpet is to follow.</description>
 		<bankreq>7=29</bankreq>
 	</object>
 
@@ -2600,7 +2672,13 @@ Does nothing if placed alone. For it to act as an entrance or an exit, the corre
 		<name>Big Key</name>
 		<internalname>OBJ_KEY</internalname>
 		<actorid>282</actorid>
-		<description></description>
+		<description>Parameter1:
+0= Bowser Key
+1= Bowser Key
+2= Mario Key
+3= Luigi Key
+4= Wario Key
+5= Big Star Key</description>
 		<bankreq>4=1</bankreq>
 	</object>
 
@@ -2609,7 +2687,7 @@ Does nothing if placed alone. For it to act as an entrance or an exit, the corre
 		<name>Last Star</name>
 		<internalname>LAST_STAR</internalname>
 		<actorid>283</actorid>
-		<description>Spawns a large star similar to the one awarded when Bowser is defeated for the final time. Touching it gives the player wings, and upon landing, the player teleports to 0.000, 0.000, 0.000 and executes the &quot;super triple jump&quot; animation, then flies around for a few seconds, finally triggering the ending. Some parameters might yield a key from the first two fights.</description>
+		<description>Spawns a large star similar to the one awarded when Bowser is defeated for the final time. Touching it gives the player wings, and upon landing, the player teleports to 0.000, 0.000, 0.000 and executes the &quot;super triple jump&quot; animation, then flies around for a few seconds, finally triggering the ending. Some parameters might yield a key from the first two fights. Setting Parameter 1 to FFFF causes it to work the same as when Bowser is defeated and trigger the ending sequence.</description>
 		<bankreq>4=1</bankreq>
 	</object>
 
@@ -2636,7 +2714,10 @@ Does nothing if placed alone. For it to act as an entrance or an exit, the corre
 		<name>Koopa the Quick</name>
 		<internalname>RACE_NOKO</internalname>
 		<actorid>188</actorid>
-		<description>A large Koopa that challenges the player to several races.</description>
+		<description>A large Koopa that challenges the player to several races. He will follow the path specified in Parameter2, he does detect collision and will jump across edges automatically.
+
+Parameter2:
+ID (zero-based index) of the path he follows</description>
 		<bankreq>0=1</bankreq>
 	</object>
 
@@ -2723,7 +2804,7 @@ Does nothing if placed alone. For it to act as an entrance or an exit, the corre
 
 	<object id='291'>
 		<category>1</category>
-		<name></name>
+		<name>Chief Chilly</name>
 		<internalname>KING_DONKETU</internalname>
 		<actorid>218</actorid>
 		<description></description>
@@ -2782,7 +2863,7 @@ Appears lower than its position if the two pillars in the castle basement have b
 		<name></name>
 		<internalname>MC_HAZAD</internalname>
 		<actorid>341</actorid>
-		<description></description>
+		<description>Rope barrier.</description>
 		<bankreq>none</bankreq>
 	</object>
 
@@ -2827,7 +2908,13 @@ Appears lower than its position if the two pillars in the castle basement have b
 		<name>Super Mushroom</name>
 		<internalname>SCALEUP_KINOKO</internalname>
 		<actorid>277</actorid>
-		<description>A mushroom that makes the player huge, stomping everything in their way. If the player is huge and falls into water, the player acts as if they were Metal Wario.</description>
+		<description>A mushroom that makes the player huge, stomping everything in their way. If the player is huge and falls into water, the player acts as if they were Metal Wario.
+		
+Parameter1:
+0 = Like spawned from block
+F1 = Not there
+F2 = Flies away when approached
+F3 = Still, doesn't disappear</description>
 		<bankreq>none</bankreq>
 	</object>
 
