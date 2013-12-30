@@ -29,7 +29,7 @@
         private void InitializeComponent()
         {
             System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(TextEditorForm));
-            this.splitContainer1 = new System.Windows.Forms.SplitContainer();
+            this.splitCVertical = new System.Windows.Forms.SplitContainer();
             this.lbxMsgList = new System.Windows.Forms.ListBox();
             this.toolStrip1 = new System.Windows.Forms.ToolStrip();
             this.btnImport = new System.Windows.Forms.ToolStripButton();
@@ -57,46 +57,35 @@
             this.btnUpdateString = new System.Windows.Forms.Button();
             this.txtEdit = new System.Windows.Forms.TextBox();
             this.tbxMsgPreview = new System.Windows.Forms.TextBox();
-            //((System.ComponentModel.ISupportInitialize)(this.splitContainer1)).BeginInit();
-            this.splitContainer1.Panel1.SuspendLayout();
-            this.splitContainer1.Panel2.SuspendLayout();
-            this.splitContainer1.SuspendLayout();
+            this.splitCHorizontal = new System.Windows.Forms.SplitContainer();
+            //((System.ComponentModel.ISupportInitialize)(this.splitCVertical)).BeginInit();
+            this.splitCVertical.Panel1.SuspendLayout();
+            this.splitCVertical.Panel2.SuspendLayout();
+            this.splitCVertical.SuspendLayout();
             this.toolStrip1.SuspendLayout();
+            //((System.ComponentModel.ISupportInitialize)(this.splitCHorizontal)).BeginInit();
+            this.splitCHorizontal.Panel1.SuspendLayout();
+            this.splitCHorizontal.Panel2.SuspendLayout();
+            this.splitCHorizontal.SuspendLayout();
             this.SuspendLayout();
             // 
-            // splitContainer1
+            // splitCVertical
             // 
-            this.splitContainer1.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.splitContainer1.Location = new System.Drawing.Point(0, 0);
-            this.splitContainer1.Name = "splitContainer1";
+            this.splitCVertical.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.splitCVertical.Location = new System.Drawing.Point(0, 0);
+            this.splitCVertical.Name = "splitCVertical";
             // 
-            // splitContainer1.Panel1
+            // splitCVertical.Panel1
             // 
-            this.splitContainer1.Panel1.Controls.Add(this.lbxMsgList);
+            this.splitCVertical.Panel1.Controls.Add(this.lbxMsgList);
             // 
-            // splitContainer1.Panel2
+            // splitCVertical.Panel2
             // 
-            this.splitContainer1.Panel2.Controls.Add(this.toolStrip1);
-            this.splitContainer1.Panel2.Controls.Add(this.label5);
-            this.splitContainer1.Panel2.Controls.Add(this.label4);
-            this.splitContainer1.Panel2.Controls.Add(this.btnSaveAll);
-            this.splitContainer1.Panel2.Controls.Add(this.btnCoins);
-            this.splitContainer1.Panel2.Controls.Add(this.btnR);
-            this.splitContainer1.Panel2.Controls.Add(this.btnL);
-            this.splitContainer1.Panel2.Controls.Add(this.btnY);
-            this.splitContainer1.Panel2.Controls.Add(this.btnX);
-            this.splitContainer1.Panel2.Controls.Add(this.btnB);
-            this.splitContainer1.Panel2.Controls.Add(this.btnA);
-            this.splitContainer1.Panel2.Controls.Add(this.btnDPad);
-            this.splitContainer1.Panel2.Controls.Add(this.btnStarEmpty);
-            this.splitContainer1.Panel2.Controls.Add(this.btnStarFull);
-            this.splitContainer1.Panel2.Controls.Add(this.label1);
-            this.splitContainer1.Panel2.Controls.Add(this.btnUpdateString);
-            this.splitContainer1.Panel2.Controls.Add(this.txtEdit);
-            this.splitContainer1.Panel2.Controls.Add(this.tbxMsgPreview);
-            this.splitContainer1.Size = new System.Drawing.Size(793, 515);
-            this.splitContainer1.SplitterDistance = 264;
-            this.splitContainer1.TabIndex = 0;
+            this.splitCVertical.Panel2.Controls.Add(this.splitCHorizontal);
+            this.splitCVertical.Panel2.Controls.Add(this.toolStrip1);
+            this.splitCVertical.Size = new System.Drawing.Size(791, 515);
+            this.splitCVertical.SplitterDistance = 223;
+            this.splitCVertical.TabIndex = 0;
             // 
             // lbxMsgList
             // 
@@ -104,7 +93,7 @@
             this.lbxMsgList.FormattingEnabled = true;
             this.lbxMsgList.Location = new System.Drawing.Point(0, 0);
             this.lbxMsgList.Name = "lbxMsgList";
-            this.lbxMsgList.Size = new System.Drawing.Size(264, 515);
+            this.lbxMsgList.Size = new System.Drawing.Size(223, 515);
             this.lbxMsgList.TabIndex = 0;
             this.lbxMsgList.SelectedIndexChanged += new System.EventHandler(this.lbxMsgList_SelectedIndexChanged);
             // 
@@ -121,7 +110,7 @@
             this.btnHelp});
             this.toolStrip1.Location = new System.Drawing.Point(0, 0);
             this.toolStrip1.Name = "toolStrip1";
-            this.toolStrip1.Size = new System.Drawing.Size(525, 25);
+            this.toolStrip1.Size = new System.Drawing.Size(564, 25);
             this.toolStrip1.TabIndex = 24;
             this.toolStrip1.Text = "toolStrip1";
             // 
@@ -190,8 +179,9 @@
             // 
             // label5
             // 
+            this.label5.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)));
             this.label5.AutoSize = true;
-            this.label5.Location = new System.Drawing.Point(112, 485);
+            this.label5.Location = new System.Drawing.Point(115, 216);
             this.label5.Name = "label5";
             this.label5.Size = new System.Drawing.Size(207, 13);
             this.label5.TabIndex = 22;
@@ -199,8 +189,9 @@
             // 
             // label4
             // 
+            this.label4.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)));
             this.label4.AutoSize = true;
-            this.label4.Location = new System.Drawing.Point(112, 454);
+            this.label4.Location = new System.Drawing.Point(115, 185);
             this.label4.Name = "label4";
             this.label4.Size = new System.Drawing.Size(268, 13);
             this.label4.TabIndex = 21;
@@ -208,7 +199,8 @@
             // 
             // btnSaveAll
             // 
-            this.btnSaveAll.Location = new System.Drawing.Point(3, 480);
+            this.btnSaveAll.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)));
+            this.btnSaveAll.Location = new System.Drawing.Point(6, 211);
             this.btnSaveAll.Name = "btnSaveAll";
             this.btnSaveAll.Size = new System.Drawing.Size(103, 23);
             this.btnSaveAll.TabIndex = 20;
@@ -218,8 +210,9 @@
             // 
             // btnCoins
             // 
+            this.btnCoins.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)));
             this.btnCoins.Image = global::SM64DSe.Properties.Resources.Coins1;
-            this.btnCoins.Location = new System.Drawing.Point(0, 409);
+            this.btnCoins.Location = new System.Drawing.Point(3, 140);
             this.btnCoins.Name = "btnCoins";
             this.btnCoins.Size = new System.Drawing.Size(35, 30);
             this.btnCoins.TabIndex = 14;
@@ -228,8 +221,9 @@
             // 
             // btnR
             // 
+            this.btnR.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)));
             this.btnR.Image = global::SM64DSe.Properties.Resources.btnR1;
-            this.btnR.Location = new System.Drawing.Point(349, 409);
+            this.btnR.Location = new System.Drawing.Point(352, 140);
             this.btnR.Name = "btnR";
             this.btnR.Size = new System.Drawing.Size(35, 30);
             this.btnR.TabIndex = 13;
@@ -238,8 +232,9 @@
             // 
             // btnL
             // 
+            this.btnL.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)));
             this.btnL.Image = global::SM64DSe.Properties.Resources.btnL1;
-            this.btnL.Location = new System.Drawing.Point(310, 409);
+            this.btnL.Location = new System.Drawing.Point(313, 140);
             this.btnL.Name = "btnL";
             this.btnL.Size = new System.Drawing.Size(35, 30);
             this.btnL.TabIndex = 12;
@@ -248,8 +243,9 @@
             // 
             // btnY
             // 
+            this.btnY.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)));
             this.btnY.Image = global::SM64DSe.Properties.Resources.btnY1;
-            this.btnY.Location = new System.Drawing.Point(271, 409);
+            this.btnY.Location = new System.Drawing.Point(274, 140);
             this.btnY.Name = "btnY";
             this.btnY.Size = new System.Drawing.Size(35, 30);
             this.btnY.TabIndex = 11;
@@ -258,8 +254,9 @@
             // 
             // btnX
             // 
+            this.btnX.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)));
             this.btnX.Image = global::SM64DSe.Properties.Resources.btnX1;
-            this.btnX.Location = new System.Drawing.Point(232, 409);
+            this.btnX.Location = new System.Drawing.Point(235, 140);
             this.btnX.Name = "btnX";
             this.btnX.Size = new System.Drawing.Size(35, 30);
             this.btnX.TabIndex = 10;
@@ -268,8 +265,9 @@
             // 
             // btnB
             // 
+            this.btnB.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)));
             this.btnB.Image = global::SM64DSe.Properties.Resources.btnB1;
-            this.btnB.Location = new System.Drawing.Point(193, 409);
+            this.btnB.Location = new System.Drawing.Point(196, 140);
             this.btnB.Name = "btnB";
             this.btnB.Size = new System.Drawing.Size(35, 30);
             this.btnB.TabIndex = 9;
@@ -278,8 +276,9 @@
             // 
             // btnA
             // 
+            this.btnA.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)));
             this.btnA.Image = global::SM64DSe.Properties.Resources.btnA1;
-            this.btnA.Location = new System.Drawing.Point(154, 409);
+            this.btnA.Location = new System.Drawing.Point(157, 140);
             this.btnA.Name = "btnA";
             this.btnA.Size = new System.Drawing.Size(35, 30);
             this.btnA.TabIndex = 8;
@@ -288,8 +287,9 @@
             // 
             // btnDPad
             // 
+            this.btnDPad.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)));
             this.btnDPad.Image = global::SM64DSe.Properties.Resources.DPad1;
-            this.btnDPad.Location = new System.Drawing.Point(115, 409);
+            this.btnDPad.Location = new System.Drawing.Point(118, 140);
             this.btnDPad.Name = "btnDPad";
             this.btnDPad.Size = new System.Drawing.Size(35, 30);
             this.btnDPad.TabIndex = 7;
@@ -298,8 +298,9 @@
             // 
             // btnStarEmpty
             // 
+            this.btnStarEmpty.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)));
             this.btnStarEmpty.Image = global::SM64DSe.Properties.Resources.StarEmpty1;
-            this.btnStarEmpty.Location = new System.Drawing.Point(76, 409);
+            this.btnStarEmpty.Location = new System.Drawing.Point(79, 140);
             this.btnStarEmpty.Name = "btnStarEmpty";
             this.btnStarEmpty.Size = new System.Drawing.Size(35, 30);
             this.btnStarEmpty.TabIndex = 6;
@@ -308,8 +309,9 @@
             // 
             // btnStarFull
             // 
+            this.btnStarFull.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)));
             this.btnStarFull.Image = global::SM64DSe.Properties.Resources.StarFull1;
-            this.btnStarFull.Location = new System.Drawing.Point(39, 409);
+            this.btnStarFull.Location = new System.Drawing.Point(42, 140);
             this.btnStarFull.Name = "btnStarFull";
             this.btnStarFull.Size = new System.Drawing.Size(35, 30);
             this.btnStarFull.TabIndex = 5;
@@ -318,8 +320,10 @@
             // 
             // label1
             // 
+            this.label1.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom)
+                        | System.Windows.Forms.AnchorStyles.Left)));
             this.label1.AutoSize = true;
-            this.label1.Location = new System.Drawing.Point(-3, 272);
+            this.label1.Location = new System.Drawing.Point(0, 3);
             this.label1.Name = "label1";
             this.label1.Size = new System.Drawing.Size(134, 13);
             this.label1.TabIndex = 3;
@@ -327,7 +331,8 @@
             // 
             // btnUpdateString
             // 
-            this.btnUpdateString.Location = new System.Drawing.Point(3, 449);
+            this.btnUpdateString.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)));
+            this.btnUpdateString.Location = new System.Drawing.Point(6, 180);
             this.btnUpdateString.Name = "btnUpdateString";
             this.btnUpdateString.Size = new System.Drawing.Size(103, 23);
             this.btnUpdateString.TabIndex = 2;
@@ -337,47 +342,90 @@
             // 
             // txtEdit
             // 
-            this.txtEdit.Location = new System.Drawing.Point(0, 288);
+            this.txtEdit.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom)
+                        | System.Windows.Forms.AnchorStyles.Left)
+                        | System.Windows.Forms.AnchorStyles.Right)));
+            this.txtEdit.Location = new System.Drawing.Point(2, 19);
             this.txtEdit.Multiline = true;
             this.txtEdit.Name = "txtEdit";
             this.txtEdit.ScrollBars = System.Windows.Forms.ScrollBars.Both;
-            this.txtEdit.Size = new System.Drawing.Size(513, 115);
+            this.txtEdit.Size = new System.Drawing.Size(562, 115);
             this.txtEdit.TabIndex = 1;
             // 
             // tbxMsgPreview
             // 
-            this.tbxMsgPreview.Location = new System.Drawing.Point(0, 26);
+            this.tbxMsgPreview.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.tbxMsgPreview.Location = new System.Drawing.Point(0, 0);
             this.tbxMsgPreview.Multiline = true;
             this.tbxMsgPreview.Name = "tbxMsgPreview";
             this.tbxMsgPreview.ReadOnly = true;
             this.tbxMsgPreview.ScrollBars = System.Windows.Forms.ScrollBars.Vertical;
-            this.tbxMsgPreview.Size = new System.Drawing.Size(513, 243);
+            this.tbxMsgPreview.Size = new System.Drawing.Size(564, 245);
             this.tbxMsgPreview.TabIndex = 0;
+            // 
+            // splitCHorizontal
+            // 
+            this.splitCHorizontal.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.splitCHorizontal.Location = new System.Drawing.Point(0, 25);
+            this.splitCHorizontal.Name = "splitCHorizontal";
+            this.splitCHorizontal.Orientation = System.Windows.Forms.Orientation.Horizontal;
+            // 
+            // splitCHorizontal.Panel1
+            // 
+            this.splitCHorizontal.Panel1.Controls.Add(this.tbxMsgPreview);
+            // 
+            // splitCHorizontal.Panel2
+            // 
+            this.splitCHorizontal.Panel2.Controls.Add(this.label1);
+            this.splitCHorizontal.Panel2.Controls.Add(this.txtEdit);
+            this.splitCHorizontal.Panel2.Controls.Add(this.label5);
+            this.splitCHorizontal.Panel2.Controls.Add(this.btnCoins);
+            this.splitCHorizontal.Panel2.Controls.Add(this.label4);
+            this.splitCHorizontal.Panel2.Controls.Add(this.btnUpdateString);
+            this.splitCHorizontal.Panel2.Controls.Add(this.btnSaveAll);
+            this.splitCHorizontal.Panel2.Controls.Add(this.btnStarFull);
+            this.splitCHorizontal.Panel2.Controls.Add(this.btnStarEmpty);
+            this.splitCHorizontal.Panel2.Controls.Add(this.btnR);
+            this.splitCHorizontal.Panel2.Controls.Add(this.btnDPad);
+            this.splitCHorizontal.Panel2.Controls.Add(this.btnL);
+            this.splitCHorizontal.Panel2.Controls.Add(this.btnA);
+            this.splitCHorizontal.Panel2.Controls.Add(this.btnY);
+            this.splitCHorizontal.Panel2.Controls.Add(this.btnB);
+            this.splitCHorizontal.Panel2.Controls.Add(this.btnX);
+            this.splitCHorizontal.Size = new System.Drawing.Size(564, 490);
+            this.splitCHorizontal.SplitterDistance = 245;
+            this.splitCHorizontal.TabIndex = 25;
             // 
             // TextEditorForm
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.ClientSize = new System.Drawing.Size(793, 515);
-            this.Controls.Add(this.splitContainer1);
+            this.Controls.Add(this.splitCVertical);
             this.Icon = ((System.Drawing.Icon)(resources.GetObject("$this.Icon")));
             this.Name = "TextEditorForm";
             this.Text = "Text editor - SM64DS Editor";
             this.Load += new System.EventHandler(this.TextEditorForm_Load);
-            this.splitContainer1.Panel1.ResumeLayout(false);
-            this.splitContainer1.Panel2.ResumeLayout(false);
-            this.splitContainer1.Panel2.PerformLayout();
-            //((System.ComponentModel.ISupportInitialize)(this.splitContainer1)).EndInit();
-            this.splitContainer1.ResumeLayout(false);
+            this.splitCVertical.Panel1.ResumeLayout(false);
+            this.splitCVertical.Panel2.ResumeLayout(false);
+            this.splitCVertical.Panel2.PerformLayout();
+            //((System.ComponentModel.ISupportInitialize)(this.splitCVertical)).EndInit();
+            this.splitCVertical.ResumeLayout(false);
             this.toolStrip1.ResumeLayout(false);
             this.toolStrip1.PerformLayout();
+            this.splitCHorizontal.Panel1.ResumeLayout(false);
+            this.splitCHorizontal.Panel1.PerformLayout();
+            this.splitCHorizontal.Panel2.ResumeLayout(false);
+            this.splitCHorizontal.Panel2.PerformLayout();
+            //((System.ComponentModel.ISupportInitialize)(this.splitCHorizontal)).EndInit();
+            this.splitCHorizontal.ResumeLayout(false);
             this.ResumeLayout(false);
 
         }
 
         #endregion
 
-        private System.Windows.Forms.SplitContainer splitContainer1;
+        private System.Windows.Forms.SplitContainer splitCVertical;
         private System.Windows.Forms.ListBox lbxMsgList;
         private System.Windows.Forms.TextBox tbxMsgPreview;
         private System.Windows.Forms.TextBox txtEdit;
@@ -405,5 +453,6 @@
         private System.Windows.Forms.ToolStripSeparator toolStripSeparator2;
         private System.Windows.Forms.ToolStripDropDownButton btnLanguages;
         private System.Windows.Forms.ToolStripButton btnHelp;
+        private System.Windows.Forms.SplitContainer splitCHorizontal;
     }
 }

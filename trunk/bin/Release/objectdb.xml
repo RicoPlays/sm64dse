@@ -459,7 +459,10 @@ Set Parameter 1 to 1 if they are to be used with a Blue Coin Switch.
 		<name>Bowser</name>
 		<internalname>KOOPA</internalname>
 		<actorid>279</actorid>
-		<description></description>
+		<description>Parameter 1:
+0 - Dark World Behaviour Patterns
+1 - Fire Sea Behaviour Patterns
+2 - Sky Behaviour Patterns (Can only be used in Sky - Fight)</description>
 		<bankreq>none</bankreq>
 	</object>
 
@@ -489,7 +492,7 @@ Set Parameter 1 to 1 if they are to be used with a Blue Coin Switch.
 		<actorid>307</actorid>
 		<description>Jump-through paintings in the castle.
 
-Parameter1:
+Parameter 1:
 Painting/Size</description>
 		<bankreq>2=4</bankreq>
 	</object>
@@ -566,7 +569,7 @@ The fist two digits of Parameter 1 give the time limit (seconds / 2 possibly) an
 		<name>1UP Mushroom</name>
 		<internalname>ONEUPKINOKO</internalname>
 		<actorid>276</actorid>
-		<description></description>
+		<description>Green mushroom that gives the Player an extra life.</description>
 		<bankreq>none</bankreq>
 	</object>
 
@@ -721,7 +724,12 @@ When an object will make it appear: Set Parameter 1 to 2 followed by the Star ID
 		<name>Whomp King</name>
 		<internalname>BATANKING</internalname>
 		<actorid>165</actorid>
-		<description>Takes 3 hits to destroy.</description>
+		<description>Takes 3 hits to destroy.
+
+Parameter 1:
+FF followed by Star ID eg. FF01 for Star 1. 
+
+There should be a corresponding Star Marker with Parameters 2 followed by Star ID, eg. 21 for Star 1.</description>
 		<bankreq>2=3</bankreq>
 	</object>
 
@@ -739,7 +747,22 @@ When an object will make it appear: Set Parameter 1 to 2 followed by the Star ID
 		<name>Boo</name>
 		<internalname>TERESA</internalname>
 		<actorid>209</actorid>
-		<description>Chases the player. Turns translucent when looked at, revealing an object inside.</description>
+		<description>Chases the player. Turns translucent when looked at, revealing an object inside.
+
+Parameter 1:
+0 - Normal
+1 - Stays still, doesn't turn transparent, cannot be defeated or stomped but can be eaten which triggers the usual line "You can't eat ghosts" and can be pushed around by walking into it.
+2 - Slightly erratic chasing movement, triggers "ghosts don't die" text, otherwise normal
+3 - Spawns two of the Para1:1 ghosts in the same place
+4/FF04 - Transparent, slightly bigger, flies away forever after being approached. Used in castle corridor.
+5/FF05 - Big Boo's Haunt cage, like it was just spawned.
+6 - Appears normal?
+7 - Spawns three Boos, one of them may be Param. 1/2 behaviour.
+8 - Doesn't chase or turn transparent, but moves in a circle, otherwise normal.
+9/10 - Appears normal, needs investigation?
+A/FF0A - Contains yellow coin instead of blue coin
+B - Doesn't spawn
+100 - Wears Luigi Cap</description>
 		<bankreq>0=2</bankreq>
 	</object>
 
@@ -748,7 +771,16 @@ When an object will make it appear: Set Parameter 1 to 2 followed by the Star ID
 		<name>Big Boo</name>
 		<internalname>BOSS_TERESA</internalname>
 		<actorid>210</actorid>
-		<description>The Boo's larger brethren. Takes 3 hits to destroy and releases a Power Star.</description>
+		<description>The Boo's larger brethren. Takes 3 hits to destroy and releases a Power Star.
+
+Parameter 1:
+0 - Normal
+1 - Does not appear to spawn. Needs investigation.
+2 - Spawns when all Para1:2 Boos are defeated.
+3 - King Boo (may require object LUIGI to function)
+4 - Stays still, doesn't turn transparent, cannot be defeated or stomped but can be pushed around by walking into it.
+5 - same as 4
+500 - Appears when approached, needs Star Marker to spawn star.</description>
 		<bankreq>0=2</bankreq>
 	</object>
 
@@ -1973,7 +2005,7 @@ Set Parameter 1 to 1 to also spit fire at Player.</description>
 		<name></name>
 		<internalname>BK_FUTA</internalname>
 		<actorid>46</actorid>
-		<description>Breakable block at bottom of Tower from Whomp's Fortress.</description>
+		<description>Breakable wall at bottom of Tower from Whomp's Fortress.</description>
 		<bankreq>none</bankreq>
 	</object>
 
@@ -1982,7 +2014,9 @@ Set Parameter 1 to 1 to also spit fire at Player.</description>
 		<name></name>
 		<internalname>BK_KABE01</internalname>
 		<actorid>47</actorid>
-		<description></description>
+		<description>Non-breakable version of BK_KABE00 wall from Whomp's Fortress from "Blast Away The Wall".
+
+Note: The collision map for this object should be scaled by 8 - reason unknown.</description>
 		<bankreq>2=3</bankreq>
 	</object>
 
@@ -1991,7 +2025,13 @@ Set Parameter 1 to 1 to also spit fire at Player.</description>
 		<name></name>
 		<internalname>BK_KABE00</internalname>
 		<actorid>48</actorid>
-		<description></description>
+		<description>Breakable wall from Whomp's Fortress from "Blast Away The Wall". Destroyed when Player hits it after being fired from cannon.
+Parameter 1:
+FF followed by ID of Star, eg. FF01 for Star 1
+
+A Star marker should exist with Parameter of 2 followed by Star ID. eg. 21 for Star 1.
+
+Note: The collision map for this object should be scaled by 8 - reason unknown.</description>
 		<bankreq>2=3</bankreq>
 	</object>
 
@@ -2009,7 +2049,7 @@ Set Parameter 1 to 1 to also spit fire at Player.</description>
 		<name></name>
 		<internalname>BK_UKISIMA</internalname>
 		<actorid>50</actorid>
-		<description></description>
+		<description>Floating rotating island from Whomp's Fortress.</description>
 		<bankreq>7=8</bankreq>
 	</object>
 
@@ -2027,7 +2067,12 @@ Set Parameter 1 to 1 to also spit fire at Player.</description>
 		<name></name>
 		<internalname>BK_LIFT01</internalname>
 		<actorid>52</actorid>
-		<description></description>
+		<description>Moving steps used to climb the Tower in Whomp's Fortress.
+
+Parameter 1:
+FFFF - No movement
+FF01 - Move in and out
+FF02 - Move up and down</description>
 		<bankreq>7=8</bankreq>
 	</object>
 
@@ -2036,7 +2081,7 @@ Set Parameter 1 to 1 to also spit fire at Player.</description>
 		<name></name>
 		<internalname>BK_DOSSUNBAR_S</internalname>
 		<actorid>54</actorid>
-		<description></description>
+		<description>Chunk of wall (small) that move in and out in Whomp's Fortress. Rotation does not work correctly, direction of movement cannot be changed.</description>
 		<bankreq>7=8</bankreq>
 	</object>
 
@@ -2045,7 +2090,7 @@ Set Parameter 1 to 1 to also spit fire at Player.</description>
 		<name></name>
 		<internalname>BK_DOSSUNBAR_L</internalname>
 		<actorid>53</actorid>
-		<description></description>
+		<description>Chunk of wall (large) that move in and out in Whomp's Fortress. Rotation does not work correctly, direction of movement cannot be changed.</description>
 		<bankreq>7=8</bankreq>
 	</object>
 
@@ -2054,7 +2099,7 @@ Set Parameter 1 to 1 to also spit fire at Player.</description>
 		<name></name>
 		<internalname>BK_TRANSBAR</internalname>
 		<actorid>55</actorid>
-		<description></description>
+		<description>Platforms that move in and out from Whomp's Fortress. Can be rotated.</description>
 		<bankreq>4=3</bankreq>
 	</object>
 
@@ -3014,7 +3059,7 @@ Alone, not a really useful object.</description>
 		<name>Giant Venus Firetrap</name>
 		<internalname>FIREPAKUN</internalname>
 		<actorid>251</actorid>
-		<description>Giant fire-breathing Piranha Plant.</description>
+		<description>A large fire-breathing Piranha Plant that grows into visibility when approached.</description>
 		<bankreq>3=1</bankreq>
 	</object>
 
@@ -3023,16 +3068,16 @@ Alone, not a really useful object.</description>
 		<name>Tiny Venus Firetrap</name>
 		<internalname>FIREPAKUN_S</internalname>
 		<actorid>252</actorid>
-		<description>Tiny fire-breathing Piranha Plant.</description>
+		<description>A small fire-breathing Piranha Plant that grows into visibility when approached.</description>
 		<bankreq>3=1</bankreq>
 	</object>
 
 	<object id='314'>
 		<category>2</category>
-		<name>Venus Firetrap</name>
+		<name>Hidden Piranha Plant</name>
 		<internalname>PAKUN2</internalname>
 		<actorid>253</actorid>
-		<description>Fire-breathing Piranha Plant.</description>
+		<description>A hidden Piranha Plant that grows into visibility when approached.</description>
 		<bankreq>3=1</bankreq>
 	</object>
 

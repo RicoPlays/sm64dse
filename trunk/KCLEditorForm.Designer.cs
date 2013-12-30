@@ -29,6 +29,8 @@
         private void InitializeComponent()
         {
             this.splitContainer1 = new System.Windows.Forms.SplitContainer();
+            this.splitCHorizontal = new System.Windows.Forms.SplitContainer();
+            this.lbxPlanes = new System.Windows.Forms.ListBox();
             this.tabDetailsImport = new System.Windows.Forms.TabControl();
             this.tpgDetails = new System.Windows.Forms.TabPage();
             this.lblV1 = new System.Windows.Forms.Label();
@@ -58,7 +60,6 @@
             this.btnOpenModel = new System.Windows.Forms.Button();
             this.txtModelName = new System.Windows.Forms.TextBox();
             this.label1 = new System.Windows.Forms.Label();
-            this.lbxPlanes = new System.Windows.Forms.ListBox();
             this.glModelView = new OpenTK.GLControl();
             this.toolStrip1 = new System.Windows.Forms.ToolStrip();
             this.btnOpen = new System.Windows.Forms.ToolStripButton();
@@ -66,20 +67,24 @@
             this.toolStripSeparator1 = new System.Windows.Forms.ToolStripSeparator();
             this.btnExportToOBJ = new System.Windows.Forms.ToolStripButton();
             this.cmbPolygonMode = new System.Windows.Forms.ComboBox();
+            //((System.ComponentModel.ISupportInitialize)(this.splitContainer1)).BeginInit();
             this.splitContainer1.Panel1.SuspendLayout();
             this.splitContainer1.Panel2.SuspendLayout();
             this.splitContainer1.SuspendLayout();
+            //((System.ComponentModel.ISupportInitialize)(this.splitCHorizontal)).BeginInit();
+            this.splitCHorizontal.Panel1.SuspendLayout();
+            this.splitCHorizontal.Panel2.SuspendLayout();
+            this.splitCHorizontal.SuspendLayout();
             this.tabDetailsImport.SuspendLayout();
             this.tpgDetails.SuspendLayout();
             this.tpgImport.SuspendLayout();
+            //((System.ComponentModel.ISupportInitialize)(this.gridColTypes)).BeginInit();
             this.toolStrip1.SuspendLayout();
             this.SuspendLayout();
             // 
             // splitContainer1
             // 
-            this.splitContainer1.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom)
-                        | System.Windows.Forms.AnchorStyles.Left)
-                        | System.Windows.Forms.AnchorStyles.Right)));
+            this.splitContainer1.Dock = System.Windows.Forms.DockStyle.Fill;
             this.splitContainer1.FixedPanel = System.Windows.Forms.FixedPanel.Panel1;
             this.splitContainer1.Location = new System.Drawing.Point(0, 25);
             this.splitContainer1.Margin = new System.Windows.Forms.Padding(0);
@@ -87,24 +92,53 @@
             // 
             // splitContainer1.Panel1
             // 
-            this.splitContainer1.Panel1.Controls.Add(this.tabDetailsImport);
-            this.splitContainer1.Panel1.Controls.Add(this.lbxPlanes);
+            this.splitContainer1.Panel1.Controls.Add(this.splitCHorizontal);
             // 
             // splitContainer1.Panel2
             // 
             this.splitContainer1.Panel2.Controls.Add(this.glModelView);
-            this.splitContainer1.Size = new System.Drawing.Size(900, 514);
+            this.splitContainer1.Size = new System.Drawing.Size(900, 523);
             this.splitContainer1.SplitterDistance = 246;
             this.splitContainer1.TabIndex = 0;
+            // 
+            // splitCHorizontal
+            // 
+            this.splitCHorizontal.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.splitCHorizontal.Location = new System.Drawing.Point(0, 0);
+            this.splitCHorizontal.Name = "splitCHorizontal";
+            this.splitCHorizontal.Orientation = System.Windows.Forms.Orientation.Horizontal;
+            // 
+            // splitCHorizontal.Panel1
+            // 
+            this.splitCHorizontal.Panel1.Controls.Add(this.lbxPlanes);
+            // 
+            // splitCHorizontal.Panel2
+            // 
+            this.splitCHorizontal.Panel2.Controls.Add(this.tabDetailsImport);
+            this.splitCHorizontal.Size = new System.Drawing.Size(246, 523);
+            this.splitCHorizontal.SplitterDistance = 245;
+            this.splitCHorizontal.TabIndex = 18;
+            // 
+            // lbxPlanes
+            // 
+            this.lbxPlanes.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.lbxPlanes.FormattingEnabled = true;
+            this.lbxPlanes.Location = new System.Drawing.Point(0, 0);
+            this.lbxPlanes.Name = "lbxPlanes";
+            this.lbxPlanes.SelectionMode = System.Windows.Forms.SelectionMode.MultiExtended;
+            this.lbxPlanes.Size = new System.Drawing.Size(246, 245);
+            this.lbxPlanes.TabIndex = 0;
+            this.lbxPlanes.SelectedIndexChanged += new System.EventHandler(this.lbxPlanes_SelectedIndexChanged);
             // 
             // tabDetailsImport
             // 
             this.tabDetailsImport.Controls.Add(this.tpgDetails);
             this.tabDetailsImport.Controls.Add(this.tpgImport);
-            this.tabDetailsImport.Location = new System.Drawing.Point(4, 235);
+            this.tabDetailsImport.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.tabDetailsImport.Location = new System.Drawing.Point(0, 0);
             this.tabDetailsImport.Name = "tabDetailsImport";
             this.tabDetailsImport.SelectedIndex = 0;
-            this.tabDetailsImport.Size = new System.Drawing.Size(242, 276);
+            this.tabDetailsImport.Size = new System.Drawing.Size(246, 274);
             this.tabDetailsImport.TabIndex = 17;
             // 
             // tpgDetails
@@ -128,16 +162,15 @@
             this.tpgDetails.Location = new System.Drawing.Point(4, 22);
             this.tpgDetails.Name = "tpgDetails";
             this.tpgDetails.Padding = new System.Windows.Forms.Padding(3);
-            this.tpgDetails.Size = new System.Drawing.Size(234, 250);
+            this.tpgDetails.Size = new System.Drawing.Size(238, 248);
             this.tpgDetails.TabIndex = 0;
             this.tpgDetails.Text = "Details";
             this.tpgDetails.UseVisualStyleBackColor = true;
             // 
             // lblV1
             // 
-            this.lblV1.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)));
             this.lblV1.AutoSize = true;
-            this.lblV1.Location = new System.Drawing.Point(7, 9);
+            this.lblV1.Location = new System.Drawing.Point(7, 7);
             this.lblV1.Name = "lblV1";
             this.lblV1.Size = new System.Drawing.Size(46, 13);
             this.lblV1.TabIndex = 1;
@@ -145,8 +178,8 @@
             // 
             // txtD3
             // 
-            this.txtD3.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)));
-            this.txtD3.Location = new System.Drawing.Point(77, 140);
+            this.txtD3.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
+            this.txtD3.Location = new System.Drawing.Point(77, 138);
             this.txtD3.Name = "txtD3";
             this.txtD3.ReadOnly = true;
             this.txtD3.Size = new System.Drawing.Size(151, 20);
@@ -154,9 +187,8 @@
             // 
             // lblV2
             // 
-            this.lblV2.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)));
             this.lblV2.AutoSize = true;
-            this.lblV2.Location = new System.Drawing.Point(7, 31);
+            this.lblV2.Location = new System.Drawing.Point(7, 29);
             this.lblV2.Name = "lblV2";
             this.lblV2.Size = new System.Drawing.Size(46, 13);
             this.lblV2.TabIndex = 2;
@@ -164,9 +196,8 @@
             // 
             // lblD3
             // 
-            this.lblD3.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)));
             this.lblD3.AutoSize = true;
-            this.lblD3.Location = new System.Drawing.Point(7, 143);
+            this.lblD3.Location = new System.Drawing.Point(7, 141);
             this.lblD3.Name = "lblD3";
             this.lblD3.Size = new System.Drawing.Size(29, 13);
             this.lblD3.TabIndex = 15;
@@ -174,9 +205,8 @@
             // 
             // lblV3
             // 
-            this.lblV3.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)));
             this.lblV3.AutoSize = true;
-            this.lblV3.Location = new System.Drawing.Point(7, 53);
+            this.lblV3.Location = new System.Drawing.Point(7, 51);
             this.lblV3.Name = "lblV3";
             this.lblV3.Size = new System.Drawing.Size(46, 13);
             this.lblV3.TabIndex = 3;
@@ -184,8 +214,8 @@
             // 
             // txtD2
             // 
-            this.txtD2.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)));
-            this.txtD2.Location = new System.Drawing.Point(77, 117);
+            this.txtD2.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
+            this.txtD2.Location = new System.Drawing.Point(77, 115);
             this.txtD2.Name = "txtD2";
             this.txtD2.ReadOnly = true;
             this.txtD2.Size = new System.Drawing.Size(151, 20);
@@ -193,9 +223,8 @@
             // 
             // lblColType
             // 
-            this.lblColType.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)));
             this.lblColType.AutoSize = true;
-            this.lblColType.Location = new System.Drawing.Point(7, 166);
+            this.lblColType.Location = new System.Drawing.Point(7, 164);
             this.lblColType.Name = "lblColType";
             this.lblColType.Size = new System.Drawing.Size(72, 13);
             this.lblColType.TabIndex = 4;
@@ -203,8 +232,8 @@
             // 
             // txtD1
             // 
-            this.txtD1.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)));
-            this.txtD1.Location = new System.Drawing.Point(77, 95);
+            this.txtD1.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
+            this.txtD1.Location = new System.Drawing.Point(77, 93);
             this.txtD1.Name = "txtD1";
             this.txtD1.ReadOnly = true;
             this.txtD1.Size = new System.Drawing.Size(151, 20);
@@ -212,8 +241,8 @@
             // 
             // txtColType
             // 
-            this.txtColType.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)));
-            this.txtColType.Location = new System.Drawing.Point(77, 163);
+            this.txtColType.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
+            this.txtColType.Location = new System.Drawing.Point(77, 161);
             this.txtColType.Name = "txtColType";
             this.txtColType.Size = new System.Drawing.Size(151, 20);
             this.txtColType.TabIndex = 5;
@@ -221,8 +250,8 @@
             // 
             // txtNormal
             // 
-            this.txtNormal.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)));
-            this.txtNormal.Location = new System.Drawing.Point(77, 73);
+            this.txtNormal.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
+            this.txtNormal.Location = new System.Drawing.Point(77, 71);
             this.txtNormal.Name = "txtNormal";
             this.txtNormal.ReadOnly = true;
             this.txtNormal.Size = new System.Drawing.Size(151, 20);
@@ -230,8 +259,8 @@
             // 
             // txtV1
             // 
-            this.txtV1.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)));
-            this.txtV1.Location = new System.Drawing.Point(77, 6);
+            this.txtV1.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
+            this.txtV1.Location = new System.Drawing.Point(77, 4);
             this.txtV1.Name = "txtV1";
             this.txtV1.ReadOnly = true;
             this.txtV1.Size = new System.Drawing.Size(151, 20);
@@ -239,9 +268,8 @@
             // 
             // lblD2
             // 
-            this.lblD2.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)));
             this.lblD2.AutoSize = true;
-            this.lblD2.Location = new System.Drawing.Point(7, 120);
+            this.lblD2.Location = new System.Drawing.Point(7, 118);
             this.lblD2.Name = "lblD2";
             this.lblD2.Size = new System.Drawing.Size(29, 13);
             this.lblD2.TabIndex = 11;
@@ -249,8 +277,8 @@
             // 
             // txtV2
             // 
-            this.txtV2.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)));
-            this.txtV2.Location = new System.Drawing.Point(77, 28);
+            this.txtV2.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
+            this.txtV2.Location = new System.Drawing.Point(77, 26);
             this.txtV2.Name = "txtV2";
             this.txtV2.ReadOnly = true;
             this.txtV2.Size = new System.Drawing.Size(151, 20);
@@ -258,7 +286,6 @@
             // 
             // lblD1
             // 
-            this.lblD1.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)));
             this.lblD1.AutoSize = true;
             this.lblD1.Location = new System.Drawing.Point(7, 98);
             this.lblD1.Name = "lblD1";
@@ -268,8 +295,8 @@
             // 
             // txtV3
             // 
-            this.txtV3.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)));
-            this.txtV3.Location = new System.Drawing.Point(77, 50);
+            this.txtV3.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
+            this.txtV3.Location = new System.Drawing.Point(77, 48);
             this.txtV3.Name = "txtV3";
             this.txtV3.ReadOnly = true;
             this.txtV3.Size = new System.Drawing.Size(151, 20);
@@ -277,9 +304,8 @@
             // 
             // lblNormal
             // 
-            this.lblNormal.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)));
             this.lblNormal.AutoSize = true;
-            this.lblNormal.Location = new System.Drawing.Point(7, 76);
+            this.lblNormal.Location = new System.Drawing.Point(7, 74);
             this.lblNormal.Name = "lblNormal";
             this.lblNormal.Size = new System.Drawing.Size(40, 13);
             this.lblNormal.TabIndex = 9;
@@ -300,13 +326,14 @@
             this.tpgImport.Location = new System.Drawing.Point(4, 22);
             this.tpgImport.Name = "tpgImport";
             this.tpgImport.Padding = new System.Windows.Forms.Padding(3);
-            this.tpgImport.Size = new System.Drawing.Size(234, 250);
+            this.tpgImport.Size = new System.Drawing.Size(238, 248);
             this.tpgImport.TabIndex = 1;
             this.tpgImport.Text = "Import Model";
             this.tpgImport.UseVisualStyleBackColor = true;
             // 
             // txtScale
             // 
+            this.txtScale.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
             this.txtScale.Location = new System.Drawing.Point(109, 56);
             this.txtScale.Name = "txtScale";
             this.txtScale.Size = new System.Drawing.Size(119, 20);
@@ -324,7 +351,8 @@
             // 
             // btnImportColMap
             // 
-            this.btnImportColMap.Location = new System.Drawing.Point(3, 224);
+            this.btnImportColMap.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)));
+            this.btnImportColMap.Location = new System.Drawing.Point(3, 222);
             this.btnImportColMap.Name = "btnImportColMap";
             this.btnImportColMap.Size = new System.Drawing.Size(119, 23);
             this.btnImportColMap.TabIndex = 11;
@@ -334,6 +362,7 @@
             // 
             // btnAssignTypes
             // 
+            this.btnAssignTypes.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)));
             this.btnAssignTypes.Location = new System.Drawing.Point(3, 195);
             this.btnAssignTypes.Name = "btnAssignTypes";
             this.btnAssignTypes.Size = new System.Drawing.Size(87, 23);
@@ -346,6 +375,9 @@
             // 
             this.gridColTypes.AllowUserToAddRows = false;
             this.gridColTypes.AllowUserToDeleteRows = false;
+            this.gridColTypes.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom)
+                        | System.Windows.Forms.AnchorStyles.Left)
+                        | System.Windows.Forms.AnchorStyles.Right)));
             this.gridColTypes.ColumnHeadersHeightSizeMode = System.Windows.Forms.DataGridViewColumnHeadersHeightSizeMode.AutoSize;
             this.gridColTypes.Location = new System.Drawing.Point(0, 77);
             this.gridColTypes.Name = "gridColTypes";
@@ -355,6 +387,7 @@
             // 
             // txtThreshold
             // 
+            this.txtThreshold.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
             this.txtThreshold.Location = new System.Drawing.Point(109, 30);
             this.txtThreshold.Name = "txtThreshold";
             this.txtThreshold.Size = new System.Drawing.Size(119, 20);
@@ -372,6 +405,7 @@
             // 
             // btnOpenModel
             // 
+            this.btnOpenModel.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
             this.btnOpenModel.Location = new System.Drawing.Point(73, 2);
             this.btnOpenModel.Name = "btnOpenModel";
             this.btnOpenModel.Size = new System.Drawing.Size(30, 23);
@@ -382,6 +416,7 @@
             // 
             // txtModelName
             // 
+            this.txtModelName.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
             this.txtModelName.Location = new System.Drawing.Point(109, 4);
             this.txtModelName.Name = "txtModelName";
             this.txtModelName.Size = new System.Drawing.Size(119, 20);
@@ -396,23 +431,13 @@
             this.label1.TabIndex = 0;
             this.label1.Text = "OBJ or DAE:";
             // 
-            // lbxPlanes
-            // 
-            this.lbxPlanes.FormattingEnabled = true;
-            this.lbxPlanes.Location = new System.Drawing.Point(4, 4);
-            this.lbxPlanes.Name = "lbxPlanes";
-            this.lbxPlanes.SelectionMode = System.Windows.Forms.SelectionMode.MultiExtended;
-            this.lbxPlanes.Size = new System.Drawing.Size(238, 225);
-            this.lbxPlanes.TabIndex = 0;
-            this.lbxPlanes.SelectedIndexChanged += new System.EventHandler(this.lbxPlanes_SelectedIndexChanged);
-            // 
             // glModelView
             // 
             this.glModelView.BackColor = System.Drawing.Color.Black;
             this.glModelView.Dock = System.Windows.Forms.DockStyle.Fill;
             this.glModelView.Location = new System.Drawing.Point(0, 0);
             this.glModelView.Name = "glModelView";
-            this.glModelView.Size = new System.Drawing.Size(650, 514);
+            this.glModelView.Size = new System.Drawing.Size(650, 523);
             this.glModelView.TabIndex = 0;
             this.glModelView.VSync = false;
             this.glModelView.Load += new System.EventHandler(this.glModelView_Load);
@@ -484,19 +509,25 @@
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.ClientSize = new System.Drawing.Size(900, 548);
+            this.Controls.Add(this.splitContainer1);
             this.Controls.Add(this.cmbPolygonMode);
             this.Controls.Add(this.toolStrip1);
-            this.Controls.Add(this.splitContainer1);
             this.Name = "KCLEditorForm";
             this.Text = "KCL Editor";
             this.splitContainer1.Panel1.ResumeLayout(false);
             this.splitContainer1.Panel2.ResumeLayout(false);
+            //((System.ComponentModel.ISupportInitialize)(this.splitContainer1)).EndInit();
             this.splitContainer1.ResumeLayout(false);
+            this.splitCHorizontal.Panel1.ResumeLayout(false);
+            this.splitCHorizontal.Panel2.ResumeLayout(false);
+            //((System.ComponentModel.ISupportInitialize)(this.splitCHorizontal)).EndInit();
+            this.splitCHorizontal.ResumeLayout(false);
             this.tabDetailsImport.ResumeLayout(false);
             this.tpgDetails.ResumeLayout(false);
             this.tpgDetails.PerformLayout();
             this.tpgImport.ResumeLayout(false);
             this.tpgImport.PerformLayout();
+            //((System.ComponentModel.ISupportInitialize)(this.gridColTypes)).EndInit();
             this.toolStrip1.ResumeLayout(false);
             this.toolStrip1.PerformLayout();
             this.ResumeLayout(false);
@@ -544,5 +575,6 @@
         private System.Windows.Forms.Button btnAssignTypes;
         private System.Windows.Forms.TextBox txtScale;
         private System.Windows.Forms.Label label3;
+        private System.Windows.Forms.SplitContainer splitCHorizontal;
     }
 }

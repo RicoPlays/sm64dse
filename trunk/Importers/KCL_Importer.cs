@@ -198,7 +198,12 @@ namespace SM64DSe
                                     ind++;
                                 }
                                 break;
+                            case "lines":
+                                reader.Skip();
+                                break;
                             case "triangles":
+                                isTriangles = true;
+                                goto case "polylist";
                             case "polylist":
                                 {
                                     group_name = reader.GetAttribute("material");
@@ -954,6 +959,15 @@ namespace SM64DSe
                 float max_z0 = KCL_Importer.max(KCL_Importer.max(t.u.z.theValue, t.v.z.theValue, t.w.z.theValue));
                 if (max_z0 > max_z) max_z = max_z0;
             }
+
+            // If model only uses two axes, eg. flat square, the base width will get set to min_width (1) which can 
+            // create an octree with 100's of thousands of tiny empty or almost empty nodes is very computationally expensive
+            if (max_x == 0)
+                max_x = KCL_Importer.max(max_y, max_z);
+            if (max_y == 0)
+                max_y = KCL_Importer.max(max_x, max_z);
+            if (max_z == 0)
+                max_z = KCL_Importer.max(max_x, max_y);
 
             this.width_x = (float)Math.Pow(2, (int)(Math.Ceiling(Math.Log(KCL_Importer.max(max_x - min_x, min_width), 2))));
             this.width_y = (float)Math.Pow(2, (int)(Math.Ceiling(Math.Log(KCL_Importer.max(max_y - min_y, min_width), 2))));

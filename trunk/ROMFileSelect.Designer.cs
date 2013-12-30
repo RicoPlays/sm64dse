@@ -36,14 +36,19 @@
             // 
             // tvFiles
             // 
+            this.tvFiles.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom)
+                        | System.Windows.Forms.AnchorStyles.Left)
+                        | System.Windows.Forms.AnchorStyles.Right)));
             this.tvFiles.Location = new System.Drawing.Point(13, 13);
             this.tvFiles.Name = "tvFiles";
+            this.tvFiles.PathSeparator = "/";
             this.tvFiles.Size = new System.Drawing.Size(392, 260);
             this.tvFiles.TabIndex = 0;
             this.tvFiles.AfterSelect += new System.Windows.Forms.TreeViewEventHandler(this.tvFiles_AfterSelect);
             // 
             // btnOK
             // 
+            this.btnOK.Anchor = System.Windows.Forms.AnchorStyles.Bottom;
             this.btnOK.DialogResult = System.Windows.Forms.DialogResult.OK;
             this.btnOK.Location = new System.Drawing.Point(115, 290);
             this.btnOK.Name = "btnOK";
@@ -55,6 +60,7 @@
             // 
             // btnCancel
             // 
+            this.btnCancel.Anchor = System.Windows.Forms.AnchorStyles.Bottom;
             this.btnCancel.DialogResult = System.Windows.Forms.DialogResult.Cancel;
             this.btnCancel.Location = new System.Drawing.Point(196, 290);
             this.btnCancel.Name = "btnCancel";

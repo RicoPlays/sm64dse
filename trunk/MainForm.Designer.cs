@@ -38,19 +38,21 @@
             this.btnDumpObjInfo = new System.Windows.Forms.ToolStripMenuItem();
             this.btnObjFinder = new System.Windows.Forms.ToolStripMenuItem();
             this.mnitDumpAllOvls = new System.Windows.Forms.ToolStripMenuItem();
+            this.decompressOverlaysWithinGameToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.btnKCLEditor = new System.Windows.Forms.ToolStripButton();
             this.toolStripSeparator2 = new System.Windows.Forms.ToolStripSeparator();
+            this.btnAddPatches = new System.Windows.Forms.ToolStripButton();
             this.btnOptions = new System.Windows.Forms.ToolStripDropDownButton();
             this.btnUpdateODB = new System.Windows.Forms.ToolStripMenuItem();
             this.btnEditorSettings = new System.Windows.Forms.ToolStripMenuItem();
             this.btnHalp = new System.Windows.Forms.ToolStripButton();
-            this.btnAddPatches = new System.Windows.Forms.ToolStripButton();
             this.lbxLevels = new System.Windows.Forms.ListBox();
             this.ofdOpenFile = new System.Windows.Forms.OpenFileDialog();
             this.sfdSaveFile = new System.Windows.Forms.SaveFileDialog();
             this.ssStatusBar = new System.Windows.Forms.StatusStrip();
             this.slStatusLabel = new System.Windows.Forms.ToolStripStatusLabel();
             this.spbStatusProgress = new System.Windows.Forms.ToolStripProgressBar();
+            this.hexDumpToBinaryFileToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.tsToolBar.SuspendLayout();
             this.ssStatusBar.SuspendLayout();
             this.SuspendLayout();
@@ -121,14 +123,15 @@
             this.btnSecretShit.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
             this.btnDumpObjInfo,
             this.btnObjFinder,
-            this.mnitDumpAllOvls});
+            this.mnitDumpAllOvls,
+            this.decompressOverlaysWithinGameToolStripMenuItem,
+            this.hexDumpToBinaryFileToolStripMenuItem});
             this.btnSecretShit.Image = ((System.Drawing.Image)(resources.GetObject("btnSecretShit.Image")));
             this.btnSecretShit.ImageTransparentColor = System.Drawing.Color.Magenta;
             this.btnSecretShit.Name = "btnSecretShit";
             this.btnSecretShit.Size = new System.Drawing.Size(28, 22);
             this.btnSecretShit.Text = "D";
             this.btnSecretShit.ToolTipText = "Debug crap. Don\'t touch unless you know what you\'re doing.";
-            this.btnSecretShit.Visible = false;
             // 
             // btnDumpObjInfo
             // 
@@ -136,21 +139,28 @@
             this.btnDumpObjInfo.Image = ((System.Drawing.Image)(resources.GetObject("btnDumpObjInfo.Image")));
             this.btnDumpObjInfo.ImageTransparentColor = System.Drawing.Color.Magenta;
             this.btnDumpObjInfo.Name = "btnDumpObjInfo";
-            this.btnDumpObjInfo.Size = new System.Drawing.Size(172, 22);
+            this.btnDumpObjInfo.Size = new System.Drawing.Size(259, 22);
             this.btnDumpObjInfo.Text = "Dump object info ";
             // 
             // btnObjFinder
             // 
             this.btnObjFinder.Name = "btnObjFinder";
-            this.btnObjFinder.Size = new System.Drawing.Size(172, 22);
+            this.btnObjFinder.Size = new System.Drawing.Size(259, 22);
             this.btnObjFinder.Text = "Object finder";
             // 
             // mnitDumpAllOvls
             // 
             this.mnitDumpAllOvls.Name = "mnitDumpAllOvls";
-            this.mnitDumpAllOvls.Size = new System.Drawing.Size(172, 22);
+            this.mnitDumpAllOvls.Size = new System.Drawing.Size(259, 22);
             this.mnitDumpAllOvls.Text = "Dump All Overlays";
             this.mnitDumpAllOvls.Click += new System.EventHandler(this.mnitDumpAllOvls_Click);
+            // 
+            // decompressOverlaysWithinGameToolStripMenuItem
+            // 
+            this.decompressOverlaysWithinGameToolStripMenuItem.Name = "decompressOverlaysWithinGameToolStripMenuItem";
+            this.decompressOverlaysWithinGameToolStripMenuItem.Size = new System.Drawing.Size(259, 22);
+            this.decompressOverlaysWithinGameToolStripMenuItem.Text = "Decompress Overlays Within Game";
+            this.decompressOverlaysWithinGameToolStripMenuItem.Click += new System.EventHandler(this.decompressOverlaysWithinGameToolStripMenuItem_Click);
             // 
             // btnKCLEditor
             // 
@@ -166,6 +176,15 @@
             // 
             this.toolStripSeparator2.Name = "toolStripSeparator2";
             this.toolStripSeparator2.Size = new System.Drawing.Size(6, 25);
+            // 
+            // btnAddPatches
+            // 
+            this.btnAddPatches.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Text;
+            this.btnAddPatches.ImageTransparentColor = System.Drawing.Color.Magenta;
+            this.btnAddPatches.Name = "btnAddPatches";
+            this.btnAddPatches.Size = new System.Drawing.Size(110, 22);
+            this.btnAddPatches.Text = "Additional Patches";
+            this.btnAddPatches.Click += new System.EventHandler(this.btnAddPatches_Click);
             // 
             // btnOptions
             // 
@@ -201,19 +220,10 @@
             this.btnHalp.Image = ((System.Drawing.Image)(resources.GetObject("btnHalp.Image")));
             this.btnHalp.ImageTransparentColor = System.Drawing.Color.Magenta;
             this.btnHalp.Name = "btnHalp";
-            this.btnHalp.Size = new System.Drawing.Size(23, 22);
+            this.btnHalp.Size = new System.Drawing.Size(23, 19);
             this.btnHalp.Text = "?";
             this.btnHalp.ToolTipText = "Help, about, etc...";
             this.btnHalp.Click += new System.EventHandler(this.btnHalp_Click);
-            // 
-            // btnAddPatches
-            // 
-            this.btnAddPatches.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Text;
-            this.btnAddPatches.ImageTransparentColor = System.Drawing.Color.Magenta;
-            this.btnAddPatches.Name = "btnAddPatches";
-            this.btnAddPatches.Size = new System.Drawing.Size(110, 22);
-            this.btnAddPatches.Text = "Additional Patches";
-            this.btnAddPatches.Click += new System.EventHandler(this.btnAddPatches_Click);
             // 
             // lbxLevels
             // 
@@ -267,6 +277,13 @@
             this.spbStatusProgress.Style = System.Windows.Forms.ProgressBarStyle.Continuous;
             this.spbStatusProgress.Visible = false;
             // 
+            // hexDumpToBinaryFileToolStripMenuItem
+            // 
+            this.hexDumpToBinaryFileToolStripMenuItem.Name = "hexDumpToBinaryFileToolStripMenuItem";
+            this.hexDumpToBinaryFileToolStripMenuItem.Size = new System.Drawing.Size(259, 22);
+            this.hexDumpToBinaryFileToolStripMenuItem.Text = "Hex Dump to Binary File";
+            this.hexDumpToBinaryFileToolStripMenuItem.Click += new System.EventHandler(this.hexDumpToBinaryFileToolStripMenuItem_Click);
+            // 
             // MainForm
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
@@ -312,6 +329,8 @@
         private System.Windows.Forms.ToolStripMenuItem mnitDumpAllOvls;
         private System.Windows.Forms.ToolStripButton btnKCLEditor;
         private System.Windows.Forms.ToolStripButton btnAddPatches;
+        private System.Windows.Forms.ToolStripMenuItem decompressOverlaysWithinGameToolStripMenuItem;
+        private System.Windows.Forms.ToolStripMenuItem hexDumpToBinaryFileToolStripMenuItem;
     }
 }
 
