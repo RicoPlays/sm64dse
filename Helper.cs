@@ -114,6 +114,88 @@ namespace SM64DSe
 
             return ret;
         }
+
+        public static void DecompressOverlaysWithinGame()
+        {
+            if (CheckAllOverlaysDecompressed())
+                return;
+
+            for (int i = 0; i < 155; i++)
+            {
+                NitroOverlay overlay = new NitroOverlay(Program.m_ROM, (uint)i);
+                // Overlay is decompressed when initialised above automatically if needed, just need to save changes
+                overlay.SaveChanges();
+            }
+        }
+
+        public static bool CheckAllOverlaysDecompressed()
+        {
+            bool allDecompressed = true;
+            for (int i = 0; i < 155; i++)
+            {
+                if (CheckOverlayCompressed((uint)i) == true)
+                {
+                    allDecompressed = false;
+                    break;
+                }
+            }
+            return allDecompressed;
+        }
+
+        public static bool CheckOverlayCompressed(uint id)
+        {
+            uint OVTEntryAddr = Program.m_ROM.GetOverlayEntryOffset(id);
+            Byte flags = Program.m_ROM.Read8(OVTEntryAddr + 0x1F);
+
+            if ((flags & 0x01) == 0x01)
+                return true;
+            else
+                return false;
+        }
+
+        /*
+         * Converts a Hex Dump to binary file
+         */ 
+        public static byte[] HexDumpToBinary(string hexdump)
+        {
+            string[] lines = hexdump.Split('\n');
+            string[][] hexBytes = new string[lines.Length][];
+            // For now just assume <ADDRESS> <hex data 1> ... <hex data 8>
+            int startIndex = (lines[0].Split(' ').Length >= 17) ? 1 : 0;
+            int endIndex = (lines[0].Split(' ').Length >= 17) ? 16 : 15;
+            int numBytes = 0;
+
+            // Get string array of each individual byte in hex format
+            for (int i = 0; i < lines.Length; i++)
+            {
+                string[] split = lines[i].Replace('-', ' ').Split(' ');// Some files have "-" separator in middle
+                if (split.Length == 1)
+                    break;// End of file
+                string[] hexData = new string[(endIndex + 1) - startIndex];
+                for (int j = startIndex, k = 0; j <= endIndex; j++, k++)
+                {
+                    hexData[k] = split[j];
+                }
+                hexBytes[i] = hexData;
+                numBytes += hexData.Length;
+            }
+
+            // Convert string hex representation of each byte to actual byte
+            byte[] binaryData = new byte[numBytes];
+            int count = 0;
+            for (int i = 0; i < hexBytes.Length; i++)
+            {
+                if (hexBytes[i] == null)
+                    break;
+                for (int j = 0; j < hexBytes[i].Length; j++)
+                {
+                    binaryData[count] = byte.Parse(hexBytes[i][j], System.Globalization.NumberStyles.HexNumber);
+                    count++;
+                }
+            }
+
+            return binaryData;
+        }
     }
 
     // Taken from http://stackoverflow.com/questions/1440392/use-byte-as-key-in-dictionary

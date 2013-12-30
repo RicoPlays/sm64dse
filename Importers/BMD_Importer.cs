@@ -1527,7 +1527,12 @@ namespace SM64DSe.Importers
                                     ind++;
                                 }
                                 break;
+                            case "lines":
+                                reader.Skip();
+                                break;
                             case "triangles":
+                                isTriangles = true;
+                                goto case "polylist";
                             case "polylist":
                                 {
                                     curmaterial = reader.GetAttribute("material");

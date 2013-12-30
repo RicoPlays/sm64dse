@@ -28,7 +28,8 @@
         /// </summary>
         private void InitializeComponent()
         {
-            System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle1 = new System.Windows.Forms.DataGridViewCellStyle();
+            System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle2 = new System.Windows.Forms.DataGridViewCellStyle();
+            System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(CLPS_Form));
             this.label1 = new System.Windows.Forms.Label();
             this.txtNumEntries = new System.Windows.Forms.TextBox();
             this.btnCopy = new System.Windows.Forms.Button();
@@ -80,12 +81,15 @@
             // 
             this.gridCLPSData.AllowUserToAddRows = false;
             this.gridCLPSData.AllowUserToDeleteRows = false;
+            this.gridCLPSData.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom)
+                        | System.Windows.Forms.AnchorStyles.Left)
+                        | System.Windows.Forms.AnchorStyles.Right)));
             this.gridCLPSData.ColumnHeadersHeightSizeMode = System.Windows.Forms.DataGridViewColumnHeadersHeightSizeMode.AutoSize;
             this.gridCLPSData.Location = new System.Drawing.Point(15, 110);
             this.gridCLPSData.MultiSelect = false;
             this.gridCLPSData.Name = "gridCLPSData";
-            dataGridViewCellStyle1.ForeColor = System.Drawing.Color.Black;
-            this.gridCLPSData.RowsDefaultCellStyle = dataGridViewCellStyle1;
+            dataGridViewCellStyle2.ForeColor = System.Drawing.Color.Black;
+            this.gridCLPSData.RowsDefaultCellStyle = dataGridViewCellStyle2;
             this.gridCLPSData.Size = new System.Drawing.Size(451, 150);
             this.gridCLPSData.StandardTab = true;
             this.gridCLPSData.TabIndex = 6;
@@ -93,6 +97,7 @@
             // 
             // btnRemove
             // 
+            this.btnRemove.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)));
             this.btnRemove.Location = new System.Drawing.Point(15, 267);
             this.btnRemove.Name = "btnRemove";
             this.btnRemove.Size = new System.Drawing.Size(22, 23);
@@ -103,6 +108,7 @@
             // 
             // btnAdd
             // 
+            this.btnAdd.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)));
             this.btnAdd.Location = new System.Drawing.Point(43, 267);
             this.btnAdd.Name = "btnAdd";
             this.btnAdd.Size = new System.Drawing.Size(22, 23);
@@ -113,6 +119,7 @@
             // 
             // btnShiftUp
             // 
+            this.btnShiftUp.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right)));
             this.btnShiftUp.Location = new System.Drawing.Point(472, 157);
             this.btnShiftUp.Name = "btnShiftUp";
             this.btnShiftUp.Size = new System.Drawing.Size(22, 23);
@@ -123,6 +130,7 @@
             // 
             // btnShiftDown
             // 
+            this.btnShiftDown.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right)));
             this.btnShiftDown.Location = new System.Drawing.Point(472, 186);
             this.btnShiftDown.Name = "btnShiftDown";
             this.btnShiftDown.Size = new System.Drawing.Size(22, 23);
@@ -145,6 +153,7 @@
             this.Controls.Add(this.btnCopy);
             this.Controls.Add(this.txtNumEntries);
             this.Controls.Add(this.label1);
+            this.Icon = ((System.Drawing.Icon)(resources.GetObject("$this.Icon")));
             this.Name = "CLPS_Form";
             this.Text = "CLPS Data";
             //((System.ComponentModel.ISupportInitialize)(this.gridCLPSData)).EndInit();

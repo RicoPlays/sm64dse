@@ -183,6 +183,7 @@
             // 
             // btnEditTextures
             // 
+            this.btnEditTextures.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)));
             this.btnEditTextures.Location = new System.Drawing.Point(3, 418);
             this.btnEditTextures.Name = "btnEditTextures";
             this.btnEditTextures.Size = new System.Drawing.Size(125, 23);
@@ -202,6 +203,7 @@
             // 
             // btnAssignTypes
             // 
+            this.btnAssignTypes.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)));
             this.btnAssignTypes.Location = new System.Drawing.Point(4, 389);
             this.btnAssignTypes.Name = "btnAssignTypes";
             this.btnAssignTypes.Size = new System.Drawing.Size(87, 23);
@@ -214,6 +216,8 @@
             // 
             this.gridColTypes.AllowUserToAddRows = false;
             this.gridColTypes.AllowUserToDeleteRows = false;
+            this.gridColTypes.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom)
+                        | System.Windows.Forms.AnchorStyles.Left)));
             this.gridColTypes.ColumnHeadersHeightSizeMode = System.Windows.Forms.DataGridViewColumnHeadersHeightSizeMode.AutoSize;
             this.gridColTypes.Location = new System.Drawing.Point(4, 250);
             this.gridColTypes.Name = "gridColTypes";
@@ -371,7 +375,7 @@
             this.spcMainContainer.Panel1.ResumeLayout(false);
             this.spcMainContainer.Panel1.PerformLayout();
             this.spcMainContainer.Panel2.ResumeLayout(false);
-            //System.ComponentModel.ISupportInitialize)(this.spcMainContainer)).EndInit();
+            //((System.ComponentModel.ISupportInitialize)(this.spcMainContainer)).EndInit();
             this.spcMainContainer.ResumeLayout(false);
             //((System.ComponentModel.ISupportInitialize)(this.gridColTypes)).EndInit();
             this.groupBox2.ResumeLayout(false);

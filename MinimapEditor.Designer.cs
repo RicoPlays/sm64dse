@@ -28,6 +28,7 @@
         /// </summary>
         private void InitializeComponent()
         {
+            System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(MinimapEditor));
             this.pbxMinimapGfx = new System.Windows.Forms.PictureBox();
             this.tsMinimapEditor = new System.Windows.Forms.ToolStrip();
             this.tslBeforeAreaBtns = new System.Windows.Forms.ToolStripLabel();
@@ -39,6 +40,9 @@
             this.label1 = new System.Windows.Forms.Label();
             this.txtCoordScale = new System.Windows.Forms.TextBox();
             this.groupBox1 = new System.Windows.Forms.GroupBox();
+            this.chk256 = new System.Windows.Forms.CheckBox();
+            this.chk128 = new System.Windows.Forms.CheckBox();
+            this.chkIsMinimap = new System.Windows.Forms.CheckBox();
             this.chkNSCDcmp = new System.Windows.Forms.CheckBox();
             this.chkNCGDcmp = new System.Windows.Forms.CheckBox();
             this.btnLoadImage = new System.Windows.Forms.Button();
@@ -60,20 +64,25 @@
             this.label8 = new System.Windows.Forms.Label();
             this.txtZoom = new System.Windows.Forms.TextBox();
             this.label9 = new System.Windows.Forms.Label();
-            this.chkIsMinimap = new System.Windows.Forms.CheckBox();
-            this.chk128 = new System.Windows.Forms.CheckBox();
-            this.chk256 = new System.Windows.Forms.CheckBox();
-            //((System.ComponentModel.ISupportInitialize)(this.pbxMinimapGfx)).BeginInit();
+            this.splitCVertical = new System.Windows.Forms.SplitContainer();
+            ((System.ComponentModel.ISupportInitialize)(this.pbxMinimapGfx)).BeginInit();
             this.tsMinimapEditor.SuspendLayout();
-            //((System.ComponentModel.ISupportInitialize)(this.gridPalette)).BeginInit();
+            ((System.ComponentModel.ISupportInitialize)(this.gridPalette)).BeginInit();
             this.groupBox1.SuspendLayout();
+            ((System.ComponentModel.ISupportInitialize)(this.splitCVertical)).BeginInit();
+            this.splitCVertical.Panel1.SuspendLayout();
+            this.splitCVertical.Panel2.SuspendLayout();
+            this.splitCVertical.SuspendLayout();
             this.SuspendLayout();
             // 
             // pbxMinimapGfx
             // 
-            this.pbxMinimapGfx.Location = new System.Drawing.Point(12, 40);
+            this.pbxMinimapGfx.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom)
+                        | System.Windows.Forms.AnchorStyles.Left)
+                        | System.Windows.Forms.AnchorStyles.Right)));
+            this.pbxMinimapGfx.Location = new System.Drawing.Point(3, 3);
             this.pbxMinimapGfx.Name = "pbxMinimapGfx";
-            this.pbxMinimapGfx.Size = new System.Drawing.Size(512, 512);
+            this.pbxMinimapGfx.Size = new System.Drawing.Size(547, 512);
             this.pbxMinimapGfx.TabIndex = 0;
             this.pbxMinimapGfx.TabStop = false;
             // 
@@ -126,7 +135,7 @@
             this.gridPalette.ColumnHeadersHeightSizeMode = System.Windows.Forms.DataGridViewColumnHeadersHeightSizeMode.DisableResizing;
             this.gridPalette.ColumnHeadersVisible = false;
             this.gridPalette.EnableHeadersVisualStyles = false;
-            this.gridPalette.Location = new System.Drawing.Point(547, 40);
+            this.gridPalette.Location = new System.Drawing.Point(6, 17);
             this.gridPalette.MultiSelect = false;
             this.gridPalette.Name = "gridPalette";
             this.gridPalette.ReadOnly = true;
@@ -143,7 +152,7 @@
             // lblPaletteTitle
             // 
             this.lblPaletteTitle.AutoSize = true;
-            this.lblPaletteTitle.Location = new System.Drawing.Point(544, 24);
+            this.lblPaletteTitle.Location = new System.Drawing.Point(3, 1);
             this.lblPaletteTitle.Name = "lblPaletteTitle";
             this.lblPaletteTitle.Size = new System.Drawing.Size(43, 13);
             this.lblPaletteTitle.TabIndex = 5;
@@ -151,7 +160,7 @@
             // 
             // btnSetBackground
             // 
-            this.btnSetBackground.Location = new System.Drawing.Point(547, 306);
+            this.btnSetBackground.Location = new System.Drawing.Point(6, 283);
             this.btnSetBackground.Name = "btnSetBackground";
             this.btnSetBackground.Size = new System.Drawing.Size(151, 23);
             this.btnSetBackground.TabIndex = 6;
@@ -162,7 +171,7 @@
             // label1
             // 
             this.label1.AutoSize = true;
-            this.label1.Location = new System.Drawing.Point(544, 332);
+            this.label1.Location = new System.Drawing.Point(3, 309);
             this.label1.Name = "label1";
             this.label1.Size = new System.Drawing.Size(91, 13);
             this.label1.TabIndex = 7;
@@ -170,7 +179,7 @@
             // 
             // txtCoordScale
             // 
-            this.txtCoordScale.Location = new System.Drawing.Point(638, 329);
+            this.txtCoordScale.Location = new System.Drawing.Point(97, 306);
             this.txtCoordScale.Name = "txtCoordScale";
             this.txtCoordScale.Size = new System.Drawing.Size(163, 20);
             this.txtCoordScale.TabIndex = 8;
@@ -199,12 +208,46 @@
             this.groupBox1.Controls.Add(this.label3);
             this.groupBox1.Controls.Add(this.txtSelNCG);
             this.groupBox1.Controls.Add(this.label2);
-            this.groupBox1.Location = new System.Drawing.Point(547, 355);
+            this.groupBox1.Location = new System.Drawing.Point(6, 332);
             this.groupBox1.Name = "groupBox1";
             this.groupBox1.Size = new System.Drawing.Size(260, 257);
             this.groupBox1.TabIndex = 11;
             this.groupBox1.TabStop = false;
             this.groupBox1.Text = "Image";
+            // 
+            // chk256
+            // 
+            this.chk256.AutoSize = true;
+            this.chk256.Location = new System.Drawing.Point(186, 205);
+            this.chk256.Name = "chk256";
+            this.chk256.Size = new System.Drawing.Size(67, 17);
+            this.chk256.TabIndex = 20;
+            this.chk256.Text = "256x256";
+            this.chk256.UseVisualStyleBackColor = true;
+            this.chk256.CheckedChanged += new System.EventHandler(this.chk256_CheckedChanged);
+            // 
+            // chk128
+            // 
+            this.chk128.AutoSize = true;
+            this.chk128.Location = new System.Drawing.Point(113, 205);
+            this.chk128.Name = "chk128";
+            this.chk128.Size = new System.Drawing.Size(67, 17);
+            this.chk128.TabIndex = 19;
+            this.chk128.Text = "128x128";
+            this.chk128.UseVisualStyleBackColor = true;
+            this.chk128.CheckedChanged += new System.EventHandler(this.chk128_CheckedChanged);
+            // 
+            // chkIsMinimap
+            // 
+            this.chkIsMinimap.AutoSize = true;
+            this.chkIsMinimap.Checked = true;
+            this.chkIsMinimap.CheckState = System.Windows.Forms.CheckState.Checked;
+            this.chkIsMinimap.Location = new System.Drawing.Point(8, 205);
+            this.chkIsMinimap.Name = "chkIsMinimap";
+            this.chkIsMinimap.Size = new System.Drawing.Size(76, 17);
+            this.chkIsMinimap.TabIndex = 18;
+            this.chkIsMinimap.Text = "Is Minimap";
+            this.chkIsMinimap.UseVisualStyleBackColor = true;
             // 
             // chkNSCDcmp
             // 
@@ -372,8 +415,9 @@
             // 
             // label8
             // 
+            this.label8.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)));
             this.label8.AutoSize = true;
-            this.label8.Location = new System.Drawing.Point(9, 574);
+            this.label8.Location = new System.Drawing.Point(3, 535);
             this.label8.Name = "label8";
             this.label8.Size = new System.Drawing.Size(34, 13);
             this.label8.TabIndex = 12;
@@ -381,80 +425,72 @@
             // 
             // txtZoom
             // 
-            this.txtZoom.Location = new System.Drawing.Point(49, 571);
+            this.txtZoom.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)));
+            this.txtZoom.Location = new System.Drawing.Point(43, 532);
             this.txtZoom.Name = "txtZoom";
-            this.txtZoom.Size = new System.Drawing.Size(100, 20);
+            this.txtZoom.Size = new System.Drawing.Size(86, 20);
             this.txtZoom.TabIndex = 13;
             this.txtZoom.TextChanged += new System.EventHandler(this.txtZoom_TextChanged);
             // 
             // label9
             // 
-            this.label9.Location = new System.Drawing.Point(9, 594);
+            this.label9.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)));
+            this.label9.Location = new System.Drawing.Point(3, 555);
             this.label9.Name = "label9";
-            this.label9.Size = new System.Drawing.Size(515, 28);
+            this.label9.Size = new System.Drawing.Size(501, 28);
             this.label9.TabIndex = 14;
             this.label9.Text = "Note: Imported multiple minimaps are stored left to right, top to bottom. Ensure " +
                 "you select the right size, you can\'t change the size of a level\'s minimap.";
             // 
-            // chkIsMinimap
+            // splitCVertical
             // 
-            this.chkIsMinimap.AutoSize = true;
-            this.chkIsMinimap.Checked = true;
-            this.chkIsMinimap.CheckState = System.Windows.Forms.CheckState.Checked;
-            this.chkIsMinimap.Location = new System.Drawing.Point(8, 205);
-            this.chkIsMinimap.Name = "chkIsMinimap";
-            this.chkIsMinimap.Size = new System.Drawing.Size(76, 17);
-            this.chkIsMinimap.TabIndex = 18;
-            this.chkIsMinimap.Text = "Is Minimap";
-            this.chkIsMinimap.UseVisualStyleBackColor = true;
+            this.splitCVertical.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.splitCVertical.FixedPanel = System.Windows.Forms.FixedPanel.Panel2;
+            this.splitCVertical.Location = new System.Drawing.Point(0, 25);
+            this.splitCVertical.Name = "splitCVertical";
             // 
-            // chk128
+            // splitCVertical.Panel1
             // 
-            this.chk128.AutoSize = true;
-            this.chk128.Location = new System.Drawing.Point(113, 205);
-            this.chk128.Name = "chk128";
-            this.chk128.Size = new System.Drawing.Size(67, 17);
-            this.chk128.TabIndex = 19;
-            this.chk128.Text = "128x128";
-            this.chk128.UseVisualStyleBackColor = true;
-            this.chk128.CheckedChanged += new System.EventHandler(this.chk128_CheckedChanged);
+            this.splitCVertical.Panel1.Controls.Add(this.pbxMinimapGfx);
+            this.splitCVertical.Panel1.Controls.Add(this.label9);
+            this.splitCVertical.Panel1.Controls.Add(this.label8);
+            this.splitCVertical.Panel1.Controls.Add(this.txtZoom);
             // 
-            // chk256
+            // splitCVertical.Panel2
             // 
-            this.chk256.AutoSize = true;
-            this.chk256.Location = new System.Drawing.Point(186, 205);
-            this.chk256.Name = "chk256";
-            this.chk256.Size = new System.Drawing.Size(67, 17);
-            this.chk256.TabIndex = 20;
-            this.chk256.Text = "256x256";
-            this.chk256.UseVisualStyleBackColor = true;
-            this.chk256.CheckedChanged += new System.EventHandler(this.chk256_CheckedChanged);
+            this.splitCVertical.Panel2.Controls.Add(this.lblPaletteTitle);
+            this.splitCVertical.Panel2.Controls.Add(this.gridPalette);
+            this.splitCVertical.Panel2.Controls.Add(this.btnSetBackground);
+            this.splitCVertical.Panel2.Controls.Add(this.label1);
+            this.splitCVertical.Panel2.Controls.Add(this.groupBox1);
+            this.splitCVertical.Panel2.Controls.Add(this.txtCoordScale);
+            this.splitCVertical.Size = new System.Drawing.Size(816, 599);
+            this.splitCVertical.SplitterDistance = 535;
+            this.splitCVertical.TabIndex = 15;
             // 
             // MinimapEditor
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.ClientSize = new System.Drawing.Size(816, 624);
-            this.Controls.Add(this.label9);
-            this.Controls.Add(this.txtZoom);
-            this.Controls.Add(this.label8);
-            this.Controls.Add(this.groupBox1);
-            this.Controls.Add(this.txtCoordScale);
-            this.Controls.Add(this.label1);
-            this.Controls.Add(this.btnSetBackground);
-            this.Controls.Add(this.lblPaletteTitle);
-            this.Controls.Add(this.gridPalette);
+            this.Controls.Add(this.splitCVertical);
             this.Controls.Add(this.tsMinimapEditor);
-            this.Controls.Add(this.pbxMinimapGfx);
+            this.Icon = ((System.Drawing.Icon)(resources.GetObject("$this.Icon")));
             this.Name = "MinimapEditor";
-            this.Text = "MinimapEditor";
+            this.Text = "Minimap and Image Editor";
             this.Load += new System.EventHandler(this.MinimapEditor_Load);
-            //((System.ComponentModel.ISupportInitialize)(this.pbxMinimapGfx)).EndInit();
+            ((System.ComponentModel.ISupportInitialize)(this.pbxMinimapGfx)).EndInit();
             this.tsMinimapEditor.ResumeLayout(false);
             this.tsMinimapEditor.PerformLayout();
-            //((System.ComponentModel.ISupportInitialize)(this.gridPalette)).EndInit();
+            ((System.ComponentModel.ISupportInitialize)(this.gridPalette)).EndInit();
             this.groupBox1.ResumeLayout(false);
             this.groupBox1.PerformLayout();
+            this.splitCVertical.Panel1.ResumeLayout(false);
+            this.splitCVertical.Panel1.PerformLayout();
+            this.splitCVertical.Panel2.ResumeLayout(false);
+            this.splitCVertical.Panel2.PerformLayout();
+            ((System.ComponentModel.ISupportInitialize)(this.splitCVertical)).EndInit();
+            this.splitCVertical.ResumeLayout(false);
             this.ResumeLayout(false);
             this.PerformLayout();
 
@@ -497,5 +533,6 @@
         private System.Windows.Forms.CheckBox chk128;
         private System.Windows.Forms.CheckBox chkIsMinimap;
         private System.Windows.Forms.Label label9;
+        private System.Windows.Forms.SplitContainer splitCVertical;
     }
 }

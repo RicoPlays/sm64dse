@@ -323,6 +323,8 @@ namespace SM64DSe
 
         private void mnitDumpAllOvls_Click(object sender, EventArgs e)
         {
+            if (Program.m_ROM == null)
+                return;
             for (int i = 0; i < 155; i++)
             {
                 NitroOverlay overlay = new NitroOverlay(Program.m_ROM, (uint)i);
@@ -332,7 +334,7 @@ namespace SM64DSe
                     Directory.CreateDirectory(dir);
                 System.IO.File.WriteAllBytes(filename, overlay.m_Data);
             }
-            MessageBox.Show("All overlays have been successfully dumped.");
+            slStatusLabel.Text = "All overlays have been successfully dumped.";
         }
 
         private void btnKCLEditor_Click(object sender, EventArgs e)
@@ -348,6 +350,37 @@ namespace SM64DSe
         {
             AdditionalPatchesForm addPatchesForm = new AdditionalPatchesForm();
             addPatchesForm.Show();
+        }
+
+        private void decompressOverlaysWithinGameToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            if (Program.m_ROM == null)
+                return;
+            Program.m_ROM.BeginRW();
+            Helper.DecompressOverlaysWithinGame();
+            Program.m_ROM.EndRW();
+            slStatusLabel.Text = "All overlays have been decompressed successfully.";
+        }
+
+        private void hexDumpToBinaryFileToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            OpenFileDialog ofd = new OpenFileDialog();
+            ofd.Title = "Select a hex dump to open.";
+            if (ofd.ShowDialog(this) == DialogResult.OK)
+            {
+                try
+                {
+                    string hexDump = File.ReadAllText(ofd.FileName);
+                    byte[] binaryData = Helper.HexDumpToBinary(hexDump);
+                    System.IO.File.WriteAllBytes(ofd.FileName + ".bin", binaryData);
+
+                    slStatusLabel.Text = "Hex dump successfully converted to binary file.";
+                }
+                catch (Exception ex)
+                {
+                    MessageBox.Show(ex.Message + "\n" + ex.StackTrace);
+                }
+            }
         }
 
     }
