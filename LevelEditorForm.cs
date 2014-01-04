@@ -834,7 +834,7 @@ namespace SM64DSe
             m_PointerList.Add(new PointerReference(_ref, _ptr));
         }
 
-        private void RemovePointer(uint _ref)
+        public void RemovePointer(uint _ref)
         {
             for (int i = 0; i < m_PointerList.Count; )
             {
@@ -854,16 +854,20 @@ namespace SM64DSe
             {
                 foreach (LevelTexAnim anim in m_TexAnims[a])
                 {
-                    if (anim.m_Offset >= start) anim.m_Offset += delta;
-                    if (anim.m_ScaleTblOffset >= start) anim.m_ScaleTblOffset += delta;
-                    if (anim.m_RotTblOffset >= start) anim.m_RotTblOffset += delta;
-                    if (anim.m_TransTblOffset >= start) anim.m_TransTblOffset += delta;
-                    if (anim.m_MatNameOffset >= start) anim.m_MatNameOffset += delta;
+                    if (anim.m_TexAnimHeaderOffset >= start) anim.m_TexAnimHeaderOffset = (uint)(anim.m_TexAnimHeaderOffset + delta);
+                    if (anim.m_Offset >= start) anim.m_Offset = (uint)(anim.m_Offset + delta);
+                    if (anim.m_ScaleTblOffset >= start) anim.m_ScaleTblOffset = (uint)(anim.m_ScaleTblOffset + delta);
+                    if (anim.m_RotTblOffset >= start) anim.m_RotTblOffset = (uint)(anim.m_RotTblOffset + delta);
+                    if (anim.m_TransTblOffset >= start) anim.m_TransTblOffset = (uint)(anim.m_TransTblOffset + delta);
+                    if (anim.m_MatNameOffset >= start) anim.m_MatNameOffset = (uint)(anim.m_MatNameOffset + delta);
+                    if (anim.m_BaseScaleTblAddr >= start) anim.m_BaseScaleTblAddr = (uint)(anim.m_BaseScaleTblAddr + delta);
+                    if (anim.m_BaseRotTblAddr >= start) anim.m_BaseRotTblAddr = (uint)(anim.m_BaseRotTblAddr + delta);
+                    if (anim.m_BaseTransTblAddr >= start) anim.m_BaseTransTblAddr = (uint)(anim.m_BaseTransTblAddr + delta);
                 }
             }
         }
 
-        private void AddSpace(uint offset, uint amount)
+        public void AddSpace(uint offset, uint amount)
         {
             if ((m_Overlay.GetSize() + amount) > NitroROM.LEVEL_OVERLAY_SIZE)
                 throw new Exception("This level has reached the level size limit. Cannot add more data.");
@@ -894,7 +898,7 @@ namespace SM64DSe
             UpdateObjectOffsets(offset, amount);
         }
 
-        private void RemoveSpace(uint offset, uint amount)
+        public void RemoveSpace(uint offset, uint amount)
         {
             // move the data
             byte[] block = m_Overlay.ReadBlock(offset + amount, (uint)(m_Overlay.GetSize() - offset - amount));

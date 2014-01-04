@@ -62,7 +62,7 @@ namespace SM64DSe
             Write32(addr, ptr);
         }
 
-        public void SaveChanges()
+        public override void SaveChanges()
         {
             bool autorw = !m_ROM.CanRW();
             if (autorw) m_ROM.BeginRW();

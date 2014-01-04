@@ -2650,10 +2650,10 @@ Set Parameter 1 to F followed by the path ID then 00 if it is to swim about foll
 
 	<object id='270'>
 		<category>1</category>
-		<name></name>
+		<name>Block Super Mushroom Tag</name>
 		<internalname>BLK_SKINOKO_TAG</internalname>
 		<actorid>322</actorid>
-		<description></description>
+		<description>Spawns a Super Mushroom if its location is the same as that of a Brick Block or Big Brick Block when the block is destroyed.</description>
 		<bankreq>none</bankreq>
 	</object>
 
@@ -2977,7 +2977,11 @@ F3 = Still, doesn't disappear</description>
 		<name>Invisible Secret</name>
 		<internalname>SECRET_COIN</internalname>
 		<actorid>329</actorid>
-		<description>When touched, a number appears. Touching 5 reveals a Star.</description>
+		<description>When touched, a number appears. Touching 5 reveals a Star.
+
+Parameter 1:
+F followed by Star ID, eg. F05 for Star 5. 
+There should be a Star Marker with parameters 2 followed by Star ID eg. 25 for Star 5.</description>
 		<bankreq>none</bankreq>
 	</object>
 

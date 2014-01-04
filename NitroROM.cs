@@ -685,6 +685,9 @@ namespace SM64DSe
 			    Array.Resize(ref m_Data, (int)(addr + size));
 	    }
 
+        // To be implemented by subclasses
+        public virtual void SaveChanges() { }
+
 	    public NitroROM m_ROM;
 	    public byte[] m_Data;
     }
