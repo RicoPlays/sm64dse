@@ -1,7 +1,8 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <Patches>
   <Patch>
-    <PatchName>Skip Introduction by Skelux</PatchName>
+    <PatchName>Skip Introduction</PatchName>
+    <Author>Skelux</Author>
     <EURPatch>
       <AddressDataPair>
         <Address>81396</Address>
@@ -44,7 +45,8 @@
     </EURRestoreData>
   </Patch>
   <Patch>
-    <PatchName>All Minigames Unlocked by Skelux</PatchName>
+    <PatchName>All Minigames Unlocked</PatchName>
+    <Author>Skelux</Author>
     <EURPatch>
       <AddressDataPair>
         <Address>79428</Address>
@@ -102,7 +104,8 @@
     </EURRestoreData>
   </Patch>
   <Patch>
-    <PatchName>Improve Working Sound Effects for Levels Using Minigame Music by Skelux</PatchName>
+    <PatchName>Improve Working Sound Effects for Levels Using Minigame Music</PatchName>
+    <Author>Skelux</Author>
     <FileToPatch>data/sound_data.sdat</FileToPatch>
     <EURPatch>
       <AddressDataPair>
@@ -561,7 +564,8 @@
     </EURRestoreData>
   </Patch>
   <Patch>
-    <PatchName>Change Level Loaded on 'Exit Course' by Fiachra. Replace the data value with the ID of the level you want loaded.</PatchName>
+    <PatchName>Change Level Loaded on 'Exit Course'. Replace the data value with the ID of the level you want loaded.</PatchName>
+    <Author>Fiachra</Author>
     <EURPatch>
       <AddressDataPair>
         <Address>168824</Address>
@@ -580,11 +584,12 @@
     </EURRestoreData>
   </Patch>
   <Patch>
-    <PatchName>Change Starting Level by Fiachra. Replace the data value with the ID of the level you want loaded.</PatchName>
-    <DecompressAllOverlays>TRUE</DecompressAllOverlays>
+    <PatchName>Change Starting Level. Replace the data value with the ID of the level you want loaded.</PatchName>
+    <Author>Fiachra</Author>
+    <OverlayToPatch>7</OverlayToPatch>
     <EURPatch>
       <AddressDataPair>
-        <Address>1909444</Address>
+        <Address>126240</Address>
         <Data>
           <Byte>7</Byte>
         </Data>
@@ -592,16 +597,16 @@
     </EURPatch>
     <EURRestoreData>
       <AddressDataPair>
-        <Address>1909444</Address>
+        <Address>126240</Address>
         <Data>
-          <Byte>1</Byte>
+          <Byte>66</Byte>
         </Data>
       </AddressDataPair>
     </EURRestoreData>
   </Patch>
   <Patch>
-    <PatchName>Swap Run with Walk by Skelux [1/4]</PatchName>
-    <DecompressAllOverlays>TRUE</DecompressAllOverlays>
+    <PatchName>Swap Run with Walk [1/4]</PatchName>
+    <Author>Skelux</Author>
     <EURPatch>
       <AddressDataPair>
         <Address>182156</Address>
@@ -642,11 +647,12 @@
     </EURRestoreData>
   </Patch>
   <Patch>
-    <PatchName>Disable Run-Up by Skelux [2/4]</PatchName>
-    <DecompressAllOverlays>TRUE</DecompressAllOverlays>
+    <PatchName>Disable Run-Up [2/4]</PatchName>
+    <Author>Skelux</Author>
+    <OverlayToPatch>2</OverlayToPatch>
     <EURPatch>
       <AddressDataPair>
-        <Address>917384</Address>
+        <Address>154084</Address>
         <Data>
           <Byte>58</Byte>
           <Byte>0</Byte>
@@ -657,22 +663,23 @@
     </EURPatch>
     <EURRestoreData>
       <AddressDataPair>
-        <Address>917384</Address>
+        <Address>154084</Address>
         <Data>
-          <Byte>58</Byte>
-          <Byte>0</Byte>
-          <Byte>0</Byte>
-          <Byte>10</Byte>
+          <Byte>32</Byte>
+          <Byte>19</Byte>
+          <Byte>159</Byte>
+          <Byte>229</Byte>
         </Data>
       </AddressDataPair>
     </EURRestoreData>
   </Patch>
   <Patch>
-    <PatchName>Fix Swimming by Skelux [3/4]</PatchName>
-    <DecompressAllOverlays>TRUE</DecompressAllOverlays>
+    <PatchName>Fix Swimming [3/4]</PatchName>
+    <Author>Skelux</Author>
+    <OverlayToPatch>2</OverlayToPatch>
     <EURPatch>
       <AddressDataPair>
-        <Address>895324</Address>
+        <Address>132024</Address>
         <Data>
           <Byte>2</Byte>
           <Byte>16</Byte>
@@ -683,22 +690,23 @@
     </EURPatch>
     <EURRestoreData>
       <AddressDataPair>
-        <Address>895324</Address>
+        <Address>132024</Address>
         <Data>
-          <Byte>244</Byte>
-          <Byte>24</Byte>
-          <Byte>159</Byte>
-          <Byte>229</Byte>
+          <Byte>223</Byte>
+          <Byte>117</Byte>
+          <Byte>0</Byte>
+          <Byte>235</Byte>
         </Data>
       </AddressDataPair>
     </EURRestoreData>
   </Patch>
   <Patch>
-    <PatchName>Increase Acceleration by Skelux [4/4]</PatchName>
-    <DecompressAllOverlays>TRUE</DecompressAllOverlays>
+    <PatchName>Increase Acceleration [4/4]</PatchName>
+    <Author>Skelux</Author>
+    <OverlayToPatch>2</OverlayToPatch>
     <EURPatch>
       <AddressDataPair>
-        <Address>921636</Address>
+        <Address>158336</Address>
         <Data>
           <Byte>1</Byte>
           <Byte>42</Byte>
@@ -709,19 +717,19 @@
     </EURPatch>
     <EURRestoreData>
       <AddressDataPair>
-        <Address>921636</Address>
+        <Address>158336</Address>
         <Data>
-          <Byte>4</Byte>
-          <Byte>32</Byte>
-          <Byte>160</Byte>
-          <Byte>225</Byte>
+          <Byte>0</Byte>
+          <Byte>64</Byte>
+          <Byte>194</Byte>
+          <Byte>229</Byte>
         </Data>
       </AddressDataPair>
     </EURRestoreData>
   </Patch>
   <Patch>
-    <PatchName>Start with Camera Zoomed Out by Skelux</PatchName>
-    <DecompressAllOverlays>TRUE</DecompressAllOverlays>
+    <PatchName>Start with Camera Zoomed Out</PatchName>
+    <Author>Skelux</Author>
     <EURPatch>
       <AddressDataPair>
         <Address>53016</Address>
@@ -765,6 +773,52 @@
           <Byte>0</Byte>
           <Byte>129</Byte>
           <Byte>229</Byte>
+        </Data>
+      </AddressDataPair>
+    </EURRestoreData>
+  </Patch>
+  <Patch>
+    <PatchName>Changing Starting Lives. Replace the data with the number of lives to start with.</PatchName>
+    <Author>Fiachra</Author>
+    <EURPatch>
+      <AddressDataPair>
+        <Address>175368</Address>
+        <Data>
+          <Byte>99</Byte>
+        </Data>
+      </AddressDataPair>
+    </EURPatch>
+    <EURRestoreData>
+      <AddressDataPair>
+        <Address>175368</Address>
+        <Data>
+          <Byte>4</Byte>
+        </Data>
+      </AddressDataPair>
+    </EURRestoreData>
+  </Patch>
+  <Patch>
+    <PatchName>Infinite Health</PatchName>
+    <Author>Fiachra</Author>
+    <EURPatch>
+      <AddressDataPair>
+        <Address>174112</Address>
+        <Data>
+          <Byte>34</Byte>
+          <Byte>13</Byte>
+          <Byte>160</Byte>
+          <Byte>227</Byte>
+        </Data>
+      </AddressDataPair>
+    </EURPatch>
+    <EURRestoreData>
+      <AddressDataPair>
+        <Address>174112</Address>
+        <Data>
+          <Byte>1</Byte>
+          <Byte>0</Byte>
+          <Byte>128</Byte>
+          <Byte>224</Byte>
         </Data>
       </AddressDataPair>
     </EURRestoreData>

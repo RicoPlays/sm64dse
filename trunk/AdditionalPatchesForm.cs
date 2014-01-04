@@ -142,6 +142,7 @@ namespace SM64DSe
             clearEditData();
 
             txtPatchName.Text = m_Patches[gridPatches.SelectedRows[0].Index].m_PatchName;
+            txtAuthor.Text = m_Patches[gridPatches.SelectedRows[0].Index].m_Author;
 
             // Display patch data
             DisplayPatchData("EUR", m_Patches[gridPatches.SelectedRows[0].Index].m_EURPatch);
@@ -151,6 +152,8 @@ namespace SM64DSe
             
             chkApplyToFile.Checked = m_Patches[gridPatches.SelectedRows[0].Index].m_FileToPatch != null;
             if (chkApplyToFile.Checked) txtApplyToFile.Text = m_Patches[gridPatches.SelectedRows[0].Index].m_FileToPatch;
+            chkApplyToOverlay.Checked = m_Patches[gridPatches.SelectedRows[0].Index].m_OverlayID != null;
+            if (chkApplyToOverlay.Checked) txtOverlayID.Text = m_Patches[gridPatches.SelectedRows[0].Index].m_OverlayID;
             chkDecompressAllOverlays.Checked = m_Patches[gridPatches.SelectedRows[0].Index].m_DecompressAllOverlays;
         }
 
@@ -256,8 +259,11 @@ namespace SM64DSe
         private void clearEditData()
         {
             txtPatchName.Text = "";
+            txtAuthor.Text = "";
             txtApplyToFile.Text = "";
             chkApplyToFile.Checked = false;
+            txtOverlayID.Text = "";
+            chkApplyToOverlay.Checked = false;
             chkDecompressAllOverlays.Checked = false;
 
             txtPatchData.Text = "START EUR" + nl + nl + "END EUR" + nl +nl + "START USv1" + nl + nl + 
@@ -294,9 +300,12 @@ namespace SM64DSe
         private void btnSavePatch_Click(object sender, EventArgs e)
         {
             string name = txtPatchName.Text;
+            string author = (txtAuthor.Text != "") ? txtAuthor.Text : null;
 
             bool isFileToPatch = chkApplyToFile.Checked;
+            bool isOverlayToPatch = chkApplyToOverlay.Checked;
             String fileToPatch = (isFileToPatch) ? txtApplyToFile.Text : null;
+            String overlayID = (isOverlayToPatch) ? txtOverlayID.Text : null;
             bool decompressAllOverlays = chkDecompressAllOverlays.Checked;
             List<Patch.AddressDataPair> eurPatch = new List<Patch.AddressDataPair>(), usv1Patch = new List<Patch.AddressDataPair>(),
                 usv2Patch = new List<Patch.AddressDataPair>(), japPatch = new List<Patch.AddressDataPair>();
@@ -313,8 +322,6 @@ namespace SM64DSe
             Program.m_ROM.BeginRW();
             if (decompressAllOverlays)
                 Helper.DecompressOverlaysWithinGame();
-
-            NitroFile file = (isFileToPatch) ? Program.m_ROM.GetFileFromName(fileToPatch) : null;
 
             switch (Program.m_ROM.m_Version)
             {
@@ -336,11 +343,11 @@ namespace SM64DSe
 
             // Finally, add the parsed details to the list of patches
             if (editingIndex == -1)
-                m_Patches.Add(new Patch(name, eurPatch, usv1Patch, usv2Patch, japPatch, eurRestoreData, usv1RestoreData, 
-                    usv2RestoreData, japRestoreData, fileToPatch, decompressAllOverlays));
+                m_Patches.Add(new Patch(name, author, eurPatch, usv1Patch, usv2Patch, japPatch, eurRestoreData, usv1RestoreData, 
+                    usv2RestoreData, japRestoreData, fileToPatch, overlayID, decompressAllOverlays));
             else
-                m_Patches[editingIndex] = new Patch(name, eurPatch, usv1Patch, usv2Patch, japPatch, eurRestoreData, usv1RestoreData, 
-                    usv2RestoreData, japRestoreData, fileToPatch, decompressAllOverlays);
+                m_Patches[editingIndex] = new Patch(name, author, eurPatch, usv1Patch, usv2Patch, japPatch, eurRestoreData, usv1RestoreData, 
+                    usv2RestoreData, japRestoreData, fileToPatch, overlayID, decompressAllOverlays);
 
             // Write the updated patches to XML
             Patch.PatchToXML(m_Patches);
@@ -361,11 +368,24 @@ namespace SM64DSe
                 }
             }
         }
+
+        private void chkApplyToFile_CheckedChanged(object sender, EventArgs e)
+        {
+            if (chkApplyToFile.Checked)
+                chkApplyToOverlay.Checked = false;
+        }
+
+        private void chkApplyToOverlay_CheckedChanged(object sender, EventArgs e)
+        {
+            if (chkApplyToOverlay.Checked)
+                chkApplyToFile.Checked = false;
+        }
     }
 
     public class Patch
     {
         public string m_PatchName;
+        public string m_Author;
         public List<AddressDataPair> m_EURPatch;
         public List<AddressDataPair> m_USv1Patch;
         public List<AddressDataPair> m_USv2Patch;
@@ -374,18 +394,20 @@ namespace SM64DSe
         public List<AddressDataPair> m_USv1RestoreData;
         public List<AddressDataPair> m_USv2RestoreData;
         public List<AddressDataPair> m_JAPRestoreData;
-        public String m_FileToPatch;// Optionally you can specify the patch be applied to a particular file (addresses relative to start)
+        public string m_FileToPatch;// Optionally you can specify the patch be applied to a particular file (addresses relative to start)
         private bool m_IsFileToPatch;
+        public string m_OverlayID;// Optionally set if an overlay is being patched, stored as string so we can check if null
         public bool m_DecompressAllOverlays;
 
         bool m_IsApplied;
         public bool[] m_VersionSupport = new bool[] { false, false, false, false };// Whether each region is supported, EUR, USv1, USv2, JAP
 
-        public Patch(string name, List<AddressDataPair> eurPatch, List<AddressDataPair> usv1Patch, List<AddressDataPair> usv2Patch,
+        public Patch(string name, string author, List<AddressDataPair> eurPatch, List<AddressDataPair> usv1Patch, List<AddressDataPair> usv2Patch,
             List<AddressDataPair> japPatch, List<AddressDataPair> eurRestoreData, List<AddressDataPair> usv1RestoreData,
-            List<AddressDataPair> usv2RestoreData, List<AddressDataPair> japRestoreData, string fileToPatch = null, bool decompressAllOverlays = false)
+            List<AddressDataPair> usv2RestoreData, List<AddressDataPair> japRestoreData, string fileToPatch = null, string overlayID = null, bool decompressAllOverlays = false)
         {
             m_PatchName = name;
+            m_Author = author;
             m_EURPatch = eurPatch;
             m_USv1Patch = usv1Patch;
             m_USv2Patch = usv2Patch;
@@ -397,6 +419,7 @@ namespace SM64DSe
 
             m_IsFileToPatch = (!(fileToPatch == null || fileToPatch.Equals("")));
             m_FileToPatch = (m_IsFileToPatch) ? fileToPatch : null;
+            m_OverlayID = overlayID;
             m_DecompressAllOverlays = decompressAllOverlays;
 
             m_VersionSupport = new bool[] { (eurPatch.Count > 0), (usv1Patch.Count > 0), (usv2Patch.Count > 0), (japPatch.Count > 0) };
@@ -417,7 +440,11 @@ namespace SM64DSe
                 return false;
             }
 
-            NitroFile fileToPatch = (m_IsFileToPatch) ? Program.m_ROM.GetFileFromName(m_FileToPatch) : null;
+            INitroROMBlock fileToPatch = null;
+            if (m_FileToPatch != null)
+                fileToPatch = Program.m_ROM.GetFileFromName(m_FileToPatch);
+            else if (m_OverlayID != null)
+                fileToPatch = new NitroOverlay(Program.m_ROM, uint.Parse(m_OverlayID));
 
             AddressDataPair testAddressDataPair = null;
 
@@ -445,12 +472,12 @@ namespace SM64DSe
 
             for (int i = 0; i < testAddressDataPair.m_Data.Length; i++)
             {
-                if (!m_IsFileToPatch && rom.Read8(testAddressDataPair.m_Address + (uint)i) != testAddressDataPair.m_Data[i])
+                if (fileToPatch == null && rom.Read8(testAddressDataPair.m_Address + (uint)i) != testAddressDataPair.m_Data[i])
                 {
                     m_IsApplied = false;
                     return false;
                 }
-                else if (m_IsFileToPatch && fileToPatch.Read8(testAddressDataPair.m_Address + (uint)i) != testAddressDataPair.m_Data[i])
+                else if (fileToPatch != null && fileToPatch.Read8(testAddressDataPair.m_Address + (uint)i) != testAddressDataPair.m_Data[i])
                 {
                     m_IsApplied = false;
                     return false;
@@ -489,17 +516,21 @@ namespace SM64DSe
             if (m_DecompressAllOverlays)
                 Helper.DecompressOverlaysWithinGame();
 
-            NitroFile fileToPatch = (m_IsFileToPatch) ? Program.m_ROM.GetFileFromName(m_FileToPatch) : null;
+            INitroROMBlock fileToPatch = null;
+            if (m_FileToPatch != null)
+                fileToPatch = Program.m_ROM.GetFileFromName(m_FileToPatch);
+            else if (m_OverlayID != null)
+                fileToPatch = new NitroOverlay(Program.m_ROM, uint.Parse(m_OverlayID));
 
             foreach (AddressDataPair addressDataPair in addressDataPairs)
             {
                 for (int i = 0; i < addressDataPair.m_Data.Length; i++)
                 {
-                    if (!m_IsFileToPatch)
+                    if (fileToPatch == null)
                     {
                         rom.Write8(addressDataPair.m_Address + (uint)i, addressDataPair.m_Data[i]);
                     }
-                    else if (m_IsFileToPatch)
+                    else
                     {
                         fileToPatch.Write8(addressDataPair.m_Address + (uint)i, addressDataPair.m_Data[i]);
                     }
@@ -530,17 +561,21 @@ namespace SM64DSe
                     break;
             }
 
-            NitroFile fileToPatch = (m_IsFileToPatch) ? Program.m_ROM.GetFileFromName(m_FileToPatch) : null;
+            INitroROMBlock fileToPatch = null;
+            if (m_FileToPatch != null)
+                fileToPatch = Program.m_ROM.GetFileFromName(m_FileToPatch);
+            else if (m_OverlayID != null)
+                fileToPatch = new NitroOverlay(Program.m_ROM, uint.Parse(m_OverlayID));
 
             foreach (AddressDataPair addressDataPair in addressDataPairs)
             {
                 for (int i = 0; i < addressDataPair.m_Data.Length; i++)
                 {
-                    if (!m_IsFileToPatch)
+                    if (fileToPatch == null)
                     {
                         rom.Write8(addressDataPair.m_Address + (uint)i, addressDataPair.m_Data[i]);
                     }
-                    else if (m_IsFileToPatch)
+                    else
                     {
                         fileToPatch.Write8(addressDataPair.m_Address + (uint)i, addressDataPair.m_Data[i]);
                     }
@@ -551,9 +586,15 @@ namespace SM64DSe
                 fileToPatch.SaveChanges();
         }
 
-        public static List<AddressDataPair> GenerateRestoreData(List<AddressDataPair> patchData)
+        public static List<AddressDataPair> GenerateRestoreData(List<AddressDataPair> patchData, string fileName = null, string overlayID = null)
         {
             List<AddressDataPair> restoreDataList = new List<AddressDataPair>();
+
+            INitroROMBlock fileToPatch = null;
+            if (fileName != null)
+                fileToPatch = Program.m_ROM.GetFileFromName(fileName);
+            else if (overlayID != null)
+                fileToPatch = new NitroOverlay(Program.m_ROM, uint.Parse(overlayID));
 
             foreach (AddressDataPair addressDataPair in patchData)
             {
@@ -563,7 +604,10 @@ namespace SM64DSe
                 List<byte> data = new List<byte>();
                 for (int i = 0; i < addressDataPair.m_Data.Length; i++)
                 {
-                    data.Add(Program.m_ROM.Read8(addressDataPair.m_Address + (uint)i));
+                    if (fileToPatch == null)
+                        data.Add(Program.m_ROM.Read8(addressDataPair.m_Address + (uint)i));
+                    else
+                        data.Add(fileToPatch.Read8(addressDataPair.m_Address + (uint)i));
                 }
                 restoreData.m_Data = data.ToArray();
 
@@ -592,8 +636,14 @@ namespace SM64DSe
 
                     writer.WriteElementString("PatchName", patch.m_PatchName);
 
+                    if (patch.m_Author != null)
+                        writer.WriteElementString("Author", patch.m_Author);
+
                     if (patch.m_IsFileToPatch)
                         writer.WriteElementString("FileToPatch", patch.m_FileToPatch);
+
+                    if (patch.m_OverlayID != null)
+                        writer.WriteElementString("OverlayToPatch", patch.m_OverlayID);
 
                     if (patch.m_DecompressAllOverlays)
                         writer.WriteElementString("DecompressAllOverlays", (patch.m_DecompressAllOverlays == true) ? "TRUE" : "FALSE");
@@ -665,11 +715,13 @@ namespace SM64DSe
         {
             List<Patch> patches = new List<Patch>();
             string name = "";
+            string author = null;
             List<AddressDataPair> eurPatch = new List<AddressDataPair>(), usv1Patch = new List<AddressDataPair>(),
                 usv2Patch = new List<AddressDataPair>(), japPatch = new List<AddressDataPair>();
             List<AddressDataPair> eurRestoreData = new List<AddressDataPair>(), usv1RestoreData = new List<AddressDataPair>(),
                 usv2RestoreData = new List<AddressDataPair>(), japRestoreData = new List<AddressDataPair>();
             string fileToPatch = "";
+            string overlayID = null;
             bool decompressAllOverlays = false;
 
             // Create an XML reader for this file.
@@ -689,9 +741,17 @@ namespace SM64DSe
                                 reader.MoveToContent();
                                 name = reader.ReadElementContentAsString();
                                 break;
+                            case "Author":
+                                reader.MoveToContent();
+                                author = reader.ReadElementContentAsString();
+                                break;
                             case "FileToPatch":
                                 reader.MoveToContent();
                                 fileToPatch = reader.ReadElementContentAsString();
+                                break;
+                            case "OverlayToPatch":
+                                reader.MoveToContent();
+                                overlayID = reader.ReadElementContentAsString();
                                 break;
                             case "DecompressAllOverlays":
                                 reader.MoveToContent();
@@ -727,14 +787,16 @@ namespace SM64DSe
                     {
                         if (reader.LocalName.Equals("Patch"))
                         {
-                            patches.Add(new Patch(name, eurPatch.ToList(), usv1Patch.ToList(), usv2Patch.ToList(), japPatch.ToList(),
+                            patches.Add(new Patch(name, author, eurPatch.ToList(), usv1Patch.ToList(), usv2Patch.ToList(), japPatch.ToList(),
                                 eurRestoreData.ToList(), usv1RestoreData.ToList(), usv2RestoreData.ToList(), japRestoreData.ToList(), 
-fileToPatch, decompressAllOverlays));
+                                fileToPatch, overlayID, decompressAllOverlays));
                             // Reset lists for next patch
                             eurPatch.Clear(); usv1Patch.Clear(); usv2Patch.Clear(); japPatch.Clear();
                             eurRestoreData.Clear(); usv1RestoreData.Clear(); usv2RestoreData.Clear(); japRestoreData.Clear();
                             fileToPatch = "";
+                            overlayID = null;
                             decompressAllOverlays = false;
+                            author = null;
                         }
                     }
                 }

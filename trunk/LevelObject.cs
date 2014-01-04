@@ -1267,28 +1267,81 @@ namespace SM64DSe
         public LevelTexAnim(NitroOverlay ovl, uint tbloffset, uint offset, int num, int area)
         {
             m_Overlay = ovl;
+            // Address of the animation data
             m_Offset = offset;
             m_UniqueID = (uint)num;
             m_Area = area;
+            // Address of the texture animation data header for this texture animation
             m_TexAnimHeaderOffset = tbloffset;
 
+            // Addresses at which the scale, rotation and translation data for this texture animation starts
             m_ScaleTblOffset = m_Overlay.ReadPointer(tbloffset + 0x4) + (uint)(m_Overlay.Read16(m_Offset + 0xE) * 4);
             m_RotTblOffset = m_Overlay.ReadPointer(tbloffset + 0x8) + (uint)(m_Overlay.Read16(m_Offset + 0x12) * 2);
             m_TransTblOffset = m_Overlay.ReadPointer(tbloffset + 0xC) + (uint)(m_Overlay.Read16(m_Offset + 0x16) * 4);
-            m_NumTexAnims = (int)m_Overlay.Read32(tbloffset + 0x10);
-            m_ScaleTblSize = m_Overlay.Read16(m_Offset + 0xC);
-            m_ScaleTblStart = m_Overlay.Read16(m_Offset + 0xE);
-            m_RotTblSize = m_Overlay.Read16(m_Offset + 0x10);
-            m_RotTblStart = m_Overlay.Read16(m_Offset + 0x12);
-            m_TransTblSize = m_Overlay.Read16(m_Offset + 0x14);
-            m_TransTblStart = m_Overlay.Read16(m_Offset + 0x16);
-
-            m_ScaleTblAddr = m_Overlay.ReadPointer(tbloffset + 0x4);
-            m_RotTblAddr = m_Overlay.ReadPointer(tbloffset + 0x8);
-            m_TransTblAddr = m_Overlay.ReadPointer(tbloffset + 0xC);
+            
+            // Addresses of the shared scale, rotation and translation tables
+            m_BaseScaleTblAddr = m_Overlay.ReadPointer(tbloffset + 0x4);
+            m_BaseRotTblAddr = m_Overlay.ReadPointer(tbloffset + 0x8);
+            m_BaseTransTblAddr = m_Overlay.ReadPointer(tbloffset + 0xC);
 
             m_MatNameOffset = m_Overlay.ReadPointer(m_Offset + 0x4);
+        }
+
+        // Using getters for non-offset values so that these don't need updated every time a change is made eg. new scale value 
+        // inserted, the value will be written to the address only and the field updated on each get()
+
+        public uint getNumFrames()
+        {
+            m_NumFrames = m_Overlay.Read32(m_TexAnimHeaderOffset + 0x00);
+            return m_NumFrames;
+        }
+
+        public int getNumTexAnims()
+        {
+            m_NumTexAnims = (int)m_Overlay.Read32(m_TexAnimHeaderOffset + 0x10);
+            return m_NumTexAnims;
+        }
+
+        public uint getScaleTblSize()
+        {
+            m_ScaleTblSize = m_Overlay.Read16(m_Offset + 0xC);
+            return m_ScaleTblSize;
+        }
+
+        public uint getScaleTblStart()
+        {
+            m_ScaleTblStart = m_Overlay.Read16(m_Offset + 0xE);
+            return m_ScaleTblStart;
+        }
+
+        public uint getRotTblSize()
+        {
+            m_RotTblSize = m_Overlay.Read16(m_Offset + 0x10);
+            return m_RotTblSize;
+        }
+
+        public uint getRotTblStart()
+        {
+            m_RotTblStart = m_Overlay.Read16(m_Offset + 0x12);
+            return m_RotTblStart;
+        }
+
+        public uint getTransTblSize()
+        {
+            m_TransTblSize = m_Overlay.Read16(m_Offset + 0x14);
+            return m_TransTblSize;
+        }
+
+        public uint getTransTblStart()
+        {
+            m_TransTblStart = m_Overlay.Read16(m_Offset + 0x16);
+            return m_TransTblStart;
+        }
+
+        public string getMatName()
+        {
             m_MatName = m_Overlay.ReadString(m_MatNameOffset, 0);
+            return m_MatName;
         }
 
         public string GetDescription()
@@ -1307,23 +1360,25 @@ namespace SM64DSe
         public int m_Area;
         public uint m_UniqueID;
 
-        public int m_NumTexAnims;
+        private int m_NumTexAnims;
+        private uint m_NumFrames;
 
-        public uint m_ScaleTblAddr;
-        public uint m_RotTblAddr;
-        public uint m_TransTblAddr;
+        public uint m_BaseScaleTblAddr;
+        public uint m_BaseRotTblAddr;
+        public uint m_BaseTransTblAddr;
 
         public uint m_ScaleTblOffset;
         public uint m_RotTblOffset;
         public uint m_TransTblOffset;
-        public ushort m_ScaleTblSize;
-        public ushort m_RotTblSize;
-        public ushort m_TransTblSize;
-        public ushort m_ScaleTblStart;
-        public ushort m_RotTblStart;
-        public ushort m_TransTblStart;
+
+        private ushort m_ScaleTblSize;
+        private ushort m_RotTblSize;
+        private ushort m_TransTblSize;
+        private ushort m_ScaleTblStart;
+        private ushort m_RotTblStart;
+        private ushort m_TransTblStart;
 
         public uint m_MatNameOffset;
-        public string m_MatName;
+        private string m_MatName;
     }
 }

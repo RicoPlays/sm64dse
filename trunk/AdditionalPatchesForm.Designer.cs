@@ -46,10 +46,14 @@
             this.txtPatchData = new System.Windows.Forms.TextBox();
             this.btnSavePatch = new System.Windows.Forms.Button();
             this.pnlNewEditPatches = new System.Windows.Forms.Panel();
+            this.txtAuthor = new System.Windows.Forms.TextBox();
+            this.label4 = new System.Windows.Forms.Label();
+            this.txtOverlayID = new System.Windows.Forms.TextBox();
+            this.chkApplyToOverlay = new System.Windows.Forms.CheckBox();
             this.label3 = new System.Windows.Forms.Label();
             this.pnlExistingPatches = new System.Windows.Forms.Panel();
             this.tlpTop = new System.Windows.Forms.TableLayoutPanel();
-            //((System.ComponentModel.ISupportInitialize)(this.gridPatches)).BeginInit();
+            ((System.ComponentModel.ISupportInitialize)(this.gridPatches)).BeginInit();
             this.pnlNewEditPatches.SuspendLayout();
             this.pnlExistingPatches.SuspendLayout();
             this.tlpTop.SuspendLayout();
@@ -104,9 +108,9 @@
             // 
             this.txtPatchName.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left)
                         | System.Windows.Forms.AnchorStyles.Right)));
-            this.txtPatchName.Location = new System.Drawing.Point(104, 3);
+            this.txtPatchName.Location = new System.Drawing.Point(137, 3);
             this.txtPatchName.Name = "txtPatchName";
-            this.txtPatchName.Size = new System.Drawing.Size(302, 20);
+            this.txtPatchName.Size = new System.Drawing.Size(351, 20);
             this.txtPatchName.TabIndex = 4;
             // 
             // label2
@@ -155,7 +159,7 @@
             // 
             this.txtApplyToFile.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left)
                         | System.Windows.Forms.AnchorStyles.Right)));
-            this.txtApplyToFile.Location = new System.Drawing.Point(104, 29);
+            this.txtApplyToFile.Location = new System.Drawing.Point(137, 29);
             this.txtApplyToFile.Name = "txtApplyToFile";
             this.txtApplyToFile.Size = new System.Drawing.Size(168, 20);
             this.txtApplyToFile.TabIndex = 35;
@@ -163,7 +167,7 @@
             // btnSelectFile
             // 
             this.btnSelectFile.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
-            this.btnSelectFile.Location = new System.Drawing.Point(278, 27);
+            this.btnSelectFile.Location = new System.Drawing.Point(311, 27);
             this.btnSelectFile.Name = "btnSelectFile";
             this.btnSelectFile.Size = new System.Drawing.Size(30, 23);
             this.btnSelectFile.TabIndex = 36;
@@ -176,15 +180,16 @@
             this.chkApplyToFile.AutoSize = true;
             this.chkApplyToFile.Location = new System.Drawing.Point(6, 31);
             this.chkApplyToFile.Name = "chkApplyToFile";
-            this.chkApplyToFile.Size = new System.Drawing.Size(90, 17);
+            this.chkApplyToFile.Size = new System.Drawing.Size(86, 17);
             this.chkApplyToFile.TabIndex = 37;
-            this.chkApplyToFile.Text = "Apply To File:";
+            this.chkApplyToFile.Text = "Apply to File:";
             this.chkApplyToFile.UseVisualStyleBackColor = true;
+            this.chkApplyToFile.CheckedChanged += new System.EventHandler(this.chkApplyToFile_CheckedChanged);
             // 
             // label15
             // 
             this.label15.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
-            this.label15.Location = new System.Drawing.Point(314, 32);
+            this.label15.Location = new System.Drawing.Point(347, 32);
             this.label15.Name = "label15";
             this.label15.Size = new System.Drawing.Size(320, 18);
             this.label15.TabIndex = 38;
@@ -193,7 +198,7 @@
             // chkDecompressAllOverlays
             // 
             this.chkDecompressAllOverlays.AutoSize = true;
-            this.chkDecompressAllOverlays.Location = new System.Drawing.Point(5, 55);
+            this.chkDecompressAllOverlays.Location = new System.Drawing.Point(6, 77);
             this.chkDecompressAllOverlays.Name = "chkDecompressAllOverlays";
             this.chkDecompressAllOverlays.Size = new System.Drawing.Size(143, 17);
             this.chkDecompressAllOverlays.TabIndex = 39;
@@ -205,11 +210,11 @@
             this.txtPatchData.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom)
                         | System.Windows.Forms.AnchorStyles.Left)
                         | System.Windows.Forms.AnchorStyles.Right)));
-            this.txtPatchData.Location = new System.Drawing.Point(6, 116);
+            this.txtPatchData.Location = new System.Drawing.Point(6, 139);
             this.txtPatchData.Multiline = true;
             this.txtPatchData.Name = "txtPatchData";
             this.txtPatchData.ScrollBars = System.Windows.Forms.ScrollBars.Both;
-            this.txtPatchData.Size = new System.Drawing.Size(660, 233);
+            this.txtPatchData.Size = new System.Drawing.Size(660, 210);
             this.txtPatchData.TabIndex = 40;
             // 
             // btnSavePatch
@@ -225,6 +230,10 @@
             // 
             // pnlNewEditPatches
             // 
+            this.pnlNewEditPatches.Controls.Add(this.txtAuthor);
+            this.pnlNewEditPatches.Controls.Add(this.label4);
+            this.pnlNewEditPatches.Controls.Add(this.txtOverlayID);
+            this.pnlNewEditPatches.Controls.Add(this.chkApplyToOverlay);
             this.pnlNewEditPatches.Controls.Add(this.label3);
             this.pnlNewEditPatches.Controls.Add(this.label2);
             this.pnlNewEditPatches.Controls.Add(this.btnSavePatch);
@@ -241,9 +250,45 @@
             this.pnlNewEditPatches.Size = new System.Drawing.Size(669, 392);
             this.pnlNewEditPatches.TabIndex = 42;
             // 
+            // txtAuthor
+            // 
+            this.txtAuthor.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
+            this.txtAuthor.Location = new System.Drawing.Point(538, 3);
+            this.txtAuthor.Name = "txtAuthor";
+            this.txtAuthor.Size = new System.Drawing.Size(122, 20);
+            this.txtAuthor.TabIndex = 46;
+            // 
+            // label4
+            // 
+            this.label4.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
+            this.label4.AutoSize = true;
+            this.label4.Location = new System.Drawing.Point(494, 6);
+            this.label4.Name = "label4";
+            this.label4.Size = new System.Drawing.Size(38, 13);
+            this.label4.TabIndex = 45;
+            this.label4.Text = "Author";
+            // 
+            // txtOverlayID
+            // 
+            this.txtOverlayID.Location = new System.Drawing.Point(137, 52);
+            this.txtOverlayID.Name = "txtOverlayID";
+            this.txtOverlayID.Size = new System.Drawing.Size(168, 20);
+            this.txtOverlayID.TabIndex = 44;
+            // 
+            // chkApplyToOverlay
+            // 
+            this.chkApplyToOverlay.AutoSize = true;
+            this.chkApplyToOverlay.Location = new System.Drawing.Point(6, 54);
+            this.chkApplyToOverlay.Name = "chkApplyToOverlay";
+            this.chkApplyToOverlay.Size = new System.Drawing.Size(126, 17);
+            this.chkApplyToOverlay.TabIndex = 43;
+            this.chkApplyToOverlay.Text = "Apply to Overlay (ID):";
+            this.chkApplyToOverlay.UseVisualStyleBackColor = true;
+            this.chkApplyToOverlay.CheckedChanged += new System.EventHandler(this.chkApplyToOverlay_CheckedChanged);
+            // 
             // label3
             // 
-            this.label3.Location = new System.Drawing.Point(3, 75);
+            this.label3.Location = new System.Drawing.Point(2, 97);
             this.label3.Name = "label3";
             this.label3.Size = new System.Drawing.Size(179, 38);
             this.label3.TabIndex = 42;
@@ -290,7 +335,7 @@
             this.Name = "AdditionalPatchesForm";
             this.Text = "Additional Patches";
             this.Load += new System.EventHandler(this.AdditionalPatchesForm_Load);
-            //((System.ComponentModel.ISupportInitialize)(this.gridPatches)).EndInit();
+            ((System.ComponentModel.ISupportInitialize)(this.gridPatches)).EndInit();
             this.pnlNewEditPatches.ResumeLayout(false);
             this.pnlNewEditPatches.PerformLayout();
             this.pnlExistingPatches.ResumeLayout(false);
@@ -322,5 +367,9 @@
         private System.Windows.Forms.Label label3;
         private System.Windows.Forms.Panel pnlExistingPatches;
         private System.Windows.Forms.TableLayoutPanel tlpTop;
+        private System.Windows.Forms.TextBox txtOverlayID;
+        private System.Windows.Forms.CheckBox chkApplyToOverlay;
+        private System.Windows.Forms.TextBox txtAuthor;
+        private System.Windows.Forms.Label label4;
     }
 }
