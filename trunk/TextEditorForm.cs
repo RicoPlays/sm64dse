@@ -25,6 +25,7 @@ using System.Linq;
 using System.Text;
 using System.Windows.Forms;
 using System.Xml;
+using System.IO;
 
 namespace SM64DSe
 {
@@ -48,6 +49,21 @@ namespace SM64DSe
         String[] langs = new String[0];
         String[] langNames = new String[0];
 
+        public static BiDictionaryOneToOne<byte, string> BASIC_EUR_US_CHARS = new BiDictionaryOneToOne<byte,string>();
+        public static BiDictionaryOneToOne<byte, string> EXTENDED_ASCII_CHARS = new BiDictionaryOneToOne<byte,string>();
+        public static BiDictionaryOneToOne<byte, string> JAP_CHARS = new BiDictionaryOneToOne<byte, string>();
+
+        public static Dictionary<string, uint> BASIC_EUR_US_SIZES = new Dictionary<string, uint>();
+        public static Dictionary<string, uint> EXTENDED_ASCII_SIZES = new Dictionary<string, uint>();
+        public static Dictionary<string, uint> JAP_SIZES = new Dictionary<string, uint>();
+
+        static TextEditorForm()
+        {
+            LoadCharList("extended_ascii.txt", EXTENDED_ASCII_CHARS, EXTENDED_ASCII_SIZES);
+            LoadCharList("basic_eur_us_chars.txt", BASIC_EUR_US_CHARS, BASIC_EUR_US_SIZES);
+            LoadCharList("jap_chars.txt", JAP_CHARS, JAP_SIZES);
+        }
+
         int limit = 45;// Length of preview text to be shown
         int selectedIndex;
         int langIndex = -1;
@@ -65,19 +81,19 @@ namespace SM64DSe
             else if (theVersion == NitroROM.Version.JAP)
             {
                 lblVer.Text = "JAP";
-                langs = new String[] { "Japanese (Unsupported)", "English" };
+                langs = new String[] { "Japanese", "English" };
                 langNames = new String[] { "jpn", "nes" };
             }
             else if (theVersion == NitroROM.Version.USA_v1)
             {
                 lblVer.Text = "USAv1";
-                langs = new String[] { "English", "Japanese (Unsupported)" };
+                langs = new String[] { "English", "Japanese" };
                 langNames = new String[] { "nes", "jpn" };
             }
             else if (theVersion == NitroROM.Version.USA_v2)
             {
                 lblVer.Text = "USAv2";
-                langs = new String[] { "English", "Japanese (Unsupported)" };
+                langs = new String[] { "English", "Japanese" };
                 langNames = new String[] { "nes", "jpn" };
             }
 
@@ -133,40 +149,38 @@ namespace SM64DSe
                     length++;
                     char thechar = '\0';
 
-                    if ((cur >= 0x00) && (cur <= 0x09))
+                    /*if ((cur >= 0x00) && (cur <= 0x09))
                         thechar = (char)('0' + cur);
                     else if ((cur >= 0x0A) && (cur <= 0x23))
                         thechar = (char)('A' + cur - 0x0A);
                     else if ((cur >= 0x2D) && (cur <= 0x46))
                         thechar = (char)('a' + cur - 0x2D);
                     else if ((cur >= 0x50) && (cur <= 0xCF))//Extended ASCII Characters
-                        thechar = (char)(0x30 + cur);
+                        thechar = (char)(0x30 + cur);*/
+                    // Some characters are two bytes long, can skip the second
+
+                    if (langNames[langIndex] == "jpn")
+                    {
+                        if (JAP_CHARS.GetFirstToSecond().ContainsKey(cur))
+                        {
+                            thetext += JAP_CHARS.GetByFirst(cur);
+                            straddr += (JAP_SIZES[JAP_CHARS.GetByFirst(cur)] - 1);
+                            length += (int)(JAP_SIZES[JAP_CHARS.GetByFirst(cur)] - 1);
+                        }
+                    }
                     else
                     {
-                        switch (cur)
+                        if ((cur >= 0x00 && cur <= 0x4F) || (cur >= 0xEE && cur <= 0xFB))
                         {
-                            case 0x26: thechar = '?'; break;
-                            case 0x27: thechar = '!'; break;
-                            case 0x28: thechar = '~'; break;
-                            case 0x29: thechar = ','; break;
-                            case 0x2A: thechar = '“'; break;
-                            case 0x2B: thechar = '”'; break;
-                            case 0x47: thechar = '-'; break;
-                            case 0x48: thechar = '.'; break;
-                            case 0x49: thechar = '\''; break;
-                            case 0x4A: thechar = ':'; break;
-                            case 0x4B: thechar = ';'; break;
-                            case 0x4C: thechar = '&'; break;
-                            case 0x4D: thechar = ' '; break;
-                            case 0x4E: thechar = '/'; break;
-                            case 0xEE: thetext += "[\\r]C"; straddr++; length++; break;
-                            case 0xF0: thetext += "[\\r]S"; break;
-                            case 0xF1: thetext += "[\\r]s"; break;
-                            case 0xF2: thetext += "[\\r]D"; straddr++; length++; break;
-                            case 0xF4: thetext += "[\\r]A"; straddr++; length++; break;
-                            case 0xF6: thetext += "[\\r]B"; straddr++; length++; break;
-                            case 0xF8: thetext += "[\\r]X"; straddr++; length++; break;
-                            case 0xFA: thetext += "[\\r]Y"; straddr++; length++; break;
+                            thetext += BASIC_EUR_US_CHARS.GetByFirst(cur);
+                            straddr += (BASIC_EUR_US_SIZES[BASIC_EUR_US_CHARS.GetByFirst(cur)] - 1);
+                            length += (int)(BASIC_EUR_US_SIZES[BASIC_EUR_US_CHARS.GetByFirst(cur)] - 1);
+                        }
+                        else if (cur >= 0x50 && cur <= 0xCF)
+                        {
+                            thetext += EXTENDED_ASCII_CHARS.GetByFirst(cur);
+                            straddr += (EXTENDED_ASCII_SIZES[EXTENDED_ASCII_CHARS.GetByFirst(cur)] - 1);
+                            length += (int)(EXTENDED_ASCII_SIZES[EXTENDED_ASCII_CHARS.GetByFirst(cur)] - 1);
                         }
                     }
 
@@ -210,6 +224,7 @@ namespace SM64DSe
             int i = 0;
             while (i < newTextByte.Length)
             {
+                /*
                 // Upper
                 // nintendo encoding = ('A' + cur - 0x0A);
                 // ascii = A + ne - 0x0A
@@ -221,8 +236,21 @@ namespace SM64DSe
                 else if (newTextByte[i] >= 0x61 && newTextByte[i] <= 0x7A)// Lowercase
                     encodedString.Add((byte)(newTextByte[i] - 'a' + 0x2D));
                 else if (newTextByte[i] >= 0x80 && newTextByte[i] < (0xFF + 0x01))// Extended characters 128 to 255
-                    encodedString.Add((byte)(newTextByte[i] - 0x30));// Character - offset of 0x30 to get Nintendo character
-                else if (newTextByte[i].Equals('\r'))// New Line is \r\n
+                    encodedString.Add((byte)(newTextByte[i] - 0x30));// Character - offset of 0x30 to get Nintendo character*/
+
+                if (langNames[langIndex] == "jpn")
+                {
+                    if (JAP_CHARS.GetSecondToFirst().ContainsKey("" + newTextByte[i]))
+                        encodedString.Add(JAP_CHARS.GetBySecond("" + newTextByte[i]));
+                }
+                else
+                {
+                    if (BASIC_EUR_US_CHARS.GetSecondToFirst().ContainsKey("" + newTextByte[i]))
+                        encodedString.Add(BASIC_EUR_US_CHARS.GetBySecond("" + newTextByte[i]));
+                    if (EXTENDED_ASCII_CHARS.GetSecondToFirst().ContainsKey("" + newTextByte[i]))
+                        encodedString.Add(EXTENDED_ASCII_CHARS.GetBySecond("" + newTextByte[i]));
+                }
+                if (newTextByte[i].Equals('\r'))// New Line is \r\n
                 {
                     i++;// Point after r
                     if (newTextByte[i].Equals('\n'))
@@ -249,65 +277,37 @@ namespace SM64DSe
                     }
                     else
                     {
-                        // 0x42
-                        int special = 0x42;
-                        switch (newTextByte[i])
+                        // Special characters [\r]C [\r]S [\r]s [\r]D [\r]A [\r]B [\r]X [\r]Y
+
+                        string specialChar = "[\\r]" + newTextByte[i];
+                        uint size = 0;
+                        byte val = 0xFF;
+
+                        if (langNames[langIndex] == "jpn")
                         {
-                            case 'C':
-                                encodedString.Add((byte)(48 - special));
-                                encodedString.Add((byte)(49 - special));
-                                break;
-                            case 'S':
-                                encodedString.Add((byte)(50 - special));
-                                break;
-                            case 's':
-                                encodedString.Add((byte)(51 - special));
-                                break;
-                            case 'D':
-                                encodedString.Add((byte)(52 - special));
-                                encodedString.Add((byte)(53 - special));
-                                break;
-                            case 'A':
-                                encodedString.Add((byte)(54 - special));
-                                encodedString.Add((byte)(55 - special));
-                                break;
-                            case 'B':
-                                encodedString.Add((byte)(56 - special));
-                                encodedString.Add((byte)(57 - special));
-                                break;
-                            case 'X':
-                                encodedString.Add((byte)(58 - special));
-                                encodedString.Add((byte)(59 - special));
-                                break;
-                            case 'Y':
-                                encodedString.Add((byte)(60 - special));
-                                encodedString.Add((byte)(61 - special));
-                                break;
+                            size = JAP_SIZES[specialChar];
+                            val = JAP_CHARS.GetBySecond(specialChar);
                         }
+                        else
+                        {
+                            if (BASIC_EUR_US_SIZES.ContainsKey(specialChar))
+                                size = BASIC_EUR_US_SIZES[specialChar];
+                            else if (EXTENDED_ASCII_SIZES.ContainsKey(specialChar))
+                                size = EXTENDED_ASCII_SIZES[specialChar];
+
+                            if (BASIC_EUR_US_CHARS.GetSecondToFirst().ContainsKey(specialChar))
+                                val = BASIC_EUR_US_CHARS.GetBySecond(specialChar);
+                            else if (EXTENDED_ASCII_CHARS.GetSecondToFirst().ContainsKey(specialChar))
+                                val = EXTENDED_ASCII_CHARS.GetBySecond(specialChar);
+                        }
+
+                        for (int j = 0; j < size; j++)
+                        {
+                            encodedString.Add((byte)(val + j));
+                        }
+
                         i++;
                         continue;
-                    }
-                }
-
-                else// Punctuation and other characters
-                {
-                    switch (newTextByte[i])
-                    {
-                        case '?': encodedString.Add((byte)(newTextByte[i] - '?' + 0x26)); break;
-                        case '!': encodedString.Add((byte)(newTextByte[i] - '!' + 0x27)); break;
-                        case '~': encodedString.Add((byte)(newTextByte[i] - '~' + 0x28)); break;
-                        case ',': encodedString.Add((byte)(newTextByte[i] - ',' + 0x29)); break;
-                        case '“': encodedString.Add((byte)(newTextByte[i] - '“' + 0x2A)); break;
-                        case '”': encodedString.Add((byte)(newTextByte[i] - '”' + 0x2B)); break;
-
-                        case '-': encodedString.Add((byte)(newTextByte[i] - '-' + 0x47)); break;
-                        case '.': encodedString.Add((byte)(newTextByte[i] - '.' + 0x48)); break;
-                        case '\'': encodedString.Add((byte)(newTextByte[i] - '\'' + 0x49)); break;
-                        case ':': encodedString.Add((byte)(newTextByte[i] - ':' + 0x4A)); break;
-                        case ';': encodedString.Add((byte)(newTextByte[i] - ';' + 0x4B)); break;
-                        case '&': encodedString.Add((byte)(newTextByte[i] - '&' + 0x4C)); break;
-                        case ' ': encodedString.Add((byte)(newTextByte[i] - ' ' + 0x4D)); break;
-                        case '/': encodedString.Add((byte)(newTextByte[i] - '/' + 0x4E)); break;
                     }
                 }
                 i++;
@@ -316,6 +316,33 @@ namespace SM64DSe
             encodedString.Add(0xFF);// End of message
 
             return encodedString;
+        }
+
+        private static void LoadCharList(string txtName, BiDictionaryOneToOne<byte, string> charList,
+            Dictionary<string, uint> sizeList)
+        {
+            string filename = Path.Combine(Application.StartupPath, txtName);
+            string text = File.ReadAllText(filename);
+
+            string[] lines = text.Split(new string[] { "\n", "\r\n" }, StringSplitOptions.RemoveEmptyEntries);
+            for (int i = 0; i < lines.Length; i++)
+            {
+                // Ignore comments
+                if (lines[i].ToCharArray()[0] == '#')
+                    continue;
+
+                string[] pair = lines[i].Split('=');
+                if (pair.Length < 3)
+                    continue;
+
+                try { 
+                    charList.Add(byte.Parse(pair[0]), pair[2]); 
+                    sizeList.Add(pair[2], uint.Parse(pair[1]));
+                }
+                catch (Exception e) { MessageBox.Show("Error in " + filename + "\n\n" + "Line " + i + "\n\n" + 
+                    pair[0] + "\t" + pair[1] + "\t" + pair[2]); }
+            }
+
         }
 
         private void lbxMsgList_SelectedIndexChanged(object sender, EventArgs e)
@@ -561,7 +588,11 @@ namespace SM64DSe
 
                 for (int i = 0; i < m_MsgData.Length; i++)
                 {
-                    writer.WriteElementString("Text", m_MsgData[i]);
+                    writer.WriteStartElement("Text");
+                    writer.WriteAttributeString("index", i.ToString());
+                    writer.WriteAttributeString("id", String.Format("{0:X4}", i));
+                    writer.WriteString(m_MsgData[i]);
+                    writer.WriteEndElement();
                 }
                 writer.WriteEndElement();
                 writer.WriteEndDocument();

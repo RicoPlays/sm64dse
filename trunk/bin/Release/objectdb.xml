@@ -36,7 +36,7 @@ If you set Parameter 1 to 0001, he loads as a mario, but when hit turns into Lui
 		<name></name>
 		<internalname>EWB_ICE_A</internalname>
 		<actorid>170</actorid>
-		<description></description>
+		<description>An icy hexagonal platform from Chief Chilly Challenge - fight. </description>
 		<bankreq>1=5</bankreq>
 	</object>
 
@@ -45,7 +45,7 @@ If you set Parameter 1 to 0001, he loads as a mario, but when hit turns into Lui
 		<name></name>
 		<internalname>EWB_ICE_B</internalname>
 		<actorid>171</actorid>
-		<description></description>
+		<description>A layer of ice platforms that Chief Chilly destroys after 2nd hit.</description>
 		<bankreq>1=5</bankreq>
 	</object>
 
@@ -54,7 +54,7 @@ If you set Parameter 1 to 0001, he loads as a mario, but when hit turns into Lui
 		<name></name>
 		<internalname>EWB_ICE_C</internalname>
 		<actorid>172</actorid>
-		<description></description>
+		<description>A layer of ice platforms that Chief Chilly destroys after 1st hit.</description>
 		<bankreq>1=5</bankreq>
 	</object>
 
@@ -168,7 +168,17 @@ TODO: figure out parameters.</description>
 		<name>Giant Rolling Rock</name>
 		<internalname>GORO_ROCK</internalname>
 		<actorid>221</actorid>
-		<description>Used in Hazy Maze Cave.</description>
+		<description>Used in Hazy Maze Cave.
+Parameter 1:
+
+Star ID followed by:
+
+00 - Spawn many, rolling, without a star, while player isn't close.
+01 - Spawn many, rolling, with a star, while player isn't close
+02 - Spawn one, rolling, without a star, without looking at player distance
+03 - Spawn one, rolling, with a star, without looking at player distance
+04 - Spawn one, not rolling, with a star.
+Later same as 02</description>
 		<bankreq>7=14</bankreq>
 	</object>
 
@@ -179,10 +189,16 @@ TODO: figure out parameters.</description>
 		<actorid>200</actorid>
 		<description>That well-known enemy from SMB.
 
-[b]Parameters (standard):[/b]
-1: 0xFFFF = normal. Other values may cause the Goomba to reveal a Silver Star when killed.
-2: no effect
-3: no effect</description>
+Parameter 1:
+XYZA where:
+
+X = Unknown
+Y = Determines when the cap should be spawned: 0 - Never, 1 - If the character already unlocked, 2 - Even if character not unlocked
+Z = 0 - Spawn coin when defeated, 1 - Spawn coin when defeated + Silver Star
+A = Cap to spawn. 0 - Mario, 1 - Luigi, 2 - Wario, F - None
+
+FFFF = Normal
+</description>
 		<bankreq>3=1</bankreq>
 	</object>
 
@@ -383,7 +399,7 @@ Contains:
 		<actorid>23</actorid>
 		<description>A box that gives out a Mario hat when hit.
 
-This object is unused in the game, but is present in the general purpose test map, and fully functional.</description>
+This object is unused in the game, but is present in the general purpose test map, and fully functional. Character must be unlocked or the level contain a corresponding hat through Object 254.</description>
 		<bankreq>none</bankreq>
 	</object>
 
@@ -394,7 +410,7 @@ This object is unused in the game, but is present in the general purpose test ma
 		<actorid>24</actorid>
 		<description>A box that gives out a Wario hat when hit.
 
-This object is unused in the game, but is present in the general purpose test map, and fully functional.</description>
+This object is unused in the game, but is present in the general purpose test map, and fully functional. Character must be unlocked or the level contain a corresponding hat through Object 254.</description>
 		<bankreq>none</bankreq>
 	</object>
 
@@ -405,7 +421,7 @@ This object is unused in the game, but is present in the general purpose test ma
 		<actorid>25</actorid>
 		<description>A box that gives out a Luigi hat when hit.
 
-This object is unused in the game, but is present in the general purpose test map, and fully functional.</description>
+This object is unused in the game, but is present in the general purpose test map, and fully functional. Character must be unlocked or the level contain a corresponding hat through Object 254.</description>
 		<bankreq>none</bankreq>
 	</object>
 
@@ -425,7 +441,9 @@ This object is unused in the game, but is present in the general purpose test ma
 		<actorid>288</actorid>
 		<description>Standard, yellow coin. Every 50 coins collected earn the player one life upon successfully finishing the stage.
 		
-Set Parameter 1 to 75 to make them appear permanently until collected otherwise they only last a few seconds.</description>
+Parameter 1:
+0 - Disappear after a few seconds.
+1/75 - Appear permanently until collected.</description>
 		<bankreq>none</bankreq>
 	</object>
 
@@ -438,7 +456,11 @@ Set Parameter 1 to 75 to make them appear permanently until collected otherwise 
 
 [b]Important note:[/b] Do not place more than 8 red coins in a level. Collecting more than 8 red coins freezes the game.
 
-For Red Coins Stars, set Parameter 1 to the Star ID followed by 1.</description>
+Parameter 1:
+
+Set to the Star ID followed by:
+0 - Appear only temporarily
+1 - Appear permanently until collected</description>
 		<bankreq>none</bankreq>
 	</object>
 
@@ -449,7 +471,10 @@ For Red Coins Stars, set Parameter 1 to the Star ID followed by 1.</description>
 		<actorid>290</actorid>
 		<description>Worth 5 yellow coins. Appears when ground-pounding an associated [object=0131], or when killing certain enemies.
 		
-Set Parameter 1 to 1 if they are to be used with a Blue Coin Switch.
+Parameter 1:
+
+0 - Appear only temporarily
+1 - Activated by a Blue Coin Switch.
 		</description>
 		<bankreq>none</bankreq>
 	</object>
@@ -503,8 +528,19 @@ Painting/Size</description>
 		<internalname>HANSWITCH</internalname>
 		<actorid>11</actorid>
 		<description>When pressed, makes Red ? Blocks become solid and usable.
-		
-Set Parameter 1 to FF02 and Parameter 1 of the (ID 25) SW_BLOCK_L bricks to FF00.</description>
+
+XXXY where:
+
+X - Unknown, FF0
+
+Z - Mode:
+0 - Switch permanently
+1 - Unable to switch on?
+2 - Switch on SW_BLOCK_L with a timer
+8 - Open SW_BLOCK_L without timer
+
+Set Parameter 1 of the (ID 25) SW_BLOCK_L bricks to FF00
+</description>
 		<bankreq>none</bankreq>
 	</object>
 
@@ -623,7 +659,13 @@ The fist two digits of Parameter 1 give the time limit (seconds / 2 possibly) an
 		<name>Butterflies</name>
 		<internalname>BUTTERFLY</internalname>
 		<actorid>336</actorid>
-		<description>Butterflies flying around. Purely decorative.</description>
+		<description>Butterflies flying around.
+
+Parameter 1:
+21 - Spawn 3, 2 turn into cannonballs when touched, one turns into 1UP
+75 - Spawn 5
+1F - Spawn 3, one turns into 1UP
+2F - Turns into cannonball</description>
 		<bankreq>6=1</bankreq>
 	</object>
 
@@ -670,7 +712,11 @@ Sleeps most of the time, but if a player comes too close, wakes up and starts ch
 		<name></name>
 		<internalname>STAR_CAMERA</internalname>
 		<actorid>177</actorid>
-		<description></description>
+		<description>This sprite determines where the camera should be placed while a star is spawning.
+
+Parameter 1:
+
+Star ID</description>
 		<bankreq>none</bankreq>
 	</object>
 
@@ -679,7 +725,17 @@ Sleeps most of the time, but if a player comes too close, wakes up and starts ch
 		<name>Power Star</name>
 		<internalname>STAR</internalname>
 		<actorid>178</actorid>
-		<description>Adds 1 star to the player's star counter when collected. Not all secret Stars end the level. Setting Paramater 1 to a number from 1 - 7 will set it as that star for the current level.</description>
+		<description>Adds 1 star to the player's star counter when collected. Not all secret Stars end the level.
+
+Parameter 1:
+XY where:
+
+Y - Star ID
+X - Mode
+0: Normal
+1: Jumping around (Like if you defeat an enemy with a Silver Star)
+5: Always yellow, but not collectable if already collected?
+6: Appears as glass sphere, can be spawned by silver stars</description>
 		<bankreq>none</bankreq>
 	</object>
 
@@ -701,11 +757,14 @@ Sleeps most of the time, but if a player comes too close, wakes up and starts ch
 
 Optionally, this object can show a horizontal star shadow at its position, usually when the star is spawned by collecting red coins.
 
-Switch Star: Set Parameter 1 to 6 followed by the number of the Star (act) it is for.
+Parameter 1:
+Where X is the Star ID:
 
-Red Coins: Set Parameter 1 to the ID of the Star it is for.
-
-When an object will make it appear: Set Parameter 1 to 2 followed by the Star ID.
+X - Used for Red Coins, appears as blue rotating horizontal star
+1X (also: 3X, 5X, 7X, 9X, BX...) - If set to this, it appears invisible, and nothing seems to spawn a star. Star Switches set to this ID will appear already pressed.
+2X, AX - Star can be spawned by events like Koopa the Quick, numbered "secrets" or from a baddie being beaten.
+4X - Appears as the Star Switch glass sphere, but won't spawn stars from Switch Stars, baddies nor silver stars?
+6X - For Switch Stars, appears as glass sphere
 </description>
 		<bankreq>none</bankreq>
 	</object>
@@ -1380,7 +1439,7 @@ Use FFFF.
 		<name></name>
 		<internalname>FL_RING</internalname>
 		<actorid>71</actorid>
-		<description></description>
+		<description>The rotating ring around the volcano in Lethal Lava Land.</description>
 		<bankreq>7=15</bankreq>
 	</object>
 
@@ -1398,7 +1457,7 @@ Use FFFF.
 		<name></name>
 		<internalname>FL_LONDON</internalname>
 		<actorid>73</actorid>
-		<description></description>
+		<description>The little bridge that goes up and down from Lethal Lava Land.</description>
 		<bankreq>7=15</bankreq>
 	</object>
 
@@ -1560,7 +1619,9 @@ Use FFFF.
 		<name>Big Mr. I</name>
 		<internalname>EYEKUN_BOSS</internalname>
 		<actorid>263</actorid>
-		<description>Huge version of Mr. I seen in the attic in Big Boo's Haunt. It acts the same way as its smaller counterpart, but releases a Power Star when defeated, as opposed to a blue coin.</description>
+		<description>Huge version of Mr. I seen in the attic in Big Boo's Haunt. It acts the same way as its smaller counterpart, but releases a Power Star when defeated, as opposed to a blue coin.
+
+Parameter 1: Star ID</description>
 		<bankreq>1=3</bankreq>
 	</object>
 
@@ -1740,7 +1801,11 @@ Use FFFF.
 		<name></name>
 		<internalname>CASKET</internalname>
 		<actorid>64</actorid>
-		<description></description>
+		<description>Coffin from Big Boo's Haunt.
+
+Parameter 1:
+0 - Raise up when jumped on
+1 - Do not move</description>
 		<bankreq>1=3</bankreq>
 	</object>
 
@@ -1886,7 +1951,7 @@ Does nothing if placed alone. For it to act as an entrance or an exit, the corre
 		<name></name>
 		<internalname>YAJIRUSI_L</internalname>
 		<actorid>299</actorid>
-		<description></description>
+		<description>Sign with left facing arrow from Bob-Omb Battlefield.</description>
 		<bankreq>none</bankreq>
 	</object>
 
@@ -1895,7 +1960,7 @@ Does nothing if placed alone. For it to act as an entrance or an exit, the corre
 		<name></name>
 		<internalname>YAJIRUSI_R</internalname>
 		<actorid>300</actorid>
-		<description></description>
+		<description>Sign with right facing arrow from Bob-Omb Battlefield.</description>
 		<bankreq>none</bankreq>
 	</object>
 
@@ -2162,7 +2227,15 @@ FF02 - Move up and down</description>
 		<name></name>
 		<internalname>KM2_SUSUMU</internalname>
 		<actorid>144</actorid>
-		<description></description>
+		<description>Parameter 1:
+
+Byte 1:
+0 - Arrow platform, follows paths, starts moving on touch
+1 - Metal Grate Platform, follows paths, starts moving on touch
+2 - Crashes
+
+Byte 2:
+Path ID</description>
 		<bankreq>4=3</bankreq>
 	</object>
 
@@ -2180,7 +2253,7 @@ FF02 - Move up and down</description>
 		<name></name>
 		<internalname>KM2_RIFUT02</internalname>
 		<actorid>146</actorid>
-		<description></description>
+		<description>Rectangular platform that moves along its longer side.</description>
 		<bankreq>4=3</bankreq>
 	</object>
 
@@ -2644,7 +2717,7 @@ Set Parameter 1 to F followed by the path ID then 00 if it is to swim about foll
 		<name></name>
 		<internalname>BLK_OKINOKO_TAG</internalname>
 		<actorid>321</actorid>
-		<description></description>
+		<description>Spawns a 1UP Mushroom if its location is the same as that of a Brick Block or Big Brick Block when the block is destroyed.</description>
 		<bankreq>none</bankreq>
 	</object>
 
@@ -2653,7 +2726,10 @@ Set Parameter 1 to F followed by the path ID then 00 if it is to swim about foll
 		<name>Block Super Mushroom Tag</name>
 		<internalname>BLK_SKINOKO_TAG</internalname>
 		<actorid>322</actorid>
-		<description>Spawns a Super Mushroom if its location is the same as that of a Brick Block or Big Brick Block when the block is destroyed.</description>
+		<description>Spawns a Super Mushroom if its location is the same as that of a Brick Block or Big Brick Block when the block is destroyed.
+
+Parameter 1:
+7F</description>
 		<bankreq>none</bankreq>
 	</object>
 
@@ -2662,7 +2738,7 @@ Set Parameter 1 to F followed by the path ID then 00 if it is to swim about foll
 		<name></name>
 		<internalname>BLK_GNSHELL_TAG</internalname>
 		<actorid>323</actorid>
-		<description></description>
+		<description>Spawns a Green Shell if its location is the same as that of a Brick Block or Big Brick Block when the block is destroyed.</description>
 		<bankreq>none</bankreq>
 	</object>
 
@@ -2671,7 +2747,7 @@ Set Parameter 1 to F followed by the path ID then 00 if it is to swim about foll
 		<name></name>
 		<internalname>BLK_SLVSTAR_TAG</internalname>
 		<actorid>324</actorid>
-		<description></description>
+		<description>Spawns a Silver Star if its location is the same as that of a Brick Block or Big Brick Block when the block is destroyed.</description>
 		<bankreq>none</bankreq>
 	</object>
 
@@ -2899,7 +2975,7 @@ Appears lower than its position if the two pillars in the castle basement have b
 		<name></name>
 		<internalname>MC_DODAI</internalname>
 		<actorid>340</actorid>
-		<description></description>
+		<description>Little stairs.</description>
 		<bankreq>none</bankreq>
 	</object>
 
@@ -2990,7 +3066,23 @@ There should be a Star Marker with parameters 2 followed by Star ID eg. 25 for S
 		<name>Blue Coin Switch</name>
 		<internalname>BC_SWITCH</internalname>
 		<actorid>10</actorid>
-		<description>Makes Blue Coins appear for a limited time.</description>
+		<description>Makes Blue Coins appear for a limited time.
+
+Parameter 1:
+XYZA where:
+
+X : When the time remaining is low, start ticking faster?
+0,F - Yes
+Other - No
+
+Y : Time limit, (seconds * 2)?
+
+Z : Unknown, zero
+
+A : Spawn Coin?
+0 - Yes
+Other - No
+</description>
 		<bankreq>none</bankreq>
 	</object>
 
@@ -3173,7 +3265,9 @@ Alone, not a really useful object.</description>
 		<name></name>
 		<internalname>MUGEN_BGM</internalname>
 		<actorid>351</actorid>
-		<description></description>
+		<description>Changes background music. Need proper combination of current level music and a correct param
+to switch properly.
+For instance: Jolly Roger Bay's music + Param 1: 71 = Jolly Roger Overworld music</description>
 		<bankreq>none</bankreq>
 	</object>
 
@@ -3182,7 +3276,7 @@ Alone, not a really useful object.</description>
 		<name></name>
 		<internalname>SOUND_OBJ</internalname>
 		<actorid>359</actorid>
-		<description></description>
+		<description>Used to play sound effects upon entering a level.</description>
 		<bankreq>none</bankreq>
 	</object>
 

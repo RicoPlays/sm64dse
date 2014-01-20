@@ -36,6 +36,7 @@
             this.btnSelect = new System.Windows.Forms.Button();
             this.label1 = new System.Windows.Forms.Label();
             this.tbxObjSearch = new System.Windows.Forms.TextBox();
+            //((System.ComponentModel.ISupportInitialize)(this.spcMainContainer)).BeginInit();
             this.spcMainContainer.Panel1.SuspendLayout();
             this.spcMainContainer.Panel2.SuspendLayout();
             this.spcMainContainer.SuspendLayout();
@@ -128,11 +129,10 @@
             this.tbxObjSearch.Location = new System.Drawing.Point(46, 0);
             this.tbxObjSearch.Margin = new System.Windows.Forms.Padding(0);
             this.tbxObjSearch.Name = "tbxObjSearch";
-            this.tbxObjSearch.ReadOnly = true;
             this.tbxObjSearch.ShortcutsEnabled = false;
             this.tbxObjSearch.Size = new System.Drawing.Size(298, 20);
             this.tbxObjSearch.TabIndex = 6;
-            this.tbxObjSearch.Text = "(doesn\'t work.)";
+            this.tbxObjSearch.TextChanged += new System.EventHandler(this.tbxObjSearch_TextChanged);
             // 
             // ObjectListForm
             // 
@@ -150,6 +150,7 @@
             this.Load += new System.EventHandler(this.ObjectListForm_Load);
             this.spcMainContainer.Panel1.ResumeLayout(false);
             this.spcMainContainer.Panel2.ResumeLayout(false);
+            //((System.ComponentModel.ISupportInitialize)(this.spcMainContainer)).EndInit();
             this.spcMainContainer.ResumeLayout(false);
             this.ResumeLayout(false);
             this.PerformLayout();

@@ -31,6 +31,27 @@ namespace SM64DSe
     {
         private LevelSettings m_LevelSettings;
 
+        private static uint ACT_SELECTOR_ID_TABLE;
+
+        static LevelSettingsForm()
+        {
+            switch (Program.m_ROM.m_Version)
+            {
+                case NitroROM.Version.EUR:
+                    ACT_SELECTOR_ID_TABLE = 0x75298;
+                    break;
+                case NitroROM.Version.USA_v1:
+                    ACT_SELECTOR_ID_TABLE = 0x731F0;
+                    break;
+                case NitroROM.Version.USA_v2:
+                    ACT_SELECTOR_ID_TABLE = 0x73F10;
+                    break;
+                case NitroROM.Version.JAP:
+                    ACT_SELECTOR_ID_TABLE = 0x73744;
+                    break;
+            }
+        }
+
         public LevelSettingsForm(LevelSettings settings)
         {
             InitializeComponent();
@@ -89,6 +110,10 @@ namespace SM64DSe
             txtMusicByte01.Text = m_LevelSettings.m_Overlay.Read8(0x7C).ToString();
             txtMusicByte02.Text = m_LevelSettings.m_Overlay.Read8(0x7D).ToString();
             txtMusicByte03.Text = m_LevelSettings.m_Overlay.Read8(0x7E).ToString();
+
+            Program.m_ROM.BeginRW();
+            txtActSelectorID.Text = Program.m_ROM.Read8((uint)(ACT_SELECTOR_ID_TABLE + ((LevelEditorForm)Owner).m_LevelID)).ToString();
+            Program.m_ROM.EndRW();
         }
 
         private void cbxBankX_MeasureItem(object sender, MeasureItemEventArgs e)
@@ -148,9 +173,21 @@ namespace SM64DSe
             m_LevelSettings.ObjectBanks[6] = (uint)cbxBank6.SelectedIndex;
             m_LevelSettings.ObjectBanks[7] = (uint)cbxBank7.SelectedIndex;
 
-            m_LevelSettings.m_Overlay.Write8((uint)0x7C, (byte)int.Parse(txtMusicByte01.Text));
-            m_LevelSettings.m_Overlay.Write8((uint)0x7D, (byte)int.Parse(txtMusicByte02.Text));
-            m_LevelSettings.m_Overlay.Write8((uint)0x7E, (byte)int.Parse(txtMusicByte03.Text));
+            try
+            {
+                m_LevelSettings.m_Overlay.Write8((uint)0x7C, (byte)int.Parse(txtMusicByte01.Text));
+                m_LevelSettings.m_Overlay.Write8((uint)0x7D, (byte)int.Parse(txtMusicByte02.Text));
+                m_LevelSettings.m_Overlay.Write8((uint)0x7E, (byte)int.Parse(txtMusicByte03.Text));
+            }
+            catch { }
+
+            try
+            {
+                Program.m_ROM.BeginRW();
+                Program.m_ROM.Write8((uint)(ACT_SELECTOR_ID_TABLE + ((LevelEditorForm)Owner).m_LevelID), byte.Parse(txtActSelectorID.Text));
+                Program.m_ROM.EndRW();
+            }
+            catch { }
         }
 
         private void cbxBackground_SelectedIndexChanged(object sender, EventArgs e)

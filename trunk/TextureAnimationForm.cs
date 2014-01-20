@@ -70,12 +70,9 @@ namespace SM64DSe
             txtTransStart.Text = _owner.m_TexAnims[lbxArea.SelectedIndex].ElementAt(lbxTexAnim.SelectedIndex).getTransTblStart().ToString();
             txtTransSize.Text = _owner.m_TexAnims[lbxArea.SelectedIndex].ElementAt(lbxTexAnim.SelectedIndex).getTransTblSize().ToString();
 
-            /*//Take this out when done testing
-            textBox1.Text = "" + 
-                _owner.m_Overlay.Read32(_owner.m_TexAnims[lbxArea.SelectedIndex].ElementAt(lbxTexAnim.SelectedIndex).m_TexAnimHeaderOffset) +
-                ",  " + _owner.m_Overlay.Read32(_owner.m_TexAnims[lbxArea.SelectedIndex].ElementAt(lbxTexAnim.SelectedIndex).m_Offset) +
-                ",  " + _owner.m_Overlay.Read32((uint)(_owner.m_TexAnims[lbxArea.SelectedIndex].ElementAt(lbxTexAnim.SelectedIndex).m_Offset + 0x08)) +
-                ",  " + _owner.m_Overlay.Read16((uint)(_owner.m_TexAnims[lbxArea.SelectedIndex].ElementAt(lbxTexAnim.SelectedIndex).m_Offset + 0x18)) +
+            //Take this out when done testing
+            /*textBox1.Text = 
+                "" + _owner.m_Overlay.Read16((uint)(_owner.m_TexAnims[lbxArea.SelectedIndex].ElementAt(lbxTexAnim.SelectedIndex).m_Offset + 0x18)) +
                 ",  " + _owner.m_Overlay.Read16((uint)(_owner.m_TexAnims[lbxArea.SelectedIndex].ElementAt(lbxTexAnim.SelectedIndex).m_Offset + 0x1A));
              // Values at 0x08, 0x18 and 0x1A within animation data unknown, seems linked to number of frames possibly*/
 
@@ -145,9 +142,9 @@ namespace SM64DSe
                 ((uint)index * 4), (uint)(value * 4096f));
             setScaleSize((ushort)(_owner.m_TexAnims[area].ElementAt(texAnim).getScaleTblSize() + 1), area, texAnim);
             // Need to update start indices for following texture animations in same area
-            for (int i = index + 1; i < _owner.m_TexAnims[area].Count; i++)
+            for (int i = texAnim + 1; i < _owner.m_TexAnims[area].Count; i++)
             {
-                setScaleStart((ushort)(_owner.m_TexAnims[area].ElementAt(i).getScaleTblStart() + 1), area, texAnim);
+                setScaleStart((ushort)(_owner.m_TexAnims[area].ElementAt(i).getScaleTblStart() + 1), area, i);
             }
         }
 
@@ -158,9 +155,9 @@ namespace SM64DSe
                 ((uint)index * 2), (ushort)(value * (1024f / 90f)));
             setRotationSize((ushort)(_owner.m_TexAnims[area].ElementAt(texAnim).getRotTblSize() + 1), area, texAnim);
             // Need to update start indices for following texture animations in same area
-            for (int i = index + 1; i < _owner.m_TexAnims[area].Count; i++)
+            for (int i = texAnim + 1; i < _owner.m_TexAnims[area].Count; i++)
             {
-                setRotationStart((ushort)(_owner.m_TexAnims[area].ElementAt(i).getRotTblStart() + 1), area, texAnim);
+                setRotationStart((ushort)(_owner.m_TexAnims[area].ElementAt(i).getRotTblStart() + 1), area, i);
             }
             // Because each rotation value is 2 bytes, if there's an odd number, following addresses will no 
             // longer be multiples of 4
@@ -175,9 +172,9 @@ namespace SM64DSe
                 ((uint)index * 4), (uint)(value * 4096f));
             setTranslationSize((ushort)(_owner.m_TexAnims[area].ElementAt(texAnim).getTransTblSize() + 1), area, texAnim);
             // Need to update start indices for following texture animations in same area
-            for (int i = index + 1; i < _owner.m_TexAnims[area].Count; i++)
+            for (int i = texAnim + 1; i < _owner.m_TexAnims[area].Count; i++)
             {
-                setTranslationStart((ushort)(_owner.m_TexAnims[area].ElementAt(i).getTransTblStart() + 1), area, texAnim);
+                setTranslationStart((ushort)(_owner.m_TexAnims[area].ElementAt(i).getTransTblStart() + 1), area, i);
             }
         }
 
@@ -225,9 +222,10 @@ namespace SM64DSe
             _owner.RemoveSpace(_owner.m_TexAnims[area].ElementAt(texAnim).m_ScaleTblOffset + (uint)(index * 4), 4);
             setScaleSize((ushort)(_owner.m_TexAnims[area].ElementAt(texAnim).getScaleTblSize() - 1), area, texAnim);
             // Need to update start indices for following texture animations in same area
-            for (int i = index + 1; i < _owner.m_TexAnims[area].Count; i++)
+            for (int i = texAnim + 1; i < _owner.m_TexAnims[area].Count; i++)
             {
-                setScaleStart((ushort)(_owner.m_TexAnims[area].ElementAt(i).getScaleTblStart() - 1), area, texAnim);
+                if (_owner.m_TexAnims[area].ElementAt(i).getScaleTblStart() != 0)
+                    setScaleStart((ushort)(_owner.m_TexAnims[area].ElementAt(i).getScaleTblStart() - 1), area, i);
             }
         }
 
@@ -236,9 +234,10 @@ namespace SM64DSe
             _owner.RemoveSpace(_owner.m_TexAnims[area].ElementAt(texAnim).m_RotTblOffset + (uint)(index * 2), 2);
             setRotationSize((ushort)(_owner.m_TexAnims[area].ElementAt(texAnim).getRotTblSize() - 1), area, texAnim);
             // Need to update start indices for following texture animations in same area
-            for (int i = index + 1; i < _owner.m_TexAnims[area].Count; i++)
+            for (int i = texAnim + 1; i < _owner.m_TexAnims[area].Count; i++)
             {
-                setRotationStart((ushort)(_owner.m_TexAnims[area].ElementAt(i).getRotTblStart() - 1), area, texAnim);
+                if (_owner.m_TexAnims[area].ElementAt(i).getRotTblStart() != 0)
+                    setRotationStart((ushort)(_owner.m_TexAnims[area].ElementAt(i).getRotTblStart() - 1), area, i);
             }
             // Because each rotation value is 2 bytes, if there's an odd number, following addresses will no 
             // longer be multiples of 4
@@ -251,9 +250,10 @@ namespace SM64DSe
             _owner.RemoveSpace(_owner.m_TexAnims[area].ElementAt(texAnim).m_TransTblOffset + (uint)(index * 4), 4);
             setTranslationSize((ushort)(_owner.m_TexAnims[area].ElementAt(texAnim).getTransTblSize() - 1), area, texAnim);
             // Need to update start indices for following texture animations in same area
-            for (int i = index + 1; i < _owner.m_TexAnims[area].Count; i++)
+            for (int i = texAnim + 1; i < _owner.m_TexAnims[area].Count; i++)
             {
-                setTranslationStart((ushort)(_owner.m_TexAnims[area].ElementAt(i).getTransTblStart() - 1), area, texAnim);
+                if (_owner.m_TexAnims[area].ElementAt(i).getTransTblStart() != 0)
+                    setTranslationStart((ushort)(_owner.m_TexAnims[area].ElementAt(i).getTransTblStart() - 1), area, i);
             }
         }
 
@@ -351,47 +351,13 @@ namespace SM64DSe
             {
                 for (int j = 0; j < _owner.m_TexAnims[i].Count; j++)
                 {
-                    List<int> pointersToRemove = new List<int>();
-                    for (int k = 0; k < _owner.m_PointerList.Count; k++)
-                    {
-                        if (_owner.m_PointerList.ElementAt(k).m_PointerAddr == _owner.m_TexAnims[i].ElementAt(j).m_TexAnimHeaderOffset)
-                        {
-                            if (!pointersToRemove.Contains(k))
-                                pointersToRemove.Add(k);
-                        }
-                        if (_owner.m_PointerList.ElementAt(k).m_PointerAddr == _owner.m_TexAnims[i].ElementAt(j).m_BaseScaleTblAddr)
-                        {
-                            if (!pointersToRemove.Contains(k))
-                                pointersToRemove.Add(k);
-                        }
-                        if (_owner.m_PointerList.ElementAt(k).m_PointerAddr == _owner.m_TexAnims[i].ElementAt(j).m_BaseRotTblAddr)
-                        {
-                            if (!pointersToRemove.Contains(k))
-                                pointersToRemove.Add(k);
-                        }
-                        if (_owner.m_PointerList.ElementAt(k).m_PointerAddr == _owner.m_TexAnims[i].ElementAt(j).m_BaseTransTblAddr)
-                        {
-                            if (!pointersToRemove.Contains(k))
-                                pointersToRemove.Add(k);
-                        }
-                        if (_owner.m_PointerList.ElementAt(k).m_PointerAddr == _owner.m_TexAnims[i].ElementAt(j).m_Offset)
-                        {
-                            if (!pointersToRemove.Contains(k))
-                                pointersToRemove.Add(k);
-                        }
-                        if (_owner.m_PointerList.ElementAt(k).m_PointerAddr == _owner.m_TexAnims[i].ElementAt(j).m_MatNameOffset)
-                        {
-                            if (!pointersToRemove.Contains(k))
-                                pointersToRemove.Add(k);
-                        }
-                    }
-                    for (int k = pointersToRemove.Count - 1; k >= 0; k--)
-                    {
-                        // Remove the last ones first so the indices at the end point to the correct entry
-                        _owner.m_PointerList.RemoveAt(pointersToRemove.ElementAt(k));
-                    }
+                    _owner.RemovePointerByPointerAddress(_owner.m_TexAnims[i].ElementAt(j).m_TexAnimHeaderOffset);
+                    _owner.RemovePointerByPointerAddress(_owner.m_TexAnims[i].ElementAt(j).m_BaseScaleTblAddr);
+                    _owner.RemovePointerByPointerAddress(_owner.m_TexAnims[i].ElementAt(j).m_BaseRotTblAddr);
+                    _owner.RemovePointerByPointerAddress(_owner.m_TexAnims[i].ElementAt(j).m_BaseTransTblAddr);
+                    _owner.RemovePointerByPointerAddress(_owner.m_TexAnims[i].ElementAt(j).m_Offset);
+                    _owner.RemovePointerByPointerAddress(_owner.m_TexAnims[i].ElementAt(j).m_MatNameOffset);
                 }
-
             }
 
             _owner.m_TexAnims = new List<LevelTexAnim>[numAreas];
@@ -684,27 +650,13 @@ namespace SM64DSe
                 // First, remove all pointers to texture animations for this area:
                 // Addresss of Texture Animation header, addresses of scale, rotation and translation 
                 // tables, address of the animation data, address of the material name
-                List<int> pointersToRemove = new List<int>();
-                for (int i = 0; i < _owner.m_PointerList.Count; i++)
-                {
-                    if (_owner.m_PointerList.ElementAt(i).m_PointerAddr == _owner.m_TexAnims[area].ElementAt(texAnim).m_TexAnimHeaderOffset)
-                        pointersToRemove.Add(i);
-                    if (_owner.m_PointerList.ElementAt(i).m_PointerAddr == _owner.m_TexAnims[area].ElementAt(texAnim).m_BaseScaleTblAddr)
-                        pointersToRemove.Add(i);
-                    if (_owner.m_PointerList.ElementAt(i).m_PointerAddr == _owner.m_TexAnims[area].ElementAt(texAnim).m_BaseRotTblAddr)
-                        pointersToRemove.Add(i);
-                    if (_owner.m_PointerList.ElementAt(i).m_PointerAddr == _owner.m_TexAnims[area].ElementAt(texAnim).m_BaseTransTblAddr)
-                        pointersToRemove.Add(i);
-                    if (_owner.m_PointerList.ElementAt(i).m_PointerAddr == _owner.m_TexAnims[area].ElementAt(texAnim).m_Offset)
-                        pointersToRemove.Add(i);
-                    if (_owner.m_PointerList.ElementAt(i).m_PointerAddr == _owner.m_TexAnims[area].ElementAt(texAnim).m_MatNameOffset)
-                        pointersToRemove.Add(i);
-                }
-                for (int i = pointersToRemove.Count - 1; i >= 0; i--)
-                {
-                    // Remove the last ones first so the indices at the end point to the correct entry
-                    _owner.m_PointerList.RemoveAt(pointersToRemove.ElementAt(i));
-                }
+
+                _owner.RemovePointerByPointerAddress(_owner.m_TexAnims[area].ElementAt(texAnim).m_TexAnimHeaderOffset);
+                _owner.RemovePointerByPointerAddress(_owner.m_TexAnims[area].ElementAt(texAnim).m_BaseScaleTblAddr);
+                _owner.RemovePointerByPointerAddress(_owner.m_TexAnims[area].ElementAt(texAnim).m_BaseRotTblAddr);
+                _owner.RemovePointerByPointerAddress(_owner.m_TexAnims[area].ElementAt(texAnim).m_BaseTransTblAddr);
+                _owner.RemovePointerByPointerAddress(_owner.m_TexAnims[area].ElementAt(texAnim).m_Offset);
+                _owner.RemovePointerByPointerAddress(_owner.m_TexAnims[area].ElementAt(texAnim).m_MatNameOffset);
 
                 // Remove the space once occupied by the texture animation data:
                 // Texture Animation header, Animation Data header, material name, scale, rotation and translation values
@@ -730,19 +682,8 @@ namespace SM64DSe
             }
             else if (_owner.m_TexAnims[area].Count > 1)
             {
-                List<int> pointersToRemove = new List<int>();
-                for (int i = 0; i < _owner.m_PointerList.Count; i++)
-                {
-                    if (_owner.m_PointerList.ElementAt(i).m_PointerAddr == _owner.m_TexAnims[area].ElementAt(texAnim).m_Offset)
-                        pointersToRemove.Add(i);
-                    if (_owner.m_PointerList.ElementAt(i).m_PointerAddr == _owner.m_TexAnims[area].ElementAt(texAnim).m_MatNameOffset)
-                        pointersToRemove.Add(i);
-                }
-                for (int i = pointersToRemove.Count - 1; i >= 0; i--)
-                {
-                    // Remove the last ones first so the indices at the end point to the correct entry
-                    _owner.m_PointerList.RemoveAt(pointersToRemove.ElementAt(i));
-                }
+                _owner.RemovePointerByPointerAddress(_owner.m_TexAnims[area].ElementAt(texAnim).m_Offset);
+                _owner.RemovePointerByPointerAddress(_owner.m_TexAnims[area].ElementAt(texAnim).m_MatNameOffset);
 
                 uint matNameRemove = (uint)((_owner.m_TexAnims[area].ElementAt(texAnim).getMatName().Length) & ~3);
                 _owner.RemoveSpace(_owner.m_TexAnims[area].ElementAt(texAnim).m_MatNameOffset,
@@ -764,8 +705,7 @@ namespace SM64DSe
                 // No existing texture animations in area
 
                 // New data will get written to end of overlay
-                uint texAnimHeader = _owner.m_Overlay.GetSize();
-                texAnimHeader = texAnimHeader + (4 - (texAnimHeader % 4));// multiple of 4
+                uint texAnimHeader = (uint)((_owner.m_Overlay.GetSize() + 3) & ~3);// multiple of 4
                 uint animDataHeader = texAnimHeader + 24;
                 uint matNameAddress = animDataHeader + 28;
                 uint scaleTblAddress = matNameAddress + 16;

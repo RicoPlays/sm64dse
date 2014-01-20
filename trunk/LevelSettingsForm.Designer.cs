@@ -58,6 +58,7 @@
             this.label12 = new System.Windows.Forms.Label();
             this.label11 = new System.Windows.Forms.Label();
             this.label10 = new System.Windows.Forms.Label();
+            this.txtActSelectorID = new System.Windows.Forms.TextBox();
             this.groupBox1.SuspendLayout();
             this.groupBox2.SuspendLayout();
             this.groupBox3.SuspendLayout();
@@ -79,11 +80,13 @@
             // 
             // groupBox1
             // 
+            this.groupBox1.Controls.Add(this.txtActSelectorID);
+            this.groupBox1.Controls.Add(this.label10);
             this.groupBox1.Controls.Add(this.cbxBackground);
             this.groupBox1.Controls.Add(this.label1);
             this.groupBox1.Location = new System.Drawing.Point(12, 12);
             this.groupBox1.Name = "groupBox1";
-            this.groupBox1.Size = new System.Drawing.Size(381, 62);
+            this.groupBox1.Size = new System.Drawing.Size(381, 81);
             this.groupBox1.TabIndex = 1;
             this.groupBox1.TabStop = false;
             this.groupBox1.Text = "General settings";
@@ -105,9 +108,9 @@
             "[9] Foggy forest",
             "[10] Bowser in the Dark World",
             "[11] Bowser in the Sky"});
-            this.cbxBackground.Location = new System.Drawing.Point(89, 24);
+            this.cbxBackground.Location = new System.Drawing.Point(103, 24);
             this.cbxBackground.Name = "cbxBackground";
-            this.cbxBackground.Size = new System.Drawing.Size(277, 21);
+            this.cbxBackground.Size = new System.Drawing.Size(263, 21);
             this.cbxBackground.TabIndex = 1;
             this.cbxBackground.SelectedIndexChanged += new System.EventHandler(this.cbxBackground_SelectedIndexChanged);
             // 
@@ -138,7 +141,7 @@
             this.groupBox2.Controls.Add(this.cbxBank1);
             this.groupBox2.Controls.Add(this.label2);
             this.groupBox2.Controls.Add(this.cbxBank0);
-            this.groupBox2.Location = new System.Drawing.Point(12, 80);
+            this.groupBox2.Location = new System.Drawing.Point(12, 99);
             this.groupBox2.Name = "groupBox2";
             this.groupBox2.Size = new System.Drawing.Size(381, 230);
             this.groupBox2.TabIndex = 2;
@@ -344,31 +347,30 @@
             this.groupBox3.Controls.Add(this.label13);
             this.groupBox3.Controls.Add(this.label12);
             this.groupBox3.Controls.Add(this.label11);
-            this.groupBox3.Controls.Add(this.label10);
-            this.groupBox3.Location = new System.Drawing.Point(12, 317);
+            this.groupBox3.Location = new System.Drawing.Point(12, 336);
             this.groupBox3.Name = "groupBox3";
-            this.groupBox3.Size = new System.Drawing.Size(381, 111);
+            this.groupBox3.Size = new System.Drawing.Size(381, 99);
             this.groupBox3.TabIndex = 5;
             this.groupBox3.TabStop = false;
             this.groupBox3.Text = "Level Music";
             // 
             // txtMusicByte03
             // 
-            this.txtMusicByte03.Location = new System.Drawing.Point(266, 87);
+            this.txtMusicByte03.Location = new System.Drawing.Point(266, 66);
             this.txtMusicByte03.Name = "txtMusicByte03";
             this.txtMusicByte03.Size = new System.Drawing.Size(100, 20);
             this.txtMusicByte03.TabIndex = 6;
             // 
             // txtMusicByte02
             // 
-            this.txtMusicByte02.Location = new System.Drawing.Point(266, 64);
+            this.txtMusicByte02.Location = new System.Drawing.Point(266, 43);
             this.txtMusicByte02.Name = "txtMusicByte02";
             this.txtMusicByte02.Size = new System.Drawing.Size(100, 20);
             this.txtMusicByte02.TabIndex = 5;
             // 
             // txtMusicByte01
             // 
-            this.txtMusicByte01.Location = new System.Drawing.Point(266, 40);
+            this.txtMusicByte01.Location = new System.Drawing.Point(266, 19);
             this.txtMusicByte01.Name = "txtMusicByte01";
             this.txtMusicByte01.Size = new System.Drawing.Size(100, 20);
             this.txtMusicByte01.TabIndex = 4;
@@ -376,38 +378,45 @@
             // label13
             // 
             this.label13.AutoSize = true;
-            this.label13.Location = new System.Drawing.Point(105, 90);
+            this.label13.Location = new System.Drawing.Point(15, 69);
             this.label13.Name = "label13";
-            this.label13.Size = new System.Drawing.Size(128, 13);
+            this.label13.Size = new System.Drawing.Size(92, 13);
             this.label13.TabIndex = 3;
-            this.label13.Text = "Byte 03 (SSEQ (0-) Index)";
+            this.label13.Text = "Byte 03: SSEQ ID";
             // 
             // label12
             // 
             this.label12.AutoSize = true;
-            this.label12.Location = new System.Drawing.Point(105, 67);
+            this.label12.Location = new System.Drawing.Point(15, 46);
             this.label12.Name = "label12";
-            this.label12.Size = new System.Drawing.Size(142, 13);
+            this.label12.Size = new System.Drawing.Size(92, 13);
             this.label12.TabIndex = 2;
-            this.label12.Text = "Byte 02 (Unknown, required)";
+            this.label12.Text = "Byte 02: SBNK ID";
             // 
             // label11
             // 
             this.label11.AutoSize = true;
-            this.label11.Location = new System.Drawing.Point(105, 43);
+            this.label11.Location = new System.Drawing.Point(15, 22);
             this.label11.Name = "label11";
-            this.label11.Size = new System.Drawing.Size(142, 13);
+            this.label11.Size = new System.Drawing.Size(186, 13);
             this.label11.TabIndex = 1;
-            this.label11.Text = "Byte 01 (Unknown, required)";
+            this.label11.Text = "Byte 01: (SWAR entry address - 4) / 4";
             // 
             // label10
             // 
             this.label10.AutoSize = true;
-            this.label10.Location = new System.Drawing.Point(15, 25);
+            this.label10.Location = new System.Drawing.Point(15, 54);
             this.label10.Name = "label10";
-            this.label10.Size = new System.Drawing.Size(93, 13);
-            this.label10.TabIndex = 0;
-            this.label10.Text = "Level music track:";
+            this.label10.Size = new System.Drawing.Size(82, 13);
+            this.label10.TabIndex = 2;
+            this.label10.Text = "Act Selector ID:";
+            // 
+            // txtActSelectorID
+            // 
+            this.txtActSelectorID.Location = new System.Drawing.Point(266, 51);
+            this.txtActSelectorID.Name = "txtActSelectorID";
+            this.txtActSelectorID.Size = new System.Drawing.Size(100, 20);
+            this.txtActSelectorID.TabIndex = 3;
             // 
             // LevelSettingsForm
             // 
@@ -467,6 +476,7 @@
         private System.Windows.Forms.Label label13;
         private System.Windows.Forms.Label label12;
         private System.Windows.Forms.Label label11;
+        private System.Windows.Forms.TextBox txtActSelectorID;
         private System.Windows.Forms.Label label10;
     }
 }

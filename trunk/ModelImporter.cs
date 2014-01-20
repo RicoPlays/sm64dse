@@ -431,6 +431,11 @@ namespace SM64DSe
 
         private void btnImport_Click(object sender, EventArgs e)
         {
+            ImportModel();
+        }
+
+        private void ImportModel()
+        {
             Vector3 originalScale = new Vector3(1, 1, 1);
             float faceSizeThreshold = 0.001f;
             if (txtThreshold.Text == "")
@@ -469,9 +474,13 @@ namespace SM64DSe
                     kcl = Program.m_ROM.GetFileFromName(m_KCLName);
                     KCL_Importer.ConvertToKCL(m_ModelFileName, ref kcl, m_Scale.X, faceSizeThreshold, matColTypes);
                 }
-                catch
+                catch (Exception e)
                 {
-                    MessageBox.Show("This object has no collision data, however the model will still be imported.");
+                    if (e.Message.Contains("NitroROM: cannot find file"))
+                        MessageBox.Show("This object has no collision data, however the model will still be imported.");
+                    else
+                        MessageBox.Show("An error occurred importing the collision map:\n\n" + 
+                            e.Message + "\n\n" + e.StackTrace);
                 }
             }
             slStatus.Text = "Finished importing.";

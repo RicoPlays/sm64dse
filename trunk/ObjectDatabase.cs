@@ -41,6 +41,11 @@ namespace SM64DSe
                 public string m_Description;
             }
 
+            public string GetBasicInfo()
+            {
+                return (m_Name + "\n" + m_InternalName + "\n" + m_Description);
+            }
+
             public int m_Category;
 
             public ushort m_ID;

@@ -13,6 +13,8 @@ namespace SM64DSe
         IDictionary<TFirst, TSecond> firstToSecond = new Dictionary<TFirst, TSecond>();
         IDictionary<TSecond, TFirst> secondToFirst = new Dictionary<TSecond, TFirst>();
 
+        public BiDictionaryOneToOne() { }
+
         // Allows you to specify a custom IEqualityComparer for the first dictionary when 
         // retrieving by Key, eg. specify your own IEqualityComparer for using a byte[] as a key type
         public BiDictionaryOneToOne(IEqualityComparer<TFirst> comparator)
