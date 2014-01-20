@@ -451,16 +451,16 @@ namespace SM64DSe
             switch (rom.m_Version)
             {
                 case NitroROM.Version.EUR:
-                    testAddressDataPair = m_EURPatch.ElementAt(0);
+                    testAddressDataPair = (m_EURPatch.Count == 0) ? null : m_EURPatch.ElementAt(0);
                     break;
                 case NitroROM.Version.USA_v1:
-                    testAddressDataPair = m_USv1Patch.ElementAt(0);
+                    testAddressDataPair = (m_USv1Patch.Count == 0) ? null : m_USv1Patch.ElementAt(0);
                     break;
                 case NitroROM.Version.USA_v2:
-                    testAddressDataPair = m_USv2Patch.ElementAt(0);
+                    testAddressDataPair = (m_USv2Patch.Count == 0) ? null : m_USv2Patch.ElementAt(0);
                     break;
                 case NitroROM.Version.JAP:
-                    testAddressDataPair = m_JAPPatch.ElementAt(0);
+                    testAddressDataPair = (m_JAPPatch.Count == 0) ? null : m_JAPPatch.ElementAt(0);
                     break;
             }
 

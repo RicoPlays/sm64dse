@@ -31,6 +31,7 @@ namespace SM64DSe
     {
         public ushort ObjectID;
         private Dictionary<ushort, bool> m_ObjAvailable;
+        private Dictionary<ushort, string> m_BasicDescriptions;
 
         public ObjectListForm(ushort objid)
         {
@@ -51,7 +52,11 @@ namespace SM64DSe
 
         private void lbxObjectList_SelectedIndexChanged(object sender, EventArgs e)
         {
-            ObjectID = (ushort)lbxObjectList.SelectedIndex;
+            string objListString = lbxObjectList.Items[lbxObjectList.SelectedIndex].ToString();
+            int posDash = objListString.IndexOf(" - ");
+
+            ObjectID = ushort.Parse(objListString.Substring(0, posDash));
+            //ObjectID = (ushort)lbxObjectList.SelectedIndex;
             if (ObjectID == 326)
                 ObjectID = 511; // haxx
 
@@ -75,11 +80,13 @@ namespace SM64DSe
         private void ObjectListForm_Load(object sender, EventArgs e)
         {
             m_ObjAvailable = ((LevelEditorForm)Owner).m_ObjAvailable;
+            m_BasicDescriptions = new Dictionary<ushort, string>();
             for (int i = 0; i < 326; i++)
             {
                 ObjectDatabase.ObjectInfo objinfo = ObjectDatabase.m_ObjectInfo[i];
                 lbxObjectList.Items.Insert(i, string.Format("{0} - {1}",
                     i, objinfo.m_Name));
+                m_BasicDescriptions.Add((ushort)i, objinfo.GetBasicInfo());
             }
 
             lbxObjectList.Items.Insert(326, "511 - Minimap change");
@@ -111,6 +118,38 @@ namespace SM64DSe
 
             e.Graphics.DrawString((string)lbxObjectList.Items[id], lbxObjectList.Font, new SolidBrush(txtcolor), e.Bounds);
             e.DrawFocusRectangle();
+        }
+
+        private void tbxObjSearch_TextChanged(object sender, EventArgs e)
+        {
+            List<ushort> matchingIDs = new List<ushort>();
+            string searchText = tbxObjSearch.Text.ToLowerInvariant();
+            if (searchText != "")
+            {
+                for (int i = 0; i < m_BasicDescriptions.Count; i++)
+                {
+                    if (m_BasicDescriptions[(ushort)i].ToLowerInvariant().Contains(searchText))
+                        matchingIDs.Add((ushort)i);
+                }
+            }
+            else
+            {
+                for (int i = 0; i <= 326; i++)
+                    matchingIDs.Add((ushort)i);
+            }
+            if (matchingIDs.Count > 0)
+            {
+                lbxObjectList.Items.Clear();
+                for (int i = 0; i < matchingIDs.Count; i++)
+                {
+                    ushort id = matchingIDs.ElementAt(i);
+                    if (id != 326)
+                        lbxObjectList.Items.Insert(i, string.Format("{0} - {1}",
+                            id, m_BasicDescriptions[id]));
+                    else
+                        lbxObjectList.Items.Insert(326, "511 - Minimap change");
+                }
+            }
         }
     }
 }

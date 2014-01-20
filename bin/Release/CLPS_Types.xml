@@ -216,7 +216,7 @@
 			<Byte>0</Byte>
 		</Value>
 	</Entry>
-	<Entry name="Lethal Lava">
+	<Entry name="Lethal Ice">
 		<Value>
 			<Byte>199</Byte>
 			<Byte>15</Byte>
@@ -228,7 +228,7 @@
 			<Byte>0</Byte>
 		</Value>
 	</Entry>
-	<Entry name="Lethal Ice">
+	<Entry name="Lethal Lava">
 		<Value>
 			<Byte>192</Byte>
 			<Byte>143</Byte>
@@ -330,6 +330,42 @@
 			<Byte>63</Byte>
 			<Byte>4</Byte>
 			<Byte>1</Byte>
+			<Byte>255</Byte>
+			<Byte>0</Byte>
+			<Byte>0</Byte>
+			<Byte>0</Byte>
+		</Value>
+	</Entry>
+	<Entry name="Wood">
+		<Value>
+			<Byte>197</Byte>
+			<Byte>47</Byte>
+			<Byte>3</Byte>
+			<Byte>1</Byte>
+			<Byte>255</Byte>
+			<Byte>0</Byte>
+			<Byte>0</Byte>
+			<Byte>0</Byte>
+		</Value>
+	</Entry>
+	<Entry name="Creaky Wooden Floor">
+		<Value>
+			<Byte>197</Byte>
+			<Byte>63</Byte>
+			<Byte>4</Byte>
+			<Byte>0</Byte>
+			<Byte>255</Byte>
+			<Byte>0</Byte>
+			<Byte>0</Byte>
+			<Byte>0</Byte>
+		</Value>
+	</Entry>
+	<Entry name="Ice">
+		<Value>
+			<Byte>199</Byte>
+			<Byte>207</Byte>
+			<Byte>0</Byte>
+			<Byte>0</Byte>
 			<Byte>255</Byte>
 			<Byte>0</Byte>
 			<Byte>0</Byte>

@@ -53,7 +53,7 @@
             this.label3 = new System.Windows.Forms.Label();
             this.pnlExistingPatches = new System.Windows.Forms.Panel();
             this.tlpTop = new System.Windows.Forms.TableLayoutPanel();
-            ((System.ComponentModel.ISupportInitialize)(this.gridPatches)).BeginInit();
+            //((System.ComponentModel.ISupportInitialize)(this.gridPatches)).BeginInit();
             this.pnlNewEditPatches.SuspendLayout();
             this.pnlExistingPatches.SuspendLayout();
             this.tlpTop.SuspendLayout();
@@ -335,7 +335,7 @@
             this.Name = "AdditionalPatchesForm";
             this.Text = "Additional Patches";
             this.Load += new System.EventHandler(this.AdditionalPatchesForm_Load);
-            ((System.ComponentModel.ISupportInitialize)(this.gridPatches)).EndInit();
+            //((System.ComponentModel.ISupportInitialize)(this.gridPatches)).EndInit();
             this.pnlNewEditPatches.ResumeLayout(false);
             this.pnlNewEditPatches.PerformLayout();
             this.pnlExistingPatches.ResumeLayout(false);

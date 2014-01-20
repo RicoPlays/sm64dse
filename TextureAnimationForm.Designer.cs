@@ -105,7 +105,7 @@
             this.txtGenerateRotationAmount = new System.Windows.Forms.TextBox();
             this.txtGenerateRotationEndValue = new System.Windows.Forms.TextBox();
             this.txtGenerateRotationStartValue = new System.Windows.Forms.TextBox();
-            ((System.ComponentModel.ISupportInitialize)(this.splitCVertical)).BeginInit();
+            //((System.ComponentModel.ISupportInitialize)(this.splitCVertical)).BeginInit();
             this.splitCVertical.Panel1.SuspendLayout();
             this.splitCVertical.Panel2.SuspendLayout();
             this.splitCVertical.SuspendLayout();
@@ -514,9 +514,9 @@
             this.label13.Enabled = false;
             this.label13.Location = new System.Drawing.Point(254, 27);
             this.label13.Name = "label13";
-            this.label13.Size = new System.Drawing.Size(198, 13);
+            this.label13.Size = new System.Drawing.Size(116, 13);
             this.label13.TabIndex = 39;
-            this.label13.Text = "tbloffset + 0, m_offset + 0, + 8, + 24, +26";
+            this.label13.Text = "m_offset + 0, + 24, +26";
             this.label13.Visible = false;
             // 
             // textBox1
@@ -977,7 +977,7 @@
             this.Text = "Texture Animation Editor";
             this.splitCVertical.Panel1.ResumeLayout(false);
             this.splitCVertical.Panel2.ResumeLayout(false);
-            ((System.ComponentModel.ISupportInitialize)(this.splitCVertical)).EndInit();
+            //((System.ComponentModel.ISupportInitialize)(this.splitCVertical)).EndInit();
             this.splitCVertical.ResumeLayout(false);
             this.tlpAreaTexAnimSelect.ResumeLayout(false);
             this.pnlArea.ResumeLayout(false);

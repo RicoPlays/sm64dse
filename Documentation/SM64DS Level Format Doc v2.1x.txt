@@ -37,7 +37,7 @@ Offset Size Desc
 76 2 Scale factor for minimap coordinates
 78 1 bit0-3: ??? (always 0xF), bit4-7: sky/background (0=none, or 1-11)
 79 3 Zero (?)
-7C 3 Music data (byte 1: unknown (SWAR (1-) index?), byte 2: unknown, byte 3: SSEQ (0-) index)
+7C 3 Music data (byte 1: (SWAR entry address - 4) / 4, byte 2: SBNK ID, byte 3: SSEQ ID (0- index)
 7F 21 Reserved for future use
 94 ... Level data
 
@@ -104,8 +104,7 @@ Offset Size Desc
 08 2 Object-specific parameter (2)
 0A 2 Y rotation (0x0400 = 90°)
 0C 2 Object-specific parameter (3)
-0E 1 Object-specific parameter (1)
-0F 1 Object-specific parameter (4)
+0E 2 Object-specific parameter (1)
 
 The first two object-specific parameters (2 and 3 in SM64DSe) should be X and Z rotation, respectively.
 However, most objects ignore them. A few objects use them as X/Z rotation, and some other objects use it for other purposes.

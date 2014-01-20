@@ -121,6 +121,14 @@ namespace SM64DSe
         {
             m_Renderer.Release();
         }
+
+        public virtual LevelObject Copy()
+        {
+            LevelObject copy = (LevelObject)MemberwiseClone();
+            copy.GenerateProperties();
+
+            return copy;
+        }
         
 
         public ushort ID;
@@ -420,9 +428,9 @@ namespace SM64DSe
             m_Properties.Properties.Add(new PropertySpec("Y rotation", typeof(float), "General", "The angle in degrees the entrance is rotated around the Y axis.", YRotation, "", typeof(FloatTypeConverter)));
             m_Properties.Properties.Add(new PropertySpec("Parameter 1", typeof(ushort), "Specific", "Purpose unknown.", Parameters[0], "", typeof(HexNumberTypeConverter)));
             m_Properties.Properties.Add(new PropertySpec("Parameter 2", typeof(ushort), "Specific", "Purpose unknown.", Parameters[1], "", typeof(HexNumberTypeConverter)));
-            m_Properties.Properties.Add(new PropertySpec("Parameter 3", typeof(ushort), "Specific", "Purpose unknown.", Parameters[2], "", typeof(HexNumberTypeConverter)));
+            m_Properties.Properties.Add(new PropertySpec("Parameter 3", typeof(ushort), "Specific", "Starting rotation.", Parameters[2], "", typeof(HexNumberTypeConverter)));
             m_Properties.Properties.Add(new PropertySpec("Parameter 4", typeof(ushort), "Specific", "Purpose unknown.", Parameters[3], "", typeof(HexNumberTypeConverter)));
-            m_Properties.Properties.Add(new PropertySpec("Parameter 5", typeof(ushort), "Specific", "Purpose unknown.", Parameters[4], "", typeof(HexNumberTypeConverter)));
+            m_Properties.Properties.Add(new PropertySpec("Parameter 5", typeof(ushort), "Specific", "AABC: A - Entrance mode, B - View ID, C - Purpose unknown", Parameters[4], "", typeof(HexNumberTypeConverter)));
 
             m_Properties["X position"] = Position.X;
             m_Properties["Y position"] = Position.Y;

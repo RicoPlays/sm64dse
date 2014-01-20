@@ -319,8 +319,38 @@ namespace SM64DSe
             //m_LevelModified = false;
             m_ObjAvailable = new Dictionary<ushort, bool>();
             GetObjectsAvailable();
+
+            // Check if the level contains addresses not aligned to 4 byte boundaries but don't attempt fix
+            m_PointerList = m_PointerList.OrderBy(o => o.m_PointerAddr).ToList();
+            bool checkCorrupt = CheckCorrupt(false);
+
+            if (checkCorrupt)
+            {
+                DialogResult result = MessageBox.Show("This level contains addresses that are not aligned to 4 byte boundaries and therefore may not work in-game." + 
+                    "\n\nDo you want to attempt to fix these issues?\n\nChanges will not be saved.", "Warning", MessageBoxButtons.YesNo);
+                // Check if the level contains addresses not aligned to 4 byte boundaries and do attempt fix
+                if (result == DialogResult.Yes)
+                    CheckCorrupt(true);
+            }
         }
 
+        public bool CheckCorrupt(bool attemptFix, int startIndex = 0)
+        {
+            for (int i = startIndex; i < m_PointerList.Count; i++)
+            {
+                int pointerModFour = (int)(m_PointerList[i].m_PointerAddr % 4);
+                if (pointerModFour != 0)
+                {
+                    if (attemptFix)
+                    {
+                        AddSpace(m_PointerList[i].m_PointerAddr, (uint)(4 - pointerModFour));
+                        CheckCorrupt(attemptFix, i + 1);
+                    }
+                    return true;
+                }
+            }
+            return false;
+        }
 
         public LevelEditorForm(NitroROM rom, int levelid)
         {
@@ -338,12 +368,12 @@ namespace SM64DSe
             m_MouseDown = MouseButtons.None;
 
             m_ROM = rom;
-            LevelID = levelid;
+            m_LevelID = levelid;
 
-            m_Overlay = new NitroOverlay(m_ROM, m_ROM.GetLevelOverlayID(LevelID));
+            m_Overlay = new NitroOverlay(m_ROM, m_ROM.GetLevelOverlayID(m_LevelID));
 
             // dump overlay
-            //System.IO.File.WriteAllBytes(string.Format("level{0}_overlay.bin", LevelID), m_Overlay.m_Data);
+            //System.IO.File.WriteAllBytes(string.Format("level{0}_overlay.bin", m_LevelID), m_Overlay.m_Data);
 
             m_GLLoaded = false;
 
@@ -816,7 +846,7 @@ namespace SM64DSe
 
 
         private NitroROM m_ROM;
-        public int LevelID;
+        public int m_LevelID;
         public NitroOverlay m_Overlay;
 
 
@@ -839,6 +869,17 @@ namespace SM64DSe
             for (int i = 0; i < m_PointerList.Count; )
             {
                 if (m_PointerList[i].m_ReferenceAddr == _ref)
+                    m_PointerList.RemoveAt(i);
+                else
+                    i++;
+            }
+        }
+
+        public void RemovePointerByPointerAddress(uint _ptr)
+        {
+            for (int i = 0; i < m_PointerList.Count; )
+            {
+                if (m_PointerList[i].m_PointerAddr == _ptr)
                     m_PointerList.RemoveAt(i);
                 else
                     i++;
@@ -936,7 +977,8 @@ namespace SM64DSe
 
                 if (tableptr == 0xFFFFFFFF)
                 {
-                    tableptr = m_Overlay.GetSize();
+                    tableptr = (uint)((m_Overlay.GetSize() + 3) & ~3);
+                    AddSpace(m_Overlay.GetSize(), tableptr - m_Overlay.GetSize());
                     m_Overlay.WritePointer(areaptr, tableptr);
                     AddPointer(areaptr);
                     m_Overlay.Write32(tableptr, 1);
@@ -953,10 +995,10 @@ namespace SM64DSe
             else
                 tableptr = m_Overlay.ReadPointer(0x64);
 
-            uint numentries = m_Overlay.Read32(tableptr);
+            uint numentries = m_Overlay.Read32(tableptr);// Number of object tables in object table list
             for (uint i = 0; i < numentries; i++)
             {
-                uint curptr = (uint)(m_Overlay.ReadPointer(tableptr + 4) + (i * 8));
+                uint curptr = (uint)(m_Overlay.ReadPointer(tableptr + 4) + (i * 8));// Start offset of current object table
 
                 byte type_layer = m_Overlay.Read8(curptr);
                 if ((type_layer & 0x1F) != type) continue;
@@ -965,12 +1007,13 @@ namespace SM64DSe
                 byte numobjs = m_Overlay.Read8(curptr + 1);
                 if (numobjs == 255) continue;
 
-                uint endptr = 0;
-                if (off == -1)
-                    endptr = (uint)(m_Overlay.ReadPointer(curptr + 4) + (numobjs * size));
-                else
-                    endptr = (uint)off;
-                AddSpace(endptr, (uint)size);
+                uint endptr = (off == -1) ? (uint)(m_Overlay.ReadPointer(curptr + 4) + (numobjs * size)) : (uint)off;
+                // Need to make sure that following addresses remain 4 byte aligned
+                uint newEndPtr = (uint)(endptr + size);
+                uint newEndPtrAlignedFour = (uint)(((endptr + size) + 3) & ~3);
+                uint roomNeeded = (uint)size + (newEndPtrAlignedFour - newEndPtr);
+
+                AddSpace(endptr, roomNeeded);
                 m_Overlay.Write8(curptr + 1, (byte)(numobjs + 1));
                 return endptr;
             }
@@ -1020,6 +1063,18 @@ namespace SM64DSe
                     continue;
 
                 RemoveSpace(obj.m_Offset, (uint)size);
+                
+                // If needed, add or remove padding at end of table to ensure following addresses are 4 byte aligned
+                uint oldTblEndAlignedFour = (uint)((tblend + 3) & ~3);
+                uint currentTblEnd = (uint)(((tblend - (uint)size) + 3) & ~3);
+                uint currentTblEndAlignedFour = oldTblEndAlignedFour - (uint)size;
+                int padding = (int)(currentTblEndAlignedFour - currentTblEnd);
+
+                if (padding > 0)
+                    RemoveSpace(currentTblEnd, (uint)padding);
+                else if (padding < 0)
+                    AddSpace(currentTblEndAlignedFour, (uint)((-1) * padding));
+
                 if (numobjs > 1)
                 {
                     m_Overlay.Write8(curptr + 1, (byte)(numobjs - 1));
@@ -1049,11 +1104,8 @@ namespace SM64DSe
             int[] sizes = { 16, 16, 6, 6, 14, 8, 8, 8, 8, 12, 14, 2, 2, 0, 4 };
             int size = sizes[type];
 
-            uint offset = 0;
-            if (off == -1)
-                offset = AddObjectSlot(type, layer, area);
-            else
-                offset = AddObjectSlot(type, layer, area, off);
+            uint offset = (off == -1) ? AddObjectSlot(type, layer, area) : AddObjectSlot(type, layer, area, off);
+
             for (int i = 0; i < size; i++)
                 m_Overlay.Write8((uint)(offset + i), 0x00);
 
@@ -1123,6 +1175,29 @@ namespace SM64DSe
             obj.m_Offset = AddObjectSlot(obj.m_Type, layer, area);
         }
 
+        private void CopyObject(LevelObject objectToCopy)
+        {
+            int type = objectToCopy.m_Type;
+            ushort id = objectToCopy.ID;
+            if (type == 0 && IsSimpleObject(id))
+                type = 5;
+
+            LevelObject obj = AddObject(type, id, objectToCopy.m_Layer, objectToCopy.m_Area);
+            obj.Position = objectToCopy.Position;
+            obj.Parameters = objectToCopy.Parameters;
+            obj.GenerateProperties();
+            pgObjectProperties.SelectedObject = obj.m_Properties;
+
+            m_Selected = obj.m_UniqueID;
+            m_SelectedObject = obj;
+            m_LastSelected = obj.m_UniqueID;
+            m_Hovered = obj.m_UniqueID;
+            m_HoveredObject = obj;
+            m_LastHovered = obj.m_UniqueID;
+            m_LastClicked = obj.m_UniqueID;
+
+            RefreshObjects(m_SelectedObject.m_Layer);
+        }
 
         //private bool m_LevelModified;
 
@@ -1167,6 +1242,7 @@ namespace SM64DSe
         private uint m_LastClicked;
         private LevelObject m_HoveredObject;
         private LevelObject m_SelectedObject;
+        private LevelObject m_CopiedObject;
         private uint m_ObjectBeingPlaced;
         private bool m_ShiftPressed;
 
@@ -1734,18 +1810,9 @@ namespace SM64DSe
                         float _ydelta = ydelta * (float)Math.Cos(m_CamRotation.Y);
                         float _zdelta = (xdelta * (float)Math.Cos(m_CamRotation.X)) + (ydelta * (float)Math.Sin(m_CamRotation.Y) * (float)Math.Sin(m_CamRotation.X));
 
-                        if (xDown)
-                            m_SelectedObject.Position.X += _xdelta;
-                        else if (yDown)
-                            m_SelectedObject.Position.Y += _ydelta;
-                        else if (zDown)
-                            m_SelectedObject.Position.Z -= _zdelta;
-                        else
-                        {
-                            m_SelectedObject.Position.X += _xdelta;
-                            m_SelectedObject.Position.Y += _ydelta;
-                            m_SelectedObject.Position.Z -= _zdelta;
-                        }
+                        m_SelectedObject.Position.X += _xdelta;
+                        m_SelectedObject.Position.Y += _ydelta;
+                        m_SelectedObject.Position.Z -= _zdelta;
                     }
 
                     UpdateSelection();
@@ -2140,7 +2207,6 @@ namespace SM64DSe
             switch (type)
             {
                 case 1: obj = "entrance"; break;
-                //case 2: obj = "path node"; break;
                 case 4: obj = "view"; break;
                 case 6: obj = "teleport source"; break;
                 case 7: obj = "teleport destination"; break;
@@ -2178,7 +2244,6 @@ namespace SM64DSe
             slStatusLabel.Text = "Object removed.";
         }
 
-        bool xDown, yDown, zDown;
         private void glLevelView_KeyDown(object sender, KeyEventArgs e)
         {
             if (e.KeyCode == Keys.ShiftKey || e.KeyCode == Keys.RShiftKey)
@@ -2195,13 +2260,6 @@ namespace SM64DSe
                     btnRemoveSel.PerformClick(); // quick cheat
             }
 
-            if (e.KeyCode == Keys.X)
-                xDown = true;
-            if (e.KeyCode == Keys.Y)
-                yDown = true;
-            if (e.KeyCode == Keys.Z)
-                zDown = true;
-
             if (e.KeyCode == Keys.Q)
                 btnLOL.PerformClick();
         }
@@ -2211,12 +2269,13 @@ namespace SM64DSe
             if (e.KeyCode == Keys.ShiftKey || e.KeyCode == Keys.RShiftKey)
                 m_ShiftPressed = false;
 
-            if (e.KeyCode == Keys.X)
-                xDown = false;
-            if (e.KeyCode == Keys.Y)
-                yDown = false;
-            if (e.KeyCode == Keys.Z)
-                zDown = false;
+            if (e.Control && e.KeyCode == Keys.C)
+                m_CopiedObject = m_SelectedObject.Copy();
+            if (e.Control && e.KeyCode == Keys.V)
+            {
+                if (m_CopiedObject != null)
+                    CopyObject(m_CopiedObject);
+            }
         }
 
         private void btnStarAll_DoubleClick(object sender, EventArgs e)
@@ -2235,7 +2294,7 @@ namespace SM64DSe
 
         private void btnDumpOverlay_Click(object sender, EventArgs e)
         {
-            string filename = "level" + LevelID.ToString() + "_overlay.bin";
+            string filename = "level" + m_LevelID.ToString() + "_overlay.bin";
             System.IO.File.WriteAllBytes(filename, m_Overlay.m_Data);
             slStatusLabel.Text = "Level overlay dumped to " + filename;
         }
@@ -2473,7 +2532,7 @@ namespace SM64DSe
         {
             using (var form = new ROMFileSelect("Please select a model (BMD) file to replace."))
             {
-                var result = form.ShowDialog();
+                var result = form.ShowDialog(this);
                 if (result == DialogResult.OK)
                 {
                     String modelName = form.m_SelectedFile;
@@ -2481,10 +2540,10 @@ namespace SM64DSe
                     String input = Microsoft.VisualBasic.Interaction.InputBox("Enter a scale for the model - Level Models use 1, most objects use 0.008:", "Scale", "1", 0, 0);
                     if (float.TryParse(input, out scale) || float.TryParse(input, NumberStyles.Float, new CultureInfo("en-US"), out scale))
                     {
-                        new ModelImporter(modelName, modelName.Substring(0, modelName.Length - 4) + ".kcl", scale).Show();
+                        new ModelImporter(modelName, modelName.Substring(0, modelName.Length - 4) + ".kcl", scale).Show(this);
                     }
                     else
-                        new ModelImporter(modelName, modelName.Substring(0, modelName.Length - 4) + ".kcl").Show();
+                        new ModelImporter(modelName, modelName.Substring(0, modelName.Length - 4) + ".kcl").Show(this);
                 }
             }
         }

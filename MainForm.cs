@@ -228,7 +228,7 @@ namespace SM64DSe
 
             foreach (LevelEditorForm lvledit in Program.m_LevelEditors)
             {
-                if (lvledit.LevelID == levelid)
+                if (lvledit.m_LevelID == levelid)
                 {
                     lvledit.Focus();
                     return;

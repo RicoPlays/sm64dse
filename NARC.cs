@@ -157,36 +157,69 @@ namespace SM64DSe
             FileEntry fe = m_FileEntries[fileid];
 
             UInt32 fileend = IMGOffset + fe.Offset + fe.Size;
-            int delta = (int)(datalength - fe.Size);
+            int delta = (int)(data.Length - fe.Size);
+            uint existingPadding = (fileid != m_FileEntries.Length - 1) ? (m_FileEntries[fileid + 1].Offset -
+                (fe.Offset + fe.Size)) : 0;
+            uint entryEndPadded = (uint)(((fe.Offset + fe.Size) + 3) & ~3);
+            uint roomNeeded = 0;
+
+            /*
+             * Example of making room:
+             * 0	5	8   11 12
+             * |    |   |   |  |
+             * |    |   |   |  ^new end of file padded to next 4 byte boundary
+			 * |    |   |   ^new end of file
+             * |    |   ^offset of next file (3 bytes of padding)
+             * |    ^current file end
+             * ^offset of file
+             *          
+             * Here we round up to the next 4 byte boundary the length of the new file - this will be 
+             * the offset of the next file and do the same for the existing file's length.
+             * The difference is the amount of room needed - we must ensure that file offsets are on 
+             * 4 byte boundaries and that any existing padding is overwritten
+             */ 
 
             // move data that comes after the file
-            if (delta > 0)
-                MakeRoom(fileend, (uint)delta);
+            if (delta > existingPadding)
+            {
+                uint newEndPadded = (uint)(((fe.Offset + data.Length) + 3) & ~3);
+                uint newEnd = (uint)(fe.Offset + data.Length);
+                roomNeeded = (uint)(newEndPadded - entryEndPadded);
+
+                MakeRoom(fileend, (uint)roomNeeded);
+            }
 
             // write the new data for the file
             WriteBlock(IMGOffset + fe.Offset, data);
-            fe.Size = (uint)datalength;
+            fe.Size = (uint)data.Length;
 
             // fix the FAT
             for (uint f = 0; f < (FATSize / 8); f++)
             {
                 uint start = Read32(FATOffset + (f * 8));
-                if (f > fileid)// Update start offsets of following files
+                uint end = Read32(FATOffset + (f * 8) + 4);
+
+                if (f > fileid)
                 {
-                    start = (uint)((int)start + delta);
+                    // Update start offsets of following files
+                    start = (uint)((int)start + roomNeeded);
                     Write32(FATOffset + (f * 8), start);
+
+                    // Update the end offsets of following files
+                    end = (uint)((int)end + roomNeeded);
+                    Write32(FATOffset + (f * 8) + 4, end);
                 }
 
-                uint end = Read32(FATOffset + (f * 8) + 4);
-                if (f >= fileid)// Update the end offsets of following and current file
+                if (f == fileid)
                 {
-                    end = (uint)((int)end + delta);
+                    // Update current file end
+                    end = (uint)(fe.Offset + data.Length);
                     Write32(FATOffset + (f * 8) + 4, end);
                 }
             }
 
             // fix misc stuff
-            IMGSize = (uint)((int)IMGSize + delta);
+            IMGSize = (uint)(IMGSize + roomNeeded);
             Write32(IMGOffset - 0x4, IMGSize + 0x8);
 
             Write32(0x8, (uint)((m_Data.Length + 3) & ~3));
