@@ -1,4 +1,5 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
+<!--SM64DS Editor v2.1x PRIVATE BETA 201402-->
 <Patches>
   <Patch>
     <PatchName>Skip Introduction</PatchName>
@@ -104,7 +105,7 @@
     </EURRestoreData>
   </Patch>
   <Patch>
-    <PatchName>Improve Working Sound Effects for Levels Using Minigame Music</PatchName>
+    <PatchName>Improve Working Sound Effects for Levels Using Minigame Music v2 Set Music byte 2 33(0x21) and byte 1 to 39(0x27)</PatchName>
     <Author>Skelux</Author>
     <FileToPatch>data/sound_data.sdat</FileToPatch>
     <EURPatch>
@@ -151,7 +152,7 @@
           <Byte>4</Byte>
           <Byte>0</Byte>
           <Byte>0</Byte>
-          <Byte>71</Byte>
+          <Byte>80</Byte>
           <Byte>0</Byte>
           <Byte>0</Byte>
           <Byte>0</Byte>
@@ -159,7 +160,7 @@
           <Byte>4</Byte>
           <Byte>0</Byte>
           <Byte>0</Byte>
-          <Byte>80</Byte>
+          <Byte>76</Byte>
           <Byte>0</Byte>
           <Byte>0</Byte>
           <Byte>0</Byte>
@@ -242,7 +243,7 @@
           <Byte>4</Byte>
           <Byte>0</Byte>
           <Byte>0</Byte>
-          <Byte>71</Byte>
+          <Byte>80</Byte>
           <Byte>0</Byte>
           <Byte>0</Byte>
           <Byte>0</Byte>
@@ -250,7 +251,7 @@
           <Byte>4</Byte>
           <Byte>0</Byte>
           <Byte>0</Byte>
-          <Byte>80</Byte>
+          <Byte>76</Byte>
           <Byte>0</Byte>
           <Byte>0</Byte>
           <Byte>0</Byte>
@@ -333,7 +334,7 @@
           <Byte>4</Byte>
           <Byte>0</Byte>
           <Byte>0</Byte>
-          <Byte>71</Byte>
+          <Byte>80</Byte>
           <Byte>0</Byte>
           <Byte>0</Byte>
           <Byte>0</Byte>
@@ -341,7 +342,7 @@
           <Byte>4</Byte>
           <Byte>0</Byte>
           <Byte>0</Byte>
-          <Byte>80</Byte>
+          <Byte>76</Byte>
           <Byte>0</Byte>
           <Byte>0</Byte>
           <Byte>0</Byte>
@@ -424,7 +425,7 @@
           <Byte>4</Byte>
           <Byte>0</Byte>
           <Byte>0</Byte>
-          <Byte>71</Byte>
+          <Byte>80</Byte>
           <Byte>0</Byte>
           <Byte>0</Byte>
           <Byte>0</Byte>
@@ -432,7 +433,7 @@
           <Byte>4</Byte>
           <Byte>0</Byte>
           <Byte>0</Byte>
-          <Byte>80</Byte>
+          <Byte>76</Byte>
           <Byte>0</Byte>
           <Byte>0</Byte>
           <Byte>0</Byte>
@@ -819,6 +820,58 @@
           <Byte>0</Byte>
           <Byte>128</Byte>
           <Byte>224</Byte>
+        </Data>
+      </AddressDataPair>
+    </EURRestoreData>
+  </Patch>
+  <Patch>
+    <PatchName>Disable Level Intro Messages</PatchName>
+    <Author>Skelux</Author>
+    <EURPatch>
+      <AddressDataPair>
+        <Address>857708</Address>
+        <Data>
+          <Byte>0</Byte>
+          <Byte>0</Byte>
+          <Byte>160</Byte>
+          <Byte>225</Byte>
+        </Data>
+      </AddressDataPair>
+    </EURPatch>
+    <EURRestoreData>
+      <AddressDataPair>
+        <Address>857708</Address>
+        <Data>
+          <Byte>226</Byte>
+          <Byte>244</Byte>
+          <Byte>255</Byte>
+          <Byte>109</Byte>
+        </Data>
+      </AddressDataPair>
+    </EURRestoreData>
+  </Patch>
+  <Patch>
+    <PatchName>Disable Bowser's Message Upon First Entry in Castle</PatchName>
+    <Author>Skelux</Author>
+    <EURPatch>
+      <AddressDataPair>
+        <Address>868792</Address>
+        <Data>
+          <Byte>0</Byte>
+          <Byte>0</Byte>
+          <Byte>160</Byte>
+          <Byte>225</Byte>
+        </Data>
+      </AddressDataPair>
+    </EURPatch>
+    <EURRestoreData>
+      <AddressDataPair>
+        <Address>868792</Address>
+        <Data>
+          <Byte>48</Byte>
+          <Byte>134</Byte>
+          <Byte>229</Byte>
+          <Byte>4</Byte>
         </Data>
       </AddressDataPair>
     </EURRestoreData>

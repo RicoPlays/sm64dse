@@ -28,9 +28,6 @@ namespace SM64DSe
 {
     public class ObjectRenderer
     {
-        public static string currentObjFilename;
-        public static float currentObjScale;
-        
         public static ObjectRenderer FromLevelObject(LevelObject obj)
         {
             ObjectRenderer ret = null;
@@ -353,8 +350,15 @@ namespace SM64DSe
 
         public virtual bool GottaRender(RenderMode mode) { return false; }
         public virtual void Render(RenderMode mode) { }
+        public virtual void UpdateRenderer() { }
+
+        public virtual string GetFilename() { return m_Filename; }
+        public virtual Vector3 GetScale() { return new Vector3(1f, 1f, 1f); }
 
         public uint m_ObjUniqueID;
+
+        public string m_Filename;
+        public Vector3 m_Scale;
     }
 
 
@@ -589,8 +593,7 @@ namespace SM64DSe
         public NormalBMDRenderer(string filename, float scale) 
         { 
             Construct(filename, scale); 
-            ObjectRenderer.currentObjFilename = filename;
-            ObjectRenderer.currentObjScale = scale;
+            m_Filename = filename;
         }
 
         public override void Release()
@@ -622,20 +625,21 @@ namespace SM64DSe
             }
         }
 
-
         public void Construct(string filename, float scale)
         {
             m_Model = ModelCache.GetModel(filename);
             m_DisplayLists = ModelCache.GetDisplayLists(m_Model);
             m_Scale = new Vector3(scale, scale, scale);
+        }
 
-            ObjectRenderer.currentObjFilename = filename;
-            ObjectRenderer.currentObjScale = scale;
+        public override void UpdateRenderer()
+        {
+            ModelCache.RemoveModel(m_Model);
+            Construct(m_Filename, m_Scale.X);
         }
 
         private BMD m_Model;
         private int[] m_DisplayLists;
-        private Vector3 m_Scale;
     }
 
 

@@ -4,7 +4,11 @@
 
 Models in SM64DS are often split up into different chunks, 'bones'. This allows each chunk, such as an arm 
 to be animated separately. Each bone has a set of transformations that must be applied to it for it to be 
-displayed properly.
+displayed properly. SM64DSe supports exporting and importing models split up into bones to allow for importing 
+models to use animation. For example, you can  export Mario's model, either edit that model or split up an 
+existing model in a similar manner and then re-import your new model over Mario and your new model will be 
+animated like the original.
+
 (Please see BMD documentation for more information.)
 
 
@@ -26,13 +30,11 @@ _has_children_: Whether or not the bone has child bones, 0 - no, 1 - yes<br>
 _sibling_offset_: Offset in bones to the current bone's next sibling. <br>These three fields are used to determine the 
 bones' hierarchical structure<br>
 _scale_: X, Y and Z Scale transformation of the current bone. (32-bit signed, 20:12 fixed point. Think GX command 0x1B)<br>
-_rotation_: X, Y and Z Rotation transformation of the current bone. (16-bit signed, 0x0400 = 90°)<br>
+_rotation_: X, Y and Z Rotation transformation of the current bone. (16-bit signed, 0x0400 = 90Â°)<br>
 _translation_: X, Y and Z Translation of the current bone. (32-bit signed, 20:12 fixed point. Think GX command 0x1C)<br>
 These last three fields are stored in hexadecimal format.
 
 Important Notes<br>
-- When editing, do not scale your model as this will affect how it appears and how animation works. This isn't really a 
-problem with models without animation.<br>
 - Please note that exporting is not perfect when assigning faces to the correct bone due to how BMD files are structured 
 so some manual fixing may be required before re-importing.<br>
 
@@ -41,10 +43,37 @@ An example of what an exported model looks like can be found <a href ="http://s1
 *Importing*
 
 When importing the bones' transformations are applied in reverse so that they are restored to their original state and 
-their transformations can be applied again. This is necessary to allow the animation to work. Make sure the .bones is 
-set at the top of the .obj file if you are re-importing bones. <br>
-The bones are then written to the BMD file using the 
-information in the .bones file. If not found default values are used and your model will still import though animation 
-won't be working. <br>
-Bones are distinguished in your .obj file using the "o" command, eg. "o bone_01" marks the beginning 
-of bone_01's vertices and faces. If no "o" commands are present, the model is treated as one large bone.
+their transformations can be applied again. SM64DSe supports importing OBJ and DAE models that are split up into bones. 
+For OBJ the OBJ "o" command is used to split the model into bones, whilst in DAE <geometry> element are used. To specify 
+the settings for each bone, you must include a .bones file, for OBJ the following line at the beginning of the model is 
+used:
+bonelib FILENAME.bones
+
+and for DAE:
+
+<bonelib value="FILENAME.bones"/>
+
+where FILENAME is the name of your .bones file.
+
+A .bones file is not necessary, however models that use animation will not be animated correctly as the animation file (.BCA) 
+expect certain transformations to be applied to the model. If not found, each bone will be assigned the default values with a 
+recursive parent-child relationship between each bone.
+
+When creating a new model, you can either edit an exported model, already split up into bones, or you can split up an 
+existing model in a similar manner to original.
+
+- Once finished editing/creating your model, export it to either OBJ or DAE format (for OBJ your modelling 
+program must support the OBJ "o" command). 
+- Ensure the bone names in your model match those listed in the .bones file, if they don't, you will need to manually change 
+either your model or .bones file
+- Add the .bones file to your model as described above.
+- Import your model
+
+Tips:
+
+Some models eg. the characters have textures animated using .BTP files (sequence of textures to swap) such as Mario blinking. 
+Whilst could find every BTP file and manually change the texture, palette and material names, it's much easier to give your 
+new model's materials, textures and palettes the same name. Material names are set using the name defined in your model, 
+texture names are set to the diffuse map filename (leave out the extension to get a match to the original) and palettes are the 
+texture name + "_pl" - most (all?) models use this for palette names so should be fine. If your material, texture and palette 
+names don't match the original and you've not changed the BTP file your level will crash on entry.

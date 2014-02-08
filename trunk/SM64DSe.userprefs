@@ -2,7 +2,8 @@
   <MonoDevelop.Ide.Workspace ActiveConfiguration="Debug" />
   <MonoDevelop.Ide.Workbench ActiveDocument="LevelEditorForm.Designer.cs">
     <Files>
-      <File FileName="LevelEditorForm.Designer.cs" Line="797" Column="15" />
+      <File FileName="LevelEditorForm.Designer.cs" Line="798" Column="43" />
+      <File FileName="Importers\BMD_Importer.cs" Line="1" Column="1" />
     </Files>
   </MonoDevelop.Ide.Workbench>
   <MonoDevelop.Ide.DebuggingService.Breakpoints>

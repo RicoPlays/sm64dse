@@ -1919,10 +1919,10 @@ Parameter 1:
 
 	<object id='184'>
 		<category>1</category>
-		<name>A piece of rock used as decoration in Jolly Rodger Bay. Lit. Name = Something_Rock.</name>
+		<name></name>
 		<internalname>KI_IWA</internalname>
 		<actorid>61</actorid>
-		<description></description>
+		<description>A piece of rock used as decoration in Jolly Rodger Bay. Lit. Name = Something_Rock.</description>
 		<bankreq>none</bankreq>
 	</object>
 
@@ -3182,7 +3182,17 @@ Alone, not a really useful object.</description>
 		<name></name>
 		<internalname>ENEMY_SWITCH</internalname>
 		<actorid>357</actorid>
-		<description></description>
+		<description>Makes ENEMY_CREATE function when player steps in the area it defines.
+
+Parameter 1:
+0 - Spawn once
+20 - Spawn continuously as long as the Player is standing in the area of the object.
+
+Parameter 2:
+Size of area
+
+Parameter 3:
+Spawn delay, in frames, 0 is the default.</description>
 		<bankreq>none</bankreq>
 	</object>
 
@@ -3191,7 +3201,7 @@ Alone, not a really useful object.</description>
 		<name></name>
 		<internalname>ENEMY_CREATE</internalname>
 		<actorid>358</actorid>
-		<description></description>
+		<description>Spawns Bob-ombs when player steps into an ENEMY_SWITCH. Bob-ombs do not have to be in the loaded level overlays.</description>
 		<bankreq>none</bankreq>
 	</object>
 

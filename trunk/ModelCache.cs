@@ -97,7 +97,15 @@ namespace SM64DSe
             if (!m_Models.ContainsKey(model.m_FileName))
                 return;
 
-            CachedModel cmdl = m_Models[model.m_FileName];
+            RemoveModel(model.m_FileName);
+        }
+
+        public static void RemoveModel(string modelName)
+        {
+            if (!m_Models.ContainsKey(modelName))
+                return;
+
+            CachedModel cmdl = m_Models[modelName];
 
             cmdl.m_References--;
             if (cmdl.m_References > 0)
@@ -113,7 +121,7 @@ namespace SM64DSe
 
             cmdl.m_Model.Release();
 
-            m_Models.Remove(model.m_FileName);
+            m_Models.Remove(modelName);
         }
 
 
