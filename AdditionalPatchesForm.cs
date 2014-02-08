@@ -628,6 +628,7 @@ namespace SM64DSe
             using (XmlWriter writer = XmlWriter.Create(Path.Combine(Application.StartupPath, "AdditionalPatches.xml"), settings))
             {
                 writer.WriteStartDocument();
+                writer.WriteComment(Program.AppTitle + " " + Program.AppVersion + " " + Program.AppDate);
                 writer.WriteStartElement("Patches");
 
                 foreach (Patch patch in patches)

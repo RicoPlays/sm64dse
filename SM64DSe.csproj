@@ -104,8 +104,10 @@
     <Compile Include="Compression.cs" />
     <Compile Include="Exporters\BMD_Exporter.cs" />
     <Compile Include="Exporters\KCL_Exporter.cs" />
+    <Compile Include="Exporters\LevelDataXML_Exporter.cs" />
     <Compile Include="Helper.cs" />
     <Compile Include="Importers\BMD_Importer.cs" />
+    <Compile Include="Importers\LevelDataXML_Importer.cs" />
     <Compile Include="KCL.cs" />
     <Compile Include="KCLEditorForm.cs">
       <SubType>Form</SubType>

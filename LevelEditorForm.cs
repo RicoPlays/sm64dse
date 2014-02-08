@@ -30,6 +30,8 @@ using OpenTK.Graphics.OpenGL;
 using System.IO;
 using System.Globalization;
 using SM64DSe.Exporters;
+using System.Xml;
+using SM64DSe.Importers;
 
 
 namespace SM64DSe
@@ -104,6 +106,7 @@ namespace SM64DSe
         }
 
         private int m_EntranceID = 0;
+        private int m_MinimapTileIDNum = 0;
         private void ReadObjectTable(uint offset, int area)
         {
             AddPointer(offset + 0x4);
@@ -215,7 +218,7 @@ namespace SM64DSe
                     case 11:
                         for (byte e = 0; e < entries_num; e++)
                         {
-                            LevelObject obj = new MinimapTileIDObject(m_Overlay, (uint)(entries_offset + (e * 2)), m_LevelObjects.Count, layer, area);
+                            LevelObject obj = new MinimapTileIDObject(m_Overlay, (uint)(entries_offset + (e * 2)), m_LevelObjects.Count, layer, m_MinimapTileIDNum++);
                             m_LevelObjects.Add(obj.m_UniqueID, obj);
                         }
                         // This is still used by Minimap Editor
@@ -308,6 +311,7 @@ namespace SM64DSe
                     AddPointer(addr);
                     ReadTextureAnimations(m_Overlay.ReadPointer(addr), a);
                 }
+
             }
 
             m_LevelModel = null;
@@ -695,7 +699,7 @@ namespace SM64DSe
                 case 0:
                     {
                         btnImportModel.Visible = true;// Properties.Settings.Default.lolhax;
-                        //btnExportModel.Visible = true;
+                        btnExportLevelModel.Visible = true;
                         //btnAddTexAnim.Visible = true;
                         //btnRemoveSel.Visible = true;
                         btnImportOtherModel.Visible = true;
@@ -1007,15 +1011,26 @@ namespace SM64DSe
                 byte numobjs = m_Overlay.Read8(curptr + 1);
                 if (numobjs == 255) continue;
 
-                uint endptr = (off == -1) ? (uint)(m_Overlay.ReadPointer(curptr + 4) + (numobjs * size)) : (uint)off;
-                // Need to make sure that following addresses remain 4 byte aligned
-                uint newEndPtr = (uint)(endptr + size);
-                uint newEndPtrAlignedFour = (uint)(((endptr + size) + 3) & ~3);
-                uint roomNeeded = (uint)size + (newEndPtrAlignedFour - newEndPtr);
+                uint endptr = (uint)(m_Overlay.ReadPointer(curptr + 4) + (numobjs * size));
+                uint new_obj_addr = (off == -1) ? endptr : (uint)off;
 
-                AddSpace(endptr, roomNeeded);
+                // Need to make sure that following addresses remain 4 byte aligned
+                uint endptr_AlignedNextFour = (uint)((endptr + 3) & ~3);
+                uint endptrPlusSize_AlignedNextFour = (uint)(((endptr + (uint)size) + 3) & ~3);
+                uint endptr_AlignedNextFour_PlusSize = endptr_AlignedNextFour + (uint)size;
+                int padding = (int)endptr_AlignedNextFour_PlusSize - (int)endptrPlusSize_AlignedNextFour;
+                int roomNeeded = size + ((-1) * padding);
+
+                AddSpace(new_obj_addr, (uint)size);
+
+                if (((-1) * padding) > 0)
+                    AddSpace(endptr + (uint)size, (uint)((-1) * padding));
+                else if (((-1) * padding) < 0)
+                    RemoveSpace(endptr + (uint)size, (uint)(padding));
+
                 m_Overlay.Write8(curptr + 1, (byte)(numobjs + 1));
-                return endptr;
+
+                return new_obj_addr;
             }
             // If a new table needs created for this object type
             uint tableendptr = (uint)(m_Overlay.ReadPointer(tableptr + 4) + (numentries * 8));
@@ -1256,7 +1271,14 @@ namespace SM64DSe
         private int m_SelectHiliteDL;
         private int m_HoverHiliteDL;
 
+        CultureInfo usa = new CultureInfo("en-US");
+
         private void glLevelView_Load(object sender, EventArgs e)
+        {
+            InitialiseLevel();
+        }
+
+        private void InitialiseLevel()
         {
             // initialize OpenGL
             glLevelView.Context.MakeCurrent(glLevelView.WindowInfo);
@@ -2094,7 +2116,6 @@ namespace SM64DSe
             foreach (LevelObject obj in m_LevelObjects.Values)
                 obj.SaveChanges();
 
-            
             m_Overlay.SaveChanges();
             slStatusLabel.Text = "Changes saved.";
         }
@@ -2320,19 +2341,22 @@ namespace SM64DSe
                 return;
             }
 
-            LevelObject obj = m_SelectedObject;
-            ObjectRenderer selObjBMD = ObjectRenderer.FromLevelObject(obj);
+            if (null == m_SelectedObject.m_Renderer.GetFilename())
+            {
+                slStatusLabel.Text = "This object uses more than one model, use 'Import Other Model' to replace them.";
+                return;
+            }
+
             //Get the name of the selected object's BMD (model) file
-            string selObjBMDName = ObjectRenderer.currentObjFilename;
+            string selObjBMDName = m_SelectedObject.m_Renderer.GetFilename();
             //Get the name of the selected object's KCL (collision data) file
             string selObjKCLName = selObjBMDName.Substring(0, selObjBMDName.Length - 4) + ".kcl";
 
-            m_LevelSettings.objBMD = selObjBMDName;
-            m_LevelSettings.objKCL = selObjKCLName;
-
-            ModelImporter form = new ModelImporter(selObjBMDName, selObjKCLName, ObjectRenderer.currentObjScale);
+            ModelImporter form = new ModelImporter(selObjBMDName, selObjKCLName, m_SelectedObject.m_Renderer.GetScale().X);
             if (form != null && !form.m_EarlyClosure)
-                form.Show(this);
+                form.ShowDialog(this);
+
+            ModelCache.RemoveModel(m_SelectedObject.m_Renderer.GetFilename());
         }
 
         private void btnEditTexAnim_Click(object sender, EventArgs e)
@@ -2517,10 +2541,8 @@ namespace SM64DSe
                 return;
             }
 
-            LevelObject obj = m_SelectedObject;
-            ObjectRenderer selObjBMD = ObjectRenderer.FromLevelObject(obj);
             //Get the name of the selected object's BMD (model) file
-            string selObjBMDName = ObjectRenderer.currentObjFilename;
+            string selObjBMDName = m_SelectedObject.m_Renderer.GetFilename();
 
             BMD objectBMD = new BMD(m_ROM.GetFileFromName(selObjBMDName));
             BMD_Exporter.ExportBMDToOBJ(objectBMD);
@@ -2539,11 +2561,10 @@ namespace SM64DSe
                     float scale;
                     String input = Microsoft.VisualBasic.Interaction.InputBox("Enter a scale for the model - Level Models use 1, most objects use 0.008:", "Scale", "1", 0, 0);
                     if (float.TryParse(input, out scale) || float.TryParse(input, NumberStyles.Float, new CultureInfo("en-US"), out scale))
-                    {
                         new ModelImporter(modelName, modelName.Substring(0, modelName.Length - 4) + ".kcl", scale).Show(this);
-                    }
                     else
                         new ModelImporter(modelName, modelName.Substring(0, modelName.Length - 4) + ".kcl").Show(this);
+
                 }
             }
         }
@@ -2566,6 +2587,52 @@ namespace SM64DSe
         private void btnOffsetAllCoords_Click(object sender, EventArgs e)
         {
             new OffsetAllObjectCoordsForm().Show(this);
+        }
+
+        private void btnExportXML_Click(object sender, EventArgs e)
+        {
+            SaveFileDialog sfd = new SaveFileDialog();
+            sfd.FileName = "Level_" + m_LevelID;
+            sfd.DefaultExt = ".xml";//Default file extension
+            sfd.Filter = "XML Document (.xml)|*.xml";//Filter by .xml
+
+            if (sfd.ShowDialog() == DialogResult.OK)
+            {
+                LevelDataXML_Exporter.ExportLevelDataToXML(m_Overlay, m_LevelID, m_LevelSettings,
+                    m_LevelObjects, m_TexAnims, sfd.FileName);
+
+                slStatusLabel.Text = "Level successfully exported.";
+            }
+        }
+
+        private void btnImportXML_Click(object sender, EventArgs e)
+        {
+            OpenFileDialog ofd = new OpenFileDialog();
+            ofd.FileName = "Level_" + m_LevelID;
+            ofd.DefaultExt = ".xml";//Default file extension
+            ofd.Filter = "XML Document (.xml)|*.xml";//Filter by .xml
+
+            if (ofd.ShowDialog() == DialogResult.OK)
+            {
+
+                int success = LevelDataXML_Importer.ImportLevelDataFromXML(ofd.FileName, m_Overlay, m_LevelID, m_MinimapFileIDs, false);
+
+                if (success != 0)
+                {
+                    slStatusLabel.Text = "Level importing failed, no changes have been saved. It is advised to reload the level.";
+                    return;
+                }
+
+                LevelDataXML_Importer.SaveChangesToAllFiles();
+
+                foreach (LevelObject obj in m_LevelObjects.Values)
+                    obj.Release();
+
+                InitialiseLevel();
+
+                slStatusLabel.Text = "Level imported successfully.";
+            }
+
         }
     }
 }

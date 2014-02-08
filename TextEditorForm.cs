@@ -247,7 +247,7 @@ namespace SM64DSe
                 {
                     if (BASIC_EUR_US_CHARS.GetSecondToFirst().ContainsKey("" + newTextByte[i]))
                         encodedString.Add(BASIC_EUR_US_CHARS.GetBySecond("" + newTextByte[i]));
-                    if (EXTENDED_ASCII_CHARS.GetSecondToFirst().ContainsKey("" + newTextByte[i]))
+                    else if (EXTENDED_ASCII_CHARS.GetSecondToFirst().ContainsKey("" + newTextByte[i]))
                         encodedString.Add(EXTENDED_ASCII_CHARS.GetBySecond("" + newTextByte[i]));
                 }
                 if (newTextByte[i].Equals('\r'))// New Line is \r\n
@@ -504,11 +504,7 @@ namespace SM64DSe
                             "When done editing an entry, click 'Update String'.\n\nWhen you have finished, click " +
                             "on 'Save Changes'\n\n" +
                             "Use the buttons under the text editing box to insert the special characters.\n" + 
-                            "[\\r] is the special character used by the text editor to indicate special characters.\n" + 
-                            "When reading, their codes are as follows:\n\n" +
-                            "[0xEE][0xEF] \t Coins\n[0xF0] \t\t Star Full\n[0xF1] \t\t Star Empty\n" +
-                            "[0xF2][0xF3] \t D-Pad\n[0xF4][0xF5] \t A\n[0xF6][0xF7] \t B\n" +
-                            "[0xF8][0xF9] \t X\n[0xFA][0xFB] \t Y");
+                            "[\\r] is the special character used by the text editor to indicate special characters.\n");
         }
 
         private void btnImport_Click(object sender, EventArgs e)
@@ -584,6 +580,7 @@ namespace SM64DSe
             using (XmlWriter writer = XmlWriter.Create(saveXML.FileName, settings))
             {
                 writer.WriteStartDocument();
+                writer.WriteComment(Program.AppTitle + " " + Program.AppVersion + " " + Program.AppDate);
                 writer.WriteStartElement("SM64DS_Texts");
 
                 for (int i = 0; i < m_MsgData.Length; i++)

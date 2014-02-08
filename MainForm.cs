@@ -137,11 +137,9 @@ namespace SM64DSe
             Program.m_ROMPath = "";
             Program.m_LevelEditors = new List<LevelEditorForm>();
 
-            if (!Program.AppVersion.ToLowerInvariant().Contains("private beta"))
-                btnSecretShit.Visible = false;
-            else
+            if (Program.AppVersion.ToLowerInvariant().Contains("private beta"))
             {
-                btnAddPatches.Enabled = false;
+                btnSecretShit.DropDownItems.Add("Dump object info", null, btnDumpObjInfo_Click);
                 btnSecretShit.DropDownItems.Add("animation editor test", null, new EventHandler(this.animationeditortest));
             }
 

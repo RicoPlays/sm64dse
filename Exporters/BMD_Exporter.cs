@@ -45,7 +45,7 @@ namespace SM64DSe.Exporters
             List<Vector3> vertices = new List<Vector3>();
             List<Vector2> texCoords = new List<Vector2>();
             List<BMD.Texture> textures = new List<BMD.Texture>();
-            output += Program.AppTitle + " " + Program.AppVersion + "\n\n";
+            output += Program.AppTitle + " " + Program.AppVersion + " " + Program.AppDate + "\n\n";
             output += "mtllib " + filename + ".mtl" + "\n\n";//Specify name of material library
             output += "bonelib " + filename + ".bones" + "\n\n";// Specify name of bones list
 

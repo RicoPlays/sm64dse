@@ -51,6 +51,14 @@ namespace SM64DSe
             KCLFileID = m_Overlay.Read16(0x6A);
             MinimapTsetFileID = m_Overlay.Read16(0x6C);
             MinimapPalFileID = m_Overlay.Read16(0x6E);
+
+            MusicBytes = new byte[3];
+            MusicBytes[0] = m_Overlay.Read8(0x7C);
+            MusicBytes[1] = m_Overlay.Read8(0x7D);
+            MusicBytes[2] = m_Overlay.Read8(0x7E);
+
+            MinimapCoordinateScale = m_Overlay.Read16(0x76);
+            CameraStartZoomedOut = m_Overlay.Read8(0x75);
         }
 
         public void SaveChanges()
@@ -64,13 +72,23 @@ namespace SM64DSe
             m_Overlay.Write8(0x59, (byte)ObjectBanks[5]);
             m_Overlay.Write8(0x5A, (byte)ObjectBanks[6]);
             m_Overlay.Write32(0x5C, (uint)ObjectBanks[7]);
+
+            m_Overlay.Write8(0x7C, MusicBytes[0]);
+            m_Overlay.Write8(0x7D, MusicBytes[1]);
+            m_Overlay.Write8(0x7E, MusicBytes[2]);
+
+            m_Overlay.Write16(0x76, MinimapCoordinateScale);
+            m_Overlay.Write8(0x75, CameraStartZoomedOut);
         }
 
         public NitroOverlay m_Overlay;
         public byte Background;
         public uint[] ObjectBanks;
         public ushort BMDFileID, KCLFileID, MinimapTsetFileID, MinimapPalFileID;
-        public string objBMD, objKCL;
+        public byte[] MusicBytes;
+        public ushort MinimapCoordinateScale;
+        public byte CameraStartZoomedOut;
+        public byte ActSelectorID;// NOT stored in the overlay - not possible
     }
 
 
@@ -117,6 +135,8 @@ namespace SM64DSe
 
         //public Matrix4 m_TestMatrix;
 
+        public virtual ObjectRenderer InitialiseRenderer() { return null; }
+
         public virtual void Release()
         {
             m_Renderer.Release();
@@ -126,6 +146,7 @@ namespace SM64DSe
         {
             LevelObject copy = (LevelObject)MemberwiseClone();
             copy.GenerateProperties();
+            copy.m_Renderer = copy.InitialiseRenderer();
 
             return copy;
         }
@@ -184,10 +205,15 @@ namespace SM64DSe
             Parameters[1] = m_Overlay.Read16(m_Offset + 0x8);
             Parameters[2] = m_Overlay.Read16(m_Offset + 0xC);
 
-            m_Renderer = ObjectRenderer.FromLevelObject(this);
+            m_Renderer = InitialiseRenderer();
             // m_PParams = new Hashtable();
             m_Properties = new PropertyTable();
             GenerateProperties();
+        }
+
+        public override ObjectRenderer InitialiseRenderer()
+        {
+            return ObjectRenderer.FromLevelObject(this);
         }
 
         public override string GetDescription()
@@ -270,7 +296,7 @@ namespace SM64DSe
                 if ((field == "Object ID") || (field.IndexOf("Parameter ") != -1))
                 {
                     m_Renderer.Release();
-                    m_Renderer = ObjectRenderer.FromLevelObject(this);
+                    m_Renderer = InitialiseRenderer();
                     //return 3;
                 }
 
@@ -315,9 +341,14 @@ namespace SM64DSe
             Parameters = new ushort[1];
             Parameters[0] = (ushort)(idparam >> 9);
 
-            m_Renderer = ObjectRenderer.FromLevelObject(this);
+            m_Renderer = InitialiseRenderer();
             m_Properties = new PropertyTable();
             GenerateProperties();
+        }
+
+        public override ObjectRenderer InitialiseRenderer()
+        {
+            return ObjectRenderer.FromLevelObject(this);
         }
 
         public override string GetDescription()
@@ -364,7 +395,7 @@ namespace SM64DSe
             if ((field == "Object ID") || (field == "Parameter 1"))
             {
                 m_Renderer.Release();
-                m_Renderer = ObjectRenderer.FromLevelObject(this);
+                m_Renderer = InitialiseRenderer();
             }
 
             if (field == "Object ID")
@@ -407,9 +438,14 @@ namespace SM64DSe
             Parameters[3] = m_Overlay.Read16(m_Offset + 0xC);
             Parameters[4] = m_Overlay.Read16(m_Offset + 0xE);
 
-            m_Renderer = new ColorCubeRenderer(Color.FromArgb(0, 255, 0), Color.FromArgb(0, 64, 0), true);
+            m_Renderer = InitialiseRenderer();
             m_Properties = new PropertyTable(); 
             GenerateProperties();
+        }
+
+        public override ObjectRenderer InitialiseRenderer()
+        {
+            return new ColorCubeRenderer(Color.FromArgb(0, 255, 0), Color.FromArgb(0, 64, 0), true);
         }
 
         public override string GetDescription()
@@ -498,9 +534,14 @@ namespace SM64DSe
             Param1 = m_Overlay.Read16(m_Offset + 0x6);
             Param2 = m_Overlay.Read16(m_Offset + 0xC);
 
-            m_Renderer = new ColorCubeRenderer(Color.FromArgb(255, 0, 0), Color.FromArgb(64, 0, 0), true);
+            m_Renderer = InitialiseRenderer();
             m_Properties = new PropertyTable(); 
             GenerateProperties();
+        }
+
+        public override ObjectRenderer InitialiseRenderer()
+        {
+            return new ColorCubeRenderer(Color.FromArgb(255, 0, 0), Color.FromArgb(64, 0, 0), true);
         }
 
         public override string GetDescription()
@@ -593,10 +634,15 @@ namespace SM64DSe
             PlaneSizeX = m_Overlay.Read8(m_Offset + 0x8);
             PlaneSizeY = PlaneSizeX >> 4;
             PlaneSizeX &= 0xF;
-            
-            m_Renderer = new DoorRenderer(this);
+
+            m_Renderer = InitialiseRenderer();
             m_Properties = new PropertyTable(); 
             GenerateProperties();
+        }
+
+        public override ObjectRenderer InitialiseRenderer()
+        {
+            return new DoorRenderer(this);
         }
 
         public override string GetDescription()
@@ -644,7 +690,7 @@ namespace SM64DSe
                     if (newval is int) DoorType = (int)newval;
                     else DoorType = int.Parse(((string)newval).Substring(0, ((string)newval).IndexOf(" - ")));
                     m_Renderer.Release();
-                    m_Renderer = new DoorRenderer(this);
+                    m_Renderer = InitialiseRenderer();
                     return 5;
 
                 case "Outside area": OutAreaID = Math.Max(0, Math.Min(15, (int)newval)); return 1;
@@ -693,13 +739,18 @@ namespace SM64DSe
             Position.Y = (float)((short)m_Overlay.Read16(m_Offset + 0x2)) / 1000f;
             Position.Z = (float)((short)m_Overlay.Read16(m_Offset + 0x4)) / 1000f;
 
-            m_Renderer = new ColourArrowRenderer(Color.FromArgb(0, 255, 255), Color.FromArgb(0, 64, 64), false);
+            m_Renderer = InitialiseRenderer();
             m_Properties = new PropertyTable();
             GenerateProperties();
         }
         //public int pathNodeID;
         public int parentPath;
         //public static int lastNodeID = -1;
+
+        public override ObjectRenderer InitialiseRenderer()
+        {
+            return new ColourArrowRenderer(Color.FromArgb(0, 255, 255), Color.FromArgb(0, 64, 64), false);
+        }
 
         public override string GetDescription()
         {
@@ -828,9 +879,14 @@ namespace SM64DSe
             Parameters[1] = m_Overlay.Read16(m_Offset + 0x8);
             Parameters[2] = m_Overlay.Read16(m_Offset + 0xC);
 
-            m_Renderer = new ColorCubeRenderer(Color.FromArgb(255, 255, 0), Color.FromArgb(64, 64, 0), true);
+            m_Renderer = InitialiseRenderer();
             m_Properties = new PropertyTable(); 
             GenerateProperties();
+        }
+
+        public override ObjectRenderer InitialiseRenderer()
+        {
+            return new ColorCubeRenderer(Color.FromArgb(255, 255, 0), Color.FromArgb(64, 64, 0), true);
         }
 
         public override string GetDescription()
@@ -906,9 +962,14 @@ namespace SM64DSe
             Parameters[0] = m_Overlay.Read8(m_Offset + 0x6);
             Parameters[1] = m_Overlay.Read8(m_Offset + 0x07);
 
-            m_Renderer = new ColorCubeRenderer(Color.FromArgb(255, 0, 255), Color.FromArgb(64, 0, 64), false);
+            m_Renderer = InitialiseRenderer();
             m_Properties = new PropertyTable();
             GenerateProperties();
+        }
+
+        public override ObjectRenderer InitialiseRenderer()
+        {
+            return new ColorCubeRenderer(Color.FromArgb(255, 0, 255), Color.FromArgb(64, 0, 64), false);
         }
 
         public override string GetDescription()
@@ -975,9 +1036,14 @@ namespace SM64DSe
             Parameters = new ushort[1];
             Parameters[0] = m_Overlay.Read16(m_Offset + 0x6);
 
-            m_Renderer = new ColorCubeRenderer(Color.FromArgb(255, 128, 0), Color.FromArgb(64, 32, 0), false);
+            m_Renderer = InitialiseRenderer();
             m_Properties = new PropertyTable();
             GenerateProperties();
+        }
+
+        public override ObjectRenderer InitialiseRenderer()
+        {
+            return new ColorCubeRenderer(Color.FromArgb(255, 128, 0), Color.FromArgb(64, 32, 0), false);
         }
 
         public override string GetDescription()
@@ -1220,11 +1286,13 @@ namespace SM64DSe
 
     public class MinimapTileIDObject : LevelObject
     {
-        public MinimapTileIDObject(NitroOverlay ovl, uint offset, int num, int layer, int area)
+        public int m_MinimapTileIDNum;
+
+        public MinimapTileIDObject(NitroOverlay ovl, uint offset, int num, int layer, int id)
             : base(ovl, offset, layer)
         {
             m_Type = 11;
-            m_Area = area;
+            m_MinimapTileIDNum = id;
             m_UniqueID = (uint)(0x50000000 | num);
 
             Parameters = new ushort[2];
@@ -1236,14 +1304,14 @@ namespace SM64DSe
 
         public override string GetDescription()
         {
-            return "Minimap Tile ID for area " + m_Area;
+            return "Minimap Tile ID for area " + m_MinimapTileIDNum;
         }
 
         public override void GenerateProperties()
         {
             m_Properties.Properties.Clear();
 
-            m_Properties.Properties.Add(new PropertySpec("Tile ID", typeof(float), "Specific", "ID of minimap tile to use in area " + m_Area, (float)Parameters[0], "", typeof(FloatTypeConverter)));
+            m_Properties.Properties.Add(new PropertySpec("Tile ID", typeof(float), "Specific", "ID of minimap tile to use in area " + m_MinimapTileIDNum, (float)Parameters[0], "", typeof(FloatTypeConverter)));
 
             m_Properties["Tile ID"] = (float)Parameters[0];
         }

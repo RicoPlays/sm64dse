@@ -1,6 +1,8 @@
 ---===[ SM64DS LEVEL FORMAT DOC ]===---
 By Mega-Mario
 
+Last updated: 2014/02/02
+
 ---===[ WHERE TO FIND THE DATA ]===---
 In a clean ROM, the level data is found in overlays 8 to 59 (one overlay per level).
 However, that level data has no unified structure, and is all surrounded with code and
@@ -23,7 +25,7 @@ Offset Size Desc
 58 1 Object bank 4 setting
 59 1 Object bank 5 setting
 5A 1 Object bank 6 setting
-5B 1 Zero
+5B 1 Zero (Padding)
 5C 4 Object bank 7 setting
 60 4 Address of the CLPS chunk
 64 4 Address of the 'misc' objects table
@@ -48,6 +50,31 @@ The dword at 0x5C isn't an original feature of the game engine-- it is made poss
 The level music data was previously stored in a 156 byte table consisting of 52 3-byte entries. Since version 2.1x, 
 music data has been moved to within the individual overlays.
 All the data past 0x94 is copied from the original level overlays.
+
+---===[ CLPS DATA ]===---
+This stores a list of the collision types available in the current level. These entries are referenced by the 
+level's collision map - each face has a collision type which acts as an index into the CLPS table.
+
+Header: 8 bytes
+
+Offset Size Desc
+00	4	String "CLPS"
+04	2	Unknown, 0x08
+06	2	Number of entries
+
+Data:
+
+Each entry is 8 bytes long. Number determined by CLPS header[0x06].
+
+Offset Size Desc
+00	1	Sound effect (?)
+01	1	Camera behaviour (?)
+02	1	Collision behaviour 
+03	1	Unknown
+04	1	Path ID (always?)
+05	1	Unknown
+06	1	Unknown
+07	1	Unknown
 
 ---===[ LEVEL AREA DATA ]===---
 Each entry is 12 bytes. Number determined by header[0x74].

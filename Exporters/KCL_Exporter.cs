@@ -35,7 +35,7 @@ namespace SM64DSe.Exporters
                     types.Add(planes[i].type);
             }
 
-            output += Program.AppTitle + Program.AppVersion + "\n\n";
+            output += Program.AppTitle + " " + Program.AppVersion + " " + Program.AppDate + "\n\n";
 
             output += "mtllib " + filename + ".mtl" + "\n\n";
 

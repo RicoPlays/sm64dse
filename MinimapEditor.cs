@@ -424,7 +424,7 @@ namespace SM64DSe
 
             tmapfiles = new NitroFile[m_NumAreas];
 
-            txtCoordScale.Text = "" + (_owner.m_Overlay.Read16((uint)0x76) / 1000f);
+            txtCoordScale.Text = "" + ((_owner.m_LevelSettings.MinimapCoordinateScale) / 1000f);
 
             int i, pos = tsMinimapEditor.Items.IndexOf(tslBeforeAreaBtns) + 1;
             for (i = 0; i < m_NumAreas; i++, pos++)
@@ -500,6 +500,7 @@ namespace SM64DSe
         private void btnImport_Click(object sender, EventArgs e)
         {
             OpenFileDialog ofd = new OpenFileDialog();
+            ofd.Title = "Select an Indexed Bitmap Image";
             ofd.Filter = "Bitmap (.bmp)|*.bmp";
             DialogResult result = ofd.ShowDialog();
             if (result == DialogResult.OK)
@@ -606,7 +607,7 @@ namespace SM64DSe
             {
                 try
                 {
-                    _owner.m_Overlay.Write16((uint)0x76, (ushort)(Convert.ToSingle(txtCoordScale.Text) * 1000));
+                    _owner.m_LevelSettings.MinimapCoordinateScale = (ushort)(Convert.ToSingle(txtCoordScale.Text) * 1000);
                 }
                 catch
                 {

@@ -35,10 +35,9 @@
             this.btnEditLevel = new System.Windows.Forms.ToolStripButton();
             this.btnEditTexts = new System.Windows.Forms.ToolStripButton();
             this.btnSecretShit = new System.Windows.Forms.ToolStripDropDownButton();
-            this.btnDumpObjInfo = new System.Windows.Forms.ToolStripMenuItem();
-            this.btnObjFinder = new System.Windows.Forms.ToolStripMenuItem();
             this.mnitDumpAllOvls = new System.Windows.Forms.ToolStripMenuItem();
             this.decompressOverlaysWithinGameToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.hexDumpToBinaryFileToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.btnKCLEditor = new System.Windows.Forms.ToolStripButton();
             this.toolStripSeparator2 = new System.Windows.Forms.ToolStripSeparator();
             this.btnAddPatches = new System.Windows.Forms.ToolStripButton();
@@ -52,7 +51,6 @@
             this.ssStatusBar = new System.Windows.Forms.StatusStrip();
             this.slStatusLabel = new System.Windows.Forms.ToolStripStatusLabel();
             this.spbStatusProgress = new System.Windows.Forms.ToolStripProgressBar();
-            this.hexDumpToBinaryFileToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.tsToolBar.SuspendLayout();
             this.ssStatusBar.SuspendLayout();
             this.SuspendLayout();
@@ -121,8 +119,6 @@
             this.btnSecretShit.Alignment = System.Windows.Forms.ToolStripItemAlignment.Right;
             this.btnSecretShit.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Text;
             this.btnSecretShit.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
-            this.btnDumpObjInfo,
-            this.btnObjFinder,
             this.mnitDumpAllOvls,
             this.decompressOverlaysWithinGameToolStripMenuItem,
             this.hexDumpToBinaryFileToolStripMenuItem});
@@ -132,21 +128,6 @@
             this.btnSecretShit.Size = new System.Drawing.Size(28, 22);
             this.btnSecretShit.Text = "D";
             this.btnSecretShit.ToolTipText = "Debug crap. Don\'t touch unless you know what you\'re doing.";
-            // 
-            // btnDumpObjInfo
-            // 
-            this.btnDumpObjInfo.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Text;
-            this.btnDumpObjInfo.Image = ((System.Drawing.Image)(resources.GetObject("btnDumpObjInfo.Image")));
-            this.btnDumpObjInfo.ImageTransparentColor = System.Drawing.Color.Magenta;
-            this.btnDumpObjInfo.Name = "btnDumpObjInfo";
-            this.btnDumpObjInfo.Size = new System.Drawing.Size(259, 22);
-            this.btnDumpObjInfo.Text = "Dump object info ";
-            // 
-            // btnObjFinder
-            // 
-            this.btnObjFinder.Name = "btnObjFinder";
-            this.btnObjFinder.Size = new System.Drawing.Size(259, 22);
-            this.btnObjFinder.Text = "Object finder";
             // 
             // mnitDumpAllOvls
             // 
@@ -161,6 +142,13 @@
             this.decompressOverlaysWithinGameToolStripMenuItem.Size = new System.Drawing.Size(259, 22);
             this.decompressOverlaysWithinGameToolStripMenuItem.Text = "Decompress Overlays Within Game";
             this.decompressOverlaysWithinGameToolStripMenuItem.Click += new System.EventHandler(this.decompressOverlaysWithinGameToolStripMenuItem_Click);
+            // 
+            // hexDumpToBinaryFileToolStripMenuItem
+            // 
+            this.hexDumpToBinaryFileToolStripMenuItem.Name = "hexDumpToBinaryFileToolStripMenuItem";
+            this.hexDumpToBinaryFileToolStripMenuItem.Size = new System.Drawing.Size(259, 22);
+            this.hexDumpToBinaryFileToolStripMenuItem.Text = "Hex Dump to Binary File";
+            this.hexDumpToBinaryFileToolStripMenuItem.Click += new System.EventHandler(this.hexDumpToBinaryFileToolStripMenuItem_Click);
             // 
             // btnKCLEditor
             // 
@@ -277,13 +265,6 @@
             this.spbStatusProgress.Style = System.Windows.Forms.ProgressBarStyle.Continuous;
             this.spbStatusProgress.Visible = false;
             // 
-            // hexDumpToBinaryFileToolStripMenuItem
-            // 
-            this.hexDumpToBinaryFileToolStripMenuItem.Name = "hexDumpToBinaryFileToolStripMenuItem";
-            this.hexDumpToBinaryFileToolStripMenuItem.Size = new System.Drawing.Size(259, 22);
-            this.hexDumpToBinaryFileToolStripMenuItem.Text = "Hex Dump to Binary File";
-            this.hexDumpToBinaryFileToolStripMenuItem.Click += new System.EventHandler(this.hexDumpToBinaryFileToolStripMenuItem_Click);
-            // 
             // MainForm
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
@@ -316,8 +297,6 @@
         private System.Windows.Forms.OpenFileDialog ofdOpenFile;
         private System.Windows.Forms.SaveFileDialog sfdSaveFile;
         private System.Windows.Forms.ToolStripDropDownButton btnSecretShit;
-        private System.Windows.Forms.ToolStripMenuItem btnDumpObjInfo;
-        private System.Windows.Forms.ToolStripMenuItem btnObjFinder;
         private System.Windows.Forms.StatusStrip ssStatusBar;
         private System.Windows.Forms.ToolStripStatusLabel slStatusLabel;
         private System.Windows.Forms.ToolStripProgressBar spbStatusProgress;

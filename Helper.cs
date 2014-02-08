@@ -27,6 +27,27 @@ namespace SM64DSe
 {
     static class Helper
     {
+        public static uint ACT_SELECTOR_ID_TABLE;
+
+        static Helper()
+        {
+            switch (Program.m_ROM.m_Version)
+            {
+                case NitroROM.Version.EUR:
+                    ACT_SELECTOR_ID_TABLE = 0x75298;
+                    break;
+                case NitroROM.Version.USA_v1:
+                    ACT_SELECTOR_ID_TABLE = 0x731F0;
+                    break;
+                case NitroROM.Version.USA_v2:
+                    ACT_SELECTOR_ID_TABLE = 0x73F10;
+                    break;
+                case NitroROM.Version.JAP:
+                    ACT_SELECTOR_ID_TABLE = 0x73744;
+                    break;
+            }
+        }
+
         public static ushort ColorToBGR15(Color color)
         {
             uint r = (uint)((color.R & 0xF8) >> 3);
@@ -113,6 +134,11 @@ namespace SM64DSe
             Matrix4.Mult(ref ret, ref mtrans, out ret);
 
             return ret;
+        }
+
+        public static uint GetActSelectorIDTableAddress()
+        {
+            return ACT_SELECTOR_ID_TABLE;
         }
 
         public static void DecompressOverlaysWithinGame()

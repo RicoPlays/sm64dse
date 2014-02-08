@@ -32,6 +32,8 @@ namespace SM64DSe
         public ushort ObjectID;
         private Dictionary<ushort, bool> m_ObjAvailable;
         private Dictionary<ushort, string> m_BasicDescriptions;
+        private int[] m_ObjectIndexIDMap = Enumerable.Range(0, 327).ToArray();
+        private string[] m_ObjectListText = new string[327];
 
         public ObjectListForm(ushort objid)
         {
@@ -52,11 +54,8 @@ namespace SM64DSe
 
         private void lbxObjectList_SelectedIndexChanged(object sender, EventArgs e)
         {
-            string objListString = lbxObjectList.Items[lbxObjectList.SelectedIndex].ToString();
-            int posDash = objListString.IndexOf(" - ");
+            ObjectID = (ushort)m_ObjectIndexIDMap[lbxObjectList.SelectedIndex];
 
-            ObjectID = ushort.Parse(objListString.Substring(0, posDash));
-            //ObjectID = (ushort)lbxObjectList.SelectedIndex;
             if (ObjectID == 326)
                 ObjectID = 511; // haxx
 
@@ -84,12 +83,14 @@ namespace SM64DSe
             for (int i = 0; i < 326; i++)
             {
                 ObjectDatabase.ObjectInfo objinfo = ObjectDatabase.m_ObjectInfo[i];
-                lbxObjectList.Items.Insert(i, string.Format("{0} - {1}",
-                    i, objinfo.m_Name));
+                m_ObjectListText[i] = string.Format("{0} - {1}",
+                    i, objinfo.m_Name);
+                lbxObjectList.Items.Insert(i, m_ObjectListText[i]);
                 m_BasicDescriptions.Add((ushort)i, objinfo.GetBasicInfo());
             }
 
-            lbxObjectList.Items.Insert(326, "511 - Minimap change");
+            m_ObjectListText[326] = "511 - Minimap change";
+            lbxObjectList.Items.Insert(326, m_ObjectListText[326]);
             lbxObjectList.SelectedIndex = (ObjectID == 511) ? (ushort) 326 : ObjectID;
         }
 
@@ -103,7 +104,7 @@ namespace SM64DSe
         {
             e.DrawBackground();
             
-            ushort id = (ushort)e.Index;
+            ushort id = (ushort)m_ObjectIndexIDMap[e.Index];
             bool sel = (e.State & (DrawItemState.Focus | DrawItemState.Selected)) != 0;
 
             bool available;
@@ -116,7 +117,7 @@ namespace SM64DSe
             else
                 txtcolor = sel ? Color.LightPink : Color.Red;
 
-            e.Graphics.DrawString((string)lbxObjectList.Items[id], lbxObjectList.Font, new SolidBrush(txtcolor), e.Bounds);
+            e.Graphics.DrawString(m_ObjectListText[id], lbxObjectList.Font, new SolidBrush(txtcolor), e.Bounds);
             e.DrawFocusRectangle();
         }
 
@@ -124,19 +125,17 @@ namespace SM64DSe
         {
             List<ushort> matchingIDs = new List<ushort>();
             string searchText = tbxObjSearch.Text.ToLowerInvariant();
-            if (searchText != "")
+
+            int index = 0;
+            for (int i = 0; i < m_BasicDescriptions.Count; i++)
             {
-                for (int i = 0; i < m_BasicDescriptions.Count; i++)
+                if (m_BasicDescriptions[(ushort)i].ToLowerInvariant().Contains(searchText))
                 {
-                    if (m_BasicDescriptions[(ushort)i].ToLowerInvariant().Contains(searchText))
-                        matchingIDs.Add((ushort)i);
+                    matchingIDs.Add((ushort)i);
+                    m_ObjectIndexIDMap[index++] = i;
                 }
             }
-            else
-            {
-                for (int i = 0; i <= 326; i++)
-                    matchingIDs.Add((ushort)i);
-            }
+
             if (matchingIDs.Count > 0)
             {
                 lbxObjectList.Items.Clear();

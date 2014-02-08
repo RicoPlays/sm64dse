@@ -182,16 +182,19 @@ namespace SM64DSe
                 if (result == DialogResult.Cancel)
                     return;
 
-                int index = lbxTextures.SelectedIndex;
+                //int index = lbxTextures.SelectedIndex;
+
+                int texIndex = lbxTextures.SelectedIndex = (int)m_Model.m_Textures[lbxTextures.SelectedItem.ToString()].m_TexID;
+                int palIndex = lbxPalettes.SelectedIndex = (int)m_Model.m_Textures[lbxTextures.SelectedItem.ToString()].m_PalID;
 
                 try
                 {
                     BMD_Importer.ConvertedTexture tex = BMD_Importer.ConvertTexture(ofd.FileName);
-                    tex.m_TextureID = (uint)index;
-                    tex.m_PaletteID = (uint)lbxPalettes.SelectedIndex;
+                    tex.m_TextureID = (uint)texIndex;
+                    tex.m_PaletteID = (uint)palIndex;
 
                     // Update texture entry
-                    uint curoffset = m_Model.m_Textures.Values.ElementAt(index).m_EntryOffset;
+                    uint curoffset = m_Model.m_Textures[lbxTextures.SelectedItem.ToString()].m_EntryOffset;
 
                     m_Model.m_File.Write32(curoffset + 0x08, (uint)tex.m_TextureDataLength);
                     m_Model.m_File.Write16(curoffset + 0x0C, (ushort)(8 << (int)((tex.m_DSTexParam >> 20) & 0x7)));
@@ -201,7 +204,7 @@ namespace SM64DSe
                     // Update palette entry
                     if (tex.m_PaletteData != null && !chkNewPalette.Checked)
                     {
-                        curoffset = m_Model.m_Textures.Values.ElementAt(index).m_PalEntryOffset;
+                        curoffset = m_Model.m_Textures[lbxTextures.SelectedItem.ToString()].m_PalEntryOffset;
 
                         m_Model.m_File.Write32(curoffset + 0x08, (uint)tex.m_PaletteData.Length);
                         m_Model.m_File.Write32(curoffset + 0x0C, 0xFFFFFFFF);
@@ -214,14 +217,14 @@ namespace SM64DSe
                     // For compressed (type 5) textures, the size of the texture data doesn't count the palette index data.
                     // The texture data is then directly followed by (size/2) of palette index data.
 
-                    uint oldTexDataSize = (uint)m_Model.m_Textures.Values.ElementAt(index).m_TexDataSize;
-                    if (m_Model.m_Textures.Values.ElementAt(index).m_TexType == 5)
+                    uint oldTexDataSize = (uint)m_Model.m_Textures[lbxTextures.SelectedItem.ToString()].m_TexDataSize;
+                    if (m_Model.m_Textures[lbxTextures.SelectedItem.ToString()].m_TexType == 5)
                         oldTexDataSize += (oldTexDataSize / 2);
                     uint newTexDataSize = (uint)((tex.m_TextureData.Length + 3) & ~3);
-                    uint oldPalDataSize = (uint)m_Model.m_Textures.Values.ElementAt(index).m_PalSize;
+                    uint oldPalDataSize = (uint)m_Model.m_Textures[lbxTextures.SelectedItem.ToString()].m_PalSize;
                     uint newPalDataSize = (uint)((tex.m_PaletteData.Length + 3) & ~3);
 
-                    uint texDataOffset = m_Model.m_File.Read32(m_Model.m_Textures.Values.ElementAt(index).m_EntryOffset + 0x04);
+                    uint texDataOffset = m_Model.m_File.Read32(m_Model.m_Textures[lbxTextures.SelectedItem.ToString()].m_EntryOffset + 0x04);
                     // If necessary, make room for additional texture data
                     if (newTexDataSize > oldTexDataSize)
                         m_Model.AddSpace(texDataOffset + oldTexDataSize, newTexDataSize - oldTexDataSize);
@@ -230,12 +233,12 @@ namespace SM64DSe
 
                     if (!chkNewPalette.Checked) // If we're editing an existing palette
                     {
-                        uint palDataOffset = m_Model.m_File.Read32(m_Model.m_Textures.Values.ElementAt(index).m_PalEntryOffset + 0x04);
+                        uint palDataOffset = m_Model.m_File.Read32(m_Model.m_Textures[lbxTextures.SelectedItem.ToString()].m_PalEntryOffset + 0x04);
                         // If necessary, make room for additional palette data
                         if (newPalDataSize > oldPalDataSize)
                             m_Model.AddSpace(palDataOffset + oldPalDataSize, newPalDataSize - oldPalDataSize);
                         // Reload palette data offset
-                        palDataOffset = m_Model.m_File.Read32(m_Model.m_Textures.Values.ElementAt(index).m_PalEntryOffset + 0x04);
+                        palDataOffset = m_Model.m_File.Read32(m_Model.m_Textures[lbxTextures.SelectedItem.ToString()].m_PalEntryOffset + 0x04);
 
                         if (tex.m_PaletteData != null)
                         {
@@ -244,7 +247,11 @@ namespace SM64DSe
                     }
                     else if (chkNewPalette.Checked)
                     {
-                        String newPalName = lbxTextures.Items[index].ToString() + "_new";
+                        /*
+                         * TODO: To get this to work, need to ensure all offsets remain 4 byte aligned
+                         */ 
+
+                        String newPalName = lbxTextures.Items[texIndex].ToString() + "_new";
 
                         uint newHdrOff = m_Model.m_PalChunksOffset + (m_Model.m_NumPalChunks * 16);
                         m_Model.AddSpace(newHdrOff, 16);
@@ -268,7 +275,7 @@ namespace SM64DSe
                         {
                             for (int j = 0; j < m_Model.m_ModelChunks[i].m_MatGroups.Length; j++)
                             {
-                                if (m_Model.m_ModelChunks[i].m_MatGroups[j].m_Texture.m_TexName == lbxTextures.Items[index].ToString())
+                                if (m_Model.m_ModelChunks[i].m_MatGroups[j].m_Texture.m_TexName == lbxTextures.Items[texIndex].ToString())
                                 {
                                     uint palID = m_Model.m_File.Read32(0x1C);
                                     uint matEntryOff = m_Model.m_File.Read32(0x28) + (m_Model.m_ModelChunks[i].m_MatGroups[j].m_ID * 48);

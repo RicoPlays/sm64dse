@@ -35,7 +35,7 @@
             this.pgObjectProperties = new System.Windows.Forms.PropertyGrid();
             this.tsEditActions = new System.Windows.Forms.ToolStrip();
             this.btnImportModel = new System.Windows.Forms.ToolStripButton();
-            this.btnExportModel = new System.Windows.Forms.ToolStripButton();
+            this.btnExportLevelModel = new System.Windows.Forms.ToolStripButton();
             this.btnAddTexAnim = new System.Windows.Forms.ToolStripButton();
             this.btnAddObject = new System.Windows.Forms.ToolStripButton();
             this.btnAddWarp = new System.Windows.Forms.ToolStripDropDownButton();
@@ -57,11 +57,13 @@
             this.toolStripMenuItem4 = new System.Windows.Forms.ToolStripMenuItem();
             this.btnImportOtherModel = new System.Windows.Forms.ToolStripButton();
             this.btnExportOtherModel = new System.Windows.Forms.ToolStripButton();
+            this.btnOffsetAllCoords = new System.Windows.Forms.ToolStripButton();
             this.glLevelView = new SM64DSe.HaxxGLControl();
             this.tsViewActions = new System.Windows.Forms.ToolStrip();
             this.btnDumpOverlay = new System.Windows.Forms.ToolStripButton();
             this.btnLOL = new System.Windows.Forms.ToolStripButton();
-            this.btnExportLevelModel = new System.Windows.Forms.ToolStripButton();
+            this.btnImportXML = new System.Windows.Forms.ToolStripButton();
+            this.btnExportXML = new System.Windows.Forms.ToolStripButton();
             this.tsToolBar = new System.Windows.Forms.ToolStrip();
             this.btnSave = new System.Windows.Forms.ToolStripButton();
             this.toolStripSeparator1 = new System.Windows.Forms.ToolStripSeparator();
@@ -89,7 +91,6 @@
             this.btnStarAll = new System.Windows.Forms.ToolStripButton();
             this.ssStatusBar = new System.Windows.Forms.StatusStrip();
             this.slStatusLabel = new System.Windows.Forms.ToolStripStatusLabel();
-            this.btnOffsetAllCoords = new System.Windows.Forms.ToolStripButton();
             //((System.ComponentModel.ISupportInitialize)(this.spcMainContainer)).BeginInit();
             this.spcMainContainer.Panel1.SuspendLayout();
             this.spcMainContainer.Panel2.SuspendLayout();
@@ -174,7 +175,7 @@
             // 
             this.tsEditActions.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {
             this.btnImportModel,
-            this.btnExportModel,
+            this.btnExportLevelModel,
             this.btnAddTexAnim,
             this.btnAddObject,
             this.btnAddWarp,
@@ -206,15 +207,14 @@
             this.btnImportModel.ToolTipText = "Replace the 3D model with one from a .obj file";
             this.btnImportModel.Click += new System.EventHandler(this.btnImportModel_Click);
             // 
-            // btnExportModel
+            // btnExportLevelModel
             // 
-            this.btnExportModel.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Text;
-            this.btnExportModel.Image = ((System.Drawing.Image)(resources.GetObject("btnExportModel.Image")));
-            this.btnExportModel.ImageTransparentColor = System.Drawing.Color.Magenta;
-            this.btnExportModel.Name = "btnExportModel";
-            this.btnExportModel.Size = new System.Drawing.Size(81, 19);
-            this.btnExportModel.Text = "Export model";
-            this.btnExportModel.ToolTipText = "Export the 3D model to a .obj file";
+            this.btnExportLevelModel.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Text;
+            this.btnExportLevelModel.ImageTransparentColor = System.Drawing.Color.Magenta;
+            this.btnExportLevelModel.Name = "btnExportLevelModel";
+            this.btnExportLevelModel.Size = new System.Drawing.Size(108, 19);
+            this.btnExportLevelModel.Text = "Export level model";
+            this.btnExportLevelModel.Click += new System.EventHandler(this.btnExportLevelModel_Click);
             // 
             // btnAddTexAnim
             // 
@@ -415,6 +415,15 @@
             this.btnExportOtherModel.Text = "Export other model";
             this.btnExportOtherModel.Click += new System.EventHandler(this.btnExportOtherModel_Click);
             // 
+            // btnOffsetAllCoords
+            // 
+            this.btnOffsetAllCoords.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Text;
+            this.btnOffsetAllCoords.ImageTransparentColor = System.Drawing.Color.Magenta;
+            this.btnOffsetAllCoords.Name = "btnOffsetAllCoords";
+            this.btnOffsetAllCoords.Size = new System.Drawing.Size(106, 19);
+            this.btnOffsetAllCoords.Text = "Offset All Co-ords";
+            this.btnOffsetAllCoords.Click += new System.EventHandler(this.btnOffsetAllCoords_Click);
+            // 
             // glLevelView
             // 
             this.glLevelView.BackColor = System.Drawing.Color.Black;
@@ -439,7 +448,8 @@
             this.tsViewActions.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {
             this.btnDumpOverlay,
             this.btnLOL,
-            this.btnExportLevelModel});
+            this.btnImportXML,
+            this.btnExportXML});
             this.tsViewActions.Location = new System.Drawing.Point(0, 0);
             this.tsViewActions.Name = "tsViewActions";
             this.tsViewActions.Size = new System.Drawing.Size(689, 25);
@@ -472,14 +482,23 @@
             this.btnLOL.Visible = false;
             this.btnLOL.Click += new System.EventHandler(this.btnLOL_Click);
             // 
-            // btnExportLevelModel
+            // btnImportXML
             // 
-            this.btnExportLevelModel.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Text;
-            this.btnExportLevelModel.ImageTransparentColor = System.Drawing.Color.Magenta;
-            this.btnExportLevelModel.Name = "btnExportLevelModel";
-            this.btnExportLevelModel.Size = new System.Drawing.Size(108, 22);
-            this.btnExportLevelModel.Text = "Export level model";
-            this.btnExportLevelModel.Click += new System.EventHandler(this.btnExportLevelModel_Click);
+            this.btnImportXML.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Text;
+            this.btnImportXML.ImageTransparentColor = System.Drawing.Color.Magenta;
+            this.btnImportXML.Name = "btnImportXML";
+            this.btnImportXML.Size = new System.Drawing.Size(74, 22);
+            this.btnImportXML.Text = "Import XML";
+            this.btnImportXML.Click += new System.EventHandler(this.btnImportXML_Click);
+            // 
+            // btnExportXML
+            // 
+            this.btnExportXML.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Text;
+            this.btnExportXML.ImageTransparentColor = System.Drawing.Color.Magenta;
+            this.btnExportXML.Name = "btnExportXML";
+            this.btnExportXML.Size = new System.Drawing.Size(71, 22);
+            this.btnExportXML.Text = "Export XML";
+            this.btnExportXML.Click += new System.EventHandler(this.btnExportXML_Click);
             // 
             // tsToolBar
             // 
@@ -776,15 +795,6 @@
             this.slStatusLabel.Paint += new System.Windows.Forms.PaintEventHandler(this.slStatusLabel_Paint);
             this.slStatusLabel.TextChanged += new System.EventHandler(this.slStatusLabel_TextChanged);
             // 
-            // btnOffsetAllCoords
-            // 
-            this.btnOffsetAllCoords.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Text;
-            this.btnOffsetAllCoords.ImageTransparentColor = System.Drawing.Color.Magenta;
-            this.btnOffsetAllCoords.Name = "btnOffsetAllCoords";
-            this.btnOffsetAllCoords.Size = new System.Drawing.Size(106, 19);
-            this.btnOffsetAllCoords.Text = "Offset All Co-ords";
-            this.btnOffsetAllCoords.Click += new System.EventHandler(this.btnOffsetAllCoords_Click);
-            // 
             // LevelEditorForm
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
@@ -853,7 +863,6 @@
         private System.Windows.Forms.PropertyGrid pgObjectProperties;
         private System.Windows.Forms.ToolStripStatusLabel slStatusLabel;
         private System.Windows.Forms.ToolStripButton btnImportModel;
-        private System.Windows.Forms.ToolStripButton btnExportModel;
         private System.Windows.Forms.ToolStripButton btnRemoveSel;
         private System.Windows.Forms.ToolStripButton btnAddTexAnim;
         private System.Windows.Forms.ToolStripButton btnAddObject;
@@ -869,7 +878,6 @@
         private HaxxGLControl glLevelView;
         private System.Windows.Forms.ToolStripButton btnEditMinimap;
         private System.Windows.Forms.ToolStripButton btnReplaceObjModel;
-        private System.Windows.Forms.ToolStripButton btnExportLevelModel;
         private System.Windows.Forms.ToolStripButton btnExportObjectModel;
         private System.Windows.Forms.ToolStripButton btnEditTexAnim;
         private System.Windows.Forms.ToolStripButton btnCLPS;
@@ -883,6 +891,9 @@
         private System.Windows.Forms.ToolStripButton btnImportOtherModel;
         private System.Windows.Forms.ToolStripButton btnExportOtherModel;
         private System.Windows.Forms.ToolStripButton btnOffsetAllCoords;
+        private System.Windows.Forms.ToolStripButton btnExportLevelModel;
+        private System.Windows.Forms.ToolStripButton btnImportXML;
+        private System.Windows.Forms.ToolStripButton btnExportXML;
 
 
     }
