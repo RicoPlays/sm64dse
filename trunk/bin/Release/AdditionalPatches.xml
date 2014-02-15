@@ -1,5 +1,5 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
-<!--SM64DS Editor v2.1x PRIVATE BETA 201402-->
+<!--SM64DS Editor v2.2 PRIVATE BETA 20140208-->
 <Patches>
   <Patch>
     <PatchName>Skip Introduction</PatchName>
@@ -575,6 +575,30 @@
         </Data>
       </AddressDataPair>
     </EURPatch>
+    <USv1Patch>
+      <AddressDataPair>
+        <Address>165520</Address>
+        <Data>
+          <Byte>3</Byte>
+        </Data>
+      </AddressDataPair>
+    </USv1Patch>
+    <USv2Patch>
+      <AddressDataPair>
+        <Address>166144</Address>
+        <Data>
+          <Byte>3</Byte>
+        </Data>
+      </AddressDataPair>
+    </USv2Patch>
+    <JAPPatch>
+      <AddressDataPair>
+        <Address>166084</Address>
+        <Data>
+          <Byte>3</Byte>
+        </Data>
+      </AddressDataPair>
+    </JAPPatch>
     <EURRestoreData>
       <AddressDataPair>
         <Address>168824</Address>
@@ -789,6 +813,30 @@
         </Data>
       </AddressDataPair>
     </EURPatch>
+    <USv1Patch>
+      <AddressDataPair>
+        <Address>171056</Address>
+        <Data>
+          <Byte>99</Byte>
+        </Data>
+      </AddressDataPair>
+    </USv1Patch>
+    <USv2Patch>
+      <AddressDataPair>
+        <Address>171752</Address>
+        <Data>
+          <Byte>99</Byte>
+        </Data>
+      </AddressDataPair>
+    </USv2Patch>
+    <JAPPatch>
+      <AddressDataPair>
+        <Address>171692</Address>
+        <Data>
+          <Byte>99</Byte>
+        </Data>
+      </AddressDataPair>
+    </JAPPatch>
     <EURRestoreData>
       <AddressDataPair>
         <Address>175368</Address>
@@ -812,6 +860,39 @@
         </Data>
       </AddressDataPair>
     </EURPatch>
+    <USv1Patch>
+      <AddressDataPair>
+        <Address>169800</Address>
+        <Data>
+          <Byte>34</Byte>
+          <Byte>13</Byte>
+          <Byte>160</Byte>
+          <Byte>227</Byte>
+        </Data>
+      </AddressDataPair>
+    </USv1Patch>
+    <USv2Patch>
+      <AddressDataPair>
+        <Address>170496</Address>
+        <Data>
+          <Byte>34</Byte>
+          <Byte>13</Byte>
+          <Byte>160</Byte>
+          <Byte>227</Byte>
+        </Data>
+      </AddressDataPair>
+    </USv2Patch>
+    <JAPPatch>
+      <AddressDataPair>
+        <Address>170436</Address>
+        <Data>
+          <Byte>34</Byte>
+          <Byte>13</Byte>
+          <Byte>160</Byte>
+          <Byte>227</Byte>
+        </Data>
+      </AddressDataPair>
+    </JAPPatch>
     <EURRestoreData>
       <AddressDataPair>
         <Address>174112</Address>
