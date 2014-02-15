@@ -123,7 +123,7 @@ namespace SM64DSe
 
                 byte type = (byte)(flags & 0x1F);
                 byte layer = (byte)(flags >> 5);
-                
+
                 switch (type)
                 {
                     case 0:
@@ -330,7 +330,7 @@ namespace SM64DSe
 
             if (checkCorrupt)
             {
-                DialogResult result = MessageBox.Show("This level contains addresses that are not aligned to 4 byte boundaries and therefore may not work in-game." + 
+                DialogResult result = MessageBox.Show("This level contains addresses that are not aligned to 4 byte boundaries and therefore may not work in-game." +
                     "\n\nDo you want to attempt to fix these issues?\n\nChanges will not be saved.", "Warning", MessageBoxButtons.YesNo);
                 // Check if the level contains addresses not aligned to 4 byte boundaries and do attempt fix
                 if (result == DialogResult.Yes)
@@ -810,7 +810,7 @@ namespace SM64DSe
                     {
                         btnAddMisc.Visible = true;
                         btnRemoveSel.Visible = true;
-                        
+
                         if (!m_ShowCommonLayer) break;
                         TreeNode node0 = tvObjectList.Nodes.Add("parent0", "Minimap Scales");
                         TreeNode node1 = tvObjectList.Nodes.Add("parent1", "Fog");
@@ -1019,7 +1019,6 @@ namespace SM64DSe
                 uint endptrPlusSize_AlignedNextFour = (uint)(((endptr + (uint)size) + 3) & ~3);
                 uint endptr_AlignedNextFour_PlusSize = endptr_AlignedNextFour + (uint)size;
                 int padding = (int)endptr_AlignedNextFour_PlusSize - (int)endptrPlusSize_AlignedNextFour;
-                int roomNeeded = size + ((-1) * padding);
 
                 AddSpace(new_obj_addr, (uint)size);
 
@@ -1037,12 +1036,15 @@ namespace SM64DSe
             AddSpace(tableendptr, 8);
             m_Overlay.Write32(tableptr, numentries + 1);
 
-            uint objaddr = m_Overlay.GetSize();
+            uint objaddr = (uint)((m_Overlay.GetSize() + 3) & ~3);
             m_Overlay.Write8(tableendptr, (byte)(type | (layer << 5)));
             m_Overlay.Write8(tableendptr + 1, 1);
             m_Overlay.Write16(tableendptr + 2, 0);
             m_Overlay.WritePointer(tableendptr + 4, objaddr);
             AddPointer(tableendptr + 4);
+
+            for (int i = 0; i < ((size + 3) & ~3); i++)
+                m_Overlay.Write8((uint)(objaddr + i), 0x00);
 
             return objaddr;
         }
@@ -1078,7 +1080,7 @@ namespace SM64DSe
                     continue;
 
                 RemoveSpace(obj.m_Offset, (uint)size);
-                
+
                 // If needed, add or remove padding at end of table to ensure following addresses are 4 byte aligned
                 uint oldTblEndAlignedFour = (uint)((tblend + 3) & ~3);
                 uint currentTblEnd = (uint)(((tblend - (uint)size) + 3) & ~3);
@@ -1120,9 +1122,6 @@ namespace SM64DSe
             int size = sizes[type];
 
             uint offset = (off == -1) ? AddObjectSlot(type, layer, area) : AddObjectSlot(type, layer, area, off);
-
-            for (int i = 0; i < size; i++)
-                m_Overlay.Write8((uint)(offset + i), 0x00);
 
             // write the object ID before creating the object so that it is created
             // with the right renderer and settings
@@ -2254,7 +2253,7 @@ namespace SM64DSe
 
                 return;
             }
-            
+
             LevelObject obj = m_SelectedObject;
 
             if (obj.m_Type == 2)
@@ -2429,7 +2428,7 @@ namespace SM64DSe
                     // Increase length of parent path
                     paths.ElementAt(i).Parameters[1] += 1;
                 }
-                else
+                else if (i > m_CurrentPathID)
                 {
                     // Increase start node index for all following paths
                     paths.ElementAt(i).Parameters[0] += 1;
