@@ -122,6 +122,7 @@
             this.mnitDumpAllOvls,
             this.decompressOverlaysWithinGameToolStripMenuItem,
             this.hexDumpToBinaryFileToolStripMenuItem});
+            this.btnSecretShit.Enabled = false;
             this.btnSecretShit.Image = ((System.Drawing.Image)(resources.GetObject("btnSecretShit.Image")));
             this.btnSecretShit.ImageTransparentColor = System.Drawing.Color.Magenta;
             this.btnSecretShit.Name = "btnSecretShit";
@@ -168,6 +169,7 @@
             // btnAddPatches
             // 
             this.btnAddPatches.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Text;
+            this.btnAddPatches.Enabled = false;
             this.btnAddPatches.ImageTransparentColor = System.Drawing.Color.Magenta;
             this.btnAddPatches.Name = "btnAddPatches";
             this.btnAddPatches.Size = new System.Drawing.Size(110, 22);

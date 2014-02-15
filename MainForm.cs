@@ -76,7 +76,7 @@ namespace SM64DSe
             {
                 DialogResult res = MessageBox.Show(
                     "This ROM needs to be patched before the editor can work with it.\n\n" +
-                    "Do you want to first make a backup of it incase the patching\n" +
+                    "Do you want to first make a backup of it in case the patching\n" +
                     "operation goes wrong somehow?",
                     Program.AppTitle, MessageBoxButtons.YesNoCancel, MessageBoxIcon.Question);
 
@@ -127,6 +127,7 @@ namespace SM64DSe
 
             btnEditTexts.Enabled = true;
             btnAddPatches.Enabled = true;
+            btnSecretShit.Enabled = true;
         }
 
         public MainForm(string[] args)
