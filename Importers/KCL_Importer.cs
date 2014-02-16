@@ -130,192 +130,307 @@ namespace SM64DSe
             return new object[] { triangles };
         }
 
+        static CultureInfo usahax = new CultureInfo("en-US");
+
+        static List<Vertex> vertices;
+        static List<Triangle> triangles;
+        static List<string> group_names;
+        static string group_name;
+        static Dictionary<string, string> geometryPositionsListNames;
+        static int currentVertexCount = 0;
+        static string currentBone;
+        static int vertexIndex = -1;
+        static int normalIndex = -1;
+        static int texCoordIndex = -1;
+        static int colourIndex = -1;
+        static int curr_group = 0;
         private static object[] read_dae(string filename, float faceSizeThreshold, Dictionary<string, int> matColTypes)
         {
-            List<Vertex> vertices = new List<Vertex>();
-            List<Triangle> triangles = new List<Triangle>();
-            List<string> group_names = new List<string>();
+            vertices = new List<Vertex>();
+            triangles = new List<Triangle>();
+            group_names = new List<string>();
 
-            string group_name = "";
-            CultureInfo usahax = new CultureInfo("en-US");
+            // Get the name of the vertices list first - needed to distinguish between positions and normals
+            geometryPositionsListNames = ReadDAEGeometryPositionsListNames(filename);
 
             using (XmlReader reader = XmlReader.Create(filename))
             {
                 reader.MoveToContent();
 
-                List<float> currentVertices = new List<float>();
-                float[][] raw = new float[1][];
-                int vertexIndex = -1;
-                int normalIndex = -1;
-                int texCoordIndex = -1;
-                int colourIndex = -1;
-                int[] vcount = null;
-                bool isTriangles = false;
-                int currentVertexCount = 0;
-                int ind = 0;
-                int curr_group = 0;
-
                 while (reader.Read())
                 {
                     if (reader.NodeType.Equals(XmlNodeType.Element))
                     {
-                        switch (reader.LocalName)
+                        if (reader.LocalName.Equals("geometry"))
                         {
-                            case "geometry":
-                                currentVertices = new List<float>();
-                                raw = new float[4][];
-                                vertexIndex = -1;
-                                vcount = null;
-                                isTriangles = false;
-                                ind = 0;
-                                break;
-                            case "float_array":
-                                {
-                                    String values = reader.ReadElementContentAsString();
-                                    String[] split = values.Split(' ');
-                                    float[] float_values = new float[split.Length];
-                                    for (int i = 0; i < split.Length; i++)
-                                        float_values[i] = float.Parse(split[i], usahax);
-                                    raw[ind] = float_values;
-
-                                    // Read components of vertices, assuming vertices is first
-                                    switch (ind)
-                                    {
-                                        // Vertices
-                                        case 0:
-                                            for (int i = 0; i < raw[0].Length; i += 3)
-                                            {
-                                                currentVertices.Add(raw[0][i]);
-                                                currentVertices.Add(raw[0][i + 1]);
-                                                currentVertices.Add(raw[0][i + 2]);
-
-                                                vertices.Add(new Vertex(raw[0][i], raw[0][i + 1], raw[0][i + 2]));
-                                            }
-                                            currentVertexCount = raw[0].Length / 3;
-                                            break;
-                                    }
-
-                                    ind++;
-                                }
-                                break;
-                            case "lines":
-                                reader.Skip();
-                                break;
-                            case "triangles":
-                                isTriangles = true;
-                                goto case "polylist";
-                            case "polylist":
-                                {
-                                    group_name = reader.GetAttribute("material");
-                                    int matNameLength = group_name.Length;
-                                    // DAE models exported with Blender add a number starting at 1 for each geometry node 
-                                    // to the end of the value given for material
-                                    if (!matColTypes.ContainsKey(group_name))
-                                    {
-                                        for (int i = 0; i < matNameLength; i++)
-                                        {
-                                            group_name = group_name.Substring(0, group_name.Length - 1);
-
-                                            if (matColTypes.ContainsKey(group_name))
-                                                break;
-                                        }
-                                    }
-                                    if (!group_names.Contains(group_name))
-                                    {
-                                        group_names.Add(group_name);
-                                    }
-                                    curr_group = group_names.IndexOf(group_name);
-                                    int numFaces = int.Parse(reader.GetAttribute("count"));
-                                    vcount = new int[numFaces];
-                                    isTriangles = (reader.LocalName.Equals("triangles")) ? true : false;
-                                }
-                                break;
-                            case "input":
-                                {
-                                    // Get the offset of the vertex positions within each face
-                                    // Although ignored, we still need to know if normals, texture co-ordinates and colours are included
-                                    switch (reader.GetAttribute("semantic"))
-                                    {
-                                        case "VERTEX":
-                                            vertexIndex = int.Parse(reader.GetAttribute("offset"));
-                                            break;
-                                        case "NORMAL":
-                                            normalIndex = int.Parse(reader.GetAttribute("offset"));
-                                            break;
-                                        case "TEXCOORD":
-                                            texCoordIndex = int.Parse(reader.GetAttribute("offset"));
-                                            break;
-                                        case "COLOR":
-                                            colourIndex = int.Parse(reader.GetAttribute("offset"));
-                                            break;
-                                    }
-                                }
-                                break;
-                            // The number of vertices in each face
-                            case "vcount":
-                                {
-                                    String values = reader.ReadElementContentAsString();
-                                    String[] split = values.Split(new string[] { " " }, StringSplitOptions.RemoveEmptyEntries);
-                                    for (int i = 0; i < split.Length; i++)
-                                    {
-                                        vcount[i] = int.Parse(split[i]);
-                                    }
-                                }
-                                break;
-                            // Face definitions
-                            // NOTE: Only supports triangulated meshes at present
-                            case "p":
-                                {
-                                    String values = reader.ReadElementContentAsString();
-                                    String[] split = values.Split(' ');
-
-                                    int vtxInd = 0;
-                                    int vcountInd = 0;
-                                    // Faces must include vertices, normals and texture co-ordinates with
-                                    // optional colours
-                                    int inputCount = 0;
-                                    if (vertexIndex != -1) inputCount++; if (normalIndex != -1) inputCount++;
-                                    if (texCoordIndex != -1) inputCount++; if (colourIndex != -1) inputCount++;
-                                    while (vtxInd < split.Length)
-                                    {
-                                        int nvtx = (!isTriangles) ? vcount[vcountInd] : 3;
-                                        int[] vtxIndices = new int[nvtx];
-
-                                        // For each vertex defined in face
-                                        for (int i = 0; i < nvtx; i += 1)
-                                        {
-                                            vtxIndices[i] = int.Parse(split[vtxInd + vertexIndex]) + (vertices.Count - currentVertexCount);
-
-                                            vtxInd += inputCount;
-                                        }
-
-                                        Vertex u = vertices[vtxIndices[0]];
-                                        Vertex v = vertices[vtxIndices[1]];
-                                        Vertex w = vertices[vtxIndices[2]];
-
-                                        //Below line gets rid of faces that are too small, original 0.001
-                                        if (cross(v.sub(u), w.sub(u)).norm_sq() > faceSizeThreshold)//#TODO: find a better solution
-                                            triangles.Add(new Triangle(u, v, w, matColTypes[group_name]));
-
-                                        /* Example of a typical triangle
-                                         * 0  0  0      2  1  3     3  2  2
-                                         * V1 N1 T1     V2 N2 T2    V3 N3 T3
-                                         * 
-                                         * V<n> are the indices of the triangles vertex positions,
-                                         * N<n> are its normal indices
-                                         * and T<n> are its texture co-ordinate indices
-                                         */
-
-                                        vcountInd++;
-                                    }
-                                }
-                                break;
+                            ReadDAE_Geometry(reader, faceSizeThreshold, matColTypes);
+                        }
+                    }
+                    else if (reader.NodeType.Equals(XmlNodeType.EndElement))
+                    {
+                        if (reader.LocalName.Equals("COLLADA"))
+                        {
+                            break;
                         }
                     }
                 }
             }
 
             return new object[] { triangles };
+        }
+
+        private static Dictionary<string, string> ReadDAEGeometryPositionsListNames(string modelFileName)
+        {
+            Dictionary<string, string> geometryPositionsListNames = new Dictionary<string, string>();
+
+            using (XmlReader reader = XmlReader.Create(modelFileName))
+            {
+                reader.MoveToContent();
+
+                while (reader.Read())
+                {
+                    reader.ReadToFollowing("geometry");
+                    string currentGeometry = reader.GetAttribute("name");
+
+                    if (!reader.NodeType.Equals(XmlNodeType.Element))
+                        continue;
+
+                    reader.ReadToFollowing("vertices");
+                    reader.ReadToFollowing("input");
+                    string semantic = reader.GetAttribute("semantic");
+                    while (semantic.ToLowerInvariant() != "position")
+                    {
+                        reader.ReadToFollowing("input");
+                        semantic = reader.GetAttribute("semantic");
+                    }
+                    string positionsName = reader.GetAttribute("source").Replace("#", "");
+                    geometryPositionsListNames.Add(currentGeometry, positionsName);
+                }
+            }
+
+            return geometryPositionsListNames;
+        }
+
+        private static void ReadDAE_Geometry(XmlReader reader, float faceSizeThreshold, Dictionary<string, int> matColTypes)
+        {
+            currentBone = reader.GetAttribute("name");
+            vertexIndex = -1;
+            normalIndex = -1;
+            texCoordIndex = -1;
+            colourIndex = -1;
+
+            reader.MoveToContent();
+            while (reader.Read())
+            {
+                if (reader.NodeType.Equals(XmlNodeType.Element))
+                {
+                    if (reader.LocalName.Equals("source"))
+                    {
+                        ReadDAE_Source(reader);
+                    }
+                    else if (reader.LocalName.Equals("polylist"))
+                    {
+                        ReadDAE_PolyList(reader, faceSizeThreshold, matColTypes);
+                    }
+                    else if (reader.LocalName.Equals("triangles"))
+                    {
+                        ReadDAE_PolyList(reader, faceSizeThreshold, matColTypes);
+                    }
+                    else if (reader.LocalName.Equals("polygons"))
+                    {
+                        ReadDAE_PolyList(reader, faceSizeThreshold, matColTypes, true);
+                    }
+                }
+                else if (reader.NodeType.Equals(XmlNodeType.EndElement) && reader.LocalName.Equals("geometry"))
+                {
+                    return;
+                }
+            }
+
+            return;
+        }
+
+        private static void ReadDAE_PolyList(XmlReader reader, float faceSizeThreshold, 
+            Dictionary<string, int> matColTypes, bool isPolygons = false)
+        {
+            group_name = reader.GetAttribute("material");
+            int matNameLength = group_name.Length;
+            // DAE models exported with Blender add a number starting at 1 for each geometry node 
+            // to the end of the value given for material
+            if (!matColTypes.ContainsKey(group_name))
+            {
+                for (int i = 0; i < matNameLength; i++)
+                {
+                    group_name = group_name.Substring(0, group_name.Length - 1);
+
+                    if (matColTypes.ContainsKey(group_name))
+                        break;
+                }
+            }
+            if (!group_names.Contains(group_name))
+            {
+                group_names.Add(group_name);
+            }
+            curr_group = group_names.IndexOf(group_name);
+            int numFaces = int.Parse(reader.GetAttribute("count"));
+            int[] vcount = null;
+
+            string element = reader.LocalName;
+
+            reader.MoveToContent();
+            while (reader.Read())
+            {
+                if (reader.NodeType.Equals(XmlNodeType.Element))
+                {
+                    if (reader.LocalName.Equals("input"))
+                    {
+                        ReadDAE_Input(reader);
+                    }
+                    else if (reader.LocalName.Equals("vcount"))
+                    {
+                        vcount = ReadDAE_VCount(reader, numFaces);
+                    }
+                    else if (reader.LocalName.Equals("p"))
+                    {
+                        ReadDAE_P(reader, vcount, numFaces, faceSizeThreshold, matColTypes, isPolygons);
+                    }
+                }
+                else if (reader.NodeType.Equals(XmlNodeType.EndElement) && reader.LocalName.Equals(element))
+                {
+                    return;
+                }
+            }
+
+            return;
+        }
+
+        private static void ReadDAE_Source(XmlReader reader)
+        {
+            reader.MoveToContent();
+            while (reader.Read())
+            {
+                if (reader.NodeType.Equals(XmlNodeType.Element))
+                {
+                    if (reader.LocalName.Equals("float_array"))
+                    {
+                        ReadDAE_FloatArray(reader);
+                    }
+                }
+                else if (reader.NodeType.Equals(XmlNodeType.EndElement) && reader.LocalName.Equals("source"))
+                {
+                    return;
+                }
+            }
+            return;
+        }
+
+        private static void ReadDAE_FloatArray(XmlReader reader)
+        {
+            string id = reader.GetAttribute("id");
+            string values = reader.ReadElementContentAsString();
+            string[] split = values.Split(new string[] { " ", "\n", "\r\n" }, StringSplitOptions.RemoveEmptyEntries);
+            float[] float_values = new float[split.Length];
+            for (int i = 0; i < split.Length; i++)
+                float_values[i] = float.Parse(split[i], usahax);
+
+            reader.ReadToFollowing("accessor");
+            int stride = int.Parse(reader.GetAttribute("stride"));
+            reader.ReadToFollowing("param");
+            string param0 = reader.GetAttribute("name");
+
+            if (id.Contains(geometryPositionsListNames[currentBone]))
+            {
+                for (int i = 0; i < float_values.Length; i += 3)
+                {
+                    vertices.Add(new Vertex(float_values[i], float_values[i + 1], float_values[i + 2]));
+                }
+                currentVertexCount = float_values.Length / 3;
+            }
+
+        }
+
+        private static void ReadDAE_Input(XmlReader reader)
+        {
+            string semantic = reader.GetAttribute("semantic");
+
+            switch (semantic)
+            {
+                case "VERTEX":
+                    vertexIndex = int.Parse(reader.GetAttribute("offset"));
+                    break;
+                case "NORMAL":
+                    normalIndex = int.Parse(reader.GetAttribute("offset"));
+                    break;
+                case "TEXCOORD":
+                    texCoordIndex = int.Parse(reader.GetAttribute("offset"));
+                    break;
+                case "COLOR":
+                    colourIndex = int.Parse(reader.GetAttribute("offset"));
+                    break;
+            }
+        }
+
+        private static int[] ReadDAE_VCount(XmlReader reader, int numFaces)
+        {
+            int[] vcount = new int[numFaces];
+
+            String values = reader.ReadElementContentAsString();
+            String[] split = values.Split(new string[] { " ", "\n", "\r\n" }, StringSplitOptions.RemoveEmptyEntries);
+            for (int i = 0; i < split.Length; i++)
+            {
+                vcount[i] = int.Parse(split[i]);
+            }
+
+            return vcount;
+        }
+
+        private static void ReadDAE_P(XmlReader reader, int[] vcount, int numFaces, float faceSizeThreshold, 
+            Dictionary<string, int> matColTypes, bool isPolygons = false)
+        {
+            String values = reader.ReadElementContentAsString();
+            String[] split = values.Split(new string[] { " ", "\n", "\r\n" }, StringSplitOptions.RemoveEmptyEntries);
+
+            int vtxInd = 0;
+            int vcountInd = 0;
+            // Faces must include vertices, normals and texture co-ordinates with
+            // optional colours
+            int inputCount = 0;
+            if (vertexIndex != -1) inputCount++; if (normalIndex != -1) inputCount++;
+            if (texCoordIndex != -1) inputCount++; if (colourIndex != -1) inputCount++;
+            while (vtxInd < split.Length)
+            {
+                int nvtx = (vcount != null) ? vcount[vcountInd] : (split.Length / (inputCount * numFaces));
+                if (isPolygons)
+                    nvtx = (split.Length / inputCount);
+                int[] vtxIndices = new int[nvtx];
+
+                // For each vertex defined in face
+                for (int i = 0; i < nvtx; i += 1)
+                {
+                    vtxIndices[i] = int.Parse(split[vtxInd + vertexIndex]) + (vertices.Count - currentVertexCount);
+
+                    vtxInd += inputCount;
+                }
+
+                Vertex u = vertices[vtxIndices[0]];
+                Vertex v = vertices[vtxIndices[1]];
+                Vertex w = vertices[vtxIndices[2]];
+
+                //Below line gets rid of faces that are too small, original 0.001
+                if (cross(v.sub(u), w.sub(u)).norm_sq() > faceSizeThreshold)//#TODO: find a better solution
+                    triangles.Add(new Triangle(u, v, w, matColTypes[group_name]));
+
+                /* Example of a typical triangle
+                 * 0  0  0      2  1  3     3  2  2
+                 * V1 N1 T1     V2 N2 T2    V3 N3 T3
+                 * 
+                 * V<n> are the indices of the triangles vertex positions,
+                 * N<n> are its normal indices
+                 * and T<n> are its texture co-ordinate indices
+                 */
+
+                vcountInd++;
+            }
         }
 
         private static void write_kcl(NitroFile kcl, List<Triangle> triangles, int max_triangles, int min_width, float scale)
