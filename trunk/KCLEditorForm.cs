@@ -453,6 +453,7 @@ namespace SM64DSe
             {
                 txtModelName.Text = ofd.FileName;
                 String modelFormat = ofd.FileName.Substring(ofd.FileName.Length - 3, 3).ToLower();
+                matColTypes = new Dictionary<string, int>();
                 switch (modelFormat)
                 {
                     case "obj":
@@ -509,12 +510,11 @@ namespace SM64DSe
                 {
                     if (reader.NodeType.Equals(XmlNodeType.Element))
                     {
-                        if (reader.LocalName.Equals("effect"))
+                        if (reader.LocalName.Equals("material"))
                         {
-                            // Get the material name by removeing "-effect" from the end of the effect node's ID
-                            String material_name = Regex.Replace(reader.GetAttribute("id"), @"-effect$", String.Empty);
-                            if (!matColTypes.ContainsKey(material_name))
-                                matColTypes.Add(material_name, 0);
+                            string material = reader.GetAttribute("name");
+                            if (!matColTypes.ContainsKey(material))
+                                matColTypes.Add(material, 0);
                         }
                     }
                 }

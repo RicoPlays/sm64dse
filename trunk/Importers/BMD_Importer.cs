@@ -879,7 +879,7 @@ namespace SM64DSe.Importers
                                     if (reader.LocalName.Equals("color"))
                                     {
                                         String value = reader.ReadElementContentAsString();
-                                        String[] rgba = value.Split(' ');
+                                        String[] rgba = value.Split(new char[] { ' ' }, StringSplitOptions.RemoveEmptyEntries);
                                         float r = float.Parse(rgba[0], usahax);
                                         float g = float.Parse(rgba[1], usahax);
                                         float b = float.Parse(rgba[2], usahax);
@@ -1451,6 +1451,19 @@ namespace SM64DSe.Importers
             return m_ImportedModel;
         }
 
+        static CultureInfo usahax = new CultureInfo("en-US");
+
+        static List<float> currentVertices;
+        static List<float> currentTexCoords;
+        static List<float> currentNormals;
+        static List<float> currentColours;
+        static string currentBone;
+        static string curmaterial;
+        static Dictionary<string, string> geometryPositionsListNames;
+        static int vertexIndex = -1;
+        static int normalIndex = -1;
+        static int texCoordIndex = -1;
+        static int colourIndex = -1;
         public static BMD LoadModel_DAE(BMD model, String modelFileName, String modelPath, Vector3 m_Scale)
         {
             m_ImportedModel = model;
@@ -1467,14 +1480,12 @@ namespace SM64DSe.Importers
             m_ModelFileName = modelFileName;
             m_ModelPath = modelPath;
 
+            currentBone = "";
+            curmaterial = "";
+
             m_MD5 = new MD5CryptoServiceProvider();
 
-            string curmaterial = "";
-            CultureInfo usahax = new CultureInfo("en-US");
-            Dictionary<string, string> geometryPositionsListNames = new Dictionary<string, string>();
-
             bool foundObjects = DAE_LoadDefaultBones(modelFileName);
-            string currentBone = "";
             if (!foundObjects)
             {
                 currentBone = "default_bone_name";
@@ -1484,6 +1495,45 @@ namespace SM64DSe.Importers
             DAE_LoadMTL(modelFileName);
 
             // Get the name of the vertices list first - needed to distinguish between positions and normals
+            geometryPositionsListNames = ReadDAEGeometryPositionsListNames(modelFileName);
+
+            using (XmlReader reader = XmlReader.Create(modelFileName))
+            {
+                reader.MoveToContent();
+
+                while (reader.Read())
+                {
+                    if (reader.NodeType.Equals(XmlNodeType.Element))
+                    {
+                        if (reader.LocalName.Equals("bonelib"))
+                        {
+                            // <bonelib value="FILENAME.bones"/>
+                            LoadBoneDefinitions(m_ModelPath + reader.GetAttribute("value"));
+                        }
+                        else if (reader.LocalName.Equals("geometry"))
+                        {
+                            ReadDAE_Geometry(reader);
+                        }
+                    }
+                    else if (reader.NodeType.Equals(XmlNodeType.EndElement))
+                    {
+                        if (reader.LocalName.Equals("COLLADA"))
+                        {
+                            break;
+                        }
+                    }
+                }
+            }
+
+            ImportModel(m_Scale, false);
+
+            return m_ImportedModel;
+        }
+
+        private static Dictionary<string, string> ReadDAEGeometryPositionsListNames(string modelFileName)
+        {
+            Dictionary<string, string> geometryPositionsListNames = new Dictionary<string, string>();
+
             using (XmlReader reader = XmlReader.Create(modelFileName))
             {
                 reader.MoveToContent();
@@ -1509,213 +1559,253 @@ namespace SM64DSe.Importers
                 }
             }
 
-            using (XmlReader reader = XmlReader.Create(modelFileName))
+            return geometryPositionsListNames;
+        }
+
+        private static void ReadDAE_Geometry(XmlReader reader)
+        {
+            currentBone = reader.GetAttribute("name");
+            m_Bones[currentBone].m_Name = currentBone;
+            currentVertices = new List<float>();
+            currentTexCoords = new List<float>();
+            currentNormals = new List<float>();
+            currentColours = new List<float>();
+            vertexIndex = -1;
+            normalIndex = -1;
+            texCoordIndex = -1;
+            colourIndex = -1;
+
+            reader.MoveToContent();
+            while (reader.Read())
             {
-                reader.MoveToContent();
-
-                List<float> currentVertices = new List<float>();
-                List<float> currentTexCoords = new List<float>();
-                List<float> currentNormals = new List<float>();
-                List<float> currentColours = new List<float>();
-                int vertexIndex = -1;
-                int normalIndex = -1;
-                int texCoordIndex = -1;
-                int colourIndex = -1;
-                int[] vcount = null;
-                bool isTriangles = false;
-
-                while (reader.Read())
+                if (reader.NodeType.Equals(XmlNodeType.Element))
                 {
-                    if (reader.NodeType.Equals(XmlNodeType.Element))
+                    if (reader.LocalName.Equals("source"))
                     {
-                        switch (reader.LocalName)
-                        {
-                            case "bonelib":
-                                // <bonelib value="FILENAME.bones"/>
-                                LoadBoneDefinitions(m_ModelPath + reader.GetAttribute("value"));
-                                break;
-                            case "geometry":
-                                currentBone = reader.GetAttribute("name");
-                                m_Bones[currentBone].m_Name = currentBone;
-                                currentVertices = new List<float>();
-                                currentTexCoords = new List<float>();
-                                currentNormals = new List<float>();
-                                currentColours = new List<float>();
-                                vertexIndex = -1;
-                                normalIndex = -1;
-                                texCoordIndex = -1;
-                                colourIndex = -1;
-                                vcount = null;
-                                isTriangles = false;
-                                break;
-                            case "float_array":
-                                {
-                                    string id = reader.GetAttribute("id");
-                                    string values = reader.ReadElementContentAsString();
-                                    string[] split = values.Split(' ');
-                                    float[] float_values = new float[split.Length];
-                                    for (int i = 0; i < split.Length; i++)
-                                        float_values[i] = float.Parse(split[i], usahax);
-
-                                    reader.ReadToFollowing("accessor");
-                                    int stride = int.Parse(reader.GetAttribute("stride"));
-                                    reader.ReadToFollowing("param");
-                                    string param0 = reader.GetAttribute("name");
-
-                                    if (stride == 2)
-                                        currentTexCoords.AddRange(float_values);
-                                    else if (param0.Equals("R") || param0.Equals("G") || param0.Equals("B"))
-                                        currentColours.AddRange(float_values);
-                                    else
-                                    {
-                                        // Positions
-                                        if (id.Contains(geometryPositionsListNames[currentBone]))
-                                            currentVertices.AddRange(float_values);
-                                        // Normals
-                                        else
-                                            currentNormals.AddRange(float_values);
-                                    }
-
-                                }
-                                break;
-                            case "lines":
-                                reader.Skip();
-                                break;
-                            case "triangles":
-                                isTriangles = true;
-                                goto case "polylist";
-                            case "polylist":
-                                {
-                                    curmaterial = reader.GetAttribute("material");
-                                    // DAE models exported with Blender add a number starting at 1 for each geometry node 
-                                    // to the end of the value given for material
-                                    if (curmaterial == null) { addWhiteMat(currentBone); curmaterial = "default_white"; }
-                                    curmaterial = getClosestMaterialMatch(curmaterial);
-                                    // The parent bone should have a list of all materials used by itself and its children
-                                    if (!m_Bones[m_Bones[currentBone].m_RootBone].m_Materials.ContainsKey(curmaterial))
-                                        m_Bones[m_Bones[currentBone].m_RootBone].m_Materials.Add(curmaterial, m_Materials[curmaterial].copyAllButFaces());
-                                    if (!m_Bones[currentBone].m_Materials.ContainsKey(curmaterial))
-                                        m_Bones[currentBone].m_Materials.Add(curmaterial, m_Materials[curmaterial].copyAllButFaces());
-                                    int numFaces = int.Parse(reader.GetAttribute("count"));
-                                    vcount = new int[numFaces];
-                                    isTriangles = (reader.LocalName.Equals("triangles")) ? true : false;
-                                }
-                                break;
-                            case "input":
-                                {
-                                    switch (reader.GetAttribute("semantic"))
-                                    {
-                                        case "VERTEX":
-                                            vertexIndex = int.Parse(reader.GetAttribute("offset"));
-                                            break;
-                                        case "NORMAL":
-                                            normalIndex = int.Parse(reader.GetAttribute("offset"));
-                                            break;
-                                        case "TEXCOORD":
-                                            texCoordIndex = int.Parse(reader.GetAttribute("offset"));
-                                            break;
-                                        case "COLOR":
-                                            colourIndex = int.Parse(reader.GetAttribute("offset"));
-                                            break;
-                                    }
-                                }
-                                break;
-                            // The number of vertices in each face
-                            case "vcount":
-                                {
-                                    String values = reader.ReadElementContentAsString();
-                                    String[] split = values.Split(new string[] { " " }, StringSplitOptions.RemoveEmptyEntries);
-                                    for (int i = 0; i < split.Length; i++)
-                                    {
-                                        vcount[i] = int.Parse(split[i]);
-                                    }
-                                }
-                                break;
-                            // Face definitions
-                            case "p":
-                                {
-                                    String values = reader.ReadElementContentAsString();
-                                    String[] split = values.Split(' ');
-
-                                    int vtxInd = 0;
-                                    int vcountInd = 0;
-                                    // Faces must include vertices, normals and texture co-ordinates with
-                                    // optional colours
-                                    int inputCount = 0;
-                                    if (vertexIndex != -1) inputCount++; if (normalIndex != -1) inputCount++;
-                                    if (texCoordIndex != -1) inputCount++; if (colourIndex != -1) inputCount++;
-                                    while (vtxInd < split.Length)
-                                    {
-                                        MaterialDef mat = (MaterialDef)m_Bones[currentBone].m_Materials[curmaterial];
-                                        int nvtx = (!isTriangles) ? vcount[vcountInd] : 3;
-
-                                        FaceDef face = new FaceDef();
-                                        face.m_MatName = curmaterial;
-                                        face.m_VtxIndices = new int[nvtx];
-                                        face.m_TxcIndices = new int[nvtx];
-                                        face.m_NrmIndices = new int[nvtx];
-                                        face.m_ColIndices = new int[nvtx];
-                                        face.m_BoneID = getBoneIndex(currentBone);
-
-                                        // For each vertex defined in face
-                                        for (int i = 0; i < nvtx; i += 1)
-                                        {
-                                            face.m_VtxIndices[i] = int.Parse(split[vtxInd + vertexIndex]) + m_Vertices.Count;
-                                            face.m_NrmIndices[i] = (normalIndex != -1) ? int.Parse(split[vtxInd + normalIndex]) + m_Normals.Count : -1;
-                                            face.m_TxcIndices[i] = (texCoordIndex != -1) ? int.Parse(split[vtxInd + texCoordIndex]) + m_TexCoords.Count : -1;
-                                            face.m_ColIndices[i] = (colourIndex != -1) ? int.Parse(split[vtxInd + colourIndex]) + m_Colours.Count : -1;
-
-                                            vtxInd += inputCount;
-                                        }
-                                        /* Example of a typical triangle
-                                         * 0  0  0      2  1  3     3  2  2
-                                         * V1 N1 T1     V2 N2 T2    V3 N3 T3
-                                         * 
-                                         * V<n> are the indices of the triangles vertex positions,
-                                         * N<n> are its normal indices
-                                         * and T<n> are its texture co-ordinate indices
-                                         */
-
-                                        // If the material has no textures set the texture co-ordinate indices to -1
-                                        if (!m_Bones[currentBone].m_Materials[curmaterial].m_HasTextures)
-                                            face.m_TxcIndices = Enumerable.Repeat(-1, nvtx).ToArray();
-
-                                        m_Bones[currentBone].m_Materials[curmaterial] = mat;
-                                        m_Bones[currentBone].m_Materials[curmaterial].m_Faces.Add(face);
-
-                                        vcountInd++;
-                                    }
-                                }
-                                break;
-                        }
+                        ReadDAE_Source(reader);
                     }
-                    else if (reader.NodeType.Equals(XmlNodeType.EndElement))
+                    else if (reader.LocalName.Equals("polylist"))
                     {
-                        if (reader.LocalName.Equals("geometry"))
-                        {
-                            // Build vertices, normals, texture co-ordinates and colours from the 
-                            // component values read earlier
-                            for (int i = 0; i < currentVertices.Count; i += 3)
-                                m_Vertices.Add(new Vector4(currentVertices[i], currentVertices[i + 1], currentVertices[i + 2], 1f));
-                            for (int i = 0; i < currentNormals.Count; i += 3)
-                            {
-                                Vector3 vec = new Vector3(currentNormals[i], currentNormals[i + 1], currentNormals[i + 2]);
-                                vec.Normalize();
-                                m_Normals.Add(vec);
-                            }
-                            for (int i = 0; i < currentTexCoords.Count; i += 2)
-                                m_TexCoords.Add(new Vector2(currentTexCoords[i], currentTexCoords[i + 1]));
-                            for (int i = 0; i < currentColours.Count; i += 3)
-                                m_Colours.Add(Color.FromArgb((int)(currentColours[i] * 255f), (int)(currentColours[i + 1] * 255f),
-                                                    (int)(currentColours[i + 2] * 255f)));
-                        }
+                        ReadDAE_PolyList(reader);
                     }
+                    else if (reader.LocalName.Equals("triangles"))
+                    {
+                        ReadDAE_PolyList(reader);
+                    }
+                    else if (reader.LocalName.Equals("polygons"))
+                    {
+                        ReadDAE_PolyList(reader, true);
+                    }
+                }
+                else if (reader.NodeType.Equals(XmlNodeType.EndElement) && reader.LocalName.Equals("geometry"))
+                {
+                    // Build vertices, normals, texture co-ordinates and colours from the 
+                    // component values read earlier
+                    for (int i = 0; i < currentVertices.Count; i += 3)
+                        m_Vertices.Add(new Vector4(currentVertices[i], currentVertices[i + 1], currentVertices[i + 2], 1f));
+                    for (int i = 0; i < currentNormals.Count; i += 3)
+                    {
+                        Vector3 vec = new Vector3(currentNormals[i], currentNormals[i + 1], currentNormals[i + 2]);
+                        vec.Normalize();
+                        m_Normals.Add(vec);
+                    }
+                    for (int i = 0; i < currentTexCoords.Count; i += 2)
+                        m_TexCoords.Add(new Vector2(currentTexCoords[i], currentTexCoords[i + 1]));
+                    for (int i = 0; i < currentColours.Count; i += 3)
+                        m_Colours.Add(Color.FromArgb((int)(currentColours[i] * 255f), (int)(currentColours[i + 1] * 255f),
+                                            (int)(currentColours[i + 2] * 255f)));
+
+                    return;
                 }
             }
 
-            ImportModel(m_Scale, false);
+            return;
+        }
 
-            return m_ImportedModel;
+        private static void ReadDAE_PolyList(XmlReader reader, bool isPolygons = false)
+        {
+            curmaterial = reader.GetAttribute("material");
+            if (curmaterial == null) { addWhiteMat(currentBone); curmaterial = "default_white"; }
+            curmaterial = getClosestMaterialMatch(curmaterial);
+
+            // The parent bone should have a list of all materials used by itself and its children
+            if (!m_Bones[m_Bones[currentBone].m_RootBone].m_Materials.ContainsKey(curmaterial))
+                m_Bones[m_Bones[currentBone].m_RootBone].m_Materials.Add(curmaterial, m_Materials[curmaterial].copyAllButFaces());
+            if (!m_Bones[currentBone].m_Materials.ContainsKey(curmaterial))
+                m_Bones[currentBone].m_Materials.Add(curmaterial, m_Materials[curmaterial].copyAllButFaces());
+
+            int numFaces = int.Parse(reader.GetAttribute("count"));
+            int[] vcount = null;
+
+            string element = reader.LocalName;
+
+            reader.MoveToContent();
+            while (reader.Read())
+            {
+                if (reader.NodeType.Equals(XmlNodeType.Element))
+                {
+                    if (reader.LocalName.Equals("input"))
+                    {
+                        ReadDAE_Input(reader);
+                    }
+                    else if (reader.LocalName.Equals("vcount"))
+                    {
+                        vcount = ReadDAE_VCount(reader, numFaces);
+                    }
+                    else if (reader.LocalName.Equals("p"))
+                    {
+                        ReadDAE_P(reader, vcount, numFaces, isPolygons);
+                    }
+                }
+                else if (reader.NodeType.Equals(XmlNodeType.EndElement) && reader.LocalName.Equals(element))
+                {
+                    return;
+                }
+            }
+
+            return;
+        }
+
+        private static void ReadDAE_Source(XmlReader reader)
+        {
+            reader.MoveToContent();
+            while (reader.Read())
+            {
+                if (reader.NodeType.Equals(XmlNodeType.Element))
+                {
+                    if (reader.LocalName.Equals("float_array"))
+                    {
+                        ReadDAE_FloatArray(reader);
+                    }
+                }
+                else if (reader.NodeType.Equals(XmlNodeType.EndElement) && reader.LocalName.Equals("source"))
+                {
+                    return;
+                }
+            }
+            return;
+        }
+
+        private static void ReadDAE_FloatArray(XmlReader reader)
+        {
+            string id = reader.GetAttribute("id");
+            string values = reader.ReadElementContentAsString();
+            string[] split = values.Split(new string[] { " ", "\n", "\r\n" }, StringSplitOptions.RemoveEmptyEntries);
+            float[] float_values = new float[split.Length];
+            for (int i = 0; i < split.Length; i++)
+                float_values[i] = float.Parse(split[i], usahax);
+
+            reader.ReadToFollowing("accessor");
+            int stride = int.Parse(reader.GetAttribute("stride"));
+            reader.ReadToFollowing("param");
+            string param0 = reader.GetAttribute("name");
+
+            if (stride == 2)
+                currentTexCoords.AddRange(float_values);
+            else if (param0.Equals("R") || param0.Equals("G") || param0.Equals("B"))
+                currentColours.AddRange(float_values);
+            else
+            {
+                // Positions
+                if (id.Contains(geometryPositionsListNames[currentBone]))
+                    currentVertices.AddRange(float_values);
+                // Normals
+                else
+                    currentNormals.AddRange(float_values);
+            }
+
+        }
+
+        private static void ReadDAE_Input(XmlReader reader)
+        {
+            string semantic = reader.GetAttribute("semantic");
+
+            switch (semantic)
+            {
+                case "VERTEX":
+                    vertexIndex = int.Parse(reader.GetAttribute("offset"));
+                    break;
+                case "NORMAL":
+                    normalIndex = int.Parse(reader.GetAttribute("offset"));
+                    break;
+                case "TEXCOORD":
+                    texCoordIndex = int.Parse(reader.GetAttribute("offset"));
+                    break;
+                case "COLOR":
+                    colourIndex = int.Parse(reader.GetAttribute("offset"));
+                    break;
+            }
+        }
+
+        private static int[] ReadDAE_VCount(XmlReader reader, int numFaces)
+        {
+            int[] vcount = new int[numFaces];
+
+            String values = reader.ReadElementContentAsString();
+            String[] split = values.Split(new string[] { " ", "\n", "\r\n" }, StringSplitOptions.RemoveEmptyEntries);
+            for (int i = 0; i < split.Length; i++)
+            {
+                vcount[i] = int.Parse(split[i]);
+            }
+
+            return vcount;
+        }
+
+        private static void ReadDAE_P(XmlReader reader, int[] vcount, int numFaces, bool isPolygons = false)
+        {
+            String values = reader.ReadElementContentAsString();
+            String[] split = values.Split(new string[] { " ", "\n", "\r\n" }, StringSplitOptions.RemoveEmptyEntries);
+
+            int vtxInd = 0;
+            int vcountInd = 0;
+            // Faces must include vertices, normals and texture co-ordinates with
+            // optional colours
+            int inputCount = 0;
+            if (vertexIndex != -1) inputCount++; if (normalIndex != -1) inputCount++;
+            if (texCoordIndex != -1) inputCount++; if (colourIndex != -1) inputCount++;
+            while (vtxInd < split.Length)
+            {
+                MaterialDef mat = (MaterialDef)m_Bones[currentBone].m_Materials[curmaterial];
+                int nvtx = (vcount != null) ? vcount[vcountInd] : (split.Length / (inputCount * numFaces));
+                if (isPolygons)
+                    nvtx = (split.Length / inputCount);
+
+                FaceDef face = new FaceDef();
+                face.m_MatName = curmaterial;
+                face.m_VtxIndices = new int[nvtx];
+                face.m_TxcIndices = new int[nvtx];
+                face.m_NrmIndices = new int[nvtx];
+                face.m_ColIndices = new int[nvtx];
+                face.m_BoneID = getBoneIndex(currentBone);
+
+                // For each vertex defined in face
+                for (int i = 0; i < nvtx; i += 1)
+                {
+                    face.m_VtxIndices[i] = int.Parse(split[vtxInd + vertexIndex]) + m_Vertices.Count;
+                    face.m_NrmIndices[i] = (normalIndex != -1) ? int.Parse(split[vtxInd + normalIndex]) + m_Normals.Count : -1;
+                    face.m_TxcIndices[i] = (texCoordIndex != -1) ? int.Parse(split[vtxInd + texCoordIndex]) + m_TexCoords.Count : -1;
+                    face.m_ColIndices[i] = (colourIndex != -1) ? int.Parse(split[vtxInd + colourIndex]) + m_Colours.Count : -1;
+
+                    vtxInd += inputCount;
+                }
+                /* Example of a typical triangle
+                 * 0  0  0      2  1  3     3  2  2
+                 * V1 N1 T1     V2 N2 T2    V3 N3 T3
+                 * 
+                 * V<n> are the indices of the triangles vertex positions,
+                 * N<n> are its normal indices
+                 * and T<n> are its texture co-ordinate indices
+                 */
+
+                // If the material has no textures set the texture co-ordinate indices to -1
+                if (!m_Bones[currentBone].m_Materials[curmaterial].m_HasTextures)
+                    face.m_TxcIndices = Enumerable.Repeat(-1, nvtx).ToArray();
+
+                m_Bones[currentBone].m_Materials[curmaterial] = mat;
+                m_Bones[currentBone].m_Materials[curmaterial].m_Faces.Add(face);
+
+                vcountInd++;
+            }
         }
 
         public static BMD ConvertToBMD(BMD model, String modelFileName, String modelPath, Vector3 m_Scale)
