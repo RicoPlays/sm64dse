@@ -993,6 +993,10 @@ namespace SM64DSe
                     m_Overlay.Write16(tableptr + 10, 0);
                     m_Overlay.WritePointer(tableptr + 12, tableptr + 16);
                     AddPointer(tableptr + 12);
+
+                    for (int i = 0; i < ((size + 3) & ~3); i++)
+                        m_Overlay.Write8((uint)((tableptr + 16) + i), 0x00);
+
                     return tableptr + 16;
                 }
             }
