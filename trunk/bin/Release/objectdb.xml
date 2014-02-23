@@ -1,12 +1,12 @@
-<?xml version='1.0'?>
+<strong>MySQL error</strong>: Unknown column 'powerlevel' in 'where clause'<br><?xml version='1.0'?>
 
 <!--
 	Super Mario 64 DS Object Info Database
-	built on 05/21/2013 04:37:40 for SM64DS Editor
-	Thanks to Benjamin, Nikolaj, Presto99, sightlight, SuperWhomp256 for their contributions!
+	built on 02/23/2014 21:20:54 for SM64DS Editor
+	Thanks to nobody ;_; for their contributions!
 -->
 
-<database timestamp='1369125460'>
+<database timestamp='1393186854'>
 
 	<object id='0'>
 		<category>4</category>
@@ -36,7 +36,7 @@ If you set Parameter 1 to 0001, he loads as a mario, but when hit turns into Lui
 		<name></name>
 		<internalname>EWB_ICE_A</internalname>
 		<actorid>170</actorid>
-		<description>An icy hexagonal platform from Chief Chilly Challenge - fight. </description>
+		<description>An icy hexagonal platform from Chief Chilly Challenge - fight.</description>
 		<bankreq>1=5</bankreq>
 	</object>
 
@@ -197,8 +197,7 @@ Y = Determines when the cap should be spawned: 0 - Never, 1 - If the character a
 Z = 0 - Spawn coin when defeated, 1 - Spawn coin when defeated + Silver Star
 A = Cap to spawn. 0 - Mario, 1 - Luigi, 2 - Wario, F - None
 
-FFFF = Normal
-</description>
+FFFF = Normal</description>
 		<bankreq>3=1</bankreq>
 	</object>
 
@@ -237,8 +236,8 @@ FFFF = Normal
 		<description>That bomb enemy from SMB2. Can be picked up and thrown. If grabbed underwater, the player can carry it like a green Koopa Shell. Even though shell swimming has a timer, the Bob-omb will explode before the time is up. It can also be thrown underwater.
 		
 Parameter1:
-1 = Doesn't walk (it still moves it's legs and can be kicked).
-5 = Chases Player and then explodes.</description>
+1 - Doesn't walk (it still moves it's legs and can be kicked).
+5 - Chases Player and then explodes.</description>
 		<bankreq>none</bankreq>
 	</object>
 
@@ -318,7 +317,7 @@ Parameter1:
 		<name>? Switch</name>
 		<internalname>HATENA_SWITCH</internalname>
 		<actorid>26</actorid>
-		<description></description>
+		<description>Turns ? Blocks Solid and allows you to save.</description>
 		<bankreq>none</bankreq>
 	</object>
 
@@ -474,8 +473,7 @@ Set to the Star ID followed by:
 Parameter 1:
 
 0 - Appear only temporarily
-1 - Activated by a Blue Coin Switch.
-		</description>
+1 - Activated by a Blue Coin Switch.</description>
 		<bankreq>none</bankreq>
 	</object>
 
@@ -539,8 +537,7 @@ Z - Mode:
 2 - Switch on SW_BLOCK_L with a timer
 8 - Open SW_BLOCK_L without timer
 
-Set Parameter 1 of the (ID 25) SW_BLOCK_L bricks to FF00
-</description>
+Set Parameter 1 of the (ID 25) SW_BLOCK_L bricks to FF00</description>
 		<bankreq>none</bankreq>
 	</object>
 
@@ -551,8 +548,7 @@ Set Parameter 1 of the (ID 25) SW_BLOCK_L bricks to FF00
 		<actorid>12</actorid>
 		<description>Makes a star inside a cage appear.
 		
-The fist two digits of Parameter 1 give the time limit (seconds / 2 possibly) and the second two give the ID of the Star.
-		</description>
+The fist two digits of Parameter 1 give the time limit (seconds / 2 possibly) and the second two give the ID of the Star.</description>
 		<bankreq>none</bankreq>
 	</object>
 
@@ -762,10 +758,9 @@ Where X is the Star ID:
 
 X - Used for Red Coins, appears as blue rotating horizontal star
 1X (also: 3X, 5X, 7X, 9X, BX...) - If set to this, it appears invisible, and nothing seems to spawn a star. Star Switches set to this ID will appear already pressed.
-2X, AX - Star can be spawned by events like Koopa the Quick, numbered "secrets" or from a baddie being beaten.
+2X, AX - Star can be spawned by events like Koopa the Quick, numbered &quot;secrets&quot; or from a baddie being beaten.
 4X - Appears as the Star Switch glass sphere, but won't spawn stars from Switch Stars, baddies nor silver stars?
-6X - For Switch Stars, appears as glass sphere
-</description>
+6X - For Switch Stars, appears as glass sphere</description>
 		<bankreq>none</bankreq>
 	</object>
 
@@ -810,8 +805,8 @@ There should be a corresponding Star Marker with Parameters 2 followed by Star I
 
 Parameter 1:
 0 - Normal
-1 - Stays still, doesn't turn transparent, cannot be defeated or stomped but can be eaten which triggers the usual line "You can't eat ghosts" and can be pushed around by walking into it.
-2 - Slightly erratic chasing movement, triggers "ghosts don't die" text, otherwise normal
+1 - Stays still, doesn't turn transparent, cannot be defeated or stomped but can be eaten which triggers the usual line &quot;You can't eat ghosts&quot; and can be pushed around by walking into it.
+2 - Slightly erratic chasing movement, triggers &quot;ghosts don't die&quot; text, otherwise normal
 3 - Spawns two of the Para1:1 ghosts in the same place
 4/FF04 - Transparent, slightly bigger, flies away forever after being approached. Used in castle corridor.
 5/FF05 - Big Boo's Haunt cage, like it was just spawned.
@@ -997,8 +992,7 @@ This might be because she was never intended to talk, but was given this behavio
 		<actorid>285</actorid>
 		<description>The green Koopa Shell can be ridden on/under water and on land, while its red counterpart can be hit to send it flying across the ground. Red shells can be eaten by Yoshi to allow him to breathe fire. Green shells can be eaten by Yoshi, then spat out to travel as a Red Shell does when hit.
 		
-Set Parameter 1 to 10 for underwater riding.
-		</description>
+Set Parameter 1 to 10 for underwater riding.</description>
 		<bankreq>none</bankreq>
 		<param n='0'>
 			<name>Color</name>
@@ -1195,7 +1189,9 @@ Set Parameter 1 to 10 for underwater riding.
 		<name>Sliding Pole</name>
 		<internalname>WL_POLELIFT</internalname>
 		<actorid>89</actorid>
-		<description>Sliding poles that appear in Dire Dire Docks. Parameter 1 gives the ID (zero-based index) of the path the pole is to follow.</description>
+		<description>Sliding poles that appear in Dire Dire Docks. 
+
+Parameter 1 gives the ID (zero-based index) of the path the pole is to follow.</description>
 		<bankreq>7=19</bankreq>
 	</object>
 
@@ -1277,6 +1273,7 @@ Set Parameter 1 to 10 for underwater riding.
 		<internalname>RC_KAITEN</internalname>
 		<actorid>129</actorid>
 		<description>Spinning platform (Y axis) from Rainbow Ride.
+
 Parameter 1 should be FFFF.
 Parameter 3 should be 0 for Counter-Clockwise, FEC9 for Clockwise.</description>
 		<bankreq>7=29</bankreq>
@@ -1315,8 +1312,8 @@ Parameter 3 should be 0 for Counter-Clockwise, FEC9 for Clockwise.</description>
 		<internalname>TT_FUTA</internalname>
 		<actorid>104</actorid>
 		<description>Breakable rock at entrance to Wiggler's Cave in Tiny Huge Island - Tiny.
-Use FFFF.
-		</description>
+
+Use FFFF.</description>
 		<bankreq>7=26</bankreq>
 	</object>
 
@@ -1326,8 +1323,8 @@ Use FFFF.
 		<internalname>TT_WATER</internalname>
 		<actorid>105</actorid>
 		<description>Water above entrance to Wiggler's Cave. Lowers and disappears when entrance broken. 
-Use FFFF.
-		</description>
+
+Use FFFF.</description>
 		<bankreq>7=26</bankreq>
 	</object>
 
@@ -1337,8 +1334,8 @@ Use FFFF.
 		<internalname>TD_FUTA</internalname>
 		<actorid>106</actorid>
 		<description>Tiny Huge Island - Huge breakable entrance to Wiggler's Cave. Disappears when entrance broken in Tiny island. 
-Use FFFF.
-		</description>
+
+Use FFFF.</description>
 		<bankreq>7=25</bankreq>
 	</object>
 
@@ -1348,8 +1345,8 @@ Use FFFF.
 		<internalname>TD_WATER</internalname>
 		<actorid>107</actorid>
 		<description>Tiny Huge Island - Huge water above entrance to Wiggler's Cave. Lowers and disappears when entrance broken in Tiny island. 
-Use FFFF.
-		</description>
+
+Use FFFF.</description>
 		<bankreq>7=25</bankreq>
 	</object>
 
@@ -1900,11 +1897,11 @@ Parameter 1:
 	</object>
 
 	<object id='182'>
-		<category>1</category>
-		<name></name>
+		<category>4</category>
+		<name>Rock Triangle (JRB)</name>
 		<internalname>KI_HASIRA_DAI</internalname>
 		<actorid>59</actorid>
-		<description>A rock triangle only solid on top from JRB. [Unused?]</description>
+		<description>A rock triangle only solid on top.</description>
 		<bankreq>none</bankreq>
 	</object>
 
@@ -1919,7 +1916,7 @@ Parameter 1:
 
 	<object id='184'>
 		<category>1</category>
-		<name></name>
+		<name>Rock Chunk (JRB)</name>
 		<internalname>KI_IWA</internalname>
 		<actorid>61</actorid>
 		<description>A piece of rock used as decoration in Jolly Rodger Bay. Lit. Name = Something_Rock.</description>
@@ -1970,6 +1967,7 @@ Does nothing if placed alone. For it to act as an entrance or an exit, the corre
 		<internalname>PROPELLER_HEYHO</internalname>
 		<actorid>232</actorid>
 		<description>Flying Shy Guy that swoops down to attack the player.
+
 Set Parameter 1 to 0 for swoop-to-attack behaviour.
 Set Parameter 1 to 1 to also spit fire at Player.</description>
 		<bankreq>1=2</bankreq>
@@ -2079,7 +2077,7 @@ Set Parameter 1 to 1 to also spit fire at Player.</description>
 		<name></name>
 		<internalname>BK_KABE01</internalname>
 		<actorid>47</actorid>
-		<description>Non-breakable version of BK_KABE00 wall from Whomp's Fortress from "Blast Away The Wall".
+		<description>Non-breakable version of BK_KABE00 wall from Whomp's Fortress from &quot;Blast Away The Wall&quot;.
 
 Note: The collision map for this object should be scaled by 8 - reason unknown.</description>
 		<bankreq>2=3</bankreq>
@@ -2090,7 +2088,7 @@ Note: The collision map for this object should be scaled by 8 - reason unknown.<
 		<name></name>
 		<internalname>BK_KABE00</internalname>
 		<actorid>48</actorid>
-		<description>Breakable wall from Whomp's Fortress from "Blast Away The Wall". Destroyed when Player hits it after being fired from cannon.
+		<description>Breakable wall from Whomp's Fortress from &quot;Blast Away The Wall&quot;. Destroyed when Player hits it after being fired from cannon.
 Parameter 1:
 FF followed by ID of Star, eg. FF01 for Star 1
 
@@ -2358,7 +2356,7 @@ Path ID</description>
 
 	<object id='230'>
 		<category>1</category>
-		<name></name>
+		<name>Fire Guy Fireball</name>
 		<internalname>PROPELLER_HEYHO_FIRE</internalname>
 		<actorid>233</actorid>
 		<description>Fireball shot by Fly Guys with Parameter 1 set to 1.</description>
@@ -2479,6 +2477,7 @@ Path ID</description>
 		<internalname>BAR</internalname>
 		<actorid>287</actorid>
 		<description>A pole. However, it is invisible.
+
 The last two digits in Parameter are the height * 100 (in hex).</description>
 		<bankreq>none</bankreq>
 	</object>
@@ -2644,8 +2643,7 @@ The last two digits in Parameter are the height * 100 (in hex).</description>
 		<description>A giant eel in Jolly Roger Bay. It swims around, but takes 3 life points if touched.
 		
 Set Parameter 1 to 2 followed by the path ID then 00 if it is to behave as in 'CAN THE EEL COME OUT TO PLAY'.
-Set Parameter 1 to F followed by the path ID then 00 if it is to swim about following a path.
-		</description>
+Set Parameter 1 to F followed by the path ID then 00 if it is to swim about following a path.</description>
 		<bankreq>7=9</bankreq>
 	</object>
 
@@ -2793,13 +2791,15 @@ Parameter 1: First two digits should be 06, second to specify the path ID (zero-
 		<name>Big Key</name>
 		<internalname>OBJ_KEY</internalname>
 		<actorid>282</actorid>
-		<description>Parameter1:
-0= Bowser Key
-1= Bowser Key
-2= Mario Key
-3= Luigi Key
-4= Wario Key
-5= Big Star Key</description>
+		<description>Big key spawned by bosses upon their defeat.
+
+Parameter1:
+0 - Bowser Key
+1 - Bowser Key
+2 - Mario Key
+3 - Luigi Key
+4 - Wario Key
+5 - Big Star Key</description>
 		<bankreq>4=1</bankreq>
 	</object>
 
@@ -2808,7 +2808,9 @@ Parameter 1: First two digits should be 06, second to specify the path ID (zero-
 		<name>Last Star</name>
 		<internalname>LAST_STAR</internalname>
 		<actorid>283</actorid>
-		<description>Spawns a large star similar to the one awarded when Bowser is defeated for the final time. Touching it gives the player wings, and upon landing, the player teleports to 0.000, 0.000, 0.000 and executes the &quot;super triple jump&quot; animation, then flies around for a few seconds, finally triggering the ending. Some parameters might yield a key from the first two fights. Setting Parameter 1 to FFFF causes it to work the same as when Bowser is defeated and trigger the ending sequence.</description>
+		<description>Spawns a large star similar to the one awarded when Bowser is defeated for the final time. Touching it gives the player wings, and upon landing, the player teleports to 0.000, 0.000, 0.000 and executes the &amp;quot;super triple jump&amp;quot; animation, then flies around for a few seconds, finally triggering the ending. Some parameters might yield a key from the first two fights. 
+
+Setting Parameter 1 to FFFF causes it to work the same as when Bowser is defeated and trigger the ending sequence.</description>
 		<bankreq>4=1</bankreq>
 	</object>
 
@@ -2915,7 +2917,7 @@ ID (zero-based index) of the path he follows</description>
 	</object>
 
 	<object id='290'>
-		<category>3</category>
+		<category>2</category>
 		<name>Ice Bully</name>
 		<internalname>ICE_DONKETU</internalname>
 		<actorid>217</actorid>
@@ -2924,7 +2926,7 @@ ID (zero-based index) of the path he follows</description>
 	</object>
 
 	<object id='291'>
-		<category>1</category>
+		<category>3</category>
 		<name>Chief Chilly</name>
 		<internalname>KING_DONKETU</internalname>
 		<actorid>218</actorid>
@@ -3032,10 +3034,10 @@ Appears lower than its position if the two pillars in the castle basement have b
 		<description>A mushroom that makes the player huge, stomping everything in their way. If the player is huge and falls into water, the player acts as if they were Metal Wario.
 		
 Parameter1:
-0 = Like spawned from block
-F1 = Not there
-F2 = Flies away when approached
-F3 = Still, doesn't disappear</description>
+0 - Like spawned from block
+F1 - Not there
+F2 - Flies away when approached
+F3 - Still, doesn't disappear</description>
 		<bankreq>none</bankreq>
 	</object>
 
@@ -3057,6 +3059,7 @@ F3 = Still, doesn't disappear</description>
 
 Parameter 1:
 F followed by Star ID, eg. F05 for Star 5. 
+
 There should be a Star Marker with parameters 2 followed by Star ID eg. 25 for Star 5.</description>
 		<bankreq>none</bankreq>
 	</object>
@@ -3081,8 +3084,7 @@ Z : Unknown, zero
 
 A : Spawn Coin?
 0 - Yes
-Other - No
-</description>
+Other - No</description>
 		<bankreq>none</bankreq>
 	</object>
 
@@ -3155,7 +3157,7 @@ Alone, not a really useful object.</description>
 		<name>Giant Venus Firetrap</name>
 		<internalname>FIREPAKUN</internalname>
 		<actorid>251</actorid>
-		<description>A large fire-breathing Piranha Plant that grows into visibility when approached.</description>
+		<description>Giant fire-breathing Piranha Plant that grows into visibility when approached.</description>
 		<bankreq>3=1</bankreq>
 	</object>
 
@@ -3164,7 +3166,7 @@ Alone, not a really useful object.</description>
 		<name>Tiny Venus Firetrap</name>
 		<internalname>FIREPAKUN_S</internalname>
 		<actorid>252</actorid>
-		<description>A small fire-breathing Piranha Plant that grows into visibility when approached.</description>
+		<description>Tiny fire-breathing Piranha Plant that grows into visibility when approached.</description>
 		<bankreq>3=1</bankreq>
 	</object>
 

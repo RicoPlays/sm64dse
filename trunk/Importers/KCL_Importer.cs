@@ -8,6 +8,7 @@ MKW KCL file format.
  
 Currently supported:
  Wavefront OBJ
+ COLLADA DAE
  
 */
 
