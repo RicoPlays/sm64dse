@@ -353,7 +353,7 @@ namespace SM64DSe
         public virtual void UpdateRenderer() { }
 
         public virtual string GetFilename() { return m_Filename; }
-        public virtual Vector3 GetScale() { return new Vector3(1f, 1f, 1f); }
+        public virtual Vector3 GetScale() { return m_Scale; }
 
         public uint m_ObjUniqueID;
 

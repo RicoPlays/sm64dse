@@ -434,9 +434,8 @@ namespace SM64DSe
             Parameters = new ushort[5];
             Parameters[0] = m_Overlay.Read16(m_Offset + 0x0);
             Parameters[1] = m_Overlay.Read16(m_Offset + 0x8);
-            Parameters[2] = m_Overlay.Read16(m_Offset + 0xA);
-            Parameters[3] = m_Overlay.Read16(m_Offset + 0xC);
-            Parameters[4] = m_Overlay.Read16(m_Offset + 0xE);
+            Parameters[2] = m_Overlay.Read16(m_Offset + 0xC);
+            Parameters[3] = m_Overlay.Read16(m_Offset + 0xE);
 
             m_Renderer = InitialiseRenderer();
             m_Properties = new PropertyTable(); 
@@ -464,9 +463,8 @@ namespace SM64DSe
             m_Properties.Properties.Add(new PropertySpec("Y rotation", typeof(float), "General", "The angle in degrees the entrance is rotated around the Y axis.", YRotation, "", typeof(FloatTypeConverter)));
             m_Properties.Properties.Add(new PropertySpec("Parameter 1", typeof(ushort), "Specific", "Purpose unknown.", Parameters[0], "", typeof(HexNumberTypeConverter)));
             m_Properties.Properties.Add(new PropertySpec("Parameter 2", typeof(ushort), "Specific", "Purpose unknown.", Parameters[1], "", typeof(HexNumberTypeConverter)));
-            m_Properties.Properties.Add(new PropertySpec("Parameter 3", typeof(ushort), "Specific", "Starting rotation.", Parameters[2], "", typeof(HexNumberTypeConverter)));
-            m_Properties.Properties.Add(new PropertySpec("Parameter 4", typeof(ushort), "Specific", "Purpose unknown.", Parameters[3], "", typeof(HexNumberTypeConverter)));
-            m_Properties.Properties.Add(new PropertySpec("Parameter 5", typeof(ushort), "Specific", "AABC: A - Entrance mode, B - View ID, C - Purpose unknown", Parameters[4], "", typeof(HexNumberTypeConverter)));
+            m_Properties.Properties.Add(new PropertySpec("Parameter 3", typeof(ushort), "Specific", "Purpose unknown.", Parameters[2], "", typeof(HexNumberTypeConverter)));
+            m_Properties.Properties.Add(new PropertySpec("Parameter 4", typeof(ushort), "Specific", "AABC: A - Entrance mode, B - View ID, C - Purpose unknown", Parameters[3], "", typeof(HexNumberTypeConverter)));
 
             m_Properties["X position"] = Position.X;
             m_Properties["Y position"] = Position.Y;
@@ -476,7 +474,6 @@ namespace SM64DSe
             m_Properties["Parameter 2"] = Parameters[1];
             m_Properties["Parameter 3"] = Parameters[2];
             m_Properties["Parameter 4"] = Parameters[3];
-            m_Properties["Parameter 5"] = Parameters[4];
         }
 
         public override int SetProperty(string field, object newval)
@@ -492,7 +489,6 @@ namespace SM64DSe
                 case "Parameter 2": Parameters[1] = (ushort)newval; return 0;
                 case "Parameter 3": Parameters[2] = (ushort)newval; return 0;
                 case "Parameter 4": Parameters[3] = (ushort)newval; return 0;
-                case "Parameter 5": Parameters[4] = (ushort)newval; return 0;
             }
 
             return 0;
@@ -507,9 +503,8 @@ namespace SM64DSe
 
             m_Overlay.Write16(m_Offset + 0x0, Parameters[0]);
             m_Overlay.Write16(m_Offset + 0x8, Parameters[1]);
-            m_Overlay.Write16(m_Offset + 0xA, Parameters[2]);
-            m_Overlay.Write16(m_Offset + 0xC, Parameters[3]);
-            m_Overlay.Write16(m_Offset + 0xE, Parameters[4]);
+            m_Overlay.Write16(m_Offset + 0xC, Parameters[2]);
+            m_Overlay.Write16(m_Offset + 0xE, Parameters[3]);
         }
     }
 

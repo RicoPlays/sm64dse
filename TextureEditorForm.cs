@@ -7,6 +7,7 @@ using System.Linq;
 using System.Text;
 using System.Windows.Forms;
 using SM64DSe.Importers;
+using System.Text.RegularExpressions;
 
 namespace SM64DSe
 {
@@ -17,6 +18,9 @@ namespace SM64DSe
 
         ModelImporter _owner;
 
+        System.Windows.Forms.Timer m_BTPTimer;
+        private int timerCount = 0;
+
         public TextureEditorForm(BMD model, ModelImporter _owner)
         {
             InitializeComponent();
@@ -24,28 +28,18 @@ namespace SM64DSe
             m_Model = model;
             this._owner = _owner;
 
-            loadTextures();
+            LoadTextures();
+            InitTimer();
         }
 
-        private void loadTextures()
+        private void LoadTextures()
         {
             // Reload the model
             m_Model = new BMD(m_Model.m_File);
-
-            if (m_BTP != null)
-            {
-                try
-                {
-                    NitroFile file = Program.m_ROM.GetFileFromName(m_BTP.m_FileName);
-                    m_BTP = new BTP(file, m_Model);
-                    m_BTP.ReadBMDTextures();
-                }
-                catch (Exception ex) { MessageBox.Show("Error loading BTP:\n" + ex.Message + "\n" + ex.Source); }
-            }
             
             lbxTextures.Items.Clear();
 
-            for (int i = 0; i < m_Model.m_TextureIDs.Keys.Count; i++)
+            for (int i = 0; i < m_Model.m_TextureIDs.Count; i++)
             {
                 lbxTextures.Items.Add(m_Model.m_TextureIDs.Keys.ElementAt(i));
             }
@@ -58,31 +52,75 @@ namespace SM64DSe
             }
         }
 
+        private void InitTimer()
+        {
+            m_BTPTimer = new System.Windows.Forms.Timer();
+            m_BTPTimer.Interval = (int)(1000f / 30f);
+            m_BTPTimer.Tick += new EventHandler(m_BTPTimer_Tick);
+        }
+
+        private void StartTimer()
+        {
+            timerCount = 0;
+            btnMatPreview.Enabled = false;
+            btnMatPreviewStop.Enabled = true;
+            m_BTPTimer.Start();
+        }
+
+        private void StopTimer()
+        {
+            m_BTPTimer.Stop();
+            btnMatPreview.Enabled = true;
+            btnMatPreviewStop.Enabled = false;
+        }
+
         private void lbxTextures_SelectedIndexChanged(object sender, EventArgs e)
         {
-            if (lbxTextures.SelectedIndex == -1)
+            if (lbxTextures.SelectedIndex == -1 || lbxTextures.SelectedIndex >= lbxTextures.Items.Count)
                 return;
-            if (m_Model.m_Textures.ContainsKey(lbxTextures.SelectedItem.ToString()))
+            string texName = lbxTextures.Items[lbxTextures.SelectedIndex].ToString();
+            if (rbTexAllInBMD.Checked && m_Model.m_Textures.ContainsKey(texName))
             {
-                lbxPalettes.SelectedIndex = (int)m_Model.m_Textures[lbxTextures.SelectedItem.ToString()].m_PalID;
+                if (m_Model.m_Textures[texName].m_PalID >= 0 && m_Model.m_Textures[texName].m_PalID < lbxPalettes.Items.Count)
+                    lbxPalettes.SelectedIndex = (int)m_Model.m_Textures[texName].m_PalID;
             }
-            if (lbxPalettes.SelectedIndex != -1)
+            if (rbTexAllInBMD.Checked && lbxPalettes.SelectedIndex != -1)
             {
-                BMD.Texture currentTexture = m_Model.ReadTexture(m_Model.m_TextureIDs[lbxTextures.SelectedItem.ToString()],
-                    m_Model.m_PaletteIDs[lbxPalettes.SelectedItem.ToString()]);
+                string palName = lbxPalettes.SelectedItem.ToString();
+                BMD.Texture currentTexture = m_Model.ReadTexture(m_Model.m_TextureIDs[texName],
+                    m_Model.m_PaletteIDs[palName]);
 
                 LoadBitmap(currentTexture);
+
+                lblTexture.Text = "Texture: (ID " + m_Model.m_TextureIDs[texName] + ")";
+            }
+            if (rbTexAsRefInBTP.Checked)
+            {
+                txtBTPTextureName.Text = texName;
+                if (m_Model.m_TextureIDs.ContainsKey(texName))
+                    lblTexture.Text = "Texture: (ID " + m_Model.m_TextureIDs[texName] + ")";
             }
         }
 
         private void lbxPalettes_SelectedIndexChanged(object sender, EventArgs e)
         {
-            if (lbxTextures.SelectedIndex != -1 && lbxPalettes.SelectedIndex != -1)
+            if (lbxPalettes.SelectedIndex < 0)
+                return;
+            string palName = lbxPalettes.Items[lbxPalettes.SelectedIndex].ToString();
+            if (rbTexAsRefInBTP.Checked)
+                txtBTPPaletteName.Text = palName;
+            if (lbxTextures.SelectedIndex != -1 && lbxPalettes.SelectedIndex != -1 && lbxPalettes.SelectedIndex < lbxPalettes.Items.Count)
             {
-                BMD.Texture currentTexture = m_Model.ReadTexture(m_Model.m_TextureIDs[lbxTextures.SelectedItem.ToString()],
-                    m_Model.m_PaletteIDs[lbxPalettes.SelectedItem.ToString()]);
+                string texName = lbxTextures.Items[lbxTextures.SelectedIndex].ToString();
+                if (m_Model.m_TextureIDs.ContainsKey(texName) && m_Model.m_PaletteIDs.ContainsKey(palName))
+                {
+                    BMD.Texture currentTexture = m_Model.ReadTexture(m_Model.m_TextureIDs[texName],
+                        m_Model.m_PaletteIDs[palName]);
 
-                LoadBitmap(currentTexture);
+                    LoadBitmap(currentTexture);
+
+                    lblPalette.Text = "Palette: (ID " + m_Model.m_PaletteIDs[palName] + ")";
+                }
             }
         }
 
@@ -103,8 +141,6 @@ namespace SM64DSe
 
             pbxTexture.Image = new Bitmap(tex);
             pbxTexture.Refresh();
-
-            lblPalette.Text = "Palette " + currentTexture.m_PalID;
         }
 
         private void btnExportAll_Click(object sender, EventArgs e)
@@ -127,9 +163,11 @@ namespace SM64DSe
 
         private void btnExport_Click(object sender, EventArgs e)
         {
-            if (lbxTextures.SelectedIndex != -1)
+            if (lbxTextures.SelectedIndex != -1 && lbxPalettes.SelectedIndex != -1)
             {
-                BMD.Texture currentTexture = m_Model.m_Textures.Values.ElementAt(lbxTextures.SelectedIndex);
+                string texName = lbxTextures.Items[lbxTextures.SelectedIndex].ToString();
+                string palName = lbxPalettes.Items[lbxPalettes.SelectedIndex].ToString();
+                BMD.Texture currentTexture = m_Model.ReadTexture(m_Model.m_TextureIDs[texName], m_Model.m_PaletteIDs[palName]);
 
                 SaveFileDialog export = new SaveFileDialog();
                 export.FileName = currentTexture.m_TexName;//Default name
@@ -202,7 +240,7 @@ namespace SM64DSe
                     m_Model.m_File.Write32(curoffset + 0x10, tex.m_DSTexParam);
 
                     // Update palette entry
-                    if (tex.m_PaletteData != null && !chkNewPalette.Checked)
+                    if (tex.m_PaletteData != null)
                     {
                         curoffset = m_Model.m_Textures[lbxTextures.SelectedItem.ToString()].m_PalEntryOffset;
 
@@ -231,66 +269,21 @@ namespace SM64DSe
 
                     m_Model.m_File.WriteBlock(texDataOffset, tex.m_TextureData);
 
-                    if (!chkNewPalette.Checked) // If we're editing an existing palette
+                    uint palDataOffset = m_Model.m_File.Read32(m_Model.m_Textures[lbxTextures.SelectedItem.ToString()].m_PalEntryOffset + 0x04);
+                    // If necessary, make room for additional palette data
+                    if (newPalDataSize > oldPalDataSize)
+                        m_Model.AddSpace(palDataOffset + oldPalDataSize, newPalDataSize - oldPalDataSize);
+                    // Reload palette data offset
+                    palDataOffset = m_Model.m_File.Read32(m_Model.m_Textures[lbxTextures.SelectedItem.ToString()].m_PalEntryOffset + 0x04);
+
+                    if (tex.m_PaletteData != null)
                     {
-                        uint palDataOffset = m_Model.m_File.Read32(m_Model.m_Textures[lbxTextures.SelectedItem.ToString()].m_PalEntryOffset + 0x04);
-                        // If necessary, make room for additional palette data
-                        if (newPalDataSize > oldPalDataSize)
-                            m_Model.AddSpace(palDataOffset + oldPalDataSize, newPalDataSize - oldPalDataSize);
-                        // Reload palette data offset
-                        palDataOffset = m_Model.m_File.Read32(m_Model.m_Textures[lbxTextures.SelectedItem.ToString()].m_PalEntryOffset + 0x04);
-
-                        if (tex.m_PaletteData != null)
-                        {
-                            m_Model.m_File.WriteBlock(palDataOffset, tex.m_PaletteData);
-                        }
-                    }
-                    else if (chkNewPalette.Checked)
-                    {
-                        /*
-                         * TODO: To get this to work, need to ensure all offsets remain 4 byte aligned
-                         */ 
-
-                        String newPalName = lbxTextures.Items[texIndex].ToString() + "_new";
-
-                        uint newHdrOff = m_Model.m_PalChunksOffset + (m_Model.m_NumPalChunks * 16);
-                        m_Model.AddSpace(newHdrOff, 16);
-                        uint newPalNameOff = m_Model.m_File.Read32(m_Model.m_Textures.Values.ElementAt(m_Model.m_Textures.Values.Count - 1).m_PalEntryOffset);
-                        while (m_Model.m_File.Read8(newPalNameOff) != 0)
-                            newPalNameOff += 1;
-                        m_Model.AddSpace((uint)newPalNameOff, (uint)newPalName.Length + 1);
-                        m_Model.m_File.WriteString(newPalNameOff, newPalName, 0);
-                        m_Model.m_File.Write32(newHdrOff, newPalNameOff);
-                        uint newPalOff = m_Model.m_Textures.Values.ElementAt(m_Model.m_Textures.Values.Count - 1).m_PalOffset +
-                            m_Model.m_Textures.Values.ElementAt(m_Model.m_Textures.Values.Count - 1).m_PalSize;
-                        m_Model.AddSpace(newPalOff, (uint)tex.m_PaletteData.Length);
-                        m_Model.m_File.Write32(newHdrOff + 0x04, newPalOff);
-                        m_Model.m_File.Write32(newHdrOff + 0x08, (uint)tex.m_PaletteData.Length);
-                        m_Model.m_File.Write32(newHdrOff + 0x0C, 0xFFFFFFFF);
-
-                        m_Model.m_File.WriteBlock(newPalOff, tex.m_PaletteData);
-
-                        // Set the material's palette ID to the new palette
-                        for (int i = 0; i < m_Model.m_ModelChunks.Length; i++)
-                        {
-                            for (int j = 0; j < m_Model.m_ModelChunks[i].m_MatGroups.Length; j++)
-                            {
-                                if (m_Model.m_ModelChunks[i].m_MatGroups[j].m_Texture.m_TexName == lbxTextures.Items[texIndex].ToString())
-                                {
-                                    uint palID = m_Model.m_File.Read32(0x1C);
-                                    uint matEntryOff = m_Model.m_File.Read32(0x28) + (m_Model.m_ModelChunks[i].m_MatGroups[j].m_ID * 48);
-                                    m_Model.m_File.Write32(matEntryOff + 0x08, palID);
-                                }
-                            }
-                        }
-
-                        // Update number of palettes
-                        m_Model.m_File.Write32(0x1C, m_Model.m_File.Read32(0x1C) + 1);
+                        m_Model.m_File.WriteBlock(palDataOffset, tex.m_PaletteData);
                     }
 
                     m_Model.m_File.SaveChanges();
 
-                    loadTextures();
+                    LoadTextures();
                 }
                 catch (Exception ex)
                 {
@@ -315,15 +308,428 @@ namespace SM64DSe
                 var result = form.ShowDialog();
                 if (result == DialogResult.OK)
                 {
-                    try
-                    {
-                        NitroFile file = Program.m_ROM.GetFileFromName(form.m_SelectedFile);
-                        m_BTP = new BTP(file, m_Model);
-
-                        loadTextures();
-                    }
-                    catch (Exception ex) { MessageBox.Show("Error loading BTP:\n" + ex.Message + "\n" + ex.Source); }
+                    ClearBTPTextBoxes();
+                    LoadBTP(form.m_SelectedFile);
                 }
+            }
+        }
+
+        private void LoadBTP(String filename)
+        {
+            try
+            {
+                NitroFile file = Program.m_ROM.GetFileFromName(filename);
+                m_BTP = new BTP(file, m_Model);
+
+                m_BTP.ReadBMDTextures();
+
+                LoadOnlyBTPReferencedTextures();
+
+                PopulateBTPListBoxes();
+
+                EnableBTPFormControls();
+            }
+            catch (Exception ex) { MessageBox.Show("Error loading BTP:\n" + ex.Message + "\n" + ex.StackTrace); }
+        }
+
+        private void PopulateBTPListBoxes()
+        {
+            lbxBTPFrames.Items.Clear();
+            lbxBTPMaterials.Items.Clear();
+
+            for (int i = 0; i < m_BTP.NumFrames(); i++)
+            {
+                lbxBTPFrames.Items.Add(String.Format("{0:D3}", i));
+            }
+
+            for (int i = 0; i < m_BTP.m_MaterialData.Keys.Count; i++)
+            {
+                lbxBTPMaterials.Items.Add(m_BTP.m_MaterialData.Keys.ElementAt(i));
+            }
+
+            if (lbxBTPMaterials.Items.Count > 0)
+                lbxBTPMaterials.SelectedIndex = 0;
+        }
+
+        private void EnableBTPFormControls()
+        {
+            rbTexAsRefInBTP.Enabled = true; rbTexAsRefInBTP.Checked = true;
+
+            btnBTPAddTexture.Enabled = true; btnBTPAddTexture.Visible = true;
+            btnBTPRemoveTexture.Enabled = true; btnBTPRemoveTexture.Visible = true;
+            btnBTPAddPalette.Enabled = true; btnBTPAddPalette.Visible = true;
+            btnBTPRemovePalette.Enabled = true; btnBTPRemovePalette.Visible = true;
+            btnBTPRenameTexture.Enabled = true; btnBTPRenameTexture.Visible = true;
+            btnBTPRenamePalette.Enabled = true; btnBTPRenamePalette.Visible = true;
+
+            txtBTPTextureName.Enabled = true; txtBTPTextureName.Visible = true;
+            txtBTPPaletteName.Enabled = true; txtBTPPaletteName.Visible = true;
+        }
+
+        private void DisableBTPFormControls()
+        {
+            btnBTPAddTexture.Enabled = false; btnBTPAddTexture.Visible = false;
+            btnBTPRemoveTexture.Enabled = false; btnBTPRemoveTexture.Visible = false;
+            btnBTPAddPalette.Enabled = false; btnBTPAddPalette.Visible = false;
+            btnBTPRemovePalette.Enabled = false; btnBTPRemovePalette.Visible = false;
+            btnBTPRenameTexture.Enabled = false; btnBTPRenameTexture.Visible = false;
+            btnBTPRenamePalette.Enabled = false; btnBTPRenamePalette.Visible = false;
+
+            txtBTPTextureName.Enabled = false; txtBTPTextureName.Visible = false;
+            txtBTPPaletteName.Enabled = false; txtBTPPaletteName.Visible = false;
+        }
+
+        private void m_BTPTimer_Tick(object sender, EventArgs e)
+        {
+            string matName = lbxBTPMaterials.Items[lbxBTPMaterials.SelectedIndex].ToString();
+
+            if (timerCount >= m_BTP.m_MaterialData[matName].m_NumFrames)
+            {
+                StopTimer();
+                return;
+            }
+
+            for (int i = m_BTP.m_MaterialData[matName].m_StartOffsetFrameChanges; i <
+                m_BTP.m_MaterialData[matName].m_StartOffsetFrameChanges + m_BTP.m_MaterialData[matName].m_NumFrameChanges; i++)
+            {
+                if (timerCount == m_BTP.m_Frames[i].m_FrameNum)
+                {
+                    lbxBTPFrames.SelectedIndex = m_BTP.m_Frames[i].m_FrameChangeID;
+                    break;
+                }
+            }
+
+            timerCount++;
+        }
+
+        private void ClearBTPTextBoxes()
+        {
+            txtBTPFrameLength.Text = "";
+            txtBTPFramePalID.Text = "";
+            txtBTPFrameTexID.Text = "";
+            txtBTPMatNumFrameChanges.Text = "";
+            txtBTPMatStartOffsetFrameChanges.Text = "";
+            lbxBTPFrames.Items.Clear();
+            lbxBTPMaterials.Items.Clear();
+        }
+
+        private void lbxBTPMaterials_SelectedIndexChanged(object sender, EventArgs e)
+        {
+            int index = lbxBTPMaterials.SelectedIndex;
+
+            if (index == -1)
+                return;
+
+            string matName = lbxBTPMaterials.Items[index].ToString();
+
+            txtBTPMatNumFrameChanges.Text = m_BTP.m_MaterialData[matName].m_NumFrameChanges.ToString();
+            txtBTPMatStartOffsetFrameChanges.Text = m_BTP.m_MaterialData[matName].m_StartOffsetFrameChanges.ToString();
+            txtBTPMaterialName.Text = matName;
+        }
+
+        private void lbxBTPFrames_SelectedIndexChanged(object sender, EventArgs e)
+        {
+            int index = lbxBTPFrames.SelectedIndex;
+
+            if (index == -1 || index >= lbxBTPFrames.Items.Count)
+                return;
+
+            for (int i = 0; i < m_BTP.m_MaterialData.Values.Count; i++)
+            {
+                BTP.BTPMaterialData matData = m_BTP.m_MaterialData.Values.ElementAt(i);
+                if (index >= matData.m_StartOffsetFrameChanges &&
+                    index < matData.m_StartOffsetFrameChanges + matData.m_NumFrameChanges)
+                {
+                    lbxBTPMaterials.SelectedIndex = i;
+                }
+            }
+
+            txtBTPFrameTexID.Text = m_BTP.m_Frames[index].m_TextureID.ToString();
+            txtBTPFramePalID.Text = m_BTP.m_Frames[index].m_PaletteID.ToString();
+            txtBTPFrameLength.Text = m_BTP.m_Frames[index].m_Length.ToString();
+
+            if (m_BTP.m_Frames[index].m_TextureID >= 0 && m_BTP.m_Frames[index].m_TextureID < lbxTextures.Items.Count)
+                lbxTextures.SelectedIndex = (int)m_BTP.m_Frames[index].m_TextureID;
+            if (m_BTP.m_Frames[index].m_PaletteID >= 0 && m_BTP.m_Frames[index].m_PaletteID < lbxPalettes.Items.Count)
+                lbxPalettes.SelectedIndex = (int)m_BTP.m_Frames[index].m_PaletteID;
+        }
+
+        private void btnMatPreview_Click(object sender, EventArgs e)
+        {
+            int index = lbxBTPMaterials.SelectedIndex;
+
+            if (lbxBTPMaterials.Items.Count <= 0)
+                return;
+            if (!(index >= 0 && index < m_BTP.m_MaterialData.Count))
+                lbxBTPMaterials.SelectedIndex = index = 0;
+
+            string matName = lbxBTPMaterials.Items[index].ToString();
+            if (m_BTP.m_MaterialData[matName].m_NumFrameChanges > 0 &&
+                m_BTP.m_MaterialData[matName].m_StartOffsetFrameChanges < m_BTP.NumFrames())
+            {
+                StartTimer();
+            }
+        }
+
+        private void rbTexAllInBMD_CheckedChanged(object sender, EventArgs e)
+        {
+            if (rbTexAllInBMD.Checked)
+            {
+                rbTexAsRefInBTP.Checked = false;
+                DisableBTPFormControls();
+                LoadTextures();
+            }
+        }
+
+        private void rbTexAsRefInBTP_CheckedChanged(object sender, EventArgs e)
+        {
+            if (rbTexAsRefInBTP.Checked)
+            {
+                rbTexAllInBMD.Checked = false;
+                EnableBTPFormControls();
+                LoadOnlyBTPReferencedTextures();
+            }
+        }
+
+        private void LoadOnlyBTPReferencedTextures()
+        {
+            /* This is necessary as the texture and palette ID's in the BTP file don't reference the 
+             * texture and palette ID's within the BMD model - they reference the ones named in the BTP file
+            */
+
+            lbxTextures.Items.Clear();
+            lbxPalettes.Items.Clear();
+
+            for (int i = 0; i < m_BTP.m_TextureNames.Count; i++)
+            {
+                lbxTextures.Items.Add(m_BTP.m_TextureNames[i]);
+            }
+
+            for (int i = 0; i < m_BTP.m_PaletteNames.Count; i++)
+            {
+                lbxPalettes.Items.Add(m_BTP.m_PaletteNames[i]);
+            }
+        }
+
+        private void btnBTPAddTexture_Click(object sender, EventArgs e)
+        {
+            string newTexName = txtBTPTextureName.Text;
+            if (newTexName.Length > 0)
+            {
+                m_BTP.AddTexture(newTexName);
+                LoadOnlyBTPReferencedTextures();
+            }
+        }
+
+        private void btnBTPAddPalette_Click(object sender, EventArgs e)
+        {
+            string newPalName = txtBTPPaletteName.Text;
+            if (newPalName.Length > 0)
+            {
+                m_BTP.AddPalette(newPalName);
+                LoadOnlyBTPReferencedTextures();
+            }
+        }
+
+        private void btnBTPRemoveTexture_Click(object sender, EventArgs e)
+        {
+            int index = lbxTextures.SelectedIndex;
+            if (index >= 0 && index < lbxTextures.Items.Count)
+            {
+                m_BTP.RemoveTexture(lbxTextures.Items[index].ToString());
+                LoadOnlyBTPReferencedTextures();
+            }
+        }
+
+        private void btnBTPRemovePalette_Click(object sender, EventArgs e)
+        {
+            int index = lbxPalettes.SelectedIndex;
+            if (index >= 0 && index < lbxPalettes.Items.Count)
+            {
+                m_BTP.RemovePalette(lbxPalettes.Items[index].ToString());
+                LoadOnlyBTPReferencedTextures();
+            }
+        }
+
+        private void btnBTPAddFrame_Click(object sender, EventArgs e)
+        {
+            int index = lbxBTPFrames.SelectedIndex;
+            if (txtBTPFrameLength.Text.Equals("") || txtBTPFrameTexID.Text.Equals("") || txtBTPFramePalID.Text.Equals(""))
+            {
+                MessageBox.Show("Invalid frame values entered.");
+                return;
+            }
+            try
+            {
+                uint textureID = uint.Parse(txtBTPFrameTexID.Text);
+                uint paletteID = uint.Parse(txtBTPFramePalID.Text);
+                int length = int.Parse(txtBTPFrameLength.Text);
+
+                m_BTP.AddFrame(textureID, paletteID, length, (index != -1) ? index + 1 : index);
+
+                LoadOnlyBTPReferencedTextures();
+                PopulateBTPListBoxes();
+            }
+            catch { MessageBox.Show("Invalid frame values entered."); }
+        }
+
+        private void btnBTPRemoveFrame_Click(object sender, EventArgs e)
+        {
+            int index = lbxBTPFrames.SelectedIndex;
+            if (index >= 0)
+            {
+                m_BTP.RemoveFrame(index);
+                LoadOnlyBTPReferencedTextures();
+                PopulateBTPListBoxes();
+                if (index < m_BTP.m_Frames.Count)
+                    lbxBTPFrames.SelectedIndex = index;
+                else
+                    lbxBTPFrames.SelectedIndex = m_BTP.m_Frames.Count - 1;
+            }
+        }
+
+        private void btnBTPAddMaterial_Click(object sender, EventArgs e)
+        {
+            string matName = txtBTPMaterialName.Text;
+            if (!matName.Equals(""))
+            {
+                try
+                {
+                    ushort numFrameChanges = ushort.Parse(txtBTPMatNumFrameChanges.Text);
+                    ushort startOffsetFrameChanges = ushort.Parse(txtBTPMatStartOffsetFrameChanges.Text);
+
+                    m_BTP.AddMaterial(matName, numFrameChanges, startOffsetFrameChanges);
+
+                    PopulateBTPListBoxes();
+                }
+                catch { MessageBox.Show("Invalid material data entered."); }
+            }
+        }
+
+        private void btnBTPRemoveMaterial_Click(object sender, EventArgs e)
+        {
+            int index = lbxBTPMaterials.SelectedIndex;
+            if (index != -1)
+            {
+                m_BTP.RemoveMaterial(lbxBTPMaterials.Items[index].ToString());
+                PopulateBTPListBoxes();
+                if (index < m_BTP.m_MaterialData.Count)
+                    lbxBTPMaterials.SelectedIndex = index;
+                else
+                    lbxBTPMaterials.SelectedIndex = m_BTP.m_MaterialData.Count - 1;
+            }
+        }
+
+        private void btnMatPreviewStop_Click(object sender, EventArgs e)
+        {
+            StopTimer();
+        }
+
+        private void btnSaveBTP_Click(object sender, EventArgs e)
+        {
+            try
+            {
+                m_BTP.SaveChanges();
+                LoadBTP(m_BTP.m_FileName);
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show("An error occurred when trying to save the BTP file: " + ex.Message + "\n\n" +
+                    ex.StackTrace);
+            }
+        }
+
+        private void txtBTPMatStartOffsetFrameChanges_TextChanged(object sender, EventArgs e)
+        {
+            int index = lbxBTPMaterials.SelectedIndex;
+            if (index >= 0 && !txtBTPMatStartOffsetFrameChanges.Text.Equals(""))
+            {
+                try
+                {
+                    string matName = lbxBTPMaterials.Items[index].ToString();
+                    ushort startOffsetFrameChanges = ushort.Parse(txtBTPMatStartOffsetFrameChanges.Text);
+                    m_BTP.SetMaterialStartOffsetFrameChanges(matName, startOffsetFrameChanges);
+                }
+                catch (Exception ex) { }
+            }
+        }
+
+        private void txtBTPMatNumFrameChanges_TextChanged(object sender, EventArgs e)
+        {
+            int index = lbxBTPMaterials.SelectedIndex;
+            if (index >= 0 && !txtBTPMatNumFrameChanges.Text.Equals(""))
+            {
+                try
+                {
+                    string matName = lbxBTPMaterials.Items[index].ToString();
+                    ushort numFrameChanges = ushort.Parse(txtBTPMatNumFrameChanges.Text);
+                    m_BTP.SetMaterialNumFrameChanges(matName, numFrameChanges);
+                }
+                catch (Exception ex) { }
+            }
+        }
+
+        private void txtBTPFrameTexID_TextChanged(object sender, EventArgs e)
+        {
+            int index = lbxBTPFrames.SelectedIndex;
+            if (index >= 0 && !txtBTPFrameTexID.Text.Equals(""))
+            {
+                try
+                {
+                    uint textureID = uint.Parse(txtBTPFrameTexID.Text);
+                    m_BTP.m_Frames[index].m_TextureID = textureID;
+                }
+                catch (Exception ex) { }
+            }
+        }
+
+        private void txtBTPFramePalID_TextChanged(object sender, EventArgs e)
+        {
+            int index = lbxBTPFrames.SelectedIndex;
+            if (index >= 0 && !txtBTPFramePalID.Text.Equals(""))
+            {
+                try
+                {
+                    uint paletteID = uint.Parse(txtBTPFramePalID.Text);
+                    m_BTP.m_Frames[index].m_PaletteID = paletteID;
+                }
+                catch (Exception ex) { }
+            }
+        }
+
+        private void txtBTPFrameLength_TextChanged(object sender, EventArgs e)
+        {
+            int index = lbxBTPFrames.SelectedIndex;
+            if (index >= 0 && !txtBTPFrameLength.Text.Equals(""))
+            {
+                try
+                {
+                    int length = int.Parse(txtBTPFrameLength.Text);
+                    m_BTP.m_Frames[index].m_Length = length;
+                }
+                catch { }
+            }
+        }
+
+        private void btnBTPRenameTexture_Click(object sender, EventArgs e)
+        {
+            int index = lbxTextures.SelectedIndex;
+            string newName = txtBTPTextureName.Text;
+            if (index >= 0 && !newName.Equals(""))
+            {
+                m_BTP.m_TextureNames[index] = newName;
+                LoadOnlyBTPReferencedTextures();
+            }
+        }
+
+        private void btnBTPRenamePalette_Click(object sender, EventArgs e)
+        {
+            int index = lbxPalettes.SelectedIndex;
+            string newName = txtBTPPaletteName.Text;
+            if (index >= 0 && !newName.Equals(""))
+            {
+                m_BTP.m_PaletteNames[index] = newName;
+                LoadOnlyBTPReferencedTextures();
             }
         }
 

@@ -1244,6 +1244,9 @@ namespace SM64DSe
         private bool m_UpsideDown;
         private Matrix4 m_CamMatrix, m_SkyboxMatrix;
 
+        private bool m_OrthView = false;
+        private float m_OrthZoom = 20f;
+
         private uint[] m_PickingFrameBuffer;
         private float m_PickingDepth;
 
@@ -1385,7 +1388,8 @@ namespace SM64DSe
 
             // lol temporary
             GL.MatrixMode(MatrixMode.Projection);
-            Matrix4 projmtx = Matrix4.CreatePerspectiveFieldOfView(k_FOV, m_AspectRatio, k_zNear, k_zFar);
+            Matrix4 projmtx = (!m_OrthView) ? Matrix4.CreatePerspectiveFieldOfView(k_FOV, m_AspectRatio, k_zNear, k_zFar) : 
+                Matrix4.CreateOrthographic(m_OrthZoom, m_OrthZoom / m_AspectRatio, k_zNear, k_zFar);
             GL.LoadMatrix(ref projmtx);
 
             // Pass 1 - picking mode rendering (render stuff with fake colors that identify objects)
@@ -1904,14 +1908,19 @@ namespace SM64DSe
             else
             {
                 float delta = -((e.Delta / 120.0f) * 0.1f);
-                m_CamTarget.X += delta * (float)Math.Cos(m_CamRotation.X) * (float)Math.Cos(m_CamRotation.Y);
-                m_CamTarget.Y += delta * (float)Math.Sin(m_CamRotation.Y);
-                m_CamTarget.Z += delta * (float)Math.Sin(m_CamRotation.X) * (float)Math.Cos(m_CamRotation.Y);
-
-                UpdateCamera();
+                ZoomCamera(delta);
             }
 
             glLevelView.Refresh();
+        }
+
+        private void ZoomCamera(float delta)
+        {
+            m_CamTarget.X += delta * (float)Math.Cos(m_CamRotation.X) * (float)Math.Cos(m_CamRotation.Y);
+            m_CamTarget.Y += delta * (float)Math.Sin(m_CamRotation.Y);
+            m_CamTarget.Z += delta * (float)Math.Sin(m_CamRotation.X) * (float)Math.Cos(m_CamRotation.Y);
+
+            UpdateCamera();
         }
 
         private Vector3 Get3DCoords(Point coords2d, float depth)
@@ -1932,6 +1941,22 @@ namespace SM64DSe
             return ret;
         }
 
+        private Bitmap DumpOpenGLRenderingToBMP()
+        {
+            int width = glLevelView.Width;
+            int height = glLevelView.Height;
+
+            Bitmap dump = new Bitmap(width, height, System.Drawing.Imaging.PixelFormat.Format32bppArgb);
+            System.Drawing.Imaging.BitmapData bData =
+                dump.LockBits(new Rectangle(0, 0, dump.Width, dump.Height), System.Drawing.Imaging.ImageLockMode.ReadWrite, dump.PixelFormat);
+
+            GL.ReadPixels(0, 0, width, height, PixelFormat.Bgra, PixelType.UnsignedByte, bData.Scan0);
+
+            dump.UnlockBits(bData);
+            dump.RotateFlip(RotateFlipType.RotateNoneFlipY);
+
+            return dump;
+        }
 
         private void ReleaseObjectTable(List<LevelObject> list)
         {
@@ -2286,6 +2311,31 @@ namespace SM64DSe
 
             if (e.KeyCode == Keys.Q)
                 btnLOL.PerformClick();
+
+
+            // Orthognal View Zoom
+            if (e.KeyCode == Keys.PageUp)
+            {
+                m_OrthZoom -= 1f;
+                glLevelView.Refresh();
+            }
+            if (e.KeyCode == Keys.PageDown)
+            {
+                m_OrthZoom += 1f;
+                glLevelView.Refresh();
+            }
+
+            // Standard View Zoom / Orthogonal View Slice
+            if (e.KeyCode == Keys.Home)
+            {
+                ZoomCamera(-0.5f);
+                glLevelView.Refresh();
+            }
+            if (e.KeyCode == Keys.End)
+            {
+                ZoomCamera(0.5f);
+                glLevelView.Refresh();
+            }
         }
 
         private void glLevelView_KeyUp(object sender, KeyEventArgs e)
@@ -2293,6 +2343,7 @@ namespace SM64DSe
             if (e.KeyCode == Keys.ShiftKey || e.KeyCode == Keys.RShiftKey)
                 m_ShiftPressed = false;
 
+            // Copy and Paste Objects
             if (e.Control && e.KeyCode == Keys.C)
                 m_CopiedObject = m_SelectedObject.Copy();
             if (e.Control && e.KeyCode == Keys.V)
@@ -2561,13 +2612,9 @@ namespace SM64DSe
                 if (result == DialogResult.OK)
                 {
                     String modelName = form.m_SelectedFile;
-                    float scale;
-                    String input = Microsoft.VisualBasic.Interaction.InputBox("Enter a scale for the model - Level Models use 1, most objects use 0.008:", "Scale", "1", 0, 0);
-                    if (float.TryParse(input, out scale) || float.TryParse(input, NumberStyles.Float, new CultureInfo("en-US"), out scale))
-                        new ModelImporter(modelName, modelName.Substring(0, modelName.Length - 4) + ".kcl", scale).Show(this);
-                    else
-                        new ModelImporter(modelName, modelName.Substring(0, modelName.Length - 4) + ".kcl").Show(this);
-
+                    ModelImporter mdlImp = new ModelImporter(modelName, modelName.Substring(0, modelName.Length - 4) + ".kcl");
+                    if (mdlImp != null && !mdlImp.m_EarlyClosure)
+                        mdlImp.ShowDialog(this);
                 }
             }
         }
@@ -2636,6 +2683,46 @@ namespace SM64DSe
                 slStatusLabel.Text = "Level imported successfully.";
             }
 
+        }
+
+        private void btnOrthView_Click(object sender, EventArgs e)
+        {
+            if (!btnOrthView.Checked)
+            {
+                btnOrthView.Checked = true;
+                m_OrthView = true;
+            }
+            else
+            {
+                btnOrthView.Checked = false;
+                m_OrthView = false;
+            }
+
+            glLevelView.Refresh();
+        }
+
+        private void btnScreenshot_Click(object sender, EventArgs e)
+        {
+            Bitmap dump = DumpOpenGLRenderingToBMP();
+
+            SaveFileDialog sfd = new SaveFileDialog();
+            sfd.FileName = "Screenshot_Level_" + m_LevelID;
+            sfd.DefaultExt = ".png";//Default file extension
+            sfd.Filter = "PNG Image (.png)|*.png";//Filter by .png
+
+            if (sfd.ShowDialog() == DialogResult.OK)
+            {
+                try
+                {
+                    dump.Save(sfd.FileName, System.Drawing.Imaging.ImageFormat.Png);
+                    slStatusLabel.Text = "Screenshot saved.";
+                }
+                catch (Exception ex)
+                {
+                    MessageBox.Show("An error occurred while trying to save texture: \n\n" +
+                        ex.Message + "\n" + ex.Data + "\n" + ex.StackTrace + "\n" + ex.Source);
+                }
+            }
         }
     }
 }

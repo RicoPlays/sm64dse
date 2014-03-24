@@ -554,15 +554,17 @@ namespace SM64DSe.Importers
             mat.m_DiffuseMapName = "";
             mat.m_DiffuseMapID = 0;
             mat.m_DiffuseMapSize = new Vector2(0f, 0f);
-            mat.m_Name = "defult_white";
+            mat.m_Name = "default_white";
             m_Materials.Add("default_white", mat);
         }
 
         private static void addWhiteMat(String bone)
         {
             addWhiteMat();
-            m_Bones[m_Bones[bone].m_RootBone].m_Materials.Add("default_white", m_Materials["default_white"].copyAllButFaces());
-            m_Bones[bone].m_Materials.Add("default_white", m_Materials["default_white"].copyAllButFaces());
+            if (!m_Bones[m_Bones[bone].m_RootBone].m_Materials.ContainsKey("default_white"))
+                m_Bones[m_Bones[bone].m_RootBone].m_Materials.Add("default_white", m_Materials["default_white"].copyAllButFaces());
+            if (!m_Bones[bone].m_Materials.ContainsKey("default_white"))
+                m_Bones[bone].m_Materials.Add("default_white", m_Materials["default_white"].copyAllButFaces());
         }
 
         // from loaded model
@@ -1349,6 +1351,11 @@ namespace SM64DSe.Importers
                     case "usemtl": // material name
                         if (parts.Length < 2) continue;
                         curmaterial = parts[1];
+                        if (!m_Materials.ContainsKey(curmaterial))
+                        {
+                            curmaterial = "default_white";
+                            addWhiteMat(currentBone);
+                        }
                         // The parent bone should have a list of all materials used by itself and its children
                         if (!m_Bones[m_Bones[currentBone].m_RootBone].m_Materials.ContainsKey(curmaterial))
                             m_Bones[m_Bones[currentBone].m_RootBone].m_Materials.Add(curmaterial, m_Materials[curmaterial].copyAllButFaces());
@@ -1410,10 +1417,8 @@ namespace SM64DSe.Importers
                             }
                             else
                             {
-                                // Referencing a material that doesn't exist
+                                // No "usemtl" command before declaring face
                                 curmaterial = "default_white";
-                                MessageBox.Show("No material library has been specified, yet faces are still set to use \n" +
-                                        "a material. A default white material will be used instead.");
                                 addWhiteMat(currentBone);
                                 mat = (MaterialDef)m_Bones[currentBone].m_Materials[curmaterial];
                             }

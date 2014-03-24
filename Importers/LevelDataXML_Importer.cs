@@ -1025,7 +1025,22 @@ namespace SM64DSe.Importers
                 }
                 else if (reader.NodeType.Equals(XmlNodeType.Element) && reader.LocalName.Equals("Parameters"))
                 {
-                    obj.Parameters = ReadParameters(reader, 5);
+                    // Should be 4
+                    string countAttr = reader.GetAttribute("count");
+                    int count = (countAttr != null) ? int.Parse(countAttr) : 5;
+
+                    ushort[] tempParams = ReadParameters(reader, count);
+
+                    // Before this revision (R73) Entrance objects had 5 parameters but the third was a duplicate of 
+                    // the Y Rotation, no longer exported but older XML's will still have the 5
+                    if (count == 5)
+                        tempParams = new ushort[] { tempParams[0], tempParams[1], tempParams[3], tempParams[4] };
+
+                    obj.Parameters = tempParams;
+
+                    // Eventually we want to get rid of this, and use only the below line
+
+                    //obj.Parameters = ReadParameters(reader, 4);
                 }
                 else if (reader.NodeType.Equals(XmlNodeType.EndElement) && reader.LocalName.Equals("EntranceObject"))
                 {

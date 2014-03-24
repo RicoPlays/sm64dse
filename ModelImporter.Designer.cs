@@ -39,6 +39,8 @@
             this.slStatus = new System.Windows.Forms.ToolStripStatusLabel();
             this.glModelView = new OpenTK.GLControl();
             this.spcMainContainer = new System.Windows.Forms.SplitContainer();
+            this.txtInGameSizePreview = new System.Windows.Forms.TextBox();
+            this.chkInGamePreview = new System.Windows.Forms.CheckBox();
             this.btnEditTextures = new System.Windows.Forms.Button();
             this.label1 = new System.Windows.Forms.Label();
             this.btnAssignTypes = new System.Windows.Forms.Button();
@@ -167,6 +169,8 @@
             // 
             // spcMainContainer.Panel1
             // 
+            this.spcMainContainer.Panel1.Controls.Add(this.txtInGameSizePreview);
+            this.spcMainContainer.Panel1.Controls.Add(this.chkInGamePreview);
             this.spcMainContainer.Panel1.Controls.Add(this.btnEditTextures);
             this.spcMainContainer.Panel1.Controls.Add(this.label1);
             this.spcMainContainer.Panel1.Controls.Add(this.btnAssignTypes);
@@ -181,14 +185,38 @@
             this.spcMainContainer.SplitterDistance = 256;
             this.spcMainContainer.TabIndex = 3;
             // 
+            // txtInGameSizePreview
+            // 
+            this.txtInGameSizePreview.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)
+                        | System.Windows.Forms.AnchorStyles.Right)));
+            this.txtInGameSizePreview.Location = new System.Drawing.Point(153, 442);
+            this.txtInGameSizePreview.Name = "txtInGameSizePreview";
+            this.txtInGameSizePreview.Size = new System.Drawing.Size(86, 20);
+            this.txtInGameSizePreview.TabIndex = 13;
+            this.txtInGameSizePreview.TextChanged += new System.EventHandler(this.txtInGameSizePreview_TextChanged);
+            // 
+            // chkInGamePreview
+            // 
+            this.chkInGamePreview.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)));
+            this.chkInGamePreview.AutoSize = true;
+            this.chkInGamePreview.Checked = true;
+            this.chkInGamePreview.CheckState = System.Windows.Forms.CheckState.Checked;
+            this.chkInGamePreview.Location = new System.Drawing.Point(3, 445);
+            this.chkInGamePreview.Name = "chkInGamePreview";
+            this.chkInGamePreview.Size = new System.Drawing.Size(130, 17);
+            this.chkInGamePreview.TabIndex = 12;
+            this.chkInGamePreview.Text = "In-Game Size Preview";
+            this.chkInGamePreview.UseVisualStyleBackColor = true;
+            this.chkInGamePreview.CheckedChanged += new System.EventHandler(this.chkInGamePreview_CheckedChanged);
+            // 
             // btnEditTextures
             // 
             this.btnEditTextures.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)));
             this.btnEditTextures.Location = new System.Drawing.Point(3, 418);
             this.btnEditTextures.Name = "btnEditTextures";
-            this.btnEditTextures.Size = new System.Drawing.Size(125, 23);
+            this.btnEditTextures.Size = new System.Drawing.Size(135, 23);
             this.btnEditTextures.TabIndex = 11;
-            this.btnEditTextures.Text = "Edit Existing Textures";
+            this.btnEditTextures.Text = "Texture and BTP Editor";
             this.btnEditTextures.UseVisualStyleBackColor = true;
             this.btnEditTextures.Click += new System.EventHandler(this.btnEditTextures_Click);
             // 
@@ -415,5 +443,7 @@
         private System.Windows.Forms.Label label1;
         private System.Windows.Forms.Button btnAssignTypes;
         private System.Windows.Forms.Button btnEditTextures;
+        private System.Windows.Forms.TextBox txtInGameSizePreview;
+        private System.Windows.Forms.CheckBox chkInGamePreview;
     }
 }
