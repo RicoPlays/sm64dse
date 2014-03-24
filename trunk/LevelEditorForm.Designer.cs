@@ -64,6 +64,9 @@
             this.btnLOL = new System.Windows.Forms.ToolStripButton();
             this.btnImportXML = new System.Windows.Forms.ToolStripButton();
             this.btnExportXML = new System.Windows.Forms.ToolStripButton();
+            this.btnScreenshot = new System.Windows.Forms.ToolStripButton();
+            this.toolStripSeparator4 = new System.Windows.Forms.ToolStripSeparator();
+            this.btnOrthView = new System.Windows.Forms.ToolStripButton();
             this.tsToolBar = new System.Windows.Forms.ToolStrip();
             this.btnSave = new System.Windows.Forms.ToolStripButton();
             this.toolStripSeparator1 = new System.Windows.Forms.ToolStripSeparator();
@@ -424,7 +427,7 @@
             this.btnOffsetAllCoords.Text = "Offset All Co-ords";
             this.btnOffsetAllCoords.Click += new System.EventHandler(this.btnOffsetAllCoords_Click);
             // 
-            // glLevelView
+            // glTextureView
             // 
             this.glLevelView.BackColor = System.Drawing.Color.Black;
             this.glLevelView.Dock = System.Windows.Forms.DockStyle.Fill;
@@ -449,7 +452,10 @@
             this.btnDumpOverlay,
             this.btnLOL,
             this.btnImportXML,
-            this.btnExportXML});
+            this.btnExportXML,
+            this.btnScreenshot,
+            this.toolStripSeparator4,
+            this.btnOrthView});
             this.tsViewActions.Location = new System.Drawing.Point(0, 0);
             this.tsViewActions.Name = "tsViewActions";
             this.tsViewActions.Size = new System.Drawing.Size(689, 25);
@@ -499,6 +505,32 @@
             this.btnExportXML.Size = new System.Drawing.Size(71, 22);
             this.btnExportXML.Text = "Export XML";
             this.btnExportXML.Click += new System.EventHandler(this.btnExportXML_Click);
+            // 
+            // btnScreenshot
+            // 
+            this.btnScreenshot.Alignment = System.Windows.Forms.ToolStripItemAlignment.Right;
+            this.btnScreenshot.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Text;
+            this.btnScreenshot.ImageTransparentColor = System.Drawing.Color.Magenta;
+            this.btnScreenshot.Name = "btnScreenshot";
+            this.btnScreenshot.Size = new System.Drawing.Size(69, 22);
+            this.btnScreenshot.Text = "Screenshot";
+            this.btnScreenshot.Click += new System.EventHandler(this.btnScreenshot_Click);
+            // 
+            // toolStripSeparator4
+            // 
+            this.toolStripSeparator4.Alignment = System.Windows.Forms.ToolStripItemAlignment.Right;
+            this.toolStripSeparator4.Name = "toolStripSeparator4";
+            this.toolStripSeparator4.Size = new System.Drawing.Size(6, 25);
+            // 
+            // btnOrthView
+            // 
+            this.btnOrthView.Alignment = System.Windows.Forms.ToolStripItemAlignment.Right;
+            this.btnOrthView.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Text;
+            this.btnOrthView.ImageTransparentColor = System.Drawing.Color.Magenta;
+            this.btnOrthView.Name = "btnOrthView";
+            this.btnOrthView.Size = new System.Drawing.Size(100, 22);
+            this.btnOrthView.Text = "Orthogonal View";
+            this.btnOrthView.Click += new System.EventHandler(this.btnOrthView_Click);
             // 
             // tsToolBar
             // 
@@ -788,7 +820,7 @@
             // slStatusLabel
             // 
             this.slStatusLabel.Name = "slStatusLabel";
-            this.slStatusLabel.Size = new System.Drawing.Size(942, 17);
+            this.slStatusLabel.Size = new System.Drawing.Size(911, 17);
             this.slStatusLabel.Spring = true;
             this.slStatusLabel.Text = "status!";
             this.slStatusLabel.TextAlign = System.Drawing.ContentAlignment.MiddleLeft;
@@ -894,6 +926,9 @@
         private System.Windows.Forms.ToolStripButton btnExportLevelModel;
         private System.Windows.Forms.ToolStripButton btnImportXML;
         private System.Windows.Forms.ToolStripButton btnExportXML;
+        private System.Windows.Forms.ToolStripButton btnOrthView;
+        private System.Windows.Forms.ToolStripButton btnScreenshot;
+        private System.Windows.Forms.ToolStripSeparator toolStripSeparator4;
 
 
     }

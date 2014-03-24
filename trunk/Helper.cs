@@ -22,12 +22,14 @@ using System.Linq;
 using System.Text;
 using System.Drawing;
 using OpenTK;
+using System.Globalization;
 
 namespace SM64DSe
 {
     static class Helper
     {
         public static uint ACT_SELECTOR_ID_TABLE;
+        public static CultureInfo USA = new CultureInfo("en-US");
 
         static Helper()
         {

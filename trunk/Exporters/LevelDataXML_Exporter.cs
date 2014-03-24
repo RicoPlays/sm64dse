@@ -247,6 +247,7 @@ namespace SM64DSe.Exporters
             writer.WriteElementString("YRotation", obj.YRotation.ToString(usa));
 
             writer.WriteStartElement("Parameters");
+            writer.WriteAttributeString("count", "3");
             for (int j = 0; j < 3; j++)
             {
                 writer.WriteStartElement("Parameter");
@@ -273,7 +274,8 @@ namespace SM64DSe.Exporters
             writer.WriteElementString("YRotation", obj.YRotation.ToString(usa));
 
             writer.WriteStartElement("Parameters");
-            for (int j = 0; j < 5; j++)
+            writer.WriteAttributeString("count", "4");
+            for (int j = 0; j < 4; j++)
             {
                 writer.WriteStartElement("Parameter");
                 writer.WriteAttributeString("id", j.ToString());
@@ -308,6 +310,7 @@ namespace SM64DSe.Exporters
             writer.WriteElementString("Length", obj.Parameters[1].ToString());
 
             writer.WriteStartElement("Parameters");
+            writer.WriteAttributeString("count", "3");
             for (int j = 0; j < 3; j++)
             {
                 writer.WriteStartElement("Parameter");
@@ -344,6 +347,7 @@ namespace SM64DSe.Exporters
             writer.WriteElementString("YRotation", obj.YRotation.ToString(usa));
 
             writer.WriteStartElement("Parameters");
+            writer.WriteAttributeString("count", "3");
             for (int j = 0; j < 3; j++)
             {
                 writer.WriteStartElement("Parameter");
@@ -373,6 +377,7 @@ namespace SM64DSe.Exporters
             writer.WriteEndElement();
 
             writer.WriteStartElement("Parameters");
+            writer.WriteAttributeString("count", "1");
             for (int j = 0; j < 1; j++)
             {
                 writer.WriteStartElement("Parameter");
@@ -396,6 +401,7 @@ namespace SM64DSe.Exporters
             writer.WriteEndElement();
 
             writer.WriteStartElement("Parameters");
+            writer.WriteAttributeString("count", "2");
             for (int j = 0; j < 2; j++)
             {
                 writer.WriteStartElement("Parameter");
@@ -419,6 +425,7 @@ namespace SM64DSe.Exporters
             writer.WriteEndElement();
 
             writer.WriteStartElement("Parameters");
+            writer.WriteAttributeString("count", "1");
             for (int j = 0; j < 1; j++)
             {
                 writer.WriteStartElement("Parameter");
@@ -486,6 +493,7 @@ namespace SM64DSe.Exporters
             writer.WriteStartElement("Parameters");
 
             writer.WriteStartElement("Parameter");
+            writer.WriteAttributeString("count", "2");
             writer.WriteAttributeString("id", "0");
             writer.WriteString(obj.Param1.ToString());
             writer.WriteEndElement();
@@ -529,6 +537,7 @@ namespace SM64DSe.Exporters
             writer.WriteStartElement("Type14Object");
 
             writer.WriteStartElement("Parameters");
+            writer.WriteAttributeString("count", "4");
             for (int j = 0; j < 4; j++)
             {
                 writer.WriteStartElement("Parameter");

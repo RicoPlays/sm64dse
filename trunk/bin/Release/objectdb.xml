@@ -2,11 +2,11 @@
 
 <!--
 	Super Mario 64 DS Object Info Database
-	built on 02/23/2014 21:20:54 for SM64DS Editor
-	Thanks to nobody ;_; for their contributions!
+	built on 03/24/2014 21:33:41 for SM64DS Editor
+	Thanks to Fiachra, Hiccup, skawo for their contributions!
 -->
 
-<database timestamp='1393186854'>
+<database timestamp='1395693221'>
 
 	<object id='0'>
 		<category>4</category>
@@ -3265,10 +3265,22 @@ Spawn delay, in frames, 0 is the default.</description>
 
 	<object id='323'>
 		<category>1</category>
-		<name></name>
+		<name>Ambient Sound Effects</name>
 		<internalname>SET_SE</internalname>
 		<actorid>350</actorid>
-		<description></description>
+		<description>Plays sound effects when player gets close.
+Param 1:
+XY
+X - ?
+Y:
+1 - Birds
+2 - Birds
+3 - Different birds
+4 - Birds with very quiet waterfall
+5 - Bird with waterfall
+6 - Loud waterfall 
+7 - Nothing
+8 - Waterfall on right speaker</description>
 		<bankreq>none</bankreq>
 	</object>
 

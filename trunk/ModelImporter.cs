@@ -56,6 +56,7 @@ namespace SM64DSe
         private bool m_ZMirror;
         private bool m_SwapYZ;
         private float m_CustomScale;
+        private float m_InGameModelScale;
 
         // camera
         private Vector2 m_CamRotation;
@@ -90,7 +91,7 @@ namespace SM64DSe
         private bool m_GLLoaded;
         private bool m_MdlLoaded;
 
-        public ModelImporter(String modelName, String kclName, float scale = 1f)
+        public ModelImporter(String modelName, String kclName, float customScale = 1f)
         {
             InitializeComponent();
 
@@ -106,7 +107,16 @@ namespace SM64DSe
             m_ImportedModel = new BMD(Program.m_ROM.GetFileFromName(m_BMDName));
 
             m_Scale = new Vector3(1f, 1f, 1f);
-            m_CustomScale = scale;
+            m_CustomScale = customScale;
+
+            m_InGameModelScale = customScale;
+            txtInGameSizePreview.Text = m_InGameModelScale.ToString(Helper.USA);
+            if (m_InGameModelScale == 1f)
+            {
+                chkInGamePreview.Checked = false;
+                txtInGameSizePreview.Enabled = false;
+            }
+
             m_ZMirror = false;
             m_SwapYZ = false;
 
@@ -235,18 +245,21 @@ namespace SM64DSe
             GL.CallList(mheaddl[1]);
             GL.PopMatrix();
 
+            Vector3 previewScale = m_Scale;
+            previewScale = Vector3.Multiply(m_Scale, m_InGameModelScale);
+
             if (m_MdlLoaded)
             {
                 GL.Disable(EnableCap.Lighting);
                 GL.PushMatrix();
                 if (m_ZMirror)
                 {
-                    GL.Scale(m_Scale.X, m_Scale.Y, -m_Scale.Z);
+                    GL.Scale(previewScale.X, previewScale.Y, -previewScale.Z);
                     GL.FrontFace(FrontFaceDirection.Cw);
                 }
                 else
                 {
-                    GL.Scale(m_Scale);
+                    GL.Scale(previewScale);
                     GL.FrontFace(FrontFaceDirection.Ccw);
                 }
 
@@ -436,14 +449,12 @@ namespace SM64DSe
 
         private void ImportModel()
         {
-            Vector3 originalScale = new Vector3(1, 1, 1);
             float faceSizeThreshold = 0.001f;
             if (txtThreshold.Text == "")
                 faceSizeThreshold = 0.001f;//Default value
             else
             {
-                try
-                { faceSizeThreshold = Convert.ToSingle(txtThreshold.Text); }
+                try { faceSizeThreshold = float.Parse(txtThreshold.Text, Helper.USA); }
                 catch { MessageBox.Show(txtThreshold.Text + "\nis not a valid float value. Please enter a value in format 0.123"); return; }
             }
             Dictionary<string, int> matColTypes = new Dictionary<string, int>();
@@ -454,25 +465,20 @@ namespace SM64DSe
             NitroFile kcl;//This'll hold the KCL file that is to be replaced, either a level's or an object's
             //If it's an object it'll be scaled down - need to get back to original value
             slStatus.Text = "Importing model...";
-            originalScale = m_Scale;
-            float scale = m_Scale.X;
-            if (m_CustomScale != 1)
-                scale = (m_Scale.X / m_CustomScale);
-            m_Scale = new Vector3(scale, scale, scale);
             glModelView.Refresh();
             m_ImportedModel = BMD_Importer.ConvertToBMD(m_ImportedModel, m_ModelFileName, m_ModelPath, m_Scale);
             BMD_Importer.SaveModelChanges();
 
-            m_Scale = originalScale;//Back to previous scale for collision as it's not affected like model's scale
             PrerenderModel();
             glModelView.Refresh();
             if (cbGenerateCollision.Checked)
             {
+                float kclScale = (!chkInGamePreview.Checked) ? m_Scale.X : (m_Scale.X * m_InGameModelScale);
                 slStatus.Text = "Importing collision map... This may take a few minutes, please be patient.";
                 try
                 {
                     kcl = Program.m_ROM.GetFileFromName(m_KCLName);
-                    KCL_Importer.ConvertToKCL(m_ModelFileName, ref kcl, m_Scale.X, faceSizeThreshold, matColTypes);
+                    KCL_Importer.ConvertToKCL(m_ModelFileName, ref kcl, kclScale, faceSizeThreshold, matColTypes);
                 }
                 catch (Exception e)
                 {
@@ -663,7 +669,7 @@ namespace SM64DSe
         private void tbScale_TextChanged(object sender, EventArgs e)
         {
             float val;
-            if (float.TryParse(tbScale.Text, out val) || float.TryParse(tbScale.Text, NumberStyles.Float, new CultureInfo("en-US"), out val))
+            if (float.TryParse(tbScale.Text, out val) || float.TryParse(tbScale.Text, NumberStyles.Float, Helper.USA, out val))
             {
                 refreshScale(val);
             }
@@ -718,6 +724,39 @@ namespace SM64DSe
             BMD bmd = new BMD(Program.m_ROM.GetFileFromName(m_BMDName));
 
             new TextureEditorForm(bmd, this).Show(this);
+        }
+
+        private void chkInGamePreview_CheckedChanged(object sender, EventArgs e)
+        {
+            if (chkInGamePreview.Checked)
+            {
+                try { m_InGameModelScale = float.Parse(txtInGameSizePreview.Text, Helper.USA); }
+                catch { MessageBox.Show("Please enter a valid scale in the format 1.23"); }
+                txtInGameSizePreview.Enabled = true;
+            }
+            else if (!chkInGamePreview.Checked)
+            {
+                m_InGameModelScale = m_CustomScale;
+                txtInGameSizePreview.Text = m_InGameModelScale.ToString(Helper.USA);
+                txtInGameSizePreview.Enabled = false;
+            }
+
+            PrerenderModel();
+            glModelView.Refresh();
+        }
+
+        private void txtInGameSizePreview_TextChanged(object sender, EventArgs e)
+        {
+            if (chkInGamePreview.Checked)
+            {
+                try 
+                { 
+                    m_InGameModelScale = float.Parse(txtInGameSizePreview.Text, Helper.USA);
+                    PrerenderModel();
+                    glModelView.Refresh();
+                }
+                catch { }
+            }
         }
     }
 }

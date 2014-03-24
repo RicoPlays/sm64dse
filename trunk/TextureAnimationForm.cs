@@ -12,9 +12,6 @@ namespace SM64DSe
 {
     public partial class TextureAnimationForm : Form
     {
-        //reloadData() patch is only done on last area but Castle Grounds Multiplayer seems to be the only one affected, 
-        //though may need to set it for each area in future
-
         // Important Note: When adding or removing space, make sure scale etc. tables and headers for the following 
         // areas are multiples of 4, so:
         // When adding space, round up to multiples of 4 eg. 9 > 12
