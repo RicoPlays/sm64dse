@@ -1124,8 +1124,10 @@ namespace SM64DSe.Importers
 
             // For PathPointObjects the area is set to 0
             int area = 0;
+            // Node ID can just be -1 here, will be set properly during level loading
+            int tmp = -1;
 
-            PathPointObject obj = new PathPointObject(m_Overlay, 0, 0);
+            PathPointObject obj = new PathPointObject(m_Overlay, 0, 0, tmp);
 
             while (reader.Read())
             {

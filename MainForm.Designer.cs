@@ -34,17 +34,18 @@
             this.toolStripSeparator1 = new System.Windows.Forms.ToolStripSeparator();
             this.btnEditLevel = new System.Windows.Forms.ToolStripButton();
             this.btnEditTexts = new System.Windows.Forms.ToolStripButton();
-            this.btnSecretShit = new System.Windows.Forms.ToolStripDropDownButton();
-            this.mnitDumpAllOvls = new System.Windows.Forms.ToolStripMenuItem();
-            this.decompressOverlaysWithinGameToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
-            this.hexDumpToBinaryFileToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.btnKCLEditor = new System.Windows.Forms.ToolStripButton();
             this.toolStripSeparator2 = new System.Windows.Forms.ToolStripSeparator();
-            this.btnAddPatches = new System.Windows.Forms.ToolStripButton();
+            this.btnAnimationEditor = new System.Windows.Forms.ToolStripButton();
             this.btnOptions = new System.Windows.Forms.ToolStripDropDownButton();
             this.btnUpdateODB = new System.Windows.Forms.ToolStripMenuItem();
             this.btnEditorSettings = new System.Windows.Forms.ToolStripMenuItem();
             this.btnHalp = new System.Windows.Forms.ToolStripButton();
+            this.btnMore = new System.Windows.Forms.ToolStripDropDownButton();
+            this.mnitAdditionalPatches = new System.Windows.Forms.ToolStripMenuItem();
+            this.mnitDumpAllOvls = new System.Windows.Forms.ToolStripMenuItem();
+            this.mnitDecompressOverlaysWithinGame = new System.Windows.Forms.ToolStripMenuItem();
+            this.mnitHexDumpToBinaryFile = new System.Windows.Forms.ToolStripMenuItem();
             this.lbxLevels = new System.Windows.Forms.ListBox();
             this.ofdOpenFile = new System.Windows.Forms.OpenFileDialog();
             this.sfdSaveFile = new System.Windows.Forms.SaveFileDialog();
@@ -62,15 +63,15 @@
             this.toolStripSeparator1,
             this.btnEditLevel,
             this.btnEditTexts,
-            this.btnSecretShit,
             this.btnKCLEditor,
             this.toolStripSeparator2,
-            this.btnAddPatches,
+            this.btnAnimationEditor,
             this.btnOptions,
-            this.btnHalp});
+            this.btnHalp,
+            this.btnMore});
             this.tsToolBar.Location = new System.Drawing.Point(0, 0);
             this.tsToolBar.Name = "tsToolBar";
-            this.tsToolBar.Size = new System.Drawing.Size(496, 25);
+            this.tsToolBar.Size = new System.Drawing.Size(508, 25);
             this.tsToolBar.TabIndex = 0;
             this.tsToolBar.Text = "toolStrip1";
             // 
@@ -114,43 +115,6 @@
             this.btnEditTexts.ToolTipText = "change what signs say";
             this.btnEditTexts.Click += new System.EventHandler(this.btnEditTexts_Click);
             // 
-            // btnSecretShit
-            // 
-            this.btnSecretShit.Alignment = System.Windows.Forms.ToolStripItemAlignment.Right;
-            this.btnSecretShit.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Text;
-            this.btnSecretShit.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
-            this.mnitDumpAllOvls,
-            this.decompressOverlaysWithinGameToolStripMenuItem,
-            this.hexDumpToBinaryFileToolStripMenuItem});
-            this.btnSecretShit.Enabled = false;
-            this.btnSecretShit.Image = ((System.Drawing.Image)(resources.GetObject("btnSecretShit.Image")));
-            this.btnSecretShit.ImageTransparentColor = System.Drawing.Color.Magenta;
-            this.btnSecretShit.Name = "btnSecretShit";
-            this.btnSecretShit.Size = new System.Drawing.Size(28, 22);
-            this.btnSecretShit.Text = "D";
-            this.btnSecretShit.ToolTipText = "Debug crap. Don\'t touch unless you know what you\'re doing.";
-            // 
-            // mnitDumpAllOvls
-            // 
-            this.mnitDumpAllOvls.Name = "mnitDumpAllOvls";
-            this.mnitDumpAllOvls.Size = new System.Drawing.Size(259, 22);
-            this.mnitDumpAllOvls.Text = "Dump All Overlays";
-            this.mnitDumpAllOvls.Click += new System.EventHandler(this.mnitDumpAllOvls_Click);
-            // 
-            // decompressOverlaysWithinGameToolStripMenuItem
-            // 
-            this.decompressOverlaysWithinGameToolStripMenuItem.Name = "decompressOverlaysWithinGameToolStripMenuItem";
-            this.decompressOverlaysWithinGameToolStripMenuItem.Size = new System.Drawing.Size(259, 22);
-            this.decompressOverlaysWithinGameToolStripMenuItem.Text = "Decompress Overlays Within Game";
-            this.decompressOverlaysWithinGameToolStripMenuItem.Click += new System.EventHandler(this.decompressOverlaysWithinGameToolStripMenuItem_Click);
-            // 
-            // hexDumpToBinaryFileToolStripMenuItem
-            // 
-            this.hexDumpToBinaryFileToolStripMenuItem.Name = "hexDumpToBinaryFileToolStripMenuItem";
-            this.hexDumpToBinaryFileToolStripMenuItem.Size = new System.Drawing.Size(259, 22);
-            this.hexDumpToBinaryFileToolStripMenuItem.Text = "Hex Dump to Binary File";
-            this.hexDumpToBinaryFileToolStripMenuItem.Click += new System.EventHandler(this.hexDumpToBinaryFileToolStripMenuItem_Click);
-            // 
             // btnKCLEditor
             // 
             this.btnKCLEditor.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Text;
@@ -166,18 +130,20 @@
             this.toolStripSeparator2.Name = "toolStripSeparator2";
             this.toolStripSeparator2.Size = new System.Drawing.Size(6, 25);
             // 
-            // btnAddPatches
+            // btnAnimationEditor
             // 
-            this.btnAddPatches.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Text;
-            this.btnAddPatches.Enabled = false;
-            this.btnAddPatches.ImageTransparentColor = System.Drawing.Color.Magenta;
-            this.btnAddPatches.Name = "btnAddPatches";
-            this.btnAddPatches.Size = new System.Drawing.Size(110, 22);
-            this.btnAddPatches.Text = "Additional Patches";
-            this.btnAddPatches.Click += new System.EventHandler(this.btnAddPatches_Click);
+            this.btnAnimationEditor.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Text;
+            this.btnAnimationEditor.Enabled = false;
+            this.btnAnimationEditor.ImageTransparentColor = System.Drawing.Color.Magenta;
+            this.btnAnimationEditor.Name = "btnAnimationEditor";
+            this.btnAnimationEditor.Size = new System.Drawing.Size(101, 22);
+            this.btnAnimationEditor.Text = "Animation Editor";
+            this.btnAnimationEditor.ToolTipText = "Animation Editor";
+            this.btnAnimationEditor.Click += new System.EventHandler(this.btnAnimationEditor_Click);
             // 
             // btnOptions
             // 
+            this.btnOptions.Alignment = System.Windows.Forms.ToolStripItemAlignment.Right;
             this.btnOptions.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Text;
             this.btnOptions.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
             this.btnUpdateODB,
@@ -210,10 +176,55 @@
             this.btnHalp.Image = ((System.Drawing.Image)(resources.GetObject("btnHalp.Image")));
             this.btnHalp.ImageTransparentColor = System.Drawing.Color.Magenta;
             this.btnHalp.Name = "btnHalp";
-            this.btnHalp.Size = new System.Drawing.Size(23, 19);
+            this.btnHalp.Size = new System.Drawing.Size(23, 22);
             this.btnHalp.Text = "?";
             this.btnHalp.ToolTipText = "Help, about, etc...";
             this.btnHalp.Click += new System.EventHandler(this.btnHalp_Click);
+            // 
+            // btnMore
+            // 
+            this.btnMore.Alignment = System.Windows.Forms.ToolStripItemAlignment.Right;
+            this.btnMore.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Text;
+            this.btnMore.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
+            this.mnitAdditionalPatches,
+            this.mnitDumpAllOvls,
+            this.mnitDecompressOverlaysWithinGame,
+            this.mnitHexDumpToBinaryFile});
+            this.btnMore.Enabled = false;
+            this.btnMore.Image = ((System.Drawing.Image)(resources.GetObject("btnMore.Image")));
+            this.btnMore.ImageTransparentColor = System.Drawing.Color.Magenta;
+            this.btnMore.Name = "btnMore";
+            this.btnMore.Size = new System.Drawing.Size(48, 19);
+            this.btnMore.Text = "More";
+            this.btnMore.ToolTipText = "Debug crap. Don\'t touch unless you know what you\'re doing.";
+            // 
+            // mnitAdditionalPatches
+            // 
+            this.mnitAdditionalPatches.Name = "mnitAdditionalPatches";
+            this.mnitAdditionalPatches.Size = new System.Drawing.Size(259, 22);
+            this.mnitAdditionalPatches.Text = "Additional Patches";
+            this.mnitAdditionalPatches.Click += new System.EventHandler(this.mnitAdditionalPatches_Click);
+            // 
+            // mnitDumpAllOvls
+            // 
+            this.mnitDumpAllOvls.Name = "mnitDumpAllOvls";
+            this.mnitDumpAllOvls.Size = new System.Drawing.Size(259, 22);
+            this.mnitDumpAllOvls.Text = "Dump All Overlays";
+            this.mnitDumpAllOvls.Click += new System.EventHandler(this.mnitDumpAllOvls_Click);
+            // 
+            // mnitDecompressOverlaysWithinGame
+            // 
+            this.mnitDecompressOverlaysWithinGame.Name = "mnitDecompressOverlaysWithinGame";
+            this.mnitDecompressOverlaysWithinGame.Size = new System.Drawing.Size(259, 22);
+            this.mnitDecompressOverlaysWithinGame.Text = "Decompress Overlays Within Game";
+            this.mnitDecompressOverlaysWithinGame.Click += new System.EventHandler(this.mnitDecompressOverlaysWithinGame_Click);
+            // 
+            // mnitHexDumpToBinaryFile
+            // 
+            this.mnitHexDumpToBinaryFile.Name = "mnitHexDumpToBinaryFile";
+            this.mnitHexDumpToBinaryFile.Size = new System.Drawing.Size(259, 22);
+            this.mnitHexDumpToBinaryFile.Text = "Hex Dump to Binary File";
+            this.mnitHexDumpToBinaryFile.Click += new System.EventHandler(this.mnitHexDumpToBinaryFile_Click);
             // 
             // lbxLevels
             // 
@@ -225,7 +236,7 @@
             this.lbxLevels.Location = new System.Drawing.Point(0, 25);
             this.lbxLevels.Margin = new System.Windows.Forms.Padding(0);
             this.lbxLevels.Name = "lbxLevels";
-            this.lbxLevels.Size = new System.Drawing.Size(496, 388);
+            this.lbxLevels.Size = new System.Drawing.Size(508, 388);
             this.lbxLevels.TabIndex = 1;
             this.lbxLevels.SelectedIndexChanged += new System.EventHandler(this.lbxLevels_SelectedIndexChanged);
             this.lbxLevels.DoubleClick += new System.EventHandler(this.lbxLevels_DoubleClick);
@@ -250,7 +261,7 @@
             this.spbStatusProgress});
             this.ssStatusBar.Location = new System.Drawing.Point(0, 413);
             this.ssStatusBar.Name = "ssStatusBar";
-            this.ssStatusBar.Size = new System.Drawing.Size(496, 22);
+            this.ssStatusBar.Size = new System.Drawing.Size(508, 22);
             this.ssStatusBar.TabIndex = 2;
             this.ssStatusBar.Text = "statusStrip1";
             // 
@@ -271,7 +282,7 @@
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(496, 435);
+            this.ClientSize = new System.Drawing.Size(508, 435);
             this.Controls.Add(this.ssStatusBar);
             this.Controls.Add(this.lbxLevels);
             this.Controls.Add(this.tsToolBar);
@@ -298,7 +309,7 @@
         private System.Windows.Forms.ToolStripButton btnEditTexts;
         private System.Windows.Forms.OpenFileDialog ofdOpenFile;
         private System.Windows.Forms.SaveFileDialog sfdSaveFile;
-        private System.Windows.Forms.ToolStripDropDownButton btnSecretShit;
+        private System.Windows.Forms.ToolStripDropDownButton btnMore;
         private System.Windows.Forms.StatusStrip ssStatusBar;
         private System.Windows.Forms.ToolStripStatusLabel slStatusLabel;
         private System.Windows.Forms.ToolStripProgressBar spbStatusProgress;
@@ -309,9 +320,10 @@
         private System.Windows.Forms.ToolStripButton btnHalp;
         private System.Windows.Forms.ToolStripMenuItem mnitDumpAllOvls;
         private System.Windows.Forms.ToolStripButton btnKCLEditor;
-        private System.Windows.Forms.ToolStripButton btnAddPatches;
-        private System.Windows.Forms.ToolStripMenuItem decompressOverlaysWithinGameToolStripMenuItem;
-        private System.Windows.Forms.ToolStripMenuItem hexDumpToBinaryFileToolStripMenuItem;
+        private System.Windows.Forms.ToolStripButton btnAnimationEditor;
+        private System.Windows.Forms.ToolStripMenuItem mnitDecompressOverlaysWithinGame;
+        private System.Windows.Forms.ToolStripMenuItem mnitHexDumpToBinaryFile;
+        private System.Windows.Forms.ToolStripMenuItem mnitAdditionalPatches;
     }
 }
 

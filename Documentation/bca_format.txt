@@ -1,5 +1,7 @@
 SM64DS BCA (3D model animation) format documentation -- by Mega-Mario
 
+Updated 2014/04/18 with new information from Gericom's MKDS Course Modifier
+Updated 2014/04/21 by Fiachra
 
 0. File header
 
@@ -7,7 +9,7 @@ It is 24 bytes long and laid out as such:
 Offset	Size	Desc.
 0x00	2	Number of bones to be handled (should match the number of bones in the BMD)
 0x02	2	Number of animation frames(1)
-0x04	4	??? (usually zero)
+0x04	4	Unknown, either 0 or 1
 0x08	4	Offset to scale values section
 0x0C	4	Offset to rotation values section
 0x10	4	Offset to translation values section
@@ -39,8 +41,10 @@ Offset	Size	Desc.
 0x20	4	Z translation descriptor
 
 Each descriptor consists of 4 bytes laid out as such:
-AA BB CC DD (DDCCBBAA when viewed as dword)
-AA: ??? may be 00 or 01. May have to do with inheriting or something...
-BB: 00 = disable this transform, anything else = enable this transform
-CC: Index of first value into the corresponding value section (aka value offset)
-DD: ??? always 00 (setting to 01 has weird effects)
+AA BB CC CC (CCCCBBAA when viewed as dword)
+
+Offset	Size	Desc.
+0x00	1		AA: Whether interpolation should be used to calculate odd frame values using the midpoint of the previous and next 
+				frames, 00 - false, 01 - true. Number of values to read = ((Number of frames in animation / 2) + AA)
+0x01	1		BB: Whether offset increments each frame, 00 - false, 01 - true. If false, only the value at start offset (CC) is used.
+0x02	2		CC: Index of first value into the corresponding value section, ushort

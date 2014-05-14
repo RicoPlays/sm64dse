@@ -679,9 +679,9 @@ namespace SM64DSe
             this.scale = scale;
         }
 
-        public int valToWrite()
+        public long valToWrite()
         {
-            return (int)(theValue / scale);
+            return (long)(theValue / scale);
         }
 
         public int sizeOf()

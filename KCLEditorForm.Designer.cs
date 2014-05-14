@@ -28,6 +28,7 @@
         /// </summary>
         private void InitializeComponent()
         {
+            System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(KCLEditorForm));
             this.splitContainer1 = new System.Windows.Forms.SplitContainer();
             this.splitCHorizontal = new System.Windows.Forms.SplitContainer();
             this.lbxPlanes = new System.Windows.Forms.ListBox();
@@ -412,7 +413,7 @@
             this.btnOpenModel.TabIndex = 2;
             this.btnOpenModel.Text = "...";
             this.btnOpenModel.UseVisualStyleBackColor = true;
-            this.btnOpenModel.Click += new System.EventHandler(this.btnOpenOBJ_Click);
+            this.btnOpenModel.Click += new System.EventHandler(this.btnOpenModel_Click);
             // 
             // txtModelName
             // 
@@ -447,6 +448,8 @@
             this.glModelView.MouseUp += new System.Windows.Forms.MouseEventHandler(this.glModelView_MouseUp);
             this.glModelView.MouseWheel += new System.Windows.Forms.MouseEventHandler(this.glModelView_MouseWheel);
             this.glModelView.Resize += new System.EventHandler(this.glModelView_Resize);
+            this.glModelView.KeyDown += new System.Windows.Forms.KeyEventHandler(this.glModelView_KeyDown);
+            this.glModelView.KeyUp += new System.Windows.Forms.KeyEventHandler(this.glModelView_KeyUp);
             // 
             // toolStrip1
             // 
@@ -512,6 +515,7 @@
             this.Controls.Add(this.splitContainer1);
             this.Controls.Add(this.cmbPolygonMode);
             this.Controls.Add(this.toolStrip1);
+            this.Icon = ((System.Drawing.Icon)(resources.GetObject("$this.Icon")));
             this.Name = "KCLEditorForm";
             this.Text = "KCL Editor";
             this.splitContainer1.Panel1.ResumeLayout(false);

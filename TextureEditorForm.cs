@@ -227,7 +227,7 @@ namespace SM64DSe
 
                 try
                 {
-                    BMD_Importer.ConvertedTexture tex = BMD_Importer.ConvertTexture(ofd.FileName);
+                    BMD_Importer_Base.ConvertedTexture tex = BMD_Importer_Base.ConvertTexture(ofd.FileName);
                     tex.m_TextureID = (uint)texIndex;
                     tex.m_PaletteID = (uint)palIndex;
 
