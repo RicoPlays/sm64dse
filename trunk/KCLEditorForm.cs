@@ -20,6 +20,14 @@ namespace SM64DSe
     {
         private bool m_GLLoaded;
         private float m_AspectRatio;
+        private float m_PickingDepth;
+        private const float k_zNear = 0.01f;
+        private const float k_zFar = 1000f;
+        private const float k_FOV = (float)(70f * Math.PI) / 180f;
+
+        private bool m_WireFrameView = false;
+
+        private int[] m_KCLMeshDLists = new int[4];// Picking, Fill, WireFrame, Highlight
 
         public List<Vector3> points;
         public List<Vector3> vectors;
@@ -37,15 +45,15 @@ namespace SM64DSe
         {
             InitializeComponent();
             kclFile = kclIn;
-            loadKCL(kclIn);
+            LoadKCL(kclIn);
             colours = getColours();
-            cmbPolygonMode.Items.Add("Wireframe");
             cmbPolygonMode.Items.Add("Fill");
-            cmbPolygonMode.Items.Add("Fill Back");
+            cmbPolygonMode.Items.Add("Wireframe");
+            cmbPolygonMode.SelectedIndex = 0;
             matColTypes = new Dictionary<string, int>();
         }
 
-        public void loadKCL(NitroFile kcl)
+        public void LoadKCL(NitroFile kcl)
         {
             points = new List<Vector3>();
             vectors = new List<Vector3>();
@@ -116,7 +124,6 @@ namespace SM64DSe
             {
                 lbxPlanes.Items.Add("Plane " + i.ToString("00000"));
             }
-
         }
 
         private void writeChanges()
@@ -153,32 +160,54 @@ namespace SM64DSe
             return theColours;
         }
 
-
         private void glModelView_Load(object sender, EventArgs e)
         {
             m_GLLoaded = true;
 
+            glModelView.Context.MakeCurrent(glModelView.WindowInfo);
+
+            m_PickingFrameBuffer = new uint[9];
+            m_PickingDepth = 0f;
+
             GL.Viewport(glModelView.ClientRectangle);
 
-            float ratio = (float)glModelView.Width / (float)glModelView.Height;
+            m_AspectRatio = (float)glModelView.Width / (float)glModelView.Height;
             GL.MatrixMode(MatrixMode.Projection);
             GL.LoadIdentity();
-            Matrix4 projmtx = Matrix4.CreatePerspectiveFieldOfView((float)((70.0f * Math.PI) / 180.0f), ratio, 0.01f, 1000.0f);
+            Matrix4 projmtx = Matrix4.CreatePerspectiveFieldOfView(k_FOV, m_AspectRatio, k_zNear, k_zFar);
             GL.MultMatrix(ref projmtx);
 
-            m_PixelFactorX = ((2f * (float)Math.Tan((35f * Math.PI) / 180f) * ratio) / (float)(glModelView.Width));
-            m_PixelFactorY = ((2f * (float)Math.Tan((35f * Math.PI) / 180f)) / (float)(glModelView.Height));
+            GL.Enable(EnableCap.DepthTest);
+            GL.ClearDepth(1.0);
 
-            GL.LineWidth(2.0f);
+            // lighting!
+            GL.Light(LightName.Light0, LightParameter.Position, new Vector4(1.0f, 1.0f, 1.0f, 0.0f));
+            GL.Light(LightName.Light0, LightParameter.Ambient, Color.SkyBlue);
+            GL.Light(LightName.Light0, LightParameter.Diffuse, Color.SkyBlue);
+            GL.Light(LightName.Light0, LightParameter.Specular, Color.SkyBlue);
+
+            GL.Enable(EnableCap.Normalize);
 
             m_CamRotation = new Vector2(0.0f, (float)Math.PI / 8.0f);
             m_CamTarget = new Vector3(0.0f, 0.0f, 0.0f);
-            m_CamDistance = 1.0f;
+            m_CamDistance = 1.0f;//6.5f;
             UpdateCamera();
 
-            GL.PolygonMode(MaterialFace.FrontAndBack, PolygonMode.Line);
+            GL.LineWidth(1f);
 
-            GL.ClearColor(Color.FromArgb(0, 0, 32));
+            m_PixelFactorX = ((2f * (float)Math.Tan(k_FOV / 2f) * m_AspectRatio) / (float)(glModelView.Width));
+            m_PixelFactorY = ((2f * (float)Math.Tan(k_FOV / 2f)) / (float)(glModelView.Height));
+
+            GL.Enable(EnableCap.Blend);
+            GL.BlendFunc(BlendingFactorSrc.SrcAlpha, BlendingFactorDest.OneMinusSrcAlpha);
+
+            GL.Enable(EnableCap.AlphaTest);
+            GL.AlphaFunc(AlphaFunction.Greater, 0.0f);
+
+            GL.Enable(EnableCap.CullFace);
+            GL.CullFace(CullFaceMode.Back);
+
+            RenderKCLMesh();
         }
 
         private void glModelView_Resize(object sender, EventArgs e)
@@ -195,60 +224,136 @@ namespace SM64DSe
             GL.MultMatrix(ref projmtx);
         }
 
-        private void glModelView_Paint(object sender, PaintEventArgs e)
+        private void RenderKCLMesh()
         {
-            if (!m_GLLoaded) return;
-            glModelView.Context.MakeCurrent(glModelView.WindowInfo);
+            m_KCLMeshDLists[0] = GL.GenLists(1);
+            GL.NewList(m_KCLMeshDLists[0], ListMode.Compile);
+            GL.PolygonMode(MaterialFace.FrontAndBack, PolygonMode.Fill);
+            for (int i = 0; i < planes.Count; i++)
+            {
+                GL.Begin(BeginMode.Triangles);
+                GL.Color4(Color.FromArgb(i));
+                GL.Vertex3(planes[i].point1);
+                GL.Vertex3(planes[i].point2);
+                GL.Vertex3(planes[i].point3);
+                GL.End();
+            }
+            GL.EndList();
 
-            GL.ClearColor(1.0f, 1.0f, 1.0f, 1.0f);
-            GL.Clear(ClearBufferMask.ColorBufferBit | ClearBufferMask.DepthBufferBit);
-
-            GL.MatrixMode(MatrixMode.Modelview);
-            GL.LoadMatrix(ref m_CamMatrix);
-
-            GL.Flush();
-
-            GL.ClearColor(0.0f, 0.0f, 0.125f, 1.0f);
-            GL.Clear(ClearBufferMask.ColorBufferBit | ClearBufferMask.DepthBufferBit);
-
-            GL.MatrixMode(MatrixMode.Modelview);
-            GL.LoadMatrix(ref m_CamMatrix);
-
+            m_KCLMeshDLists[1] = GL.GenLists(1);
+            GL.NewList(m_KCLMeshDLists[1], ListMode.Compile);
+            GL.PolygonMode(MaterialFace.FrontAndBack, PolygonMode.Fill);
+            GL.Enable(EnableCap.PolygonOffsetFill);
+            GL.PolygonOffset(1f, 1f);
             for (int i = 0; i < planes.Count; i++)
             {
                 Color planeColour = colours[planes[i].type];
 
                 GL.Begin(BeginMode.Triangles);
                 GL.Color3(planeColour);
-                GL.Vertex3(planes[i].point1 / 5);
-                GL.Color3(planeColour);
-                GL.Vertex3(planes[i].point2 / 5);
-                GL.Color3(planeColour);
-                GL.Vertex3(planes[i].point3 / 5);
+                GL.Vertex3(planes[i].point1);
+                GL.Vertex3(planes[i].point2);
+                GL.Vertex3(planes[i].point3);
+                GL.End();
             }
+            GL.Disable(EnableCap.PolygonOffsetFill);
+            GL.EndList();
 
+            m_KCLMeshDLists[2] = GL.GenLists(1);
+            GL.NewList(m_KCLMeshDLists[2], ListMode.Compile);
+            GL.PolygonMode(MaterialFace.FrontAndBack, PolygonMode.Line);
+            for (int i = 0; i < planes.Count; i++)
+            {
+                GL.Begin(BeginMode.LineStrip);
+                GL.Color3(Color.Orange);
+                GL.Vertex3(planes[i].point1);
+                GL.Vertex3(planes[i].point2);
+                GL.Vertex3(planes[i].point3);
+                GL.End();
+            }
+            GL.EndList();
+        }
+
+        private void RenderHighlight()
+        {
+            m_KCLMeshDLists[3] = GL.GenLists(1);
+            GL.NewList(m_KCLMeshDLists[3], ListMode.Compile);
             foreach (int idx in lbxPlanes.SelectedIndices)
             {
+                GL.PolygonMode(MaterialFace.FrontAndBack, PolygonMode.Fill);
                 GL.Begin(BeginMode.Triangles);
-                GL.Color3(Color.Orange);
-                GL.Vertex3(planes[idx].point1 / 5);
-                GL.Color3(Color.Orange);
-                GL.Vertex3(planes[idx].point2 / 5);
-                GL.Color3(Color.Orange);
-                GL.Vertex3(planes[idx].point3 / 5);
+                GL.Color3(Color.RoyalBlue);
+                GL.Vertex3(planes[idx].point1);
+                GL.Vertex3(planes[idx].point2);
+                GL.Vertex3(planes[idx].point3);
+                GL.End();
+            }
+            GL.EndList();
+        }
+
+        private void glModelView_Paint(object sender, PaintEventArgs e)
+        {
+            if (!m_GLLoaded) return;
+            glModelView.Context.MakeCurrent(glModelView.WindowInfo);
+
+            // Pass 1 - picking mode rendering (render stuff with fake colors that identify triangles)
+
+            GL.ClearColor(1.0f, 1.0f, 1.0f, 1.0f);
+            GL.Clear(ClearBufferMask.ColorBufferBit | ClearBufferMask.DepthBufferBit | ClearBufferMask.StencilBufferBit);
+
+            GL.MatrixMode(MatrixMode.Modelview);
+            GL.LoadMatrix(ref m_CamMatrix);
+
+            GL.Disable(EnableCap.AlphaTest);
+            GL.Disable(EnableCap.Blend);
+            GL.Disable(EnableCap.Dither);
+            GL.Disable(EnableCap.LineSmooth);
+            GL.Disable(EnableCap.PolygonSmooth);
+            GL.Disable(EnableCap.Lighting);
+
+            // Picking
+            GL.CallList(m_KCLMeshDLists[0]);
+
+            GL.Flush();
+            GL.ReadPixels(m_MouseCoords.X - 1, glModelView.Height - m_MouseCoords.Y + 1, 3, 3, PixelFormat.Bgra, PixelType.UnsignedByte, m_PickingFrameBuffer);
+
+            // depth math from http://www.opengl.org/resources/faq/technical/depthbuffer.htm
+            GL.ReadPixels(m_MouseCoords.X, glModelView.Height - m_MouseCoords.Y, 1, 1, PixelFormat.DepthComponent, PixelType.Float, ref m_PickingDepth);
+            m_PickingDepth = -(k_zFar * k_zNear / (m_PickingDepth * (k_zFar - k_zNear) - k_zFar));
+
+            GL.DepthMask(true);
+            GL.ClearColor(0.0f, 0.0f, 0.125f, 1.0f);
+            GL.Clear(ClearBufferMask.ColorBufferBit | ClearBufferMask.DepthBufferBit | ClearBufferMask.StencilBufferBit);
+
+            GL.Enable(EnableCap.AlphaTest);
+            GL.Enable(EnableCap.Blend);
+            GL.Enable(EnableCap.Dither);
+            GL.Enable(EnableCap.LineSmooth);
+            GL.Enable(EnableCap.PolygonSmooth);
+
+            GL.LoadMatrix(ref m_CamMatrix);
+
+            // Solid polygons
+            if (!m_WireFrameView)
+            {
+                GL.CallList(m_KCLMeshDLists[1]);
             }
 
-            GL.End();
+            // WireFrame overlay
+            GL.CallList(m_KCLMeshDLists[2]);
+
+            // Highlighted triangles
+            GL.CallList(m_KCLMeshDLists[3]);
 
             glModelView.SwapBuffers();
         }
 
         //Code for moving the camera, rotating etc.
-        #region Moving Camera
 
         private void glModelView_MouseDown(object sender, MouseEventArgs e)
         {
             if (m_MouseDown != MouseButtons.None) return;
+
             m_MouseDown = e.Button;
             m_LastMouseClick = e.Location;
             m_LastMouseMove = e.Location;
@@ -257,8 +362,23 @@ namespace SM64DSe
         private void glModelView_MouseUp(object sender, MouseEventArgs e)
         {
             if (e.Button != m_MouseDown) return;
+
+            if ((Math.Abs(e.X - m_LastMouseClick.X) < 3) && (Math.Abs(e.Y - m_LastMouseClick.Y) < 3) &&
+                (m_PickingFrameBuffer[4] == m_PickingFrameBuffer[1]) &&
+                (m_PickingFrameBuffer[4] == m_PickingFrameBuffer[3]) &&
+                (m_PickingFrameBuffer[4] == m_PickingFrameBuffer[5]) &&
+                (m_PickingFrameBuffer[4] == m_PickingFrameBuffer[7]))
+            {
+                int sel = (int)m_PickingFrameBuffer[4];
+                //Console.WriteLine((int)m_PickingFrameBuffer[4]);
+
+                if (!lbxPlanes.SelectedIndices.Contains(sel))
+                    lbxPlanes.SelectedIndices.Add(sel);
+                else
+                    lbxPlanes.SelectedIndices.Remove(sel);
+            }
+
             m_MouseDown = MouseButtons.None;
-            m_UnderCursor = 0xFFFFFFFF;
         }
 
         private void glModelView_MouseMove(object sender, MouseEventArgs e)
@@ -282,7 +402,7 @@ namespace SM64DSe
                     ClampRotation(ref m_CamRotation.X, (float)Math.PI * 2.0f);
                     ClampRotation(ref m_CamRotation.Y, (float)Math.PI * 2.0f);
                 }
-                else if (m_MouseDown == MouseButtons.Left)
+                else if (m_MouseDown == MouseButtons.Left/* && !m_ShiftPressed*/)
                 {
                     xdelta *= 0.005f;
                     ydelta *= 0.005f;
@@ -309,6 +429,18 @@ namespace SM64DSe
 
             UpdateCamera();
             glModelView.Refresh();
+        }
+
+        private void glModelView_KeyDown(object sender, KeyEventArgs e)
+        {
+            if (e.KeyCode == Keys.ShiftKey || e.KeyCode == Keys.RShiftKey)
+                m_ShiftPressed = true;
+        }
+
+        private void glModelView_KeyUp(object sender, KeyEventArgs e)
+        {
+            if (e.KeyCode == Keys.ShiftKey || e.KeyCode == Keys.RShiftKey)
+                m_ShiftPressed = false;
         }
 
         private void ClampRotation(ref float val, float twopi)
@@ -369,11 +501,11 @@ namespace SM64DSe
         private MouseButtons m_MouseDown;
         private Point m_LastMouseClick, m_LastMouseMove;
         private Point m_MouseCoords;
-        private uint m_UnderCursor;
+        private uint m_LastClicked;
 
         private uint[] m_PickingFrameBuffer;
 
-        #endregion
+        private bool m_ShiftPressed;
 
         private void btnSave_Click(object sender, EventArgs e)
         {
@@ -382,7 +514,7 @@ namespace SM64DSe
             planes[lbxPlanes.SelectedIndex].type = lastChange;//Make sure to get value of current plane
             writeChanges();
 
-            loadKCL(kclFile);
+            LoadKCL(kclFile);
             glModelView.Refresh();
         }
 
@@ -411,18 +543,16 @@ namespace SM64DSe
                 txtD2.Text = planes[selPos].dir2.ToString();
                 txtD3.Text = planes[selPos].dir3.ToString();
             }
-
+            RenderHighlight();
             glModelView.Refresh();
         }
 
         private void cmbPolygonMode_SelectedIndexChanged(object sender, EventArgs e)
         {
             if (cmbPolygonMode.SelectedIndex == 0)
-                GL.PolygonMode(MaterialFace.FrontAndBack, PolygonMode.Line);
+                m_WireFrameView = false;
             else if (cmbPolygonMode.SelectedIndex == 1)
-                GL.PolygonMode(MaterialFace.FrontAndBack, PolygonMode.Fill);
-            else if (cmbPolygonMode.SelectedIndex == 2)
-                GL.PolygonMode(MaterialFace.Front, PolygonMode.Line);
+                m_WireFrameView = true;
 
             glModelView.Refresh();
         }
@@ -440,12 +570,15 @@ namespace SM64DSe
                 if (result == DialogResult.OK)
                 {
                     kclFile = (Program.m_ROM.GetFileFromName(form.m_SelectedFile));
-                    loadKCL(kclFile);
+                    LoadKCL(kclFile);
+                    RenderKCLMesh();
+                    GL.DeleteLists(m_KCLMeshDLists[3], 1); m_KCLMeshDLists[3] = 0;
+                    glModelView.Refresh();
                 }
             }
         }
 
-        private void btnOpenOBJ_Click(object sender, EventArgs e)
+        private void btnOpenModel_Click(object sender, EventArgs e)
         {
             OpenFileDialog ofd = new OpenFileDialog();
             ofd.Filter = "Supported Models (*.obj, *.dae)|*.obj;*.dae";
@@ -457,20 +590,20 @@ namespace SM64DSe
                 switch (modelFormat)
                 {
                     case "obj":
-                        getMatNames_OBJ(ofd.FileName);
+                        GetMatNames_OBJ(ofd.FileName);
                         break;
                     case "dae":
                         getMatNames_DAE(ofd.FileName);
                         break;
                     default:
-                        getMatNames_OBJ(ofd.FileName);
+                        GetMatNames_OBJ(ofd.FileName);
                         break;
                 }
                 populateColTypes();
             }
         }
 
-        private void getMatNames_OBJ(String name)
+        private void GetMatNames_OBJ(String name)
         {
             Stream fs = File.OpenRead(name);
             StreamReader sr = new StreamReader(fs);
@@ -558,7 +691,10 @@ namespace SM64DSe
                 MessageBox.Show(ex.Message + ex.Source + ex.StackTrace);
             }
 
-            loadKCL(kclFile);
+            LoadKCL(kclFile);
+            RenderKCLMesh();
+            GL.DeleteLists(m_KCLMeshDLists[3], 1); m_KCLMeshDLists[3] = 0;
+            glModelView.Refresh();
         }
 
         private void btnAssignTypes_Click(object sender, EventArgs e)

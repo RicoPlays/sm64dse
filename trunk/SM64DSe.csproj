@@ -54,6 +54,10 @@
   </PropertyGroup>
   <ItemGroup>
     <Reference Include="Microsoft.VisualBasic" />
+    <Reference Include="OpenTK.Compatibility, Version=1.1.0.0, Culture=neutral, PublicKeyToken=bad199fe84eb3df4, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>bin\Release\OpenTK.Compatibility.dll</HintPath>
+    </Reference>
     <Reference Include="System" />
     <Reference Include="System.Core">
       <RequiredTargetFramework>3.5</RequiredTargetFramework>
@@ -69,9 +73,6 @@
     <Reference Include="System.Drawing" />
     <Reference Include="System.Windows.Forms" />
     <Reference Include="System.Xml" />
-    <Reference Include="HaxxGLControl">
-      <HintPath>HaxxGLControl\bin\Release\HaxxGLControl.dll</HintPath>
-    </Reference>
     <Reference Include="OpenTK">
       <HintPath>bin\Release\OpenTK.dll</HintPath>
     </Reference>
@@ -102,11 +103,14 @@
       <DependentUpon>CLPS_Form.cs</DependentUpon>
     </Compile>
     <Compile Include="Compression.cs" />
+    <Compile Include="BCA.cs" />
     <Compile Include="Exporters\BMD_Exporter.cs" />
     <Compile Include="Exporters\KCL_Exporter.cs" />
     <Compile Include="Exporters\LevelDataXML_Exporter.cs" />
     <Compile Include="Helper.cs" />
     <Compile Include="Importers\BMD_Importer.cs" />
+    <Compile Include="Importers\BMD_BCA_Importer_DAE.cs" />
+    <Compile Include="Importers\BMD_Importer_OBJ.cs" />
     <Compile Include="Importers\LevelDataXML_Importer.cs" />
     <Compile Include="KCL.cs" />
     <Compile Include="KCLEditorForm.cs">

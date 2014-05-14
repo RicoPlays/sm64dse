@@ -2,22 +2,30 @@
 
 *Introduction*
 
-Models in SM64DS are often split up into different chunks, 'bones'. This allows each chunk, such as an arm 
-to be animated separately. Each bone has a set of transformations that must be applied to it for it to be 
-displayed properly. SM64DSe supports exporting and importing models split up into bones to allow for importing 
-models to use animation. For example, you can  export Mario's model, either edit that model or split up an 
-existing model in a similar manner and then re-import your new model over Mario and your new model will be 
-animated like the original.
+Models in SM64DS often make use of bones/joints to allow the model to be animated. Each vertex is assigned to a joint which is 
+then animated separately. Within the BMD model each vertex is stored with the inverse of its bone's transformation applied (
+the "inverse bind pose"). Each vertex must have its bone's transformations applied to it for it to get its final position. For 
+animation the transformations are applied to the vertex in its default state ie. with no transformations applied.
+
+SM64DSe supports exporting models to either OBJ or DAE (recommended). Models exported to DAE have joints and skinning included 
+and are near-identical to the original BMD model.
 
 (Please see BMD documentation for more information.)
 
+*Exporting COLLADA DAE - Recommended*
 
-*Exporting*
+When exporting to DAE the model will be exported with full joints and skinning, with each vertex assigned to a joint (vertex weight of 1.0). 
+This means that the exported model should be an exact match to the BMD model and when re-importing models as all vertices will be part of 
+the same mesh, vertices with different joints remain connected meaning animation will work smoothly and exactly the same as with the original BMD model.
 
-When exporting, the bones' transformations are applied so the model looks 'normal' when editing. The model 
-is split up into its different chunks using the OBJ "o" command. Each bone can then be edited separately 
-within the 3D modelling program, eg. Blender. The model can be edited as normal and more bones added if 
-wanted.
+This is the recommended format for exporting as it matches the original BMD almost exactly.
+
+*Exporting OBJ*
+
+When exporting, the bones' transformations are applied so the model looks 'normal' when editing. The OBJ format does not support
+joints and skinning. Instead, the model is split up into its different chunks using the OBJ "o" command. Because of this, each vertex 
+can only be assigned on a per-face basis, meaning that some vertices are assigned to the wrong bone and animation will not work 
+smoothly when re-importing as vertices with different bones are not connected.
 
 Information about each bone is stored in the .bones file created when exporting. This is linked to the .obj 
 file with the line "bonelib FILENAME.bones" at the top of the .obj file. <br>
@@ -34,45 +42,49 @@ _rotation_: X, Y and Z Rotation transformation of the current bone. (16-bit sign
 _translation_: X, Y and Z Translation of the current bone. (32-bit signed, 20:12 fixed point. Think GX command 0x1C)<br>
 These last three fields are stored in hexadecimal format.
 
-Important Notes<br>
-- Please note that exporting is not perfect when assigning faces to the correct bone due to how BMD files are structured 
-so some manual fixing may be required before re-importing.<br>
+Important Notes:<br>
+- Please note that when exporting to OBJ vertices are assigned to a bone on a per-face basis, unlike BMD and DAE where 
+each individual vertex is assigned to a bone.</br>
 
-An example of what an exported model looks like can be found <a href ="http://s16.postimg.org/7gfod037n/Exported_Model_Whomp.png">here</a> (Textures also not perfect due to OBJ limitations).
 
-*Importing*
+*Importing COLLADA DAE - Recommended*
 
-When importing the bones' transformations are applied in reverse so that they are restored to their original state and 
-their transformations can be applied again. SM64DSe supports importing OBJ and DAE models that are split up into bones. 
-For OBJ the OBJ "o" command is used to split the model into bones, whilst in DAE <geometry> element are used. To specify 
+SM64DSe allows importing COLLADA DAE models with joints and skinning. The skeleton attached to a mesh is used to create the 
+bones in the BMD model and the vertex weighting is used to assign each individual vertex to a bone. This allows an imported
+DAE model to match the original BMD model exactly and animation will work exactly the same as before.
+
+SM64DSe supports importing models with transformations defined as either separate Scale, Rotation and Translation values (preferred) 
+or using SRT 4x4 matrices. Transformation matrices that have been multiplied in any other order will not produce correct results.
+
+</br>
+
+*Importing OBJ*
+
+When importing, the bones' transformations are applied in reverse so that they are restored to their original state and 
+their transformations can be applied again. For OBJ the OBJ "o" command is used to split the model into bones. To specify 
 the settings for each bone, you must include a .bones file, for OBJ the following line at the beginning of the model is 
 used:
 bonelib FILENAME.bones
 
-and for DAE:
-
-<bonelib value="FILENAME.bones"/>
-
 where FILENAME is the name of your .bones file.
 
 A .bones file is not necessary, however models that use animation will not be animated correctly as the animation file (.BCA) 
-expect certain transformations to be applied to the model. If not found, each bone will be assigned the default values with a 
-recursive parent-child relationship between each bone.
+expect certain transformations to be applied to the model. If not found, each bone will be assigned the default values with each 
+bone made a root bone.
 
-When creating a new model, you can either edit an exported model, already split up into bones, or you can split up an 
+When creating a new OBJ model, you can either edit an exported OBJ model, already split up into separate objects, or you can split up an 
 existing model in a similar manner to original.
 
-- Once finished editing/creating your model, export it to either OBJ or DAE format (for OBJ your modelling 
-program must support the OBJ "o" command). 
+- Once finished editing/creating your model, export it to OBJ format(for OBJ your modelling program must support the OBJ "o" command). 
 - Ensure the bone names in your model match those listed in the .bones file, if they don't, you will need to manually change 
 either your model or .bones file
 - Add the .bones file to your model as described above.
 - Import your model
 
-Tips:
+*Tips on texture sequence animations (BTP)*
 
 Some models eg. the characters have textures animated using .BTP files (sequence of textures to swap) such as Mario blinking. 
-Whilst could find every BTP file and manually change the texture, palette and material names, it's much easier to give your 
+Whilst you could find every BTP file and manually change the texture, palette and material names, it's much easier to give your 
 new model's materials, textures and palettes the same name. Material names are set using the name defined in your model, 
 texture names are set to the diffuse map filename (leave out the extension to get a match to the original) and palettes are the 
 texture name + "_pl" - most (all?) models use this for palette names so should be fine. If your material, texture and palette 

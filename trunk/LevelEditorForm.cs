@@ -106,6 +106,7 @@ namespace SM64DSe
         }
 
         private int m_EntranceID = 0;
+        private int m_PathNodeID = 0;
         private int m_MinimapTileIDNum = 0;
         private void ReadObjectTable(uint offset, int area)
         {
@@ -145,7 +146,7 @@ namespace SM64DSe
                     case 2: // Path Node
                         for (byte e = 0; e < entries_num; e++)
                         {
-                            LevelObject obj = new PathPointObject(m_Overlay, (uint)(entries_offset + (e * 6)), m_LevelObjects.Count/*, getPathNodeParentIDFromOffset((uint)(entries_offset + (e * 6)))*/);
+                            LevelObject obj = new PathPointObject(m_Overlay, (uint)(entries_offset + (e * 6)), m_LevelObjects.Count, m_PathNodeID++);
                             m_LevelObjects.Add(obj.m_UniqueID, obj);
                         }
                         break;
@@ -780,8 +781,13 @@ namespace SM64DSe
                         {
                             int start = paths.ElementAt(i).Parameters[0];
                             int end = start + paths.ElementAt(i).Parameters[1];
+                            // Need to add by Node ID
                             for (int j = start; j < end; j++)
-                                tvObjectList.Nodes[i + 1].Nodes.Add(pathNodes.ElementAt(j).m_UniqueID.ToString("X8"), pathNodes.ElementAt(j).GetDescription() + " " + j).Tag = pathNodes.ElementAt(j).m_UniqueID;
+                            {
+                                PathPointObject node = (PathPointObject)pathNodes.Where(obj => ((PathPointObject)obj).m_NodeID == j).ElementAt(0);
+                                tvObjectList.Nodes[i + 1].Nodes.
+                                    Add(node.m_UniqueID.ToString("X8"), node.GetDescription() + " " + j).Tag = node.m_UniqueID;
+                            }
                         }
 
                         btnAddPathNodes.DropDownItems.Clear();
@@ -1146,7 +1152,17 @@ namespace SM64DSe
                         obj = new EntranceObject(m_Overlay, offset, (int)uniqueid, layer, maxid + 1);
                     }
                     break;
-                case 2: parentnode = "parent" + (1 + m_CurrentPathID); obj = new PathPointObject(m_Overlay, offset, (int)uniqueid); break;
+                case 2:
+                    {
+                        parentnode = "parent" + (1 + m_CurrentPathID);
+                        // Calculate the Node ID using the parent path's start offset and length
+                        IEnumerable<LevelObject> paths = m_LevelObjects.Values.Where(obj0 => (obj0.m_Type) == 3);
+                        int nodeID = ((PathObject)paths.ElementAt(m_CurrentPathID)).Parameters[0] +
+                            ((PathObject)paths.ElementAt(m_CurrentPathID)).Parameters[1];
+
+                        obj = new PathPointObject(m_Overlay, offset, (int)uniqueid, nodeID);
+                    }
+                    break;
                 case 3: parentnode = "parent0"; obj = new PathObject(m_Overlay, offset, (int)uniqueid); break;
                 case 4: obj = new ViewObject(m_Overlay, offset, (int)uniqueid); break;
                 case 5: obj = new SimpleObject(m_Overlay, offset, (int)uniqueid, layer, area); break;
@@ -1301,7 +1317,12 @@ namespace SM64DSe
             GL.MultMatrix(ref projmtx);
 
             GL.Enable(EnableCap.DepthTest);
-            GL.ClearDepth(1f);
+            GL.ClearDepth(1.0);
+            /* http://www.opentk.com/node/2514
+             * GL.ClearDepth(float) requires the ARB_ES2_compatibility extension that's not supported by your card. IIRC, 
+             * this extension was introduced along with OpenGL 4.0.
+             * GL.ClearDepth(double) is a GL 1.0 function that should be available everywhere.
+             */ 
 
             // lighting!
             //GL.Light(LightName.Light0, LightParameter.Position, new Vector4(0.0f, -0.646484375f, -0.646484375f, 0.0f));
@@ -2162,7 +2183,10 @@ namespace SM64DSe
                 IEnumerable<LevelObject> pathNodes = m_LevelObjects.Values.Where(obj => (obj.m_Type) == 2);
                 List<LevelObject> nodes = new List<LevelObject>();
                 for (int i = ((PathObject)m_SelectedObject).Parameters[0]; i < (((PathObject)m_SelectedObject).Parameters[0] + ((PathObject)m_SelectedObject).Parameters[1]); i++)
-                    nodes.Add(pathNodes.ElementAt(i));
+                {
+                    PathPointObject node = (PathPointObject)pathNodes.Where(obj0 => ((PathPointObject)obj0).m_NodeID == i).ElementAt(0);
+                    nodes.Add(node);
+                }
                 RenderPathHilite(nodes, k_SelectionColor, m_SelectHiliteDL);
             }
             else
@@ -2286,7 +2310,7 @@ namespace SM64DSe
             LevelObject obj = m_SelectedObject;
 
             if (obj.m_Type == 2)
-                updatePathsNodeRemoved((PathPointObject)obj);
+                UpdatePathsNodeRemoved((PathPointObject)obj);
 
             RemoveObject(obj);
             RefreshObjects(obj.m_Layer);
@@ -2475,6 +2499,21 @@ namespace SM64DSe
             }
             catch { }
 
+            int nodeID = ((PathObject)paths.ElementAt(m_CurrentPathID)).Parameters[0] +
+                            ((PathObject)paths.ElementAt(m_CurrentPathID)).Parameters[1];
+
+            // Update Node ID's of following path nodes
+            for (int i = pathNodes.Count() - 1; i >= nodeID; i--)
+            {
+                PathPointObject node = (PathPointObject)pathNodes.Where(obj0 => ((PathPointObject)obj0).m_NodeID == i).ElementAt(0);
+                node.m_NodeID++;
+            }
+
+            // If possible, create object after last node in path
+            LevelObject obj = AddObject(type, id, 0, 0, ((lastNodeInPathOff != -1) ? ((int)lastNodeInPathOff + 6) : -1));
+            obj.GenerateProperties();
+            pgObjectProperties.SelectedObject = obj.m_Properties;
+
             // Update start indices and lengths of paths
             for (int i = m_CurrentPathID; i < paths.Count(); i++)
             {
@@ -2491,11 +2530,6 @@ namespace SM64DSe
                 paths.ElementAt(i).GenerateProperties();
             }
 
-            // If possible, create object after last node in path
-            LevelObject obj = AddObject(type, id, 0, 0, ((lastNodeInPathOff != -1) ? ((int)lastNodeInPathOff + 6) : -1));
-            obj.GenerateProperties();
-            pgObjectProperties.SelectedObject = obj.m_Properties;
-
             m_Selected = obj.m_UniqueID;
             m_SelectedObject = obj;
             m_LastSelected = obj.m_UniqueID;
@@ -2505,6 +2539,7 @@ namespace SM64DSe
             m_LastClicked = obj.m_UniqueID;
 
             RefreshObjects(m_SelectedObject.m_Layer);
+            PopulateObjectList();
 
             if (!m_ShiftPressed)
             {
@@ -2513,7 +2548,7 @@ namespace SM64DSe
             }
         }
 
-        public int getPathNodeParentIDFromOffset(uint offset)
+        public int GetPathNodeParentIDFromNodeID(int nodeID)
         {
             int pos = -1;
 
@@ -2521,12 +2556,10 @@ namespace SM64DSe
             IEnumerable<LevelObject> pathNodes = m_LevelObjects.Values.Where(obj0 => (obj0.m_Type) == 2);
             for (int i = 0; i < paths.Count(); i++)
             {
-                if (offset > pathNodes.ElementAt(paths.ElementAt(i).Parameters[0]).m_Offset)
+                if (nodeID >= paths.ElementAt(i).Parameters[0] &&
+                    nodeID < paths.ElementAt(i).Parameters[0] + paths.ElementAt(i).Parameters[1])
                 {
                     pos = i;
-                }
-                if (offset < pathNodes.ElementAt(paths.ElementAt(i).Parameters[0]).m_Offset)
-                {
                     break;
                 }
             }
@@ -2534,17 +2567,26 @@ namespace SM64DSe
             return pos;
         }
 
-        void updatePathsNodeRemoved(PathPointObject removedNode)
+        void UpdatePathsNodeRemoved(PathPointObject removedNode)
         {
-            int pathNum = getPathNodeParentIDFromOffset(removedNode.m_Offset);
+            int pathNum = GetPathNodeParentIDFromNodeID(removedNode.m_NodeID);
 
             // Decrease length of current path
             IEnumerable<LevelObject> paths = m_LevelObjects.Values.Where(obj0 => (obj0.m_Type) == 3);
             paths.ElementAt(pathNum).Parameters[1] -= 1;
+            paths.ElementAt(pathNum).GenerateProperties();
             // Decrease starting indices of following paths
             for (int i = pathNum + 1; i < paths.Count(); i++)
             {
                 paths.ElementAt(i).Parameters[0] -= 1;
+                paths.ElementAt(i).GenerateProperties();
+            }
+            IEnumerable<LevelObject> pathNodes = m_LevelObjects.Values.Where(obj0 => (obj0.m_Type) == 2);
+            // Update Node ID's of following path nodes
+            for (int i = removedNode.m_NodeID; i < pathNodes.Count(); i++)
+            {
+                PathPointObject node = (PathPointObject)pathNodes.Where(obj0 => ((PathPointObject)obj0).m_NodeID == i).ElementAt(0);
+                node.m_NodeID--;
             }
         }
 
@@ -2581,7 +2623,7 @@ namespace SM64DSe
 
         private void btnExportLevelModel_Click(object sender, EventArgs e)
         {
-            BMD_Exporter.ExportBMDToOBJ(new BMD(m_ROM.GetFileFromInternalID(m_LevelSettings.BMDFileID)));
+            BMD_Exporter.ExportBMD(new BMD(m_ROM.GetFileFromInternalID(m_LevelSettings.BMDFileID)));
 
             slStatusLabel.Text = "Finished exporting level model.";
         }//End Method
@@ -2599,7 +2641,7 @@ namespace SM64DSe
             string selObjBMDName = m_SelectedObject.m_Renderer.GetFilename();
 
             BMD objectBMD = new BMD(m_ROM.GetFileFromName(selObjBMDName));
-            BMD_Exporter.ExportBMDToOBJ(objectBMD);
+            BMD_Exporter.ExportBMD(objectBMD);
 
             slStatusLabel.Text = "Finished exporting model.";
         }
@@ -2627,7 +2669,7 @@ namespace SM64DSe
                 if (result == DialogResult.OK)
                 {
                     BMD objectBMD = new BMD(m_ROM.GetFileFromName(form.m_SelectedFile));
-                    BMD_Exporter.ExportBMDToOBJ(objectBMD);
+                    BMD_Exporter.ExportBMD(objectBMD);
 
                     slStatusLabel.Text = "Finished exporting model.";
                 }

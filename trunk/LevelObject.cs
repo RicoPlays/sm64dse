@@ -720,15 +720,12 @@ namespace SM64DSe
 
     public class PathPointObject : LevelObject
     {
-        public PathPointObject(NitroOverlay ovl, uint offset, int num/*, int parentPath*/)
+        public PathPointObject(NitroOverlay ovl, uint offset, int num, int nodeID)
             : base(ovl, offset, 0)
         {
             m_UniqueID = (uint)(0x30000000 | num);
             m_Type = 2;
-            //this.pathNodeID = pathNodeID;
-            //if (pathNodeID > lastNodeID)
-            //    lastNodeID = pathNodeID;
-            //this.parentPath = parentPath;
+            m_NodeID = nodeID;
 
             Position.X = (float)((short)m_Overlay.Read16(m_Offset)) / 1000f;
             Position.Y = (float)((short)m_Overlay.Read16(m_Offset + 0x2)) / 1000f;
@@ -738,9 +735,8 @@ namespace SM64DSe
             m_Properties = new PropertyTable();
             GenerateProperties();
         }
-        //public int pathNodeID;
-        public int parentPath;
-        //public static int lastNodeID = -1;
+        
+        public int m_NodeID;
 
         public override ObjectRenderer InitialiseRenderer()
         {

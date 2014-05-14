@@ -126,8 +126,8 @@ namespace SM64DSe
             lbxLevels.Items.AddRange(Strings.LevelNames);
 
             btnEditTexts.Enabled = true;
-            btnAddPatches.Enabled = true;
-            btnSecretShit.Enabled = true;
+            btnAnimationEditor.Enabled = true;
+            btnMore.Enabled = true;
         }
 
         public MainForm(string[] args)
@@ -140,8 +140,7 @@ namespace SM64DSe
 
             if (Program.AppVersion.ToLowerInvariant().Contains("private beta"))
             {
-                btnSecretShit.DropDownItems.Add("Dump object info", null, btnDumpObjInfo_Click);
-                btnSecretShit.DropDownItems.Add("animation editor test", null, new EventHandler(this.animationeditortest));
+                btnMore.DropDownItems.Add("Dump object info", null, btnDumpObjInfo_Click);
             }
 
             slStatusLabel.Text = "Ready";
@@ -288,7 +287,7 @@ namespace SM64DSe
 
         private void btnHalp_Click(object sender, EventArgs e)
         {
-            string msg = Program.AppTitle + " " + Program.AppVersion + "\n\n" +
+            string msg = Program.AppTitle + " " + Program.AppVersion + " " + Program.AppDate + "\n\n" +
                 "A level editor for Super Mario 64 DS.\n" +
                 "Coding and design by Mega-Mario, with help from others (see credits).\n" +
                 "Provided to you by Kuribo64, the SM64DS hacking department.\n" +
@@ -297,7 +296,8 @@ namespace SM64DSe
                 "- Treeki for the overlay decompression (Jap77), the object list, and other help\n" +
                 "- Dirbaio for other help\n" +
                 "- blank for helping with generating collision\n" + 
-                "- Fiachra Murray for helping with text editing, collision and other help\n" + 
+                "- Fiachra Murray for DAE rigged and animated model importing and exporting, " + 
+                "help with collision, text editing and other help\n" + 
                 "\n" +
                 Program.AppTitle + " is free software. If you paid for it, notify Mega-Mario about it.\n" +
                 "\n" +
@@ -313,11 +313,6 @@ namespace SM64DSe
         private void btnEditTexts_Click(object sender, EventArgs e)
         {
             new TextEditorForm().Show();
-        }
-
-        private void animationeditortest(object sender, EventArgs e)
-        {
-            new AnimationEditorForm().Show();
         }
 
         private void mnitDumpAllOvls_Click(object sender, EventArgs e)
@@ -345,13 +340,13 @@ namespace SM64DSe
             kclForm.Show();
         }
 
-        private void btnAddPatches_Click(object sender, EventArgs e)
+        private void btnAnimationEditor_Click(object sender, EventArgs e)
         {
-            AdditionalPatchesForm addPatchesForm = new AdditionalPatchesForm();
-            addPatchesForm.Show();
+            AnimationEditorForm animationEditorForm = new AnimationEditorForm();
+            animationEditorForm.Show();
         }
 
-        private void decompressOverlaysWithinGameToolStripMenuItem_Click(object sender, EventArgs e)
+        private void mnitDecompressOverlaysWithinGame_Click(object sender, EventArgs e)
         {
             if (Program.m_ROM == null)
                 return;
@@ -361,7 +356,7 @@ namespace SM64DSe
             slStatusLabel.Text = "All overlays have been decompressed successfully.";
         }
 
-        private void hexDumpToBinaryFileToolStripMenuItem_Click(object sender, EventArgs e)
+        private void mnitHexDumpToBinaryFile_Click(object sender, EventArgs e)
         {
             OpenFileDialog ofd = new OpenFileDialog();
             ofd.Title = "Select a hex dump to open.";
@@ -380,6 +375,12 @@ namespace SM64DSe
                     MessageBox.Show(ex.Message + "\n" + ex.StackTrace);
                 }
             }
+        }
+
+        private void mnitAdditionalPatches_Click(object sender, EventArgs e)
+        {
+            AdditionalPatchesForm addPatchesForm = new AdditionalPatchesForm();
+            addPatchesForm.Show();
         }
 
     }

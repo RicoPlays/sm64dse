@@ -82,6 +82,8 @@ namespace SM64DSe
 
         private BMD m_ImportedModel;
 
+        private Dictionary<string, BMD_Importer_Base.MaterialDef> m_Materials;
+
         // misc
         private Vector3 m_MarioPosition;
         private float m_MarioRotation;
@@ -135,15 +137,17 @@ namespace SM64DSe
             {
                 m_ModelFileName = ofdLoadModel.FileName.Replace('/', '\\');
                 m_ModelPath = m_ModelFileName.Substring(0, m_ModelFileName.LastIndexOf('\\') + 1);
-                m_ModelFormat = ofdLoadModel.FileName.Substring(ofdLoadModel.FileName.Length - 3, 3).ToLower(); ;
+                m_ModelFormat = ofdLoadModel.FileName.Substring(ofdLoadModel.FileName.Length - 3, 3).ToLower();
 
-                m_ImportedModel = BMD_Importer.ConvertToBMD(m_ImportedModel, m_ModelFileName, m_ModelPath, m_Scale);
+                BMD_Importer_Base importer = BMD_Importer_Base.GetModelImporter(m_ModelFileName);
+                m_ImportedModel = importer.ConvertToBMD(m_ImportedModel, m_ModelFileName, m_Scale, false);
+                m_Materials = importer.m_Materials;
 
                 m_MdlLoaded = true;
 
                 PrerenderModel();
 
-                populateColTypes();
+                PopulateColTypes();
 
                 tbModelName.Text = m_ModelFileName;
             }
@@ -154,18 +158,18 @@ namespace SM64DSe
             }
         }
 
-        private void populateColTypes()
+        private void PopulateColTypes()
         {
             gridColTypes.ColumnCount = 2;
             gridColTypes.Columns[0].HeaderText = "Material";
             gridColTypes.Columns[1].HeaderText = "Col. Type";
 
-            int numMats = BMD_Importer.m_Materials.Count;
+            int numMats = m_Materials.Count;
             gridColTypes.RowCount = numMats;
             for (int i = 0; i < numMats; i++)
             {
-                gridColTypes.Rows[i].Cells[0].Value = BMD_Importer.m_Materials.Keys.ElementAt(i);
-                gridColTypes.Rows[i].Cells[1].Value = BMD_Importer.m_Materials.Values.ElementAt(i).m_ColType;
+                gridColTypes.Rows[i].Cells[0].Value = m_Materials.Keys.ElementAt(i);
+                gridColTypes.Rows[i].Cells[1].Value = m_Materials.Values.ElementAt(i).m_ColType;
             }
         }
 
@@ -306,7 +310,7 @@ namespace SM64DSe
             GL.EndList();
         }
 
-        private bool vectorInList(List<Vector3> l, Vector3 p)
+        private bool VectorInList(List<Vector3> l, Vector3 p)
         {
             foreach (Vector3 v in l)
                 if (Helper.VectorsEqual(v, p))
@@ -314,7 +318,7 @@ namespace SM64DSe
             return false;
         }
 
-        private int addToList(List<Vector3> l, Vector3 p)
+        private int AddToList(List<Vector3> l, Vector3 p)
         {
             int i = 0;
             foreach (Vector3 v in l)
@@ -458,16 +462,16 @@ namespace SM64DSe
                 catch { MessageBox.Show(txtThreshold.Text + "\nis not a valid float value. Please enter a value in format 0.123"); return; }
             }
             Dictionary<string, int> matColTypes = new Dictionary<string, int>();
-            for (int i = 0; i < BMD_Importer.m_Materials.Count; i++)
+            for (int i = 0; i < m_Materials.Count; i++)
             {
-                matColTypes[BMD_Importer.m_Materials.Keys.ElementAt(i)] = BMD_Importer.m_Materials.Values.ElementAt(i).m_ColType;
+                matColTypes[m_Materials.Keys.ElementAt(i)] = m_Materials.Values.ElementAt(i).m_ColType;
             }
             NitroFile kcl;//This'll hold the KCL file that is to be replaced, either a level's or an object's
             //If it's an object it'll be scaled down - need to get back to original value
             slStatus.Text = "Importing model...";
             glModelView.Refresh();
-            m_ImportedModel = BMD_Importer.ConvertToBMD(m_ImportedModel, m_ModelFileName, m_ModelPath, m_Scale);
-            BMD_Importer.SaveModelChanges();
+            BMD_Importer_Base importer = BMD_Importer_Base.GetModelImporter(m_ModelFileName);
+            m_ImportedModel = importer.ConvertToBMD(m_ImportedModel, m_ModelFileName, m_Scale, true);
 
             PrerenderModel();
             glModelView.Refresh();
@@ -491,7 +495,7 @@ namespace SM64DSe
             }
             slStatus.Text = "Finished importing.";
 
-            refreshScale(1f);
+            RefreshScale(1f);
             tbScale.Text = "1";
 
             try { ((LevelEditorForm)Owner).UpdateLevelModel(); }
@@ -671,11 +675,11 @@ namespace SM64DSe
             float val;
             if (float.TryParse(tbScale.Text, out val) || float.TryParse(tbScale.Text, NumberStyles.Float, Helper.USA, out val))
             {
-                refreshScale(val);
+                RefreshScale(val);
             }
         }
 
-        private void refreshScale(float val)
+        private void RefreshScale(float val)
         {
             m_Scale = new Vector3(val, val, val);
             PrerenderModel();
@@ -689,7 +693,7 @@ namespace SM64DSe
             GL.DeleteLists(m_PDisplayList, 1);
             GL.DeleteLists(m_DisplayList, 1);
 
-            foreach (BMD_Importer.MaterialDef mat in BMD_Importer.m_Materials.Values)
+            foreach (BMD_Importer_Base.MaterialDef mat in m_Materials.Values)
                 GL.DeleteTexture(mat.m_DiffuseMapID);
 
             ModelCache.RemoveModel(m_MarioHeadModel);
@@ -715,7 +719,7 @@ namespace SM64DSe
         {
             for (int i = 0; i < gridColTypes.RowCount; i++)
             {
-                BMD_Importer.m_Materials.Values.ElementAt(i).m_ColType = int.Parse(gridColTypes.Rows[i].Cells[1].Value.ToString());
+                m_Materials.Values.ElementAt(i).m_ColType = int.Parse(gridColTypes.Rows[i].Cells[1].Value.ToString());
             }
         }
 

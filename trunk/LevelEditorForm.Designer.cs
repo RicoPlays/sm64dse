@@ -1,4 +1,5 @@
-﻿namespace SM64DSe
+﻿using OpenTK.Graphics;
+namespace SM64DSe
 {
     partial class LevelEditorForm
     {
@@ -58,7 +59,7 @@
             this.btnImportOtherModel = new System.Windows.Forms.ToolStripButton();
             this.btnExportOtherModel = new System.Windows.Forms.ToolStripButton();
             this.btnOffsetAllCoords = new System.Windows.Forms.ToolStripButton();
-            this.glLevelView = new SM64DSe.HaxxGLControl();
+            this.glLevelView = new OpenTK.GLControl(new GraphicsMode(32, 24, 8));
             this.tsViewActions = new System.Windows.Forms.ToolStrip();
             this.btnDumpOverlay = new System.Windows.Forms.ToolStripButton();
             this.btnLOL = new System.Windows.Forms.ToolStripButton();
@@ -907,7 +908,7 @@
         private System.Windows.Forms.ToolStripButton btnAddView;
         private System.Windows.Forms.ToolStripButton btnDumpOverlay;
         private System.Windows.Forms.ToolStripButton btnLOL;
-        private HaxxGLControl glLevelView;
+        private OpenTK.GLControl glLevelView;
         private System.Windows.Forms.ToolStripButton btnEditMinimap;
         private System.Windows.Forms.ToolStripButton btnReplaceObjModel;
         private System.Windows.Forms.ToolStripButton btnExportObjectModel;

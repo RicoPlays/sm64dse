@@ -671,7 +671,7 @@ namespace SM64DSe
 
             for (uint c = 0; c < m_NumModelChunks; c++)
             {
-                ModelChunk mdchunk = new ModelChunk();
+                ModelChunk mdchunk = new ModelChunk(this);
                 m_ModelChunks[c] = mdchunk;
 
                 uint mdchunkoffset = m_ModelChunksOffset + (c * 64);
@@ -874,14 +874,30 @@ namespace SM64DSe
             bool rt = Render(RenderMode.Translucent, scale);
             return ro || rt;
         }
+
         public bool Render(RenderMode mode, float scale)
+        {
+            return Render(mode, scale, null, -1);
+        }
+
+        public bool Render(RenderMode mode, float scale, BCA animation, int frame)
         {
             bool rendered_something = false;
 
-            foreach (ModelChunk mdchunk in m_ModelChunks)
+            for (int i = 0; i < m_ModelChunks.Length; i++)
             {
-                if (mdchunk.Render(mode, scale))
-                    rendered_something = true;
+                ModelChunk mdchunk = m_ModelChunks[i];
+
+                if (animation != null && frame > -1)
+                {
+                    if (mdchunk.Render(mode, scale, animation, frame))
+                        rendered_something = true;
+                }
+                else
+                {
+                    if (mdchunk.Render(mode, scale))
+                        rendered_something = true;
+                }
             }
 
             return rendered_something;
@@ -987,6 +1003,68 @@ namespace SM64DSe
 
             public uint m_EntryOffset, m_PalEntryOffset;
             public uint m_PalOffset, m_PalSize;
+
+            public override bool Equals(Object obj)
+            {
+                var tx = obj as Texture;
+                if (tx == null)
+                    return false;
+
+                if (tx.m_Data == null || this.m_Data == null)
+                {
+                    if (!(tx.m_Data == this.m_Data))
+                        return false;
+                }
+                else
+                {
+                    if (tx.m_Data.SequenceEqual(this.m_Data) == false)
+                        return false;
+                }
+
+                if (!(this.m_EntryOffset == tx.m_EntryOffset))
+                    return false;
+                if (!(this.m_Height == tx.m_Height))
+                    return false;
+                if (!(this.m_PalEntryOffset == tx.m_PalEntryOffset))
+                    return false;
+                if (!(this.m_PalID == tx.m_PalID))
+                    return false;
+
+                if (this.m_PalName == null || tx.m_PalName == null)
+                {
+                    if (this.m_PalName != tx.m_PalName)
+                        return false;
+                }
+                else if (!(this.m_PalName.Equals(tx.m_PalName)))
+                    return false;
+
+                if (!(this.m_PalOffset == tx.m_PalOffset))
+                    return false;
+                if (!(this.m_PalSize == tx.m_PalSize))
+                    return false;
+                if (!(this.m_Params == tx.m_Params))
+                    return false;
+                if (!(this.m_TexDataSize == tx.m_TexDataSize))
+                    return false;
+
+                if (!(this.m_TexID == tx.m_TexID))
+                    return false;
+
+                if (this.m_TexName == null || tx.m_TexName == null)
+                {
+                    if (this.m_TexName != tx.m_TexName)
+                        return false;
+                }
+                else if (!(this.m_TexName.Equals(tx.m_TexName)))
+                    return false;
+
+                if (!(this.m_TexType == tx.m_TexType))
+                    return false;
+                if (!(this.m_Width == tx.m_Width))
+                    return false;
+
+                return true;
+            }
         }
 
         public struct Vertex
@@ -1082,6 +1160,8 @@ namespace SM64DSe
             public string m_Name;
             public MaterialGroup[] m_MatGroups;
 
+            public BMD m_Model;
+
             public Matrix4 m_Transform;
             public bool m_Billboard;
 
@@ -1091,6 +1171,11 @@ namespace SM64DSe
             public uint[] m_Scale;
             public ushort[] m_Rotation;
             public uint[] m_Translation;
+
+            public ModelChunk(BMD model)
+            {
+                m_Model = model;
+            }
 
             public void PrepareToRender()
             {
@@ -1106,11 +1191,20 @@ namespace SM64DSe
 
             public bool Render(RenderMode mode, float scale)
             {
+                return Render(mode, scale, null, -1);
+            }
+
+            public bool Render(RenderMode mode, float scale, BCA animation, int frame)
+            {
                 BeginMode[] beginmodes = { BeginMode.Triangles, BeginMode.Quads, BeginMode.TriangleStrip, BeginMode.QuadStrip };
                 bool rendered_something = false;
 
                 if (m_MatGroups.Length == 0)
                     return false;
+
+                bool usesAnimation = (animation != null && frame > -1);
+                Matrix4[] animMatrices = (usesAnimation) ?
+                    animation.GetAllMatricesForFrame(m_Model.m_ModelChunks, frame) : null;
 
                 foreach (MaterialGroup matgroup in m_MatGroups)
                 {
@@ -1139,9 +1233,18 @@ namespace SM64DSe
                             foreach (BMD.Vertex vtx in vtxlist.m_VertexList)
                             {
                                 Vector3 finalvtx = vtx.m_Position;
-                                Matrix4 bonemtx = matgroup.m_BoneMatrices[vtx.m_MatrixID];
 
-                                Vector3.Transform(ref finalvtx, ref bonemtx, out finalvtx);
+                                if (!usesAnimation)
+                                {
+                                    Matrix4 bonemtx = matgroup.m_BoneMatrices[vtx.m_MatrixID];
+                                    Vector3.Transform(ref finalvtx, ref bonemtx, out finalvtx);
+                                }
+                                else
+                                {
+                                    int boneID = matgroup.m_BoneIDs[vtx.m_MatrixID];
+                                    Matrix4 animMatrix = animMatrices[boneID];
+                                    Vector3.Transform(ref finalvtx, ref animMatrix, out finalvtx);
+                                }
                                 Vector3.Multiply(ref finalvtx, scale, out finalvtx);
 
                                 GL.Vertex3(finalvtx);
@@ -1207,8 +1310,17 @@ namespace SM64DSe
                                     GL.Normal3(vtx.m_Normal);
 
                                 Vector3 finalvtx = vtx.m_Position;
-                                Matrix4 bonemtx = matgroup.m_BoneMatrices[vtx.m_MatrixID];
-                                Vector3.Transform(ref finalvtx, ref bonemtx, out finalvtx);
+                                if (!usesAnimation)
+                                {
+                                    Matrix4 bonemtx = matgroup.m_BoneMatrices[vtx.m_MatrixID];
+                                    Vector3.Transform(ref finalvtx, ref bonemtx, out finalvtx);
+                                }
+                                else
+                                {
+                                    int boneID = matgroup.m_BoneIDs[vtx.m_MatrixID];
+                                    Matrix4 animMatrix = animMatrices[boneID];
+                                    Vector3.Transform(ref finalvtx, ref animMatrix, out finalvtx);
+                                }
                                 Vector3.Multiply(ref finalvtx, scale, out finalvtx);
 
                                 GL.Vertex3(finalvtx);

@@ -123,7 +123,7 @@ namespace SM64DSe
         {
             Matrix4 ret = Matrix4.Identity;
 
-            Matrix4 mscale = Matrix4.Scale(scale);
+            Matrix4 mscale = Matrix4.CreateScale(scale);
             Matrix4 mxrot = Matrix4.CreateRotationX(rot.X);
             Matrix4 myrot = Matrix4.CreateRotationY(rot.Y);
             Matrix4 mzrot = Matrix4.CreateRotationZ(rot.Z);
@@ -136,6 +136,276 @@ namespace SM64DSe
             Matrix4.Mult(ref ret, ref mtrans, out ret);
 
             return ret;
+        }
+
+        /*
+         * Uses SharpDX's method to decompose Matrix4 into Scale, Rotation (Quaternion) and Translation, then converts the Quaternion 
+         * to Euler angles. See credits below.
+         */
+        public static void DecomposeSRTMatrix1(Matrix4 matrix, out Vector3 scale, out Vector3 rotation, out Vector3 translation)
+        {
+            scale = Vector3.Zero;
+            rotation = Vector3.Zero;
+            translation = Vector3.Zero;
+            Quaternion quat = new Quaternion();
+
+            Decompose(matrix, out scale, out quat, out translation);
+            rotation = FromQ2_Rad(quat, false);
+        }
+
+        /*
+         * Uses OpenTK's Matrix4 methods to extract Scale, Rotation (Quaternion) and Translation, then converts the Quaternion 
+         * to Euler angles. See credits below.
+         */
+        public static void DecomposeSRTMatrix2(Matrix4 matrix, out Vector3 scale, out Vector3 rotation, out Vector3 translation)
+        {
+            scale = matrix.ExtractScale();
+            translation = matrix.ExtractTranslation();
+            Quaternion quat = matrix.ExtractRotation();
+
+            rotation = FromQ2_Rad(quat, false);
+        }
+
+        /*
+         * Below two methods taken from SharpDX library. See License.SharpDX.txt.
+         */
+ 
+        /// <summary>
+        /// Decomposes a matrix into a scale, rotation, and translation.
+        /// </summary>
+        /// <param name="scale">When the method completes, contains the scaling component of the decomposed matrix.</param>
+        /// <param name="rotation">When the method completes, contains the rotation component of the decomposed matrix.</param>
+        /// <param name="translation">When the method completes, contains the translation component of the decomposed matrix.</param>
+        /// <remarks>
+        /// This method is designed to decompose an SRT transformation matrix only.
+        /// </remarks>
+        public static bool Decompose(Matrix4 matrix, out Vector3 scale, out Quaternion rotation, out Vector3 translation)
+        {
+            //Source: Unknown
+            //References: http://www.gamedev.net/community/forums/topic.asp?topic_id=441695
+
+            //Get the translation.
+            translation.X = matrix.M41;
+            translation.Y = matrix.M42;
+            translation.Z = matrix.M43;
+
+            //Scaling is the length of the rows.
+            scale.X = (float)Math.Sqrt((matrix.M11 * matrix.M11) + (matrix.M12 * matrix.M12) + (matrix.M13 * matrix.M13));
+            scale.Y = (float)Math.Sqrt((matrix.M21 * matrix.M21) + (matrix.M22 * matrix.M22) + (matrix.M23 * matrix.M23));
+            scale.Z = (float)Math.Sqrt((matrix.M31 * matrix.M31) + (matrix.M32 * matrix.M32) + (matrix.M33 * matrix.M33));
+
+            //If any of the scaling factors are zero, than the rotation matrix can not exist.
+            if (scale.X == 0.0f ||
+                scale.Y == 0.0f ||
+                scale.Z == 0.0f)
+            {
+                rotation = Quaternion.Identity;
+                return false;
+            }
+
+            //The rotation is the left over matrix after dividing out the scaling.
+            Matrix4 rotationmatrix = new Matrix4();
+            rotationmatrix.M11 = matrix.M11 / scale.X;
+            rotationmatrix.M12 = matrix.M12 / scale.X;
+            rotationmatrix.M13 = matrix.M13 / scale.X;
+
+            rotationmatrix.M21 = matrix.M21 / scale.Y;
+            rotationmatrix.M22 = matrix.M22 / scale.Y;
+            rotationmatrix.M23 = matrix.M23 / scale.Y;
+
+            rotationmatrix.M31 = matrix.M31 / scale.Z;
+            rotationmatrix.M32 = matrix.M32 / scale.Z;
+            rotationmatrix.M33 = matrix.M33 / scale.Z;
+
+            rotationmatrix.M44 = 1f;
+
+            RotationMatrix(ref rotationmatrix, out rotation);
+            return true;
+        }
+
+        /// <summary>
+        /// Creates a quaternion given a rotation matrix.
+        /// </summary>
+        /// <param name="matrix">The rotation matrix.</param>
+        /// <param name="result">When the method completes, contains the newly created quaternion.</param>
+        public static void RotationMatrix(ref Matrix4 matrix, out Quaternion result)
+        {
+            float sqrt;
+            float half;
+            float scale = matrix.M11 + matrix.M22 + matrix.M33;
+            result = new Quaternion();
+
+            if (scale > 0.0f)
+            {
+                sqrt = (float)Math.Sqrt(scale + 1.0f);
+                result.W = sqrt * 0.5f;
+                sqrt = 0.5f / sqrt;
+
+                result.X = (matrix.M23 - matrix.M32) * sqrt;
+                result.Y = (matrix.M31 - matrix.M13) * sqrt;
+                result.Z = (matrix.M12 - matrix.M21) * sqrt;
+            }
+            else if ((matrix.M11 >= matrix.M22) && (matrix.M11 >= matrix.M33))
+            {
+                sqrt = (float)Math.Sqrt(1.0f + matrix.M11 - matrix.M22 - matrix.M33);
+                half = 0.5f / sqrt;
+
+                result.X = 0.5f * sqrt;
+                result.Y = (matrix.M12 + matrix.M21) * half;
+                result.Z = (matrix.M13 + matrix.M31) * half;
+                result.W = (matrix.M23 - matrix.M32) * half;
+            }
+            else if (matrix.M22 > matrix.M33)
+            {
+                sqrt = (float)Math.Sqrt(1.0f + matrix.M22 - matrix.M11 - matrix.M33);
+                half = 0.5f / sqrt;
+
+                result.X = (matrix.M21 + matrix.M12) * half;
+                result.Y = 0.5f * sqrt;
+                result.Z = (matrix.M32 + matrix.M23) * half;
+                result.W = (matrix.M31 - matrix.M13) * half;
+            }
+            else
+            {
+                sqrt = (float)Math.Sqrt(1.0f + matrix.M33 - matrix.M11 - matrix.M22);
+                half = 0.5f / sqrt;
+
+                result.X = (matrix.M31 + matrix.M13) * half;
+                result.Y = (matrix.M32 + matrix.M23) * half;
+                result.Z = 0.5f * sqrt;
+                result.W = (matrix.M12 - matrix.M21) * half;
+            }
+        }
+
+        /*
+         * Below six methods taken from user 'Vlad' at:
+         * https://stackoverflow.com/questions/12088610/conversion-between-euler-quaternion-like-in-unity3d-engine
+         * 
+         * Used to convert a Quaternion to Euler angles.
+         */
+
+        public const float Deg2Rad = (float)((Math.PI * 2.0f) / 360.0f);
+        public const float Rad2Deg = (float)(360.0f / (Math.PI * 2.0f));
+
+        public static Vector3 FromQ2_Deg(Quaternion q1, bool normalise = false)
+        {
+            float sqw = q1.W * q1.W;
+            float sqx = q1.X * q1.X;
+            float sqy = q1.Y * q1.Y;
+            float sqz = q1.Z * q1.Z;
+            float unit = sqx + sqy + sqz + sqw; // if normalised is one, otherwise is correction factor
+            float test = q1.X * q1.W - q1.Y * q1.Z;
+            Vector3 v;
+
+            if (test > 0.4995f * unit)
+            { // singularity at north pole
+                v.Y = (float)(2f * Math.Atan2(q1.Y, q1.X));
+                v.X = (float)(Math.PI / 2);
+                v.Z = 0;
+                return (normalise) ? NormalizeAnglesDeg(v * Rad2Deg) : (v * Rad2Deg);
+            }
+            if (test < -0.4995f * unit)
+            { // singularity at south pole
+                v.Y = (float)(-2f * Math.Atan2(q1.Y, q1.X));
+                v.X = (float)(-Math.PI / 2.0f);
+                v.Z = 0;
+                return (normalise) ? NormalizeAnglesDeg(v * Rad2Deg) : (v * Rad2Deg);
+            }
+            Quaternion q = new Quaternion(q1.W, q1.Z, q1.X, q1.Y);
+            v.Y = (float)Math.Atan2(2f * q.X * q.W + 2f * q.Y * q.Z, 1 - 2f * (q.Z * q.Z + q.W * q.W));     // Yaw
+            v.X = (float)Math.Asin(2f * (q.X * q.Z - q.W * q.Y));                             // Pitch
+            v.Z = (float)Math.Atan2(2f * q.X * q.Y + 2f * q.Z * q.W, 1 - 2f * (q.Y * q.Y + q.Z * q.Z));      // Roll
+            return (normalise) ? NormalizeAnglesDeg(v * Rad2Deg) : (v * Rad2Deg);
+        }
+
+        public static Vector3 FromQ2_Rad(Quaternion q1, bool normalise = false)
+        {
+            float sqw = q1.W * q1.W;
+            float sqx = q1.X * q1.X;
+            float sqy = q1.Y * q1.Y;
+            float sqz = q1.Z * q1.Z;
+            float unit = sqx + sqy + sqz + sqw; // if normalised is one, otherwise is correction factor
+            float test = q1.X * q1.W - q1.Y * q1.Z;
+            Vector3 v;
+
+            if (test > 0.4995f * unit)
+            { // singularity at north pole
+                v.Y = (float)(2f * Math.Atan2(q1.Y, q1.X));
+                v.X = (float)(Math.PI / 2);
+                v.Z = 0;
+                return (normalise) ? NormalizeAnglesRad(v) : v;
+            }
+            if (test < -0.4995f * unit)
+            { // singularity at south pole
+                v.Y = (float)(-2f * Math.Atan2(q1.Y, q1.X));
+                v.X = (float)(-Math.PI / 2.0f);
+                v.Z = 0;
+                return (normalise) ? NormalizeAnglesRad(v) : v;
+            }
+            Quaternion q = new Quaternion(q1.W, q1.Z, q1.X, q1.Y);
+            v.Y = (float)Math.Atan2(2f * q.X * q.W + 2f * q.Y * q.Z, 1 - 2f * (q.Z * q.Z + q.W * q.W));     // Yaw
+            v.X = (float)Math.Asin(2f * (q.X * q.Z - q.W * q.Y));                             // Pitch
+            v.Z = (float)Math.Atan2(2f * q.X * q.Y + 2f * q.Z * q.W, 1 - 2f * (q.Y * q.Y + q.Z * q.Z));      // Roll
+            return (normalise) ? NormalizeAnglesRad(v) : v;
+        }
+
+        static Vector3 NormalizeAnglesDeg(Vector3 angles)
+        {
+            angles.X = NormalizeAngleDeg(angles.X);
+            angles.Y = NormalizeAngleDeg(angles.Y);
+            angles.Z = NormalizeAngleDeg(angles.Z);
+            return angles;
+        }
+
+        static float NormalizeAngleDeg(float angle)
+        {
+            while (angle > 360f)
+                angle -= 360f;
+            while (angle < 0f)
+                angle += 360f;
+            return angle;
+        }
+
+        static Vector3 NormalizeAnglesRad(Vector3 angles)
+        {
+            angles.X = NormalizeAngleRad(angles.X);
+            angles.Y = NormalizeAngleRad(angles.Y);
+            angles.Z = NormalizeAngleRad(angles.Z);
+            return angles;
+        }
+
+        static float NormalizeAngleRad(float angle)
+        {
+            while (angle > Math.PI)
+                angle -= (float)Math.PI;
+            while (angle < 0f)
+                angle += (float)Math.PI;
+            return angle;
+        }
+
+        public static Matrix4 StringArrayToMatrix4(string[] vals)
+        {
+            float[] vals_float = new float[vals.Length];
+            for (int i = 0; i < vals.Length; i++)
+            {
+                vals_float[i] = float.Parse(vals[i], USA);
+            }
+            Matrix4 matrix = FloatArrayToMatrix4(vals_float);
+            return matrix;
+        }
+
+        public static Matrix4 FloatArrayToMatrix4(float[] vals)
+        {
+            Vector4 row0 = new Vector4(vals[0], vals[4],
+                vals[8], vals[12]);
+            Vector4 row1 = new Vector4(vals[1], vals[5],
+                vals[9], vals[13]);
+            Vector4 row2 = new Vector4(vals[2], vals[6],
+                vals[10], vals[14]);
+            Vector4 row3 = new Vector4(vals[3], vals[7],
+                vals[11], vals[15]);
+            Matrix4 matrix = new Matrix4(row0, row1, row2, row3);
+            return matrix;
         }
 
         public static uint GetActSelectorIDTableAddress()
@@ -183,7 +453,7 @@ namespace SM64DSe
 
         /*
          * Converts a Hex Dump to binary file
-         */ 
+         */
         public static byte[] HexDumpToBinary(string hexdump)
         {
             string[] lines = hexdump.Split('\n');
