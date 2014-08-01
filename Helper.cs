@@ -23,6 +23,9 @@ using System.Text;
 using System.Drawing;
 using OpenTK;
 using System.Globalization;
+using System.IO;
+using System.Xml;
+using System.Windows.Forms;
 
 namespace SM64DSe
 {
@@ -119,6 +122,20 @@ namespace SM64DSe
             return true;
         }
 
+        public static int GetDictionaryStringKeyIndex(List<Object> keys, Object key)
+        {
+            int index = -1;
+            for (int i = 0; i < keys.Count; i++)
+            {
+                if (keys.ElementAt(i).Equals(key))
+                {
+                    index = i;
+                    break;
+                }
+            }
+            return index;
+        }
+
         public static Matrix4 SRTToMatrix(Vector3 scale, Vector3 rot, Vector3 trans)
         {
             Matrix4 ret = Matrix4.Identity;
@@ -169,7 +186,7 @@ namespace SM64DSe
         /*
          * Below two methods taken from SharpDX library. See License.SharpDX.txt.
          */
- 
+
         /// <summary>
         /// Decomposes a matrix into a scale, rotation, and translation.
         /// </summary>

@@ -30,6 +30,7 @@ using System.Globalization;
 using System.Security.Cryptography;
 using OpenTK;
 using OpenTK.Graphics.OpenGL;
+using SM64DSe.ImportExport;
 using SM64DSe.Importers;
 
 namespace SM64DSe
@@ -83,6 +84,7 @@ namespace SM64DSe
         private BMD m_ImportedModel;
 
         private Dictionary<string, BMD_Importer_Base.MaterialDef> m_Materials;
+        //private Dictionary<string, ModelBase.MaterialDef> m_Materials;
 
         // misc
         private Vector3 m_MarioPosition;
@@ -142,6 +144,10 @@ namespace SM64DSe
                 BMD_Importer_Base importer = BMD_Importer_Base.GetModelImporter(m_ModelFileName);
                 m_ImportedModel = importer.ConvertToBMD(m_ImportedModel, m_ModelFileName, m_Scale, false);
                 m_Materials = importer.m_Materials;
+
+                //m_ImportedModel = BMDImporter.ConvertModelToBMD(m_ImportedModel.m_File,
+                //    m_ModelFileName, m_Scale, false);
+                //m_Materials = BMDImporter.GetModelMaterials(m_ModelFileName);
 
                 m_MdlLoaded = true;
 
@@ -472,6 +478,8 @@ namespace SM64DSe
             glModelView.Refresh();
             BMD_Importer_Base importer = BMD_Importer_Base.GetModelImporter(m_ModelFileName);
             m_ImportedModel = importer.ConvertToBMD(m_ImportedModel, m_ModelFileName, m_Scale, true);
+            //m_ImportedModel = BMDImporter.ConvertModelToBMD(m_ImportedModel.m_File,
+            //    m_ModelFileName, m_Scale, true);
 
             PrerenderModel();
             glModelView.Refresh();
@@ -693,8 +701,10 @@ namespace SM64DSe
             GL.DeleteLists(m_PDisplayList, 1);
             GL.DeleteLists(m_DisplayList, 1);
 
+            //foreach (ModelBase.MaterialDef mat in m_Materials.Values)
+            //    GL.DeleteTexture(mat.m_DiffuseMapID);
             foreach (BMD_Importer_Base.MaterialDef mat in m_Materials.Values)
-                GL.DeleteTexture(mat.m_DiffuseMapID);
+                    GL.DeleteTexture(mat.m_DiffuseMapID);
 
             ModelCache.RemoveModel(m_MarioHeadModel);
             ModelCache.RemoveModel(m_MarioBodyModel);

@@ -17,7 +17,7 @@ namespace SM64DSe
         {
             InitializeComponent();
 
-            LoadFileList();
+            LoadFileList(this.tvFiles);
         }
 
         public ROMFileSelect(String title)
@@ -25,20 +25,20 @@ namespace SM64DSe
             InitializeComponent();
             this.Text = title;
 
-            LoadFileList();
+            LoadFileList(this.tvFiles);
         }
 
-        private void LoadFileList()
+        public static void LoadFileList(TreeView tvFileList)
         {
             NitroROM.FileEntry[] files = Program.m_ROM.GetFileEntries();
-            tvFiles.Nodes.Add("root", "ROM File System");
+            tvFileList.Nodes.Add("root", "ROM File System");
 
-            TreeNode node = tvFiles.Nodes["root"];
+            TreeNode node = tvFileList.Nodes["root"];
 
-            LoadFiles(node, files, new NARC.FileEntry[] { });
+            LoadFiles(tvFileList, node, files, new NARC.FileEntry[] { });
         }
 
-        private void LoadFiles(TreeNode node, NitroROM.FileEntry[] files, NARC.FileEntry[] filesNARC)
+        private static void LoadFiles(TreeView tvFileList, TreeNode node, NitroROM.FileEntry[] files, NARC.FileEntry[] filesNARC)
         {
             TreeNode parent = node;
             String[] names = new String[0];
@@ -64,7 +64,7 @@ namespace SM64DSe
                     /*if (parts[0].Equals(""))
                         tvFiles.Nodes["root"].Nodes.Add("Overlay");
                     else */if (!parts[0].Equals(""))
-                        tvFiles.Nodes["root"].Nodes.Add(parts[0]).Tag = names[i];
+                        tvFileList.Nodes["root"].Nodes.Add(parts[0]).Tag = names[i];
                 }
                 else
                 {
@@ -78,7 +78,8 @@ namespace SM64DSe
 
                         if (parts[j].EndsWith(".narc"))
                         {
-                            LoadFiles(node, new NitroROM.FileEntry[]{}, new NARC(Program.m_ROM, Program.m_ROM.GetFileIDFromName(files[i].FullName)).GetFileEntries());
+                            LoadFiles(tvFileList, node, new NitroROM.FileEntry[] { }, 
+                                new NARC(Program.m_ROM, Program.m_ROM.GetFileIDFromName(files[i].FullName)).GetFileEntries());
                         }
                     }
                 }

@@ -25,19 +25,13 @@ using OpenTK;
 
 namespace SM64DSe
 {
-    class KCL
+    public class KCL
     {
-        /*
-         * old KCL code copypasted from SM64DSe v1.01
-         * meant for debugging
-         * and not likely to have any other use
-         */
-
         public KCL(NitroFile file)
         {
             m_File = file;
 
-	        m_Planes = new List<Plane>();
+	        m_Planes = new List<ColFace>();
 
 	        m_PointsSectionOffset = m_File.Read32(0x00);
 	        m_NormalsSectionOffset = m_File.Read32(0x04);
@@ -47,8 +41,6 @@ namespace SM64DSe
             int planeid = 0;
 	        for (uint offset = m_PlanesSectionOffset + 0x10; offset < m_OctreeSectionOffset; offset += 0x10)
 	        {
-		        Plane plane = new Plane();
-
 		        int length = (int)m_File.Read32(offset);
 
 		        ushort pt_id = m_File.Read16(offset + 0x04);
@@ -76,13 +68,13 @@ namespace SM64DSe
 		        short d3_y = (short)m_File.Read16((uint)(m_NormalsSectionOffset + (d3_id*6) + 2));
 		        short d3_z = (short)m_File.Read16((uint)(m_NormalsSectionOffset + (d3_id*6) + 4));
 
-		        plane.m_Length = (float)length / 65536000f;
-		        plane.m_Position = new Vector3((float)pt_x / 64000f, (float)pt_y / 64000f, (float)pt_z / 64000f);
-		        plane.m_Normal = new Vector3((float)nr_x / 1024f, (float)nr_y / 1024f, (float)nr_z / 1024f);
-		        plane.m_Dir1 = new Vector3((float)d1_x / 1024f, (float)d1_y / 1024f, (float)d1_z / 1024f);
-		        plane.m_Dir2 = new Vector3((float)d2_x / 1024f, (float)d2_y / 1024f, (float)d2_z / 1024f);
-		        plane.m_Dir3 = new Vector3((float)d3_x / 1024f, (float)d3_y / 1024f, (float)d3_z / 1024f);
-		        plane.m_TerrainType = m_File.Read16(offset + 0x0E);
+                ColFace plane = new ColFace((float)length / 65536000f, 
+                    new Vector3((float)pt_x / 64000f, (float)pt_y / 64000f, (float)pt_z / 64000f), 
+                    new Vector3((float)nr_x / 1024f, (float)nr_y / 1024f, (float)nr_z / 1024f), 
+                    new Vector3((float)d1_x / 1024f, (float)d1_y / 1024f, (float)d1_z / 1024f), 
+                    new Vector3((float)d2_x / 1024f, (float)d2_y / 1024f, (float)d2_z / 1024f), 
+                    new Vector3((float)d3_x / 1024f, (float)d3_y / 1024f, (float)d3_z / 1024f), 
+                    m_File.Read16(offset + 0x0E));
 
                /* if (planeid == 31)
                     MessageBox.Show(string.Format("PLANE 32:\n{0}\n{1}\n{2}\n\n{3}\n{4}\n{5}\n\n{6}\n{7}\n{8}\n{9}\n{10}\n{11}",
@@ -133,17 +125,38 @@ namespace SM64DSe
             //MessageBox.Show(OctreeNode.m_List.Count.ToString());
         }
 
+        public class ColFace
+        {
+            public float length;
+            public Vector3 point1;
+            public Vector3 point2;
+            public Vector3 point3;
+            public Vector3 normal;
+            public int type;
+            public Vector3 dir1;
+            public Vector3 dir2;
+            public Vector3 dir3;
 
-        public class Plane
-	    {
-		    public Vector3 m_Position;
-            public float m_Length;
-            public Vector3 m_Normal;
-            public Vector3 m_Dir1;
-            public Vector3 m_Dir2;
-            public Vector3 m_Dir3;
-            public ushort m_TerrainType;
-	    }
+            public ColFace(float lengthIn, Vector3 originPoint, Vector3 normalIn, Vector3 dir1, Vector3 dir2, Vector3 dir3, int typeIn)
+            {
+                length = lengthIn;
+                normal = normalIn;
+                point1 = originPoint;
+                /*
+                Collision Tools v0.6 by blank
+                v0 = vertices[t.vertex_index] //The given vertex
+                v2 = v0 + cross(n,a)*t.length/dot(cross(n,a),c)
+                v1 = v0 + cross(n,b)*t.length/dot(cross(n,b),c)
+                */
+                point2 = point1 + Vector3.Cross(normal, dir2) * length / Vector3.Dot(Vector3.Cross(normal, dir2), dir3);
+                point3 = point1 + Vector3.Cross(normal, dir1) * length / Vector3.Dot(Vector3.Cross(normal, dir1), dir3);
+
+                type = typeIn;
+                this.dir1 = dir1;
+                this.dir2 = dir2;
+                this.dir3 = dir3;
+            }
+        }
 
         public class OctreeNode
         {
@@ -205,7 +218,7 @@ namespace SM64DSe
         }
 
         private NitroFile m_File;
-        public List<Plane> m_Planes;
+        public List<ColFace> m_Planes;
 
         uint m_PointsSectionOffset;
         uint m_NormalsSectionOffset;
@@ -213,37 +226,4 @@ namespace SM64DSe
         uint m_OctreeSectionOffset;
     }
 
-    // Used by the KCL Editor and KCL Exporter
-    public class ColFace
-    {
-        public float length;
-        public Vector3 point1;
-        public Vector3 point2;
-        public Vector3 point3;
-        public Vector3 normal;
-        public int type;
-        public Vector3 dir1;
-        public Vector3 dir2;
-        public Vector3 dir3;
-
-        public ColFace(float lengthIn, Vector3 originPoint, Vector3 normalIn, Vector3 dir1, Vector3 dir2, Vector3 dir3, int typeIn)
-        {
-            length = lengthIn;
-            normal = normalIn;
-            point1 = originPoint;
-            /*
-            Collision Tools v0.6 by blank
-            v0 = vertices[t.vertex_index] //The given vertex
-            v2 = v0 + cross(n,a)*t.length/dot(cross(n,a),c)
-            v1 = v0 + cross(n,b)*t.length/dot(cross(n,b),c)
-            */
-            point2 = point1 + Vector3.Cross(normal, dir2) * length / Vector3.Dot(Vector3.Cross(normal, dir2), dir3);
-            point3 = point1 + Vector3.Cross(normal, dir1) * length / Vector3.Dot(Vector3.Cross(normal, dir1), dir3);
-
-            type = typeIn;
-            this.dir1 = dir1;
-            this.dir2 = dir2;
-            this.dir3 = dir3;
-        }
-    }
 }

@@ -125,6 +125,8 @@ namespace SM64DSe
 
             lbxLevels.Items.AddRange(Strings.LevelNames);
 
+            ROMFileSelect.LoadFileList(this.tvFileList);
+
             btnEditTexts.Enabled = true;
             btnAnimationEditor.Enabled = true;
             btnMore.Enabled = true;
@@ -381,6 +383,50 @@ namespace SM64DSe
         {
             AdditionalPatchesForm addPatchesForm = new AdditionalPatchesForm();
             addPatchesForm.Show();
+        }
+
+        private string m_SelectedFile;
+
+        private void tvFileList_AfterSelect(object sender, TreeViewEventArgs e)
+        {
+            if (e.Node == null || e.Node.Tag == null)
+                m_SelectedFile = "";
+            else
+                m_SelectedFile = e.Node.Tag.ToString();
+        }
+
+        private void btnExtractRaw_Click(object sender, EventArgs e)
+        {
+            if (m_SelectedFile == null || m_SelectedFile.Equals(""))
+                return;
+
+            SaveFileDialog sfd = new SaveFileDialog();
+            sfd.FileName = m_SelectedFile;
+            if (sfd.ShowDialog() == DialogResult.Cancel)
+                return;
+
+            System.IO.File.WriteAllBytes(sfd.FileName, Program.m_ROM.GetFileFromName(m_SelectedFile).m_Data);
+        }
+
+        private void btnReplaceRaw_Click(object sender, EventArgs e)
+        {
+            if (m_SelectedFile == null || m_SelectedFile.Equals(""))
+                return;
+
+            OpenFileDialog ofd = new OpenFileDialog();
+            if (ofd.ShowDialog() == DialogResult.Cancel)
+                return;
+
+            NitroFile file = Program.m_ROM.GetFileFromName(m_SelectedFile);
+            file.Clear();
+            file.WriteBlock(0, System.IO.File.ReadAllBytes(ofd.FileName));
+            file.SaveChanges();
+        }
+
+        private void mnitEditSDATINFOBlockToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            SDATInfoEditor sdatInfoEditor = new SDATInfoEditor();
+            sdatInfoEditor.Show();
         }
 
     }

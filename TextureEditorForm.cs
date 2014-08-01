@@ -8,6 +8,7 @@ using System.Text;
 using System.Windows.Forms;
 using SM64DSe.Importers;
 using System.Text.RegularExpressions;
+using SM64DSe.SM64DSFormats;
 
 namespace SM64DSe
 {

@@ -44,6 +44,8 @@ namespace SM64DSe.Importers
     {
         public class GXDisplayListPacker
         {
+            private static readonly bool ALWAYS_WRITE_FULL_VERTEX_CMD_0x23 = true;
+
             public GXDisplayListPacker()
             {
                 m_CommandList = new List<GXCommand>();
@@ -77,23 +79,30 @@ namespace SM64DSe.Importers
                 Vector4 vtx = Vector4.Multiply(_vtx, 4096f);
                 Vector4 prev = Vector4.Multiply(_prev, 4096f);
 
-                if (Math.Abs(vtx.X - prev.X) < 1f)
+                if (ALWAYS_WRITE_FULL_VERTEX_CMD_0x23)
                 {
-                    uint param = (uint)(((ushort)(short)vtx.Y) | (((ushort)(short)vtx.Z) << 16));
-                    AddCommand(0x27, param);
-                }
-                else if (Math.Abs(vtx.Y - prev.Y) < 1f)
-                {
-                    uint param = (uint)(((ushort)(short)vtx.X) | (((ushort)(short)vtx.Z) << 16));
-                    AddCommand(0x26, param);
-                }
-                else if (Math.Abs(vtx.Z - prev.Z) < 1f)
-                {
-                    uint param = (uint)(((ushort)(short)vtx.X) | (((ushort)(short)vtx.Y) << 16));
-                    AddCommand(0x25, param);
+                    AddVertexCommand(_vtx);
                 }
                 else
-                    AddVertexCommand(_vtx);
+                {
+                    if (Math.Abs(vtx.X - prev.X) < 1f)
+                    {
+                        uint param = (uint)(((ushort)(short)vtx.Y) | (((ushort)(short)vtx.Z) << 16));
+                        AddCommand(0x27, param);
+                    }
+                    else if (Math.Abs(vtx.Y - prev.Y) < 1f)
+                    {
+                        uint param = (uint)(((ushort)(short)vtx.X) | (((ushort)(short)vtx.Z) << 16));
+                        AddCommand(0x26, param);
+                    }
+                    else if (Math.Abs(vtx.Z - prev.Z) < 1f)
+                    {
+                        uint param = (uint)(((ushort)(short)vtx.X) | (((ushort)(short)vtx.Y) << 16));
+                        AddCommand(0x25, param);
+                    }
+                    else
+                        AddVertexCommand(_vtx);
+                }
             }
             public void AddVertexCommand(Vector4 _vtx)
             {
@@ -698,20 +707,20 @@ namespace SM64DSe.Importers
         {
             string modelPath = Path.GetDirectoryName(modelFileName);
 
-            //try
+            try
             {
                 Import(model, modelFileName, new Vector3(1f, 1f, 1f));
                 ImportAnimation(animation, modelFileName);
             }
-            /*catch (Exception e) 
+            catch (Exception e) 
             { 
                 MessageBox.Show("An error occured importing your model and/or animation: \n\n" + 
                 e.Message + "\n" + e.StackTrace);
                 return -1;
-            }*/
+            }
 
-            //model.m_File.SaveChanges();
-            //animation.m_File.SaveChanges();
+            model.m_File.SaveChanges();
+            animation.m_File.SaveChanges();
 
             return 0;
         }
