@@ -29,9 +29,7 @@ namespace SM64DSe
 
         private int[] m_KCLMeshDLists = new int[4];// Picking, Fill, WireFrame, Highlight
 
-        public List<Vector3> points;
-        public List<Vector3> vectors;
-        public List<ColFace> planes;
+        public List<KCL.ColFace> m_Planes;
 
         CultureInfo usa = new CultureInfo("en-US");
 
@@ -46,7 +44,7 @@ namespace SM64DSe
             InitializeComponent();
             kclFile = kclIn;
             LoadKCL(kclIn);
-            colours = getColours();
+            colours = GetColours();
             cmbPolygonMode.Items.Add("Fill");
             cmbPolygonMode.Items.Add("Wireframe");
             cmbPolygonMode.SelectedIndex = 0;
@@ -55,94 +53,35 @@ namespace SM64DSe
 
         public void LoadKCL(NitroFile kcl)
         {
-            points = new List<Vector3>();
-            vectors = new List<Vector3>();
-            planes = new List<ColFace>();
+            KCL collisionMap = new KCL(kcl);
 
-            uint pointStart = (uint)kcl.Read32(0);//Address of first point
-            uint vectorStart = (uint)kcl.Read32(4);//Address of first normal
-            uint planeStart = (uint)(kcl.Read32(8));//Address of first plane
-            uint gridStart = (uint)kcl.Read32((uint)(0x0C));//Address of grid section
-            int numPoints = (int)(vectorStart - pointStart) / 12;//Size of section / size of point header
-            int numVectors = (int)((planeStart + 0x10 - vectorStart) / 6);
-            int numPlanes = (int)(gridStart - planeStart) / 16;//Size of section / size of plane header
-
-            uint offset = pointStart;
-            for (int i = 0; i < numPoints; i++)
-            {
-                Vector3 curPoint = new Vector3();
-                curPoint.X = (int)kcl.Read32((uint)offset) / 64000.0f;
-                curPoint.Y = (int)kcl.Read32((uint)(offset + 4)) / 64000.0f;
-                curPoint.Z = (int)kcl.Read32((uint)(offset + 8)) / 64000.0f;
-
-                points.Add(curPoint);
-                offset += 12;
-            }
-
-            offset = vectorStart;
-            for (int i = 0; i < numVectors; i++)
-            {
-                Vector3 curVector = new Vector3();
-                curVector.X = (short)kcl.Read16((uint)offset) / 1024.0f;
-                curVector.Y = (short)kcl.Read16((uint)(offset + 2)) / 1024.0f;
-                curVector.Z = (short)kcl.Read16((uint)(offset + 4)) / 1024.0f;
-
-                vectors.Add(curVector);
-                offset += 6;
-            }
-
-            offset = (uint)(planeStart + 0x10);
-            for (int i = 0; i < numPlanes - 1; i++)
-            {
-                //Read length
-                float planeLength = kcl.Read32(offset) / 65536000.0f;
-                //Read ID of Point 1 and get it from list of points
-                ushort p1IX = kcl.Read16((uint)(offset + 4));
-                Vector3 p1 = points[(int)p1IX];
-                //Read ID of Normal Vector and get it from list of vectors
-                ushort normalIX = kcl.Read16((uint)(offset + 6));
-                Vector3 normal = vectors[(int)normalIX];
-                //Read ID of direction vectors and get it from list of vectors
-                ushort d1IX = kcl.Read16((uint)(offset + 8));
-                Vector3 d1 = vectors[(int)d1IX];
-                ushort d2IX = kcl.Read16((uint)(offset + 10));
-                Vector3 d2 = vectors[(int)d2IX];
-                ushort d3IX = kcl.Read16((uint)(offset + 12));
-                //Read collision type
-                Vector3 d3 = vectors[(int)d3IX];
-                int colType = (int)kcl.Read16((uint)(offset + 14));
-
-                ColFace curFace = new ColFace(planeLength, p1, normal, d1, d2, d3, colType);
-                planes.Add(curFace);
-
-                offset += 16;
-            }
+            m_Planes = collisionMap.m_Planes;
 
             lbxPlanes.Items.Clear();
 
-            for (int i = 0; i < planes.Count; i++)
+            for (int i = 0; i < m_Planes.Count; i++)
             {
                 lbxPlanes.Items.Add("Plane " + i.ToString("00000"));
             }
         }
 
-        private void writeChanges()
+        private void WriteChanges()
         {
             uint planeStart = (kclFile.Read32(8));
 
             planeStart += (uint)(0x10);
 
-            for (int i = 0; i < planes.Count; i++)
+            for (int i = 0; i < m_Planes.Count; i++)
             {
                 uint posColType = (uint)(planeStart + (i * 16) + 0x0E);//Get the address of this plane's Collision Type variable
 
-                kclFile.Write16(posColType, (ushort)planes[i].type);//Write the new value to file
+                kclFile.Write16(posColType, (ushort)m_Planes[i].type);//Write the new value to file
             }
 
             kclFile.SaveChanges();
         }
 
-        private List<Color> getColours()
+        private List<Color> GetColours()
         {
             List<Color> theColours = new List<Color>();
 
@@ -229,13 +168,13 @@ namespace SM64DSe
             m_KCLMeshDLists[0] = GL.GenLists(1);
             GL.NewList(m_KCLMeshDLists[0], ListMode.Compile);
             GL.PolygonMode(MaterialFace.FrontAndBack, PolygonMode.Fill);
-            for (int i = 0; i < planes.Count; i++)
+            for (int i = 0; i < m_Planes.Count; i++)
             {
                 GL.Begin(BeginMode.Triangles);
                 GL.Color4(Color.FromArgb(i));
-                GL.Vertex3(planes[i].point1);
-                GL.Vertex3(planes[i].point2);
-                GL.Vertex3(planes[i].point3);
+                GL.Vertex3(m_Planes[i].point1);
+                GL.Vertex3(m_Planes[i].point2);
+                GL.Vertex3(m_Planes[i].point3);
                 GL.End();
             }
             GL.EndList();
@@ -245,15 +184,15 @@ namespace SM64DSe
             GL.PolygonMode(MaterialFace.FrontAndBack, PolygonMode.Fill);
             GL.Enable(EnableCap.PolygonOffsetFill);
             GL.PolygonOffset(1f, 1f);
-            for (int i = 0; i < planes.Count; i++)
+            for (int i = 0; i < m_Planes.Count; i++)
             {
-                Color planeColour = colours[planes[i].type];
+                Color planeColour = colours[m_Planes[i].type];
 
                 GL.Begin(BeginMode.Triangles);
                 GL.Color3(planeColour);
-                GL.Vertex3(planes[i].point1);
-                GL.Vertex3(planes[i].point2);
-                GL.Vertex3(planes[i].point3);
+                GL.Vertex3(m_Planes[i].point1);
+                GL.Vertex3(m_Planes[i].point2);
+                GL.Vertex3(m_Planes[i].point3);
                 GL.End();
             }
             GL.Disable(EnableCap.PolygonOffsetFill);
@@ -262,13 +201,13 @@ namespace SM64DSe
             m_KCLMeshDLists[2] = GL.GenLists(1);
             GL.NewList(m_KCLMeshDLists[2], ListMode.Compile);
             GL.PolygonMode(MaterialFace.FrontAndBack, PolygonMode.Line);
-            for (int i = 0; i < planes.Count; i++)
+            for (int i = 0; i < m_Planes.Count; i++)
             {
                 GL.Begin(BeginMode.LineStrip);
                 GL.Color3(Color.Orange);
-                GL.Vertex3(planes[i].point1);
-                GL.Vertex3(planes[i].point2);
-                GL.Vertex3(planes[i].point3);
+                GL.Vertex3(m_Planes[i].point1);
+                GL.Vertex3(m_Planes[i].point2);
+                GL.Vertex3(m_Planes[i].point3);
                 GL.End();
             }
             GL.EndList();
@@ -283,9 +222,9 @@ namespace SM64DSe
                 GL.PolygonMode(MaterialFace.FrontAndBack, PolygonMode.Fill);
                 GL.Begin(BeginMode.Triangles);
                 GL.Color3(Color.RoyalBlue);
-                GL.Vertex3(planes[idx].point1);
-                GL.Vertex3(planes[idx].point2);
-                GL.Vertex3(planes[idx].point3);
+                GL.Vertex3(m_Planes[idx].point1);
+                GL.Vertex3(m_Planes[idx].point2);
+                GL.Vertex3(m_Planes[idx].point3);
                 GL.End();
             }
             GL.EndList();
@@ -509,10 +448,13 @@ namespace SM64DSe
 
         private void btnSave_Click(object sender, EventArgs e)
         {
-            int lastChange;
-            int.TryParse(txtColType.Text, out lastChange);
-            planes[lbxPlanes.SelectedIndex].type = lastChange;//Make sure to get value of current plane
-            writeChanges();
+            if (lbxPlanes.SelectedIndex > -1)
+            {
+                int lastChange;
+                int.TryParse(txtColType.Text, out lastChange);
+                m_Planes[lbxPlanes.SelectedIndex].type = lastChange;// Make sure to get value of current plane
+            }
+            WriteChanges();
 
             LoadKCL(kclFile);
             glModelView.Refresh();
@@ -524,7 +466,7 @@ namespace SM64DSe
             int.TryParse(txtColType.Text, out newColType);
             foreach (int idx in lbxPlanes.SelectedIndices)
             {
-                planes[idx].type = newColType;
+                m_Planes[idx].type = newColType;
             }
         }
 
@@ -534,14 +476,14 @@ namespace SM64DSe
             {
                 int selPos = lbxPlanes.SelectedIndex;
 
-                txtV1.Text = planes[selPos].point1.ToString();
-                txtV2.Text = planes[selPos].point2.ToString();
-                txtV3.Text = planes[selPos].point3.ToString();
-                txtColType.Text = planes[selPos].type.ToString();
-                txtNormal.Text = planes[selPos].normal.ToString();
-                txtD1.Text = planes[selPos].dir1.ToString();
-                txtD2.Text = planes[selPos].dir2.ToString();
-                txtD3.Text = planes[selPos].dir3.ToString();
+                txtV1.Text = m_Planes[selPos].point1.ToString();
+                txtV2.Text = m_Planes[selPos].point2.ToString();
+                txtV3.Text = m_Planes[selPos].point3.ToString();
+                txtColType.Text = m_Planes[selPos].type.ToString();
+                txtNormal.Text = m_Planes[selPos].normal.ToString();
+                txtD1.Text = m_Planes[selPos].dir1.ToString();
+                txtD2.Text = m_Planes[selPos].dir2.ToString();
+                txtD3.Text = m_Planes[selPos].dir3.ToString();
             }
             RenderHighlight();
             glModelView.Refresh();
@@ -559,7 +501,7 @@ namespace SM64DSe
 
         private void btnExportToOBJ_Click(object sender, EventArgs e)
         {
-            KCL_Exporter.ExportKCLToOBJ(planes, colours);
+            KCL_Exporter.ExportKCLToOBJ(m_Planes, colours);
         }
 
         private void btnOpen_Click(object sender, EventArgs e)
@@ -593,13 +535,13 @@ namespace SM64DSe
                         GetMatNames_OBJ(ofd.FileName);
                         break;
                     case "dae":
-                        getMatNames_DAE(ofd.FileName);
+                        GetMatNames_DAE(ofd.FileName);
                         break;
                     default:
                         GetMatNames_OBJ(ofd.FileName);
                         break;
                 }
-                populateColTypes();
+                PopulateColTypes();
             }
         }
 
@@ -633,7 +575,7 @@ namespace SM64DSe
             sr.Close();
         }
 
-        private void getMatNames_DAE(String name)
+        private void GetMatNames_DAE(String name)
         {
             using (XmlReader reader = XmlReader.Create(name))
             {
@@ -645,7 +587,7 @@ namespace SM64DSe
                     {
                         if (reader.LocalName.Equals("material"))
                         {
-                            string material = reader.GetAttribute("name");
+                            string material = reader.GetAttribute("id");
                             if (!matColTypes.ContainsKey(material))
                                 matColTypes.Add(material, 0);
                         }
@@ -654,7 +596,7 @@ namespace SM64DSe
             }
         }
 
-        private void populateColTypes()
+        private void PopulateColTypes()
         {
             gridColTypes.ColumnCount = 2;
             gridColTypes.Columns[0].HeaderText = "Material";

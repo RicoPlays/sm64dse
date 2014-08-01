@@ -1451,7 +1451,7 @@ namespace SM64DSe.Exporters
                 bones.Add(model.m_ModelChunks[i].m_ID,
                     new BoneForExport(model.m_ModelChunks[i].m_Name, model.m_ModelChunks[i].m_ParentOffset,
                         model.m_ModelChunks[i].m_SiblingOffset, model.m_ModelChunks[i].m_HasChildren,
-                        model.m_ModelChunks[i].m_Scale, model.m_ModelChunks[i].m_Rotation, model.m_ModelChunks[i].m_Translation));
+                        model.m_ModelChunks[i].m_20_12Scale, model.m_ModelChunks[i].m_4_12Rotation, model.m_ModelChunks[i].m_20_12Translation));
             }
 
             // Go through each vertexlist in the BMD file and split it into separate faces, then assign 

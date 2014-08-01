@@ -95,7 +95,20 @@
       <DependentUpon>AnimationEditorForm.cs</DependentUpon>
     </Compile>
     <Compile Include="BiDictionaryOneToOne.cs" />
-    <Compile Include="BMD.cs" />
+    <Compile Include="ImportExport\BMDExporter.cs" />
+    <Compile Include="ImportExport\BMDImporter.cs" />
+    <Compile Include="ImportExport\Loaders\AbstractModelLoader.cs" />
+    <Compile Include="ImportExport\Loaders\ExternalLoaders\DAELoader.cs" />
+    <Compile Include="ImportExport\Loaders\ExternalLoaders\OBJLoader.cs" />
+    <Compile Include="ImportExport\Loaders\InternalLoaders\BMDLoader.cs" />
+    <Compile Include="ImportExport\Loaders\InternalLoaders\KCLLoader.cs" />
+    <Compile Include="ImportExport\ModelBase.cs" />
+    <Compile Include="ImportExport\Writers\AbstractModelWriter.cs" />
+    <Compile Include="ImportExport\Writers\ExternalWriters\DAEWriter.cs" />
+    <Compile Include="ImportExport\Writers\ExternalWriters\OBJWriter.cs" />
+    <Compile Include="ImportExport\Writers\InternalWriters\BMDWriter.cs" />
+    <Compile Include="ImportExport\Writers\InternalWriters\KCLWriter.cs" />
+    <Compile Include="SM64DSFormats\BMD.cs" />
     <Compile Include="CLPS_Form.cs">
       <SubType>Form</SubType>
     </Compile>
@@ -103,7 +116,7 @@
       <DependentUpon>CLPS_Form.cs</DependentUpon>
     </Compile>
     <Compile Include="Compression.cs" />
-    <Compile Include="BCA.cs" />
+    <Compile Include="SM64DSFormats\BCA.cs" />
     <Compile Include="Exporters\BMD_Exporter.cs" />
     <Compile Include="Exporters\KCL_Exporter.cs" />
     <Compile Include="Exporters\LevelDataXML_Exporter.cs" />
@@ -112,7 +125,8 @@
     <Compile Include="Importers\BMD_BCA_Importer_DAE.cs" />
     <Compile Include="Importers\BMD_Importer_OBJ.cs" />
     <Compile Include="Importers\LevelDataXML_Importer.cs" />
-    <Compile Include="KCL.cs" />
+    <Compile Include="SM64DSFormats\BTP.cs" />
+    <Compile Include="SM64DSFormats\KCL.cs" />
     <Compile Include="KCLEditorForm.cs">
       <SubType>Form</SubType>
     </Compile>
@@ -190,6 +204,12 @@
     <Compile Include="ROMFileSelect.Designer.cs">
       <DependentUpon>ROMFileSelect.cs</DependentUpon>
     </Compile>
+    <Compile Include="SDATInfoEditor.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="SDATInfoEditor.Designer.cs">
+      <DependentUpon>SDATInfoEditor.cs</DependentUpon>
+    </Compile>
     <Compile Include="TextureEditorForm.cs">
       <SubType>Form</SubType>
     </Compile>
@@ -248,6 +268,9 @@
     </EmbeddedResource>
     <EmbeddedResource Include="ROMFileSelect.resx">
       <DependentUpon>ROMFileSelect.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="SDATInfoEditor.resx">
+      <DependentUpon>SDATInfoEditor.cs</DependentUpon>
     </EmbeddedResource>
     <EmbeddedResource Include="SettingsForm.resx">
       <DependentUpon>SettingsForm.cs</DependentUpon>

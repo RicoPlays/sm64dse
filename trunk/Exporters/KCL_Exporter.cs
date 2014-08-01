@@ -12,7 +12,7 @@ namespace SM64DSe.Exporters
 {
     public static class KCL_Exporter
     {
-        public static void ExportKCLToOBJ(List<ColFace> planes, List<Color> colours)
+        public static void ExportKCLToOBJ(List<KCL.ColFace> planes, List<Color> colours)
         {
             string output = "";
             string mtllib = "";

@@ -96,6 +96,15 @@ namespace SM64DSe
 		        throw new Exception("Unknown ROM version. Tell Mega-Mario about it.");
 	        }
 
+            m_FileStream.Position = 0x28;
+            ARM9RAMAddress = m_BinReader.ReadUInt32();
+
+            m_FileStream.Position = 0x30;
+            ARM7Offset = m_BinReader.ReadUInt32();
+            m_FileStream.Position += 0x04;
+            ARM7RAMAddress = m_BinReader.ReadUInt32();
+            ARM7Size = m_BinReader.ReadUInt32();
+
 	        m_FileStream.Position = 0x40;
 	        FNTOffset = m_BinReader.ReadUInt32();
 	        FNTSize = m_BinReader.ReadUInt32();
@@ -370,6 +379,7 @@ namespace SM64DSe
         public void AutoFix(ushort fileid, uint fixstart, int delta)
         {
         	// fix the internal variables
+            if (ARM7Offset >= fixstart) ARM7Offset += (uint)delta;
             if (FNTOffset >= fixstart) FNTOffset += (uint)delta;
             if (FATOffset >= fixstart) FATOffset += (uint)delta;
             if (m_UsedSize >= fixstart) m_UsedSize += (uint)delta;
@@ -393,13 +403,13 @@ namespace SM64DSe
             }
 
             // fix the actual ROM
-            FixPtrAt(0x20, fixstart, delta);
-            FixPtrAt(0x30, fixstart, delta);
-            FixPtrAt(0x40, fixstart, delta);
-            FixPtrAt(0x48, fixstart, delta);
-            FixPtrAt(0x50, fixstart, delta);
-            FixPtrAt(0x58, fixstart, delta);
-            FixPtrAt(0x68, fixstart, delta);
+            FixPtrAt(0x20, fixstart, delta); // ARM9 bin offset
+            FixPtrAt(0x30, fixstart, delta); // ARM7 bin offset
+            FixPtrAt(0x40, fixstart, delta); // Filename table offset
+            FixPtrAt(0x48, fixstart, delta); // FAT offset
+            FixPtrAt(0x50, fixstart, delta); // ARM9 overlay offset
+            FixPtrAt(0x58, fixstart, delta); // ARM7 overlay offset
+            FixPtrAt(0x68, fixstart, delta); // Icon/Internal title offset
             //FixPtrAt(0x70, fixstart, delta);
             //FixPtrAt(0x74, fixstart, delta);
             //FixPtrAt(0x80, fixstart, delta);
@@ -577,6 +587,10 @@ namespace SM64DSe
         private uint[] m_LevelOvlIDTable;
 
         private uint m_UsedSize;
+
+        private uint ARM9RAMAddress;
+
+        private uint ARM7Offset, ARM7RAMAddress, ARM7Size;
 
         private uint FNTOffset, FNTSize;
         private uint FATOffset, FATSize;

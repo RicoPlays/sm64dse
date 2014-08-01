@@ -28,7 +28,8 @@ namespace SM64DSe
 {
     public static class KCL_Importer
     {
-        public static void ConvertToKCL(string infile, ref NitroFile kclOut, float scale, float faceSizeThreshold, Dictionary<string, int> matColTypes)
+        public static void ConvertToKCL(string infile, ref NitroFile kclOut, float scale, float faceSizeThreshold,
+            Dictionary<string, int> matColTypes)
         {
             //faceSizeThreshold is used for getting rid of very small faces below a given size, originally 0.001
             string modelFormat = infile.Substring(infile.Length - 3, 3).ToLower();
@@ -138,6 +139,7 @@ namespace SM64DSe
         static List<string> group_names;
         static string group_name;
         static Dictionary<string, string> geometryPositionsListNames;
+        static Dictionary<string, Dictionary<string, string>> materialSymbolTargetMap;
         static int currentVertexCount = 0;
         static string currentBone;
         static int vertexIndex = -1;
@@ -153,6 +155,8 @@ namespace SM64DSe
 
             // Get the name of the vertices list first - needed to distinguish between positions and normals
             geometryPositionsListNames = ReadDAEGeometryPositionsListNames(filename);
+
+            materialSymbolTargetMap = ReadDAEInstanceMaterialMapping(filename);
 
             using (XmlReader reader = XmlReader.Create(filename))
             {
@@ -191,7 +195,7 @@ namespace SM64DSe
                 while (reader.Read())
                 {
                     reader.ReadToFollowing("geometry");
-                    string currentGeometry = reader.GetAttribute("name");
+                    string currentGeometry = reader.GetAttribute("id");
 
                     if (!reader.NodeType.Equals(XmlNodeType.Element))
                         continue;
@@ -214,7 +218,7 @@ namespace SM64DSe
 
         private static void ReadDAE_Geometry(XmlReader reader, float faceSizeThreshold, Dictionary<string, int> matColTypes)
         {
-            currentBone = reader.GetAttribute("name");
+            currentBone = reader.GetAttribute("id");
             vertexIndex = -1;
             normalIndex = -1;
             texCoordIndex = -1;
@@ -251,23 +255,10 @@ namespace SM64DSe
             return;
         }
 
-        private static void ReadDAE_PolyList(XmlReader reader, float faceSizeThreshold, 
+        private static void ReadDAE_PolyList(XmlReader reader, float faceSizeThreshold,
             Dictionary<string, int> matColTypes, bool isPolygons = false)
         {
-            group_name = reader.GetAttribute("material");
-            int matNameLength = group_name.Length;
-            // DAE models exported with Blender add a number starting at 1 for each geometry node 
-            // to the end of the value given for material
-            if (!matColTypes.ContainsKey(group_name))
-            {
-                for (int i = 0; i < matNameLength; i++)
-                {
-                    group_name = group_name.Substring(0, group_name.Length - 1);
-
-                    if (matColTypes.ContainsKey(group_name))
-                        break;
-                }
-            }
+            group_name = materialSymbolTargetMap[currentBone][reader.GetAttribute("material")];
             if (!group_names.Contains(group_name))
             {
                 group_names.Add(group_name);
@@ -307,6 +298,7 @@ namespace SM64DSe
 
         private static void ReadDAE_Source(XmlReader reader)
         {
+            string id = reader.GetAttribute("id");
             reader.MoveToContent();
             while (reader.Read())
             {
@@ -314,7 +306,7 @@ namespace SM64DSe
                 {
                     if (reader.LocalName.Equals("float_array"))
                     {
-                        ReadDAE_FloatArray(reader);
+                        ReadDAE_FloatArray(reader, id);
                     }
                 }
                 else if (reader.NodeType.Equals(XmlNodeType.EndElement) && reader.LocalName.Equals("source"))
@@ -325,7 +317,7 @@ namespace SM64DSe
             return;
         }
 
-        private static void ReadDAE_FloatArray(XmlReader reader)
+        private static void ReadDAE_FloatArray(XmlReader reader, string sourceID)
         {
             string id = reader.GetAttribute("id");
             string values = reader.ReadElementContentAsString();
@@ -339,7 +331,7 @@ namespace SM64DSe
             reader.ReadToFollowing("param");
             string param0 = reader.GetAttribute("name");
 
-            if (id.Contains(geometryPositionsListNames[currentBone]))
+            if (sourceID.Contains(geometryPositionsListNames[currentBone]))
             {
                 for (int i = 0; i < float_values.Length; i += 3)
                 {
@@ -385,7 +377,7 @@ namespace SM64DSe
             return vcount;
         }
 
-        private static void ReadDAE_P(XmlReader reader, int[] vcount, int numFaces, float faceSizeThreshold, 
+        private static void ReadDAE_P(XmlReader reader, int[] vcount, int numFaces, float faceSizeThreshold,
             Dictionary<string, int> matColTypes, bool isPolygons = false)
         {
             String values = reader.ReadElementContentAsString();
@@ -432,6 +424,51 @@ namespace SM64DSe
 
                 vcountInd++;
             }
+        }
+
+        private static Dictionary<string, Dictionary<string, string>> ReadDAEInstanceMaterialMapping(string filename)
+        {
+            Dictionary<string, Dictionary<string, string>> symbolTargetMap = new Dictionary<string, Dictionary<string, string>>();
+            Dictionary<string, string> controllerToGeometryNameMap = new Dictionary<string, string>();
+
+            using (XmlReader reader = XmlReader.Create(filename))
+            {
+                controllerToGeometryNameMap = Importers.BMD_BCA_Importer_DAE.ReadDAECreateControllerIDToGeometryIDMap(reader);
+                reader.Close();
+            }
+            using (XmlReader reader = XmlReader.Create(filename))
+            {
+                reader.MoveToContent();
+
+                string current = "";
+                while (reader.Read())
+                {
+                    if (reader.NodeType.Equals(XmlNodeType.Element))
+                    {
+                        if (reader.LocalName.Equals("instance_geometry"))
+                        {
+                            current = reader.GetAttribute("url").Substring(1);
+                            if (!symbolTargetMap.ContainsKey(current))
+                                symbolTargetMap.Add(current, new Dictionary<string, string>());
+                        }
+                        else if (reader.LocalName.Equals("instance_controller"))
+                        {
+                            current = controllerToGeometryNameMap[reader.GetAttribute("url").Substring(1)];
+                            if (!symbolTargetMap.ContainsKey(current))
+                                symbolTargetMap.Add(current, new Dictionary<string, string>());
+                        }
+                        else if (reader.LocalName.Equals("instance_material"))
+                        {
+                            string symbol = reader.GetAttribute("symbol");
+                            string target = reader.GetAttribute("target").Substring(1);
+                            if (!symbolTargetMap[current].ContainsKey(symbol))
+                                symbolTargetMap[current].Add(symbol, target);
+                        }
+                    }
+                }
+            }
+
+            return symbolTargetMap;
         }
 
         private static void write_kcl(NitroFile kcl, List<Triangle> triangles, int max_triangles, int min_width, float scale)

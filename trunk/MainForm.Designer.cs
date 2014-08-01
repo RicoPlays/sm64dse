@@ -46,14 +46,38 @@
             this.mnitDumpAllOvls = new System.Windows.Forms.ToolStripMenuItem();
             this.mnitDecompressOverlaysWithinGame = new System.Windows.Forms.ToolStripMenuItem();
             this.mnitHexDumpToBinaryFile = new System.Windows.Forms.ToolStripMenuItem();
+            this.mnitEditSDATINFOBlockToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.lbxLevels = new System.Windows.Forms.ListBox();
             this.ofdOpenFile = new System.Windows.Forms.OpenFileDialog();
             this.sfdSaveFile = new System.Windows.Forms.SaveFileDialog();
             this.ssStatusBar = new System.Windows.Forms.StatusStrip();
             this.slStatusLabel = new System.Windows.Forms.ToolStripStatusLabel();
             this.spbStatusProgress = new System.Windows.Forms.ToolStripProgressBar();
+            this.tbcMainFormTabControl = new System.Windows.Forms.TabControl();
+            this.tbpLevels = new System.Windows.Forms.TabPage();
+            this.tbpFileSystem = new System.Windows.Forms.TabPage();
+            this.spcFileSystemTab = new System.Windows.Forms.SplitContainer();
+            this.tvFileList = new System.Windows.Forms.TreeView();
+            this.pnlFileOptions = new System.Windows.Forms.Panel();
+            this.btnDecompressOverlay = new System.Windows.Forms.Button();
+            this.button3 = new System.Windows.Forms.Button();
+            this.button4 = new System.Windows.Forms.Button();
+            this.button1 = new System.Windows.Forms.Button();
+            this.button2 = new System.Windows.Forms.Button();
+            this.btnReplaceImport = new System.Windows.Forms.Button();
+            this.btnReplaceRaw = new System.Windows.Forms.Button();
+            this.btnExtractExport = new System.Windows.Forms.Button();
+            this.btnExtractRaw = new System.Windows.Forms.Button();
             this.tsToolBar.SuspendLayout();
             this.ssStatusBar.SuspendLayout();
+            this.tbcMainFormTabControl.SuspendLayout();
+            this.tbpLevels.SuspendLayout();
+            this.tbpFileSystem.SuspendLayout();
+            ((System.ComponentModel.ISupportInitialize)(this.spcFileSystemTab)).BeginInit();
+            this.spcFileSystemTab.Panel1.SuspendLayout();
+            this.spcFileSystemTab.Panel2.SuspendLayout();
+            this.spcFileSystemTab.SuspendLayout();
+            this.pnlFileOptions.SuspendLayout();
             this.SuspendLayout();
             // 
             // tsToolBar
@@ -189,7 +213,8 @@
             this.mnitAdditionalPatches,
             this.mnitDumpAllOvls,
             this.mnitDecompressOverlaysWithinGame,
-            this.mnitHexDumpToBinaryFile});
+            this.mnitHexDumpToBinaryFile,
+            this.mnitEditSDATINFOBlockToolStripMenuItem});
             this.btnMore.Enabled = false;
             this.btnMore.Image = ((System.Drawing.Image)(resources.GetObject("btnMore.Image")));
             this.btnMore.ImageTransparentColor = System.Drawing.Color.Magenta;
@@ -226,17 +251,24 @@
             this.mnitHexDumpToBinaryFile.Text = "Hex Dump to Binary File";
             this.mnitHexDumpToBinaryFile.Click += new System.EventHandler(this.mnitHexDumpToBinaryFile_Click);
             // 
+            // mnitEditSDATINFOBlockToolStripMenuItem
+            // 
+            this.mnitEditSDATINFOBlockToolStripMenuItem.Enabled = false;
+            this.mnitEditSDATINFOBlockToolStripMenuItem.Name = "mnitEditSDATINFOBlockToolStripMenuItem";
+            this.mnitEditSDATINFOBlockToolStripMenuItem.Size = new System.Drawing.Size(259, 22);
+            this.mnitEditSDATINFOBlockToolStripMenuItem.Text = "Edit SDAT INFO Block";
+            this.mnitEditSDATINFOBlockToolStripMenuItem.Visible = false;
+            this.mnitEditSDATINFOBlockToolStripMenuItem.Click += new System.EventHandler(this.mnitEditSDATINFOBlockToolStripMenuItem_Click);
+            // 
             // lbxLevels
             // 
-            this.lbxLevels.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom)
-                        | System.Windows.Forms.AnchorStyles.Left)
-                        | System.Windows.Forms.AnchorStyles.Right)));
+            this.lbxLevels.Dock = System.Windows.Forms.DockStyle.Fill;
             this.lbxLevels.FormattingEnabled = true;
             this.lbxLevels.IntegralHeight = false;
-            this.lbxLevels.Location = new System.Drawing.Point(0, 25);
+            this.lbxLevels.Location = new System.Drawing.Point(3, 3);
             this.lbxLevels.Margin = new System.Windows.Forms.Padding(0);
             this.lbxLevels.Name = "lbxLevels";
-            this.lbxLevels.Size = new System.Drawing.Size(508, 388);
+            this.lbxLevels.Size = new System.Drawing.Size(494, 356);
             this.lbxLevels.TabIndex = 1;
             this.lbxLevels.SelectedIndexChanged += new System.EventHandler(this.lbxLevels_SelectedIndexChanged);
             this.lbxLevels.DoubleClick += new System.EventHandler(this.lbxLevels_DoubleClick);
@@ -278,13 +310,177 @@
             this.spbStatusProgress.Style = System.Windows.Forms.ProgressBarStyle.Continuous;
             this.spbStatusProgress.Visible = false;
             // 
+            // tbcMainFormTabControl
+            // 
+            this.tbcMainFormTabControl.Controls.Add(this.tbpLevels);
+            this.tbcMainFormTabControl.Controls.Add(this.tbpFileSystem);
+            this.tbcMainFormTabControl.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.tbcMainFormTabControl.Location = new System.Drawing.Point(0, 25);
+            this.tbcMainFormTabControl.Name = "tbcMainFormTabControl";
+            this.tbcMainFormTabControl.SelectedIndex = 0;
+            this.tbcMainFormTabControl.Size = new System.Drawing.Size(508, 388);
+            this.tbcMainFormTabControl.TabIndex = 3;
+            // 
+            // tbpLevels
+            // 
+            this.tbpLevels.Controls.Add(this.lbxLevels);
+            this.tbpLevels.Location = new System.Drawing.Point(4, 22);
+            this.tbpLevels.Name = "tbpLevels";
+            this.tbpLevels.Padding = new System.Windows.Forms.Padding(3);
+            this.tbpLevels.Size = new System.Drawing.Size(500, 362);
+            this.tbpLevels.TabIndex = 0;
+            this.tbpLevels.Text = "Levels";
+            this.tbpLevels.UseVisualStyleBackColor = true;
+            // 
+            // tbpFileSystem
+            // 
+            this.tbpFileSystem.Controls.Add(this.spcFileSystemTab);
+            this.tbpFileSystem.Location = new System.Drawing.Point(4, 22);
+            this.tbpFileSystem.Name = "tbpFileSystem";
+            this.tbpFileSystem.Padding = new System.Windows.Forms.Padding(3);
+            this.tbpFileSystem.Size = new System.Drawing.Size(500, 362);
+            this.tbpFileSystem.TabIndex = 1;
+            this.tbpFileSystem.Text = "SM64DS File System";
+            this.tbpFileSystem.UseVisualStyleBackColor = true;
+            // 
+            // spcFileSystemTab
+            // 
+            this.spcFileSystemTab.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.spcFileSystemTab.FixedPanel = System.Windows.Forms.FixedPanel.Panel2;
+            this.spcFileSystemTab.IsSplitterFixed = true;
+            this.spcFileSystemTab.Location = new System.Drawing.Point(3, 3);
+            this.spcFileSystemTab.Name = "spcFileSystemTab";
+            this.spcFileSystemTab.Orientation = System.Windows.Forms.Orientation.Horizontal;
+            // 
+            // spcFileSystemTab.Panel1
+            // 
+            this.spcFileSystemTab.Panel1.Controls.Add(this.tvFileList);
+            // 
+            // spcFileSystemTab.Panel2
+            // 
+            this.spcFileSystemTab.Panel2.Controls.Add(this.pnlFileOptions);
+            this.spcFileSystemTab.Size = new System.Drawing.Size(494, 356);
+            this.spcFileSystemTab.SplitterDistance = 275;
+            this.spcFileSystemTab.TabIndex = 2;
+            // 
+            // tvFileList
+            // 
+            this.tvFileList.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.tvFileList.Location = new System.Drawing.Point(0, 0);
+            this.tvFileList.Name = "tvFileList";
+            this.tvFileList.Size = new System.Drawing.Size(494, 275);
+            this.tvFileList.TabIndex = 0;
+            this.tvFileList.AfterSelect += new System.Windows.Forms.TreeViewEventHandler(this.tvFileList_AfterSelect);
+            // 
+            // pnlFileOptions
+            // 
+            this.pnlFileOptions.Controls.Add(this.btnDecompressOverlay);
+            this.pnlFileOptions.Controls.Add(this.button3);
+            this.pnlFileOptions.Controls.Add(this.button4);
+            this.pnlFileOptions.Controls.Add(this.button1);
+            this.pnlFileOptions.Controls.Add(this.button2);
+            this.pnlFileOptions.Controls.Add(this.btnReplaceImport);
+            this.pnlFileOptions.Controls.Add(this.btnReplaceRaw);
+            this.pnlFileOptions.Controls.Add(this.btnExtractExport);
+            this.pnlFileOptions.Controls.Add(this.btnExtractRaw);
+            this.pnlFileOptions.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.pnlFileOptions.Location = new System.Drawing.Point(0, 0);
+            this.pnlFileOptions.Name = "pnlFileOptions";
+            this.pnlFileOptions.Size = new System.Drawing.Size(494, 77);
+            this.pnlFileOptions.TabIndex = 1;
+            // 
+            // btnDecompressOverlay
+            // 
+            this.btnDecompressOverlay.Location = new System.Drawing.Point(217, 51);
+            this.btnDecompressOverlay.Name = "btnDecompressOverlay";
+            this.btnDecompressOverlay.Size = new System.Drawing.Size(137, 23);
+            this.btnDecompressOverlay.TabIndex = 8;
+            this.btnDecompressOverlay.Text = "Decompress Overlay";
+            this.btnDecompressOverlay.UseVisualStyleBackColor = true;
+            // 
+            // button3
+            // 
+            this.button3.Location = new System.Drawing.Point(357, 26);
+            this.button3.Name = "button3";
+            this.button3.Size = new System.Drawing.Size(134, 23);
+            this.button3.TabIndex = 7;
+            this.button3.Text = "LZ Compress (Header)";
+            this.button3.UseVisualStyleBackColor = true;
+            // 
+            // button4
+            // 
+            this.button4.Location = new System.Drawing.Point(357, 2);
+            this.button4.Name = "button4";
+            this.button4.Size = new System.Drawing.Size(134, 23);
+            this.button4.TabIndex = 6;
+            this.button4.Text = "LZ Compress";
+            this.button4.UseVisualStyleBackColor = true;
+            // 
+            // button1
+            // 
+            this.button1.Location = new System.Drawing.Point(217, 26);
+            this.button1.Name = "button1";
+            this.button1.Size = new System.Drawing.Size(137, 23);
+            this.button1.TabIndex = 5;
+            this.button1.Text = "LZ Decompress (Header)";
+            this.button1.UseVisualStyleBackColor = true;
+            // 
+            // button2
+            // 
+            this.button2.Location = new System.Drawing.Point(217, 2);
+            this.button2.Name = "button2";
+            this.button2.Size = new System.Drawing.Size(137, 23);
+            this.button2.TabIndex = 4;
+            this.button2.Text = "LZ Decompress";
+            this.button2.UseVisualStyleBackColor = true;
+            // 
+            // btnReplaceImport
+            // 
+            this.btnReplaceImport.Enabled = false;
+            this.btnReplaceImport.Location = new System.Drawing.Point(110, 26);
+            this.btnReplaceImport.Name = "btnReplaceImport";
+            this.btnReplaceImport.Size = new System.Drawing.Size(101, 23);
+            this.btnReplaceImport.TabIndex = 3;
+            this.btnReplaceImport.Text = "Replace (Import)";
+            this.btnReplaceImport.UseVisualStyleBackColor = true;
+            // 
+            // btnReplaceRaw
+            // 
+            this.btnReplaceRaw.Location = new System.Drawing.Point(110, 2);
+            this.btnReplaceRaw.Name = "btnReplaceRaw";
+            this.btnReplaceRaw.Size = new System.Drawing.Size(101, 23);
+            this.btnReplaceRaw.TabIndex = 2;
+            this.btnReplaceRaw.Text = "Replace (Raw)";
+            this.btnReplaceRaw.UseVisualStyleBackColor = true;
+            this.btnReplaceRaw.Click += new System.EventHandler(this.btnReplaceRaw_Click);
+            // 
+            // btnExtractExport
+            // 
+            this.btnExtractExport.Enabled = false;
+            this.btnExtractExport.Location = new System.Drawing.Point(3, 26);
+            this.btnExtractExport.Name = "btnExtractExport";
+            this.btnExtractExport.Size = new System.Drawing.Size(101, 23);
+            this.btnExtractExport.TabIndex = 1;
+            this.btnExtractExport.Text = "Extract (Export)";
+            this.btnExtractExport.UseVisualStyleBackColor = true;
+            // 
+            // btnExtractRaw
+            // 
+            this.btnExtractRaw.Location = new System.Drawing.Point(3, 2);
+            this.btnExtractRaw.Name = "btnExtractRaw";
+            this.btnExtractRaw.Size = new System.Drawing.Size(101, 23);
+            this.btnExtractRaw.TabIndex = 0;
+            this.btnExtractRaw.Text = "Extract (Raw)";
+            this.btnExtractRaw.UseVisualStyleBackColor = true;
+            this.btnExtractRaw.Click += new System.EventHandler(this.btnExtractRaw_Click);
+            // 
             // MainForm
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.ClientSize = new System.Drawing.Size(508, 435);
+            this.Controls.Add(this.tbcMainFormTabControl);
             this.Controls.Add(this.ssStatusBar);
-            this.Controls.Add(this.lbxLevels);
             this.Controls.Add(this.tsToolBar);
             this.Icon = ((System.Drawing.Icon)(resources.GetObject("$this.Icon")));
             this.Name = "MainForm";
@@ -294,6 +490,14 @@
             this.tsToolBar.PerformLayout();
             this.ssStatusBar.ResumeLayout(false);
             this.ssStatusBar.PerformLayout();
+            this.tbcMainFormTabControl.ResumeLayout(false);
+            this.tbpLevels.ResumeLayout(false);
+            this.tbpFileSystem.ResumeLayout(false);
+            this.spcFileSystemTab.Panel1.ResumeLayout(false);
+            this.spcFileSystemTab.Panel2.ResumeLayout(false);
+            ((System.ComponentModel.ISupportInitialize)(this.spcFileSystemTab)).EndInit();
+            this.spcFileSystemTab.ResumeLayout(false);
+            this.pnlFileOptions.ResumeLayout(false);
             this.ResumeLayout(false);
             this.PerformLayout();
 
@@ -324,6 +528,22 @@
         private System.Windows.Forms.ToolStripMenuItem mnitDecompressOverlaysWithinGame;
         private System.Windows.Forms.ToolStripMenuItem mnitHexDumpToBinaryFile;
         private System.Windows.Forms.ToolStripMenuItem mnitAdditionalPatches;
+        private System.Windows.Forms.TabControl tbcMainFormTabControl;
+        private System.Windows.Forms.TabPage tbpLevels;
+        private System.Windows.Forms.TabPage tbpFileSystem;
+        private System.Windows.Forms.Panel pnlFileOptions;
+        private System.Windows.Forms.TreeView tvFileList;
+        private System.Windows.Forms.Button btnReplaceImport;
+        private System.Windows.Forms.Button btnReplaceRaw;
+        private System.Windows.Forms.Button btnExtractExport;
+        private System.Windows.Forms.Button btnExtractRaw;
+        private System.Windows.Forms.Button button3;
+        private System.Windows.Forms.Button button4;
+        private System.Windows.Forms.Button button1;
+        private System.Windows.Forms.Button button2;
+        private System.Windows.Forms.SplitContainer spcFileSystemTab;
+        private System.Windows.Forms.Button btnDecompressOverlay;
+        private System.Windows.Forms.ToolStripMenuItem mnitEditSDATINFOBlockToolStripMenuItem;
     }
 }
 

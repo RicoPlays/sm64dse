@@ -110,7 +110,6 @@ namespace SM64DSe.Importers
                         switch (reader.LocalName)
                         {
                             case "material":
-                                //material = reader.GetAttribute("name");
                                 material = reader.GetAttribute("id");
                                 break;
                             case "instance_effect":
@@ -126,6 +125,9 @@ namespace SM64DSe.Importers
             {
                 reader.MoveToContent();
                 reader.ReadToFollowing("library_effects");
+
+                Dictionary<string, string> surfaces = new Dictionary<string, string>();
+                Dictionary<string, string> samplers = new Dictionary<string, string>();
 
                 while (reader.Read())
                 {
@@ -150,11 +152,49 @@ namespace SM64DSe.Importers
                                     mat.m_DiffuseMapID = 0;
                                     mat.m_DiffuseMapSize = new Vector2(0f, 0f);
                                     mat.m_ColType = 0;
-                                    try
-                                    {
+                                    if (!m_Materials.ContainsKey(curmaterial))
                                         m_Materials.Add(curmaterial, mat);
+                                }
+                                break;
+                            case "newparam":
+                                {
+                                    string id = ((id = reader.GetAttribute("sid")) != null) ? id : reader.GetAttribute("id");
+                                    while (reader.Read())
+                                    {
+                                        reader.MoveToContent();
+                                        if (reader.LocalName.Equals("surface") && reader.NodeType.Equals(XmlNodeType.Element))
+                                        {
+                                            while (reader.Read())
+                                            {
+                                                reader.MoveToContent();
+                                                if (reader.LocalName.Equals("init_from") && reader.NodeType.Equals(XmlNodeType.Element))
+                                                {
+                                                    string value = reader.ReadString();
+                                                    if (!surfaces.ContainsKey(id))
+                                                        surfaces.Add(id, value);
+                                                }
+                                                else
+                                                    break;
+                                            }
+                                        }
+                                        else if (reader.LocalName.Equals("sampler2D") && reader.NodeType.Equals(XmlNodeType.Element))
+                                        {
+                                            while (reader.Read())
+                                            {
+                                                reader.MoveToContent();
+                                                if (reader.LocalName.Equals("source") && reader.NodeType.Equals(XmlNodeType.Element))
+                                                {
+                                                    string value = reader.ReadString();
+                                                    if (!samplers.ContainsKey(id))
+                                                        samplers.Add(id, value);
+                                                }
+                                                else
+                                                    break;
+                                            }
+                                        }
+                                        else
+                                            break;
                                     }
-                                    catch { /*Duplicate material*/ }
                                 }
                                 break;
                             case "diffuse":
@@ -176,7 +216,10 @@ namespace SM64DSe.Importers
                                     }
                                     else if (reader.LocalName.Equals("texture"))
                                     {
-                                        string texname = textureNames[Regex.Replace(reader.GetAttribute("texture"), @"-sampler$", String.Empty)];
+                                        string textureAttr = reader.GetAttribute("texture");
+                                        string texname = (textureNames.ContainsKey(Regex.Replace(textureAttr, @"-sampler$", String.Empty))) ? 
+                                            textureNames[Regex.Replace(reader.GetAttribute("texture"), @"-sampler$", String.Empty)] :
+                                            textureNames[surfaces[samplers[textureAttr]]];
                                         Bitmap tex;
                                         try
                                         {
@@ -303,7 +346,6 @@ namespace SM64DSe.Importers
             m_Materials = new Dictionary<string, MaterialDef>();
             m_Textures = new Dictionary<string, MaterialDef>();
             m_Bones = new Dictionary<string, BoneForImport>();
-            m_SketchupHack = false;
 
             m_ModelFileName = modelFileName;
             m_ModelPath = Path.GetDirectoryName(m_ModelFileName);
@@ -975,7 +1017,7 @@ namespace SM64DSe.Importers
             return m_DAEGeometryToRootBoneMap.Count > 0;
         }
 
-        protected Dictionary<string, string> ReadDAECreateControllerIDToGeometryIDMap(XmlReader reader)
+        public static Dictionary<string, string> ReadDAECreateControllerIDToGeometryIDMap(XmlReader reader)
         {
             Dictionary<string, string> controllerToGeometryNameMap = new Dictionary<string, string>();
 
@@ -1776,6 +1818,7 @@ namespace SM64DSe.Importers
 
         protected void ReadDAE_Geometry_Source(XmlReader reader)
         {
+            string id = reader.GetAttribute("id");
             reader.MoveToContent();
             while (reader.Read())
             {
@@ -1783,7 +1826,7 @@ namespace SM64DSe.Importers
                 {
                     if (reader.LocalName.Equals("float_array"))
                     {
-                        ReadDAE_Geometry_FloatArray(reader);
+                        ReadDAE_Geometry_FloatArray(reader, id);
                     }
                 }
                 else if (reader.NodeType.Equals(XmlNodeType.EndElement) && reader.LocalName.Equals("source"))
@@ -1794,7 +1837,7 @@ namespace SM64DSe.Importers
             return;
         }
 
-        protected void ReadDAE_Geometry_FloatArray(XmlReader reader)
+        protected void ReadDAE_Geometry_FloatArray(XmlReader reader, string sourceID)
         {
             string id = reader.GetAttribute("id");
             string values = reader.ReadElementContentAsString();
@@ -1833,7 +1876,7 @@ namespace SM64DSe.Importers
             else
             {
                 // Positions
-                if (id.Contains(m_DAEGeometryPositionsListNames[m_DAEGeometryToRootBoneMap.GetBySecond(currentBone)]))
+                if (sourceID.Contains(m_DAEGeometryPositionsListNames[m_DAEGeometryToRootBoneMap.GetBySecond(currentBone)]))
                     currentVertices.AddRange(float_values);
                 // Normals
                 else
@@ -1879,7 +1922,7 @@ namespace SM64DSe.Importers
 
         protected void ReadDAE_Geometry_P(XmlReader reader, int[] vcount, int numFaces, bool isPolygons = false)
         {
-            String values = reader.ReadElementContentAsString();
+            String values = reader.ReadElementContentAsString().Trim();
             String[] split = values.Split(new string[] { " ", "\n", "\r\n" }, StringSplitOptions.RemoveEmptyEntries);
 
             int vtxInd = 0;
@@ -2269,7 +2312,7 @@ namespace SM64DSe.Importers
             public Dictionary<string, AnimationSamplerChannelPairForImport> m_SamplerChannelPairs =
                 new Dictionary<string, AnimationSamplerChannelPairForImport>();
             public List<AnimationFrameForImport> m_Frames = new List<AnimationFrameForImport>();
-            public bool m_IsTotal;
+            public bool m_IsTotal;// Whether this bone contains the merged animations for the bone
 
             public AnimationForImport(string id)
             {
