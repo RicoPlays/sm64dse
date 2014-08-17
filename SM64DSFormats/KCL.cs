@@ -217,7 +217,7 @@ namespace SM64DSe
             }
         }
 
-        private NitroFile m_File;
+        public NitroFile m_File;
         public List<ColFace> m_Planes;
 
         uint m_PointsSectionOffset;

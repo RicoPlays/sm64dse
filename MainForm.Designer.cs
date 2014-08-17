@@ -60,10 +60,10 @@
             this.tvFileList = new System.Windows.Forms.TreeView();
             this.pnlFileOptions = new System.Windows.Forms.Panel();
             this.btnDecompressOverlay = new System.Windows.Forms.Button();
-            this.button3 = new System.Windows.Forms.Button();
-            this.button4 = new System.Windows.Forms.Button();
-            this.button1 = new System.Windows.Forms.Button();
-            this.button2 = new System.Windows.Forms.Button();
+            this.btnLZForceCompression = new System.Windows.Forms.Button();
+            this.btnLZCompressWithHeader = new System.Windows.Forms.Button();
+            this.btnLZForceDecompression = new System.Windows.Forms.Button();
+            this.btnLZDecompressWithHeader = new System.Windows.Forms.Button();
             this.btnReplaceImport = new System.Windows.Forms.Button();
             this.btnReplaceRaw = new System.Windows.Forms.Button();
             this.btnExtractExport = new System.Windows.Forms.Button();
@@ -219,7 +219,7 @@
             this.btnMore.Image = ((System.Drawing.Image)(resources.GetObject("btnMore.Image")));
             this.btnMore.ImageTransparentColor = System.Drawing.Color.Magenta;
             this.btnMore.Name = "btnMore";
-            this.btnMore.Size = new System.Drawing.Size(48, 19);
+            this.btnMore.Size = new System.Drawing.Size(48, 22);
             this.btnMore.Text = "More";
             this.btnMore.ToolTipText = "Debug crap. Don\'t touch unless you know what you\'re doing.";
             // 
@@ -375,10 +375,10 @@
             // pnlFileOptions
             // 
             this.pnlFileOptions.Controls.Add(this.btnDecompressOverlay);
-            this.pnlFileOptions.Controls.Add(this.button3);
-            this.pnlFileOptions.Controls.Add(this.button4);
-            this.pnlFileOptions.Controls.Add(this.button1);
-            this.pnlFileOptions.Controls.Add(this.button2);
+            this.pnlFileOptions.Controls.Add(this.btnLZForceCompression);
+            this.pnlFileOptions.Controls.Add(this.btnLZCompressWithHeader);
+            this.pnlFileOptions.Controls.Add(this.btnLZForceDecompression);
+            this.pnlFileOptions.Controls.Add(this.btnLZDecompressWithHeader);
             this.pnlFileOptions.Controls.Add(this.btnReplaceImport);
             this.pnlFileOptions.Controls.Add(this.btnReplaceRaw);
             this.pnlFileOptions.Controls.Add(this.btnExtractExport);
@@ -391,48 +391,55 @@
             // 
             // btnDecompressOverlay
             // 
+            this.btnDecompressOverlay.Enabled = false;
             this.btnDecompressOverlay.Location = new System.Drawing.Point(217, 51);
             this.btnDecompressOverlay.Name = "btnDecompressOverlay";
             this.btnDecompressOverlay.Size = new System.Drawing.Size(137, 23);
             this.btnDecompressOverlay.TabIndex = 8;
             this.btnDecompressOverlay.Text = "Decompress Overlay";
             this.btnDecompressOverlay.UseVisualStyleBackColor = true;
+            this.btnDecompressOverlay.Visible = false;
+            this.btnDecompressOverlay.Click += new System.EventHandler(this.btnDecompressOverlay_Click);
             // 
-            // button3
+            // btnLZForceCompression
             // 
-            this.button3.Location = new System.Drawing.Point(357, 26);
-            this.button3.Name = "button3";
-            this.button3.Size = new System.Drawing.Size(134, 23);
-            this.button3.TabIndex = 7;
-            this.button3.Text = "LZ Compress (Header)";
-            this.button3.UseVisualStyleBackColor = true;
+            this.btnLZForceCompression.Location = new System.Drawing.Point(357, 26);
+            this.btnLZForceCompression.Name = "btnLZForceCompression";
+            this.btnLZForceCompression.Size = new System.Drawing.Size(134, 23);
+            this.btnLZForceCompression.TabIndex = 7;
+            this.btnLZForceCompression.Text = "LZ Force Compression";
+            this.btnLZForceCompression.UseVisualStyleBackColor = true;
+            this.btnLZForceCompression.Click += new System.EventHandler(this.btnLZForceCompression_Click);
             // 
-            // button4
+            // btnLZCompressWithHeader
             // 
-            this.button4.Location = new System.Drawing.Point(357, 2);
-            this.button4.Name = "button4";
-            this.button4.Size = new System.Drawing.Size(134, 23);
-            this.button4.TabIndex = 6;
-            this.button4.Text = "LZ Compress";
-            this.button4.UseVisualStyleBackColor = true;
+            this.btnLZCompressWithHeader.Location = new System.Drawing.Point(357, 2);
+            this.btnLZCompressWithHeader.Name = "btnLZCompressWithHeader";
+            this.btnLZCompressWithHeader.Size = new System.Drawing.Size(134, 23);
+            this.btnLZCompressWithHeader.TabIndex = 6;
+            this.btnLZCompressWithHeader.Text = "LZ Compress with Hdr.";
+            this.btnLZCompressWithHeader.UseVisualStyleBackColor = true;
+            this.btnLZCompressWithHeader.Click += new System.EventHandler(this.btnLZCompressWithHeader_Click);
             // 
-            // button1
+            // btnLZForceDecompression
             // 
-            this.button1.Location = new System.Drawing.Point(217, 26);
-            this.button1.Name = "button1";
-            this.button1.Size = new System.Drawing.Size(137, 23);
-            this.button1.TabIndex = 5;
-            this.button1.Text = "LZ Decompress (Header)";
-            this.button1.UseVisualStyleBackColor = true;
+            this.btnLZForceDecompression.Location = new System.Drawing.Point(217, 26);
+            this.btnLZForceDecompression.Name = "btnLZForceDecompression";
+            this.btnLZForceDecompression.Size = new System.Drawing.Size(137, 23);
+            this.btnLZForceDecompression.TabIndex = 5;
+            this.btnLZForceDecompression.Text = "LZ Force Decompression";
+            this.btnLZForceDecompression.UseVisualStyleBackColor = true;
+            this.btnLZForceDecompression.Click += new System.EventHandler(this.btnLZForceDecompression_Click);
             // 
-            // button2
+            // btnLZDecompressWithHeader
             // 
-            this.button2.Location = new System.Drawing.Point(217, 2);
-            this.button2.Name = "button2";
-            this.button2.Size = new System.Drawing.Size(137, 23);
-            this.button2.TabIndex = 4;
-            this.button2.Text = "LZ Decompress";
-            this.button2.UseVisualStyleBackColor = true;
+            this.btnLZDecompressWithHeader.Location = new System.Drawing.Point(217, 2);
+            this.btnLZDecompressWithHeader.Name = "btnLZDecompressWithHeader";
+            this.btnLZDecompressWithHeader.Size = new System.Drawing.Size(137, 23);
+            this.btnLZDecompressWithHeader.TabIndex = 4;
+            this.btnLZDecompressWithHeader.Text = "LZ Decompress with Hdr.";
+            this.btnLZDecompressWithHeader.UseVisualStyleBackColor = true;
+            this.btnLZDecompressWithHeader.Click += new System.EventHandler(this.btnLZDecompressWithHeader_Click);
             // 
             // btnReplaceImport
             // 
@@ -443,6 +450,7 @@
             this.btnReplaceImport.TabIndex = 3;
             this.btnReplaceImport.Text = "Replace (Import)";
             this.btnReplaceImport.UseVisualStyleBackColor = true;
+            this.btnReplaceImport.Visible = false;
             // 
             // btnReplaceRaw
             // 
@@ -463,6 +471,7 @@
             this.btnExtractExport.TabIndex = 1;
             this.btnExtractExport.Text = "Extract (Export)";
             this.btnExtractExport.UseVisualStyleBackColor = true;
+            this.btnExtractExport.Visible = false;
             // 
             // btnExtractRaw
             // 
@@ -537,10 +546,10 @@
         private System.Windows.Forms.Button btnReplaceRaw;
         private System.Windows.Forms.Button btnExtractExport;
         private System.Windows.Forms.Button btnExtractRaw;
-        private System.Windows.Forms.Button button3;
-        private System.Windows.Forms.Button button4;
-        private System.Windows.Forms.Button button1;
-        private System.Windows.Forms.Button button2;
+        private System.Windows.Forms.Button btnLZForceCompression;
+        private System.Windows.Forms.Button btnLZCompressWithHeader;
+        private System.Windows.Forms.Button btnLZForceDecompression;
+        private System.Windows.Forms.Button btnLZDecompressWithHeader;
         private System.Windows.Forms.SplitContainer spcFileSystemTab;
         private System.Windows.Forms.Button btnDecompressOverlay;
         private System.Windows.Forms.ToolStripMenuItem mnitEditSDATINFOBlockToolStripMenuItem;

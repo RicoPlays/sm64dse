@@ -429,5 +429,62 @@ namespace SM64DSe
             sdatInfoEditor.Show();
         }
 
+        private void btnLZDecompressWithHeader_Click(object sender, EventArgs e)
+        {
+            NitroFile file = Program.m_ROM.GetFileFromName(m_SelectedFile);
+            // NitroFile automatically decompresses on load if LZ77 header present
+            file.SaveChanges();
+        }
+
+        private void btnLZForceDecompression_Click(object sender, EventArgs e)
+        {
+            NitroFile file = Program.m_ROM.GetFileFromName(m_SelectedFile);
+            try
+            {
+                file.ForceDecompression();
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show("There was an error trying to force decompression of \"" + file.m_Name + "\", " +
+                    "this file may not use LZ77 compression (no header)\n\n" + ex.Message + "\n\n" + ex.StackTrace);
+            }
+            file.SaveChanges();
+        }
+
+        private void btnLZCompressWithHeader_Click(object sender, EventArgs e)
+        {
+            NitroFile file = Program.m_ROM.GetFileFromName(m_SelectedFile);
+            try
+            {
+                file.Compress();
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show("There was an error trying to compress the file \"" + file.m_Name + "\" with " +
+                    "LZ77 compression (with header)\n\n" + ex.Message + "\n\n" + ex.StackTrace);
+            }
+            file.SaveChanges();
+        }
+
+        private void btnLZForceCompression_Click(object sender, EventArgs e)
+        {
+            NitroFile file = Program.m_ROM.GetFileFromName(m_SelectedFile);
+            try
+            {
+                file.ForceCompression();
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show("There was an error trying to compress the file \"" + file.m_Name + "\" with " +
+                    "LZ77 compression (no header)\n\n" + ex.Message + "\n\n" + ex.StackTrace);
+            }
+            file.SaveChanges();
+        }
+
+        private void btnDecompressOverlay_Click(object sender, EventArgs e)
+        {
+            // TODO
+        }
+
     }
 }

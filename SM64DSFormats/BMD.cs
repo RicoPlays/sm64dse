@@ -820,6 +820,7 @@ namespace SM64DSe
                     {
                         byte alpha = (byte)((matgroup.m_PolyAttribs >> 13) & 0xF8);
                         alpha |= (byte)(alpha >> 5);
+                        matgroup.m_Alpha = alpha;
 
                         m_CurVertex.m_Color = Color.FromArgb(alpha, matgroup.m_DiffuseColor);
                     }
@@ -1141,6 +1142,8 @@ namespace SM64DSe
 
             public Color m_DiffuseColor, m_AmbientColor;
             public Color m_SpecularColor, m_EmissionColor;
+
+            public byte m_Alpha = 255;
 
             public Vector2 m_TexCoordScale;
             public Vector2 m_TexCoordTrans;

@@ -95,17 +95,21 @@
       <DependentUpon>AnimationEditorForm.cs</DependentUpon>
     </Compile>
     <Compile Include="BiDictionaryOneToOne.cs" />
-    <Compile Include="ImportExport\BMDExporter.cs" />
+    <Compile Include="ImportExport\BMD_BCA_KCLExporter.cs" />
     <Compile Include="ImportExport\BMDImporter.cs" />
+    <Compile Include="ImportExport\KCLImporter.cs" />
     <Compile Include="ImportExport\Loaders\AbstractModelLoader.cs" />
+    <Compile Include="ImportExport\Loaders\ExternalLoaders\collada_schema_1_4.cs" />
     <Compile Include="ImportExport\Loaders\ExternalLoaders\DAELoader.cs" />
     <Compile Include="ImportExport\Loaders\ExternalLoaders\OBJLoader.cs" />
+    <Compile Include="ImportExport\Loaders\InternalLoaders\BCALoader.cs" />
     <Compile Include="ImportExport\Loaders\InternalLoaders\BMDLoader.cs" />
     <Compile Include="ImportExport\Loaders\InternalLoaders\KCLLoader.cs" />
     <Compile Include="ImportExport\ModelBase.cs" />
     <Compile Include="ImportExport\Writers\AbstractModelWriter.cs" />
     <Compile Include="ImportExport\Writers\ExternalWriters\DAEWriter.cs" />
     <Compile Include="ImportExport\Writers\ExternalWriters\OBJWriter.cs" />
+    <Compile Include="ImportExport\Writers\InternalWriters\BCAWriter.cs" />
     <Compile Include="ImportExport\Writers\InternalWriters\BMDWriter.cs" />
     <Compile Include="ImportExport\Writers\InternalWriters\KCLWriter.cs" />
     <Compile Include="SM64DSFormats\BMD.cs" />
@@ -117,14 +121,9 @@
     </Compile>
     <Compile Include="Compression.cs" />
     <Compile Include="SM64DSFormats\BCA.cs" />
-    <Compile Include="Exporters\BMD_Exporter.cs" />
-    <Compile Include="Exporters\KCL_Exporter.cs" />
-    <Compile Include="Exporters\LevelDataXML_Exporter.cs" />
+    <Compile Include="ImportExport\LevelDataXML_Exporter.cs" />
     <Compile Include="Helper.cs" />
-    <Compile Include="Importers\BMD_Importer.cs" />
-    <Compile Include="Importers\BMD_BCA_Importer_DAE.cs" />
-    <Compile Include="Importers\BMD_Importer_OBJ.cs" />
-    <Compile Include="Importers\LevelDataXML_Importer.cs" />
+    <Compile Include="ImportExport\LevelDataXML_Importer.cs" />
     <Compile Include="SM64DSFormats\BTP.cs" />
     <Compile Include="SM64DSFormats\KCL.cs" />
     <Compile Include="KCLEditorForm.cs">
@@ -150,7 +149,6 @@
     <Compile Include="NARC.cs" />
     <Compile Include="NARCFile.cs" />
     <Compile Include="NitroFile.cs" />
-    <Compile Include="Importers\KCL_Importer.cs" />
     <Compile Include="ObjectDatabase.cs" />
     <Compile Include="ObjectListForm.cs">
       <SubType>Form</SubType>

@@ -8,8 +8,7 @@ using System.Text;
 using System.Windows.Forms;
 using OpenTK;
 using OpenTK.Graphics.OpenGL;
-using SM64DSe.Exporters;
-using SM64DSe.Importers;
+using SM64DSe.ImportExport;
 
 namespace SM64DSe
 {
@@ -413,10 +412,21 @@ namespace SM64DSe
 
         private void btnExportToDAE_Click(object sender, EventArgs e)
         {
-            if (m_BMD == null || m_BCA == null)
+            if (m_BMD == null)
                 return;
 
-            BMD_Exporter.ExportBMDAndBCA(new BMD(m_BMD.m_File), new BCA(m_BCA.m_File));
+            SaveFileDialog saveModel = new SaveFileDialog();
+            saveModel.FileName = "SM64DS_Animated_Model_" + 
+                m_BMD.m_FileName.Substring(m_BMD.m_FileName.LastIndexOf("/") + 1) + ".DAE";//Default name
+            saveModel.DefaultExt = ".dae";//Default file extension
+            saveModel.Filter = "COLLADA DAE (.dae)|*.dae";//Filter by .DAE
+            if (saveModel.ShowDialog() == DialogResult.Cancel)
+                return;
+
+            if (m_BCA != null)
+                BMD_BCA_KCLExporter.ExportAnimatedModel(new BMD(m_BMD.m_File), new BCA(m_BCA.m_File), saveModel.FileName);
+            else
+                BMD_BCA_KCLExporter.ExportBMDModel(new BMD(m_BMD.m_File), saveModel.FileName);
         }
 
         private void txtCurrentFrameNum_TextChanged(object sender, EventArgs e)
@@ -452,13 +462,18 @@ namespace SM64DSe
             if (ofd.ShowDialog() == DialogResult.OK)
             {
                 StopTimer();
-                
-                BMD_Importer_Base importer = BMD_Importer_Base.GetModelImporter(ofd.FileName);
-                int result = importer.ConvertToBMDAndBCA(ref m_BMD, ref m_BCA, ofd.FileName);
-                if (result == 0)
+
+                BMDImporter importer = new BMDImporter();
+                try
                 {
-                    m_BMD = new BMD(m_BMD.m_File);
-                    m_BCA = new BCA(m_BCA.m_File);
+                    m_BMD = importer.ConvertDAEToBMD(ref m_BMD.m_File, ofd.FileName, true);
+                    // >>> TODO <<<
+                    // Below line in necessary to an obscure bug with NARC files, if you have two file from the same 
+                    // NARC open and modify and save the first, when you then go to save the second, it won't have 
+                    // picked up the changes from the first file and when saved will write the original first file and 
+                    // the modified second file.
+                    NitroFile animationFile = Program.m_ROM.GetFileFromName(m_BCA.m_FileName);
+                    m_BCA = importer.ConvertAnimatedDAEToBMDAndBCA(ref animationFile, ofd.FileName, true);
 
                     m_AnimationFrameNumber = 0;
                     m_AnimationNumFrames = m_BCA.m_NumFrames;
@@ -470,8 +485,9 @@ namespace SM64DSe
                     if (wasRunning)
                         StartTimer();
                 }
-                else if (result == -1)
+                catch (Exception ex)
                 {
+                    MessageBox.Show("An error occurred: \n" + ex.Message + "\n\n" + ex.StackTrace);
                     m_BMD = new BMD(Program.m_ROM.GetFileFromName(m_BMD.m_FileName));
                     m_BCA = new BCA(Program.m_ROM.GetFileFromName(m_BCA.m_FileName));
                 }

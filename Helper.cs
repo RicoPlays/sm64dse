@@ -155,6 +155,25 @@ namespace SM64DSe
             return ret;
         }
 
+        public static Matrix4 InverseSRTToMatrix(Vector3 scale, Vector3 rot, Vector3 trans)
+        {
+            Matrix4 ret = Matrix4.Identity;
+
+            Matrix4 mscale = Matrix4.CreateScale(scale);
+            Matrix4 mxrot = Matrix4.CreateRotationX(rot.X);
+            Matrix4 myrot = Matrix4.CreateRotationY(rot.Y);
+            Matrix4 mzrot = Matrix4.CreateRotationZ(rot.Z);
+            Matrix4 mtrans = Matrix4.CreateTranslation(trans);
+
+            Matrix4.Mult(ref ret, ref mtrans, out ret);
+            Matrix4.Mult(ref ret, ref mzrot, out ret);
+            Matrix4.Mult(ref ret, ref myrot, out ret);
+            Matrix4.Mult(ref ret, ref mxrot, out ret);
+            Matrix4.Mult(ref ret, ref mscale, out ret);
+
+            return ret;
+        }
+
         /*
          * Uses SharpDX's method to decompose Matrix4 into Scale, Rotation (Quaternion) and Translation, then converts the Quaternion 
          * to Euler angles. See credits below.
@@ -423,6 +442,11 @@ namespace SM64DSe
                 vals[11], vals[15]);
             Matrix4 matrix = new Matrix4(row0, row1, row2, row3);
             return matrix;
+        }
+
+        public static Matrix4 DoubleArrayToMatrix4(double[] vals)
+        {
+            return FloatArrayToMatrix4(Array.ConvertAll<double, float>(vals, Convert.ToSingle));
         }
 
         public static uint GetActSelectorIDTableAddress()
