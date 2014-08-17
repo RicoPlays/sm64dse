@@ -29,9 +29,8 @@ using OpenTK;
 using OpenTK.Graphics.OpenGL;
 using System.IO;
 using System.Globalization;
-using SM64DSe.Exporters;
 using System.Xml;
-using SM64DSe.Importers;
+using SM64DSe.ImportExport;
 
 
 namespace SM64DSe
@@ -2623,7 +2622,14 @@ namespace SM64DSe
 
         private void btnExportLevelModel_Click(object sender, EventArgs e)
         {
-            BMD_Exporter.ExportBMD(new BMD(m_ROM.GetFileFromInternalID(m_LevelSettings.BMDFileID)));
+            SaveFileDialog saveModel = new SaveFileDialog();
+            saveModel.FileName = "SM64DS_Model";//Default name
+            saveModel.DefaultExt = ".dae";//Default file extension
+            saveModel.Filter = "COLLADA DAE (.dae)|*.dae|Wavefront OBJ (.obj)|*.obj";//Filter by .DAE and .OBJ
+            if (saveModel.ShowDialog() == DialogResult.Cancel)
+                return;
+
+            BMD_BCA_KCLExporter.ExportBMDModel(new BMD(m_ROM.GetFileFromInternalID(m_LevelSettings.BMDFileID)), saveModel.FileName);
 
             slStatusLabel.Text = "Finished exporting level model.";
         }//End Method
@@ -2633,15 +2639,26 @@ namespace SM64DSe
             if (m_SelectedObject == null)
             {
                 slStatusLabel.Text = "Click the object whose model you want to export.";
-
                 return;
             }
 
-            //Get the name of the selected object's BMD (model) file
+            //Get the name of the selected object's BMD (model) file(s)
             string selObjBMDName = m_SelectedObject.m_Renderer.GetFilename();
+            string[] names = selObjBMDName.Split(new char[] { ';' }, StringSplitOptions.RemoveEmptyEntries);
 
-            BMD objectBMD = new BMD(m_ROM.GetFileFromName(selObjBMDName));
-            BMD_Exporter.ExportBMD(objectBMD);
+            foreach (string name in names)
+            {
+                BMD objectBMD = new BMD(m_ROM.GetFileFromName(name));
+
+                SaveFileDialog saveModel = new SaveFileDialog();
+                saveModel.FileName = "SM64DS_Model_" + name.Substring(name.LastIndexOf("/"));//Default name
+                saveModel.DefaultExt = ".dae";//Default file extension
+                saveModel.Filter = "COLLADA DAE (.dae)|*.dae|Wavefront OBJ (.obj)|*.obj";//Filter by .DAE and .OBJ
+                if (saveModel.ShowDialog() == DialogResult.Cancel)
+                    return;
+
+                BMD_BCA_KCLExporter.ExportBMDModel(objectBMD, saveModel.FileName);
+            }
 
             slStatusLabel.Text = "Finished exporting model.";
         }
@@ -2668,8 +2685,16 @@ namespace SM64DSe
                 var result = form.ShowDialog();
                 if (result == DialogResult.OK)
                 {
+                    SaveFileDialog saveModel = new SaveFileDialog();
+                    saveModel.FileName = "SM64DS_Model";//Default name
+                    saveModel.DefaultExt = ".dae";//Default file extension
+                    saveModel.Filter = "COLLADA DAE (.dae)|*.dae|Wavefront OBJ (.obj)|*.obj";//Filter by .DAE and .OBJ
+                    if (saveModel.ShowDialog() == DialogResult.Cancel)
+                        return;
+
                     BMD objectBMD = new BMD(m_ROM.GetFileFromName(form.m_SelectedFile));
-                    BMD_Exporter.ExportBMD(objectBMD);
+
+                    BMD_BCA_KCLExporter.ExportBMDModel(objectBMD, saveModel.FileName);
 
                     slStatusLabel.Text = "Finished exporting model.";
                 }

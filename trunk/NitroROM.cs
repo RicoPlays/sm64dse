@@ -340,6 +340,11 @@ namespace SM64DSe
 
         public uint GetOverlayEntryOffset(uint ovlid) { return m_OverlayEntries[ovlid].EntryOffset; }
 
+        public OverlayEntry[] GetOverlayEntries()
+        {
+            return m_OverlayEntries;
+        }
+
         public byte Read8(uint addr) { m_FileStream.Position = addr; return m_BinReader.ReadByte(); }
         public ushort Read16(uint addr) { m_FileStream.Position = addr; return m_BinReader.ReadUInt16(); }
         public uint Read32(uint addr) { m_FileStream.Position = addr; return m_BinReader.ReadUInt32(); }
@@ -614,7 +619,7 @@ namespace SM64DSe
             public uint Size;
         }
 
-        private struct OverlayEntry
+        public struct OverlayEntry
         {
             public uint EntryOffset;
             public uint ID;

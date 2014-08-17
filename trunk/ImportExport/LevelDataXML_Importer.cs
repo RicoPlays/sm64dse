@@ -8,7 +8,7 @@ using System.Xml;
 using OpenTK;
 using System.IO;
 
-namespace SM64DSe.Importers
+namespace SM64DSe.ImportExport
 {
     public static class LevelDataXML_Importer
     {

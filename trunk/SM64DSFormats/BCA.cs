@@ -82,8 +82,13 @@ namespace SM64DSe
 
         public SRTContainer[] GetAllLocalSRTValuesForFrame(BMD.ModelChunk[] chunks, int frame)
         {
-            SRTContainer[] localSRTValues = new SRTContainer[chunks.Length];
-            for (int i = 0; i < chunks.Length; i++)
+            return GetAllLocalSRTValuesForFrame(chunks.Length, frame);
+        }
+
+        public SRTContainer[] GetAllLocalSRTValuesForFrame(int numChunks, int frame)
+        {
+            SRTContainer[] localSRTValues = new SRTContainer[numChunks];
+            for (int i = 0; i < numChunks; i++)
             {
                 localSRTValues[i] = m_AnimationData[i].GetScaleRotationTranslation(frame);
             }

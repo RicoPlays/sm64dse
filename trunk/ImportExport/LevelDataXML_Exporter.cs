@@ -6,7 +6,7 @@ using System.Xml;
 using System.Globalization;
 using System.IO;
 
-namespace SM64DSe.Exporters
+namespace SM64DSe.ImportExport
 {
     public static class LevelDataXML_Exporter
     {

@@ -1,4 +1,9 @@
-﻿using System;
+﻿/* BMDWriter
+ * 
+ * Given a ModelBase object created by a Loader class, generates a BMD model.
+ */ 
+
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -314,6 +319,11 @@ namespace SM64DSe.ImportExport.Writers.InternalWriters
         {
             Bitmap bmp = new Bitmap(filename);
 
+            return ConvertTexture(bmp, filename);
+        }
+
+        public static ConvertedTexture ConvertTexture(Bitmap bmp, string filename)
+        {
             int width = 8, height = 8;
             int dswidth = 0, dsheight = 0;
             while (width < bmp.Width) { width *= 2; dswidth++; }
@@ -491,7 +501,7 @@ namespace SM64DSe.ImportExport.Writers.InternalWriters
         protected bool m_ZMirror = false;
         protected bool m_SwapYZ = false;
 
-        public BMDWriter(ModelBase model, NitroFile modelFile) :
+        public BMDWriter(ModelBase model, ref NitroFile modelFile) :
             base(model, modelFile.m_Name)
         {
             m_ModelFile = modelFile;
@@ -521,9 +531,9 @@ namespace SM64DSe.ImportExport.Writers.InternalWriters
                     {
                         foreach (ModelBase.FaceDef face in polyList.m_Faces)
                         {
-                            for (int i = 0; i < face.m_Vertices.Length; i++)
+                            foreach (ModelBase.VertexDef vert in face.m_Vertices)
                             {
-                                Vector3 vtx = (Vector3)face.m_Vertices[i];
+                                Vector3 vtx = vert.m_Position;
 
                                 if (vtx.X > largest) largest = vtx.X;
                                 if (vtx.Y > largest) largest = vtx.Y;
@@ -560,12 +570,11 @@ namespace SM64DSe.ImportExport.Writers.InternalWriters
                     {
                         foreach (ModelBase.FaceDef face in polyList.m_Faces)
                         {
-                            for (int i = 0; i < face.m_Vertices.Length; i++)
+                            foreach (ModelBase.VertexDef vert in face.m_Vertices)
                             {
-                                Vector3 vtx = (Vector3)face.m_Vertices[i];
-                                vtx.X *= scaleModel;
-                                vtx.Y *= scaleModel;
-                                vtx.Z *= scaleModel;
+                                vert.m_Position.X *= scaleModel;
+                                vert.m_Position.Y *= scaleModel;
+                                vert.m_Position.Z *= scaleModel;
                             }
                         }
                     }
@@ -580,11 +589,16 @@ namespace SM64DSe.ImportExport.Writers.InternalWriters
                 ModelBase.MaterialDef mat = _mat.Value;
                 string matname = _mat.Key;
 
-                if (mat.m_DiffuseMapName != "")
+                if (!mat.m_DiffuseMapName.Equals(""))
                 {
                     if (!convertedTextures.ContainsKey(mat.m_DiffuseMapName))
                     {
-                        ConvertedTexture tex = ConvertTexture(m_Model.m_ModelPath + Path.DirectorySeparatorChar + mat.m_DiffuseMapName);
+                        ConvertedTexture tex = null;
+                        if (!mat.m_DiffuseMapInMemory)
+                            tex = ConvertTexture(m_Model.m_ModelPath + Path.DirectorySeparatorChar + mat.m_DiffuseMapName);
+                        else
+                            tex = ConvertTexture(m_Model.m_ConvertedTexturesBitmap[mat.m_DiffuseMapName],
+                                m_Model.m_ModelPath + Path.DirectorySeparatorChar + mat.m_DiffuseMapName);
                         tex.m_TextureID = ntex;
                         tex.m_PaletteID = npal;
                         if (tex.m_TextureData != null) { ntex++; texsize += tex.m_TextureData.Length; }
@@ -637,8 +651,9 @@ namespace SM64DSe.ImportExport.Writers.InternalWriters
                                 continue;
                             foreach (ModelBase.FaceDef face in polyList.m_Faces)
                             {
-                                foreach (Vector2? txc in face.m_TextureCoordinates)
+                                foreach (ModelBase.VertexDef vert in face.m_Vertices)
                                 {
+                                    Vector2? txc = vert.m_TextureCoordinate;
                                     if (txc == null) continue;
                                     Vector2 scaledTxc = Vector2.Multiply((Vector2)txc, tcscale);
                                     if (Math.Abs(scaledTxc.X) > largesttc) largesttc = Math.Abs(scaledTxc.X);
@@ -672,6 +687,11 @@ namespace SM64DSe.ImportExport.Writers.InternalWriters
                                 continue;
                             foreach (ModelBase.FaceDef face in polyList.m_Faces)
                             {
+                                // DEBUG ONLY
+                                //Console.WriteLine("face in material " + curmaterial + ":");
+                                //foreach (Vector3 vec in face.m_Vertices)
+                                //    Console.WriteLine(vec.ToString());
+
                                 int nvtx = face.m_NumVertices;
 
                                 if (nvtx != lastface || lastface > 4)
@@ -941,15 +961,13 @@ namespace SM64DSe.ImportExport.Writers.InternalWriters
 
             if (save)
                 bmd.SaveChanges();
-
-            //return new BMD(bmd);
         }
 
         private static void AddQuadrilateralToDisplayList(GXDisplayListPacker dlpacker, ref int lastColourARGB, ref Vector2 tcscale,
             ref int lastmatrix, ref Vector4 lastvtx, ModelBase.FaceDef face)
         {
             WriteVertexToDisplayList(dlpacker, ref lastColourARGB, ref tcscale, ref lastmatrix, lastvtx,
-                face.m_Vertices[0], face.m_TextureCoordinates[0], face.m_VertexColours[0], face.m_VertexBoneIDs[0]);
+                face.m_Vertices[0]);
 
             /*if (m_ZMirror)
             {
@@ -966,16 +984,16 @@ namespace SM64DSe.ImportExport.Writers.InternalWriters
             }
             else*/
             {
-                WriteVertexToDisplayList(dlpacker, ref lastColourARGB, ref tcscale, ref lastmatrix, new Vector4(face.m_Vertices[0], 0f),
-                    face.m_Vertices[1], face.m_TextureCoordinates[1], face.m_VertexColours[1], face.m_VertexBoneIDs[1]);
+                WriteVertexToDisplayList(dlpacker, ref lastColourARGB, ref tcscale, ref lastmatrix, new Vector4(face.m_Vertices[0].m_Position, 0f),
+                    face.m_Vertices[1]);
 
-                WriteVertexToDisplayList(dlpacker, ref lastColourARGB, ref tcscale, ref lastmatrix, new Vector4(face.m_Vertices[1], 0f),
-                    face.m_Vertices[2], face.m_TextureCoordinates[2], face.m_VertexColours[2], face.m_VertexBoneIDs[2]);
+                WriteVertexToDisplayList(dlpacker, ref lastColourARGB, ref tcscale, ref lastmatrix, new Vector4(face.m_Vertices[1].m_Position, 0f),
+                    face.m_Vertices[2]);
 
-                WriteVertexToDisplayList(dlpacker, ref lastColourARGB, ref tcscale, ref lastmatrix, new Vector4(face.m_Vertices[2], 0f),
-                    face.m_Vertices[3], face.m_TextureCoordinates[3], face.m_VertexColours[3], face.m_VertexBoneIDs[3]);
+                WriteVertexToDisplayList(dlpacker, ref lastColourARGB, ref tcscale, ref lastmatrix, new Vector4(face.m_Vertices[2].m_Position, 0f),
+                    face.m_Vertices[3]);
 
-                lastvtx = new Vector4(face.m_Vertices[3], 0f);
+                lastvtx = new Vector4(face.m_Vertices[3].m_Position, 0f);
             }
         }
 
@@ -983,7 +1001,7 @@ namespace SM64DSe.ImportExport.Writers.InternalWriters
             ref Vector4 lastvtx, ModelBase.FaceDef face)
         {
             WriteVertexToDisplayList(dlpacker, ref lastColourARGB, ref tcscale, ref lastmatrix, lastvtx,
-                face.m_Vertices[0], face.m_TextureCoordinates[0], face.m_VertexColours[0], face.m_VertexBoneIDs[0]);
+                face.m_Vertices[0]);
 
             /*if (m_ZMirror)
             {
@@ -997,13 +1015,13 @@ namespace SM64DSe.ImportExport.Writers.InternalWriters
             }
             else*/
             {
-                WriteVertexToDisplayList(dlpacker, ref lastColourARGB, ref tcscale, ref lastmatrix, new Vector4(face.m_Vertices[0], 0f),
-                    face.m_Vertices[1], face.m_TextureCoordinates[1], face.m_VertexColours[1], face.m_VertexBoneIDs[1]);
+                WriteVertexToDisplayList(dlpacker, ref lastColourARGB, ref tcscale, ref lastmatrix, new Vector4(face.m_Vertices[0].m_Position, 0f),
+                    face.m_Vertices[1]);
 
-                WriteVertexToDisplayList(dlpacker, ref lastColourARGB, ref tcscale, ref lastmatrix, new Vector4(face.m_Vertices[1], 0f),
-                    face.m_Vertices[2], face.m_TextureCoordinates[2], face.m_VertexColours[2], face.m_VertexBoneIDs[2]);
+                WriteVertexToDisplayList(dlpacker, ref lastColourARGB, ref tcscale, ref lastmatrix, new Vector4(face.m_Vertices[1].m_Position, 0f),
+                    face.m_Vertices[2]);
 
-                lastvtx = new Vector4(face.m_Vertices[2], 0f);
+                lastvtx = new Vector4(face.m_Vertices[2].m_Position, 0f);
             }
         }
 
@@ -1011,47 +1029,47 @@ namespace SM64DSe.ImportExport.Writers.InternalWriters
             ref Vector4 lastvtx, ModelBase.FaceDef face)
         {
             WriteVertexToDisplayList(dlpacker, ref lastColourARGB, ref tcscale, ref lastmatrix, lastvtx,
-                face.m_Vertices[0], face.m_TextureCoordinates[0], face.m_VertexColours[0], face.m_VertexBoneIDs[0]);
+                face.m_Vertices[0]);
 
-            WriteVertexToDisplayList(dlpacker, ref lastColourARGB, ref tcscale, ref lastmatrix, new Vector4(face.m_Vertices[0], 0f),
-                face.m_Vertices[1], face.m_TextureCoordinates[1], face.m_VertexColours[1], face.m_VertexBoneIDs[1]);
+            WriteVertexToDisplayList(dlpacker, ref lastColourARGB, ref tcscale, ref lastmatrix, new Vector4(face.m_Vertices[0].m_Position, 0f),
+                face.m_Vertices[1]);
 
-            WriteVertexToDisplayList(dlpacker, ref lastColourARGB, ref tcscale, ref lastmatrix, new Vector4(face.m_Vertices[1], 0f),
-                face.m_Vertices[1], face.m_TextureCoordinates[1], face.m_VertexColours[1], face.m_VertexBoneIDs[1]);
+            WriteVertexToDisplayList(dlpacker, ref lastColourARGB, ref tcscale, ref lastmatrix, new Vector4(face.m_Vertices[1].m_Position, 0f),
+                face.m_Vertices[1]);
 
-            lastvtx = new Vector4(face.m_Vertices[1], 0f);
+            lastvtx = new Vector4(face.m_Vertices[1].m_Position, 0f);
         }
 
         private static void AddSinglePointToDisplayList(GXDisplayListPacker dlpacker, ref int lastColourARGB, ref Vector2 tcscale,
             ref int lastmatrix, ref Vector4 lastvtx, ModelBase.FaceDef face)
         {
             WriteVertexToDisplayList(dlpacker, ref lastColourARGB, ref tcscale, ref lastmatrix, lastvtx,
-                face.m_Vertices[0], face.m_TextureCoordinates[0], face.m_VertexColours[0], face.m_VertexBoneIDs[0]);
+                face.m_Vertices[0]);
 
-            WriteVertexToDisplayList(dlpacker, ref lastColourARGB, ref tcscale, ref lastmatrix, new Vector4(face.m_Vertices[0], 0f),
-                face.m_Vertices[0], face.m_TextureCoordinates[0], face.m_VertexColours[0], face.m_VertexBoneIDs[0]);
+            WriteVertexToDisplayList(dlpacker, ref lastColourARGB, ref tcscale, ref lastmatrix, new Vector4(face.m_Vertices[0].m_Position, 0f),
+                face.m_Vertices[0]);
 
-            WriteVertexToDisplayList(dlpacker, ref lastColourARGB, ref tcscale, ref lastmatrix, new Vector4(face.m_Vertices[0], 0f),
-                face.m_Vertices[0], face.m_TextureCoordinates[0], face.m_VertexColours[0], face.m_VertexBoneIDs[0]);
+            WriteVertexToDisplayList(dlpacker, ref lastColourARGB, ref tcscale, ref lastmatrix, new Vector4(face.m_Vertices[0].m_Position, 0f),
+                face.m_Vertices[0]);
 
-            lastvtx = new Vector4(face.m_Vertices[0], 0f);
+            lastvtx = new Vector4(face.m_Vertices[0].m_Position, 0f);
         }
 
         private static void WriteVertexToDisplayList(GXDisplayListPacker dlpacker, ref int lastColourARGB, ref Vector2 tcscale,
-            ref int lastmatrix, Vector4 lastvtx, Vector3 vertex, Vector2? textureCoordinate, Color? vertexColour, int vertexBoneID)
+            ref int lastmatrix, Vector4 lastvtx, ModelBase.VertexDef vertex)
         {
-            Vector4 vtx = new Vector4(vertex, 0f);
-            if (lastmatrix != vertexBoneID)
+            Vector4 vtx = new Vector4(vertex.m_Position, 0f);
+            if (lastmatrix != vertex.m_VertexBoneID)
             {
-                dlpacker.AddCommand(0x14, (uint)vertexBoneID);// Matrix Restore ID for current vertex
-                lastmatrix = vertexBoneID;
+                dlpacker.AddCommand(0x14, (uint)vertex.m_VertexBoneID);// Matrix Restore ID for current vertex
+                lastmatrix = vertex.m_VertexBoneID;
             }
-            if (vertexColour != null && ((Color)vertexColour).ToArgb() != lastColourARGB)
+            if (vertex.m_VertexColour != null && ((Color)vertex.m_VertexColour).ToArgb() != lastColourARGB)
             {
-                dlpacker.AddColorCommand((Color)vertexColour);
-                lastColourARGB = ((Color)vertexColour).ToArgb();
+                dlpacker.AddColorCommand((Color)vertex.m_VertexColour);
+                lastColourARGB = ((Color)vertex.m_VertexColour).ToArgb();
             }
-            if (textureCoordinate != null) dlpacker.AddTexCoordCommand(Vector2.Multiply((Vector2)textureCoordinate, tcscale));
+            if (vertex.m_TextureCoordinate != null) dlpacker.AddTexCoordCommand(Vector2.Multiply((Vector2)vertex.m_TextureCoordinate, tcscale));
             dlpacker.AddVertexCommand(vtx, lastvtx);
         }
 

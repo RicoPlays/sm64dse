@@ -31,7 +31,6 @@ using System.Security.Cryptography;
 using OpenTK;
 using OpenTK.Graphics.OpenGL;
 using SM64DSe.ImportExport;
-using SM64DSe.Importers;
 
 namespace SM64DSe
 {
@@ -83,8 +82,7 @@ namespace SM64DSe
 
         private BMD m_ImportedModel;
 
-        private Dictionary<string, BMD_Importer_Base.MaterialDef> m_Materials;
-        //private Dictionary<string, ModelBase.MaterialDef> m_Materials;
+        private Dictionary<string, ModelBase.MaterialDef> m_Materials;
 
         // misc
         private Vector3 m_MarioPosition;
@@ -141,13 +139,10 @@ namespace SM64DSe
                 m_ModelPath = m_ModelFileName.Substring(0, m_ModelFileName.LastIndexOf('\\') + 1);
                 m_ModelFormat = ofdLoadModel.FileName.Substring(ofdLoadModel.FileName.Length - 3, 3).ToLower();
 
-                BMD_Importer_Base importer = BMD_Importer_Base.GetModelImporter(m_ModelFileName);
-                m_ImportedModel = importer.ConvertToBMD(m_ImportedModel, m_ModelFileName, m_Scale, false);
-                m_Materials = importer.m_Materials;
-
-                //m_ImportedModel = BMDImporter.ConvertModelToBMD(m_ImportedModel.m_File,
-                //    m_ModelFileName, m_Scale, false);
-                //m_Materials = BMDImporter.GetModelMaterials(m_ModelFileName);
+                BMDImporter importer = new BMDImporter();
+                m_ImportedModel = importer.ConvertModelToBMD(ref m_ImportedModel.m_File,
+                    m_ModelFileName, Vector3.One, false);
+                m_Materials = importer.GetModelMaterials(m_ModelFileName);
 
                 m_MdlLoaded = true;
 
@@ -476,10 +471,9 @@ namespace SM64DSe
             //If it's an object it'll be scaled down - need to get back to original value
             slStatus.Text = "Importing model...";
             glModelView.Refresh();
-            BMD_Importer_Base importer = BMD_Importer_Base.GetModelImporter(m_ModelFileName);
-            m_ImportedModel = importer.ConvertToBMD(m_ImportedModel, m_ModelFileName, m_Scale, true);
-            //m_ImportedModel = BMDImporter.ConvertModelToBMD(m_ImportedModel.m_File,
-            //    m_ModelFileName, m_Scale, true);
+            BMDImporter importer = new BMDImporter();
+            m_ImportedModel = importer.ConvertModelToBMD(ref m_ImportedModel.m_File,
+                m_ModelFileName, m_Scale, true);
 
             PrerenderModel();
             glModelView.Refresh();
@@ -490,14 +484,14 @@ namespace SM64DSe
                 try
                 {
                     kcl = Program.m_ROM.GetFileFromName(m_KCLName);
-                    KCL_Importer.ConvertToKCL(m_ModelFileName, ref kcl, kclScale, faceSizeThreshold, matColTypes);
+                    new KCLImporter().ConvertModelToKCL(kcl, m_ModelFileName, kclScale, faceSizeThreshold, matColTypes);
                 }
                 catch (Exception e)
                 {
                     if (e.Message.Contains("NitroROM: cannot find file"))
                         MessageBox.Show("This object has no collision data, however the model will still be imported.");
                     else
-                        MessageBox.Show("An error occurred importing the collision map:\n\n" + 
+                        MessageBox.Show("An error occurred importing the collision map:\n\n" +
                             e.Message + "\n\n" + e.StackTrace);
                 }
             }
@@ -701,10 +695,7 @@ namespace SM64DSe
             GL.DeleteLists(m_PDisplayList, 1);
             GL.DeleteLists(m_DisplayList, 1);
 
-            //foreach (ModelBase.MaterialDef mat in m_Materials.Values)
-            //    GL.DeleteTexture(mat.m_DiffuseMapID);
-            foreach (BMD_Importer_Base.MaterialDef mat in m_Materials.Values)
-                    GL.DeleteTexture(mat.m_DiffuseMapID);
+            m_ImportedModel.Release();
 
             ModelCache.RemoveModel(m_MarioHeadModel);
             ModelCache.RemoveModel(m_MarioBodyModel);
@@ -763,8 +754,8 @@ namespace SM64DSe
         {
             if (chkInGamePreview.Checked)
             {
-                try 
-                { 
+                try
+                {
                     m_InGameModelScale = float.Parse(txtInGameSizePreview.Text, Helper.USA);
                     PrerenderModel();
                     glModelView.Refresh();

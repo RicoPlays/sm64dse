@@ -592,8 +592,7 @@ namespace SM64DSe
         public NormalBMDRenderer() { }
         public NormalBMDRenderer(string filename, float scale) 
         { 
-            Construct(filename, scale); 
-            m_Filename = filename;
+            Construct(filename, scale);
         }
 
         public override void Release()
@@ -630,6 +629,7 @@ namespace SM64DSe
             m_Model = ModelCache.GetModel(filename);
             m_DisplayLists = ModelCache.GetDisplayLists(m_Model);
             m_Scale = new Vector3(scale, scale, scale);
+            m_Filename = filename;
         }
 
         public override void UpdateRenderer()
@@ -693,6 +693,7 @@ namespace SM64DSe
         {
             m_KurumaRenderer = new NormalBMDRenderer("data/special_obj/"+lvl+"_kuruma/"+lvl+"_kuruma.bmd", 1f);
             m_KurumajikuRenderer = new NormalBMDRenderer("data/special_obj/"+lvl+"_kuruma/"+lvl+"_kurumajiku.bmd", 1f);
+            this.m_Filename = m_KurumaRenderer.m_Filename + ";" + m_KurumajikuRenderer.m_Filename;
         }
 
         public override void Release()
@@ -795,6 +796,7 @@ namespace SM64DSe
         {
             m_HeadRenderer = new NormalBMDRenderer("data/enemy/sanbo/sanbo_head.bmd", 1f);
             m_BodyRenderer = new NormalBMDRenderer("data/enemy/sanbo/sanbo_body.bmd", 1f);
+            this.m_Filename = m_HeadRenderer.m_Filename + ";" + m_BodyRenderer.m_Filename;
         }
 
         public override void Release()
@@ -833,8 +835,13 @@ namespace SM64DSe
         public WigglerRenderer()
         {
             m_HeadRenderer = new NormalBMDRenderer("data/enemy/hanachan/hanachan_head.bmd", 1f);
+            this.m_Filename = m_HeadRenderer.m_Filename + ";";
             for (int i = 0; i < 4; i++)
-                m_BodyRenderer[i] = new NormalBMDRenderer("data/enemy/hanachan/hanachan_body0" + (i + 1) + ".bmd", 1f);
+            {
+                string name = "data/enemy/hanachan/hanachan_body0" + (i + 1) + ".bmd";
+                m_BodyRenderer[i] = new NormalBMDRenderer(name, 1f);
+                this.m_Filename += name + ";";
+            }
         }
 
         public override void Release()
@@ -873,6 +880,7 @@ namespace SM64DSe
             m_PrimaryRenderer = new NormalBMDRenderer(first, 1f);
             m_SecondaryRenderer = new NormalBMDRenderer(second, 1f);
             this.scale = scale;
+            this.m_Filename = first + ";" + second;
         }
 
         public override void Release()

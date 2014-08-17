@@ -10,9 +10,10 @@ using OpenTK;
 using OpenTK.Graphics.OpenGL;
 using System.Globalization;
 using System.IO;
-using SM64DSe.Exporters;
 using System.Text.RegularExpressions;
 using System.Xml;
+using SM64DSe.ImportExport;
+using SM64DSe.ImportExport.Loaders.InternalLoaders;
 
 namespace SM64DSe
 {
@@ -35,16 +36,21 @@ namespace SM64DSe
 
         List<Color> colours;
 
-        NitroFile kclFile;
+        KCL m_KCL;
 
         Dictionary<string, int> matColTypes;
 
         public KCLEditorForm(NitroFile kclIn)
         {
             InitializeComponent();
-            kclFile = kclIn;
             LoadKCL(kclIn);
-            colours = GetColours();
+            List<int> uniqueCollisionTypes = new List<int>();
+            foreach (KCL.ColFace plane in m_Planes)
+            {
+                if (!uniqueCollisionTypes.Contains(plane.type))
+                    uniqueCollisionTypes.Add(plane.type);
+            }
+            colours = KCLLoader.GetColours(uniqueCollisionTypes.Count);
             cmbPolygonMode.Items.Add("Fill");
             cmbPolygonMode.Items.Add("Wireframe");
             cmbPolygonMode.SelectedIndex = 0;
@@ -53,9 +59,9 @@ namespace SM64DSe
 
         public void LoadKCL(NitroFile kcl)
         {
-            KCL collisionMap = new KCL(kcl);
+            m_KCL = new KCL(kcl);
 
-            m_Planes = collisionMap.m_Planes;
+            m_Planes = m_KCL.m_Planes;
 
             lbxPlanes.Items.Clear();
 
@@ -67,6 +73,8 @@ namespace SM64DSe
 
         private void WriteChanges()
         {
+            NitroFile kclFile = m_KCL.m_File;
+
             uint planeStart = (kclFile.Read32(8));
 
             planeStart += (uint)(0x10);
@@ -79,24 +87,6 @@ namespace SM64DSe
             }
 
             kclFile.SaveChanges();
-        }
-
-        private List<Color> GetColours()
-        {
-            List<Color> theColours = new List<Color>();
-
-            for (int i = 255; i > 0; i = i - 50)
-            {
-                for (int j = 0; j < 255; j = j + 40)
-                {
-                    for (int k = 255; k > 0; k = k - 40)
-                    {
-                        Color newColour = Color.FromArgb(180, k, i, j);
-                        theColours.Add(newColour);
-                    }
-                }
-            }
-            return theColours;
         }
 
         private void glModelView_Load(object sender, EventArgs e)
@@ -456,7 +446,7 @@ namespace SM64DSe
             }
             WriteChanges();
 
-            LoadKCL(kclFile);
+            LoadKCL(m_KCL.m_File);
             glModelView.Refresh();
         }
 
@@ -501,7 +491,14 @@ namespace SM64DSe
 
         private void btnExportToOBJ_Click(object sender, EventArgs e)
         {
-            KCL_Exporter.ExportKCLToOBJ(m_Planes, colours);
+            SaveFileDialog saveModel = new SaveFileDialog();
+            saveModel.FileName = "CollisionMap";//Default name
+            saveModel.DefaultExt = ".dae";//Default file extension
+            saveModel.Filter = "COLLADA DAE (.dae)|*.dae|Wavefront OBJ (.obj)|*.obj";//Filter by .DAE and .OBJ
+            if (saveModel.ShowDialog() == DialogResult.Cancel)
+                return;
+
+            BMD_BCA_KCLExporter.ExportKCLModel(m_KCL, saveModel.FileName);
         }
 
         private void btnOpen_Click(object sender, EventArgs e)
@@ -511,8 +508,7 @@ namespace SM64DSe
                 var result = form.ShowDialog();
                 if (result == DialogResult.OK)
                 {
-                    kclFile = (Program.m_ROM.GetFileFromName(form.m_SelectedFile));
-                    LoadKCL(kclFile);
+                    LoadKCL((Program.m_ROM.GetFileFromName(form.m_SelectedFile)));
                     RenderKCLMesh();
                     GL.DeleteLists(m_KCLMeshDLists[3], 1); m_KCLMeshDLists[3] = 0;
                     glModelView.Refresh();
@@ -527,72 +523,8 @@ namespace SM64DSe
             if (ofd.ShowDialog() == DialogResult.OK)
             {
                 txtModelName.Text = ofd.FileName;
-                String modelFormat = ofd.FileName.Substring(ofd.FileName.Length - 3, 3).ToLower();
-                matColTypes = new Dictionary<string, int>();
-                switch (modelFormat)
-                {
-                    case "obj":
-                        GetMatNames_OBJ(ofd.FileName);
-                        break;
-                    case "dae":
-                        GetMatNames_DAE(ofd.FileName);
-                        break;
-                    default:
-                        GetMatNames_OBJ(ofd.FileName);
-                        break;
-                }
+                matColTypes = new KCLImporter().GetMaterialsList(ofd.FileName);
                 PopulateColTypes();
-            }
-        }
-
-        private void GetMatNames_OBJ(String name)
-        {
-            Stream fs = File.OpenRead(name);
-            StreamReader sr = new StreamReader(fs);
-
-            CultureInfo usahax = new CultureInfo("en-US");
-
-            string curline;
-            while ((curline = sr.ReadLine()) != null)
-            {
-                curline = curline.Trim();
-
-                // skip empty lines and comments
-                if (curline.Length < 1) continue;
-                if (curline[0] == '#') continue;
-
-                string[] parts = curline.Split(new char[] { ' ' }, StringSplitOptions.RemoveEmptyEntries);
-                if (parts.Length < 1) continue;
-
-                if (parts[0].Equals("usemtl"))
-                {
-                    if (parts.Length < 2) continue;
-                    if (!matColTypes.ContainsKey(parts[1]))
-                        matColTypes.Add(parts[1], 0);
-                }
-            }
-
-            sr.Close();
-        }
-
-        private void GetMatNames_DAE(String name)
-        {
-            using (XmlReader reader = XmlReader.Create(name))
-            {
-                reader.MoveToContent();
-
-                while (reader.Read())
-                {
-                    if (reader.NodeType.Equals(XmlNodeType.Element))
-                    {
-                        if (reader.LocalName.Equals("material"))
-                        {
-                            string material = reader.GetAttribute("id");
-                            if (!matColTypes.ContainsKey(material))
-                                matColTypes.Add(material, 0);
-                        }
-                    }
-                }
             }
         }
 
@@ -626,14 +558,14 @@ namespace SM64DSe
 
             try
             {
-                KCL_Importer.ConvertToKCL(txtModelName.Text, ref kclFile, scale, faceSizeThreshold, matColTypes);
+                new KCLImporter().ConvertModelToKCL(m_KCL.m_File, txtModelName.Text, scale, faceSizeThreshold, matColTypes);
             }
             catch (Exception ex)
             {
                 MessageBox.Show(ex.Message + ex.Source + ex.StackTrace);
             }
 
-            LoadKCL(kclFile);
+            LoadKCL(m_KCL.m_File);
             RenderKCLMesh();
             GL.DeleteLists(m_KCLMeshDLists[3], 1); m_KCLMeshDLists[3] = 0;
             glModelView.Refresh();

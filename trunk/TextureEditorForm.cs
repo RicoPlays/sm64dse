@@ -6,9 +6,9 @@ using System.Drawing;
 using System.Linq;
 using System.Text;
 using System.Windows.Forms;
-using SM64DSe.Importers;
 using System.Text.RegularExpressions;
 using SM64DSe.SM64DSFormats;
+using SM64DSe.ImportExport.Writers.InternalWriters;
 
 namespace SM64DSe
 {
@@ -228,7 +228,7 @@ namespace SM64DSe
 
                 try
                 {
-                    BMD_Importer_Base.ConvertedTexture tex = BMD_Importer_Base.ConvertTexture(ofd.FileName);
+                    BMDWriter.ConvertedTexture tex = BMDWriter.ConvertTexture(ofd.FileName);
                     tex.m_TextureID = (uint)texIndex;
                     tex.m_PaletteID = (uint)palIndex;
 
