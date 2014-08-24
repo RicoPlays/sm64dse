@@ -41,7 +41,7 @@ namespace SM64DSe
             int planeid = 0;
 	        for (uint offset = m_PlanesSectionOffset + 0x10; offset < m_OctreeSectionOffset; offset += 0x10)
 	        {
-		        int length = (int)m_File.Read32(offset);
+		        uint length = m_File.Read32(offset);
 
 		        ushort pt_id = m_File.Read16(offset + 0x04);
 		        int pt_x = (int)m_File.Read32((uint)(m_PointsSectionOffset + (pt_id*12)    ));
@@ -68,7 +68,7 @@ namespace SM64DSe
 		        short d3_y = (short)m_File.Read16((uint)(m_NormalsSectionOffset + (d3_id*6) + 2));
 		        short d3_z = (short)m_File.Read16((uint)(m_NormalsSectionOffset + (d3_id*6) + 4));
 
-                ColFace plane = new ColFace((float)length / 65536000f, 
+                ColFace plane = new ColFace((float)(length / 65536000f), 
                     new Vector3((float)pt_x / 64000f, (float)pt_y / 64000f, (float)pt_z / 64000f), 
                     new Vector3((float)nr_x / 1024f, (float)nr_y / 1024f, (float)nr_z / 1024f), 
                     new Vector3((float)d1_x / 1024f, (float)d1_y / 1024f, (float)d1_z / 1024f), 

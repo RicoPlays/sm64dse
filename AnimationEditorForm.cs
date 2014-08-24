@@ -473,7 +473,7 @@ namespace SM64DSe
                     // picked up the changes from the first file and when saved will write the original first file and 
                     // the modified second file.
                     NitroFile animationFile = Program.m_ROM.GetFileFromName(m_BCA.m_FileName);
-                    m_BCA = importer.ConvertAnimatedDAEToBMDAndBCA(ref animationFile, ofd.FileName, true);
+                    m_BCA = importer.ConvertAnimatedDAEToBCA(ref animationFile, ofd.FileName, true);
 
                     m_AnimationFrameNumber = 0;
                     m_AnimationNumFrames = m_BCA.m_NumFrames;

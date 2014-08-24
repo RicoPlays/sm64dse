@@ -61,7 +61,9 @@ namespace SM64DSe.ImportExport.Loaders.ExternalLoaders
             if (!foundObjects)
             {
                 currentBone = "default_bone_name";
-                m_Model.m_BoneTree.AddRootBone(new ModelBase.BoneDef(currentBone));
+                ModelBase.BoneDef defaultBone = new ModelBase.BoneDef(currentBone);
+                defaultBone.m_Geometries.Add("geometry-0", new ModelBase.GeometryDef("geometry-0"));
+                m_Model.m_BoneTree.AddRootBone(defaultBone);
             }
 
             string curline;

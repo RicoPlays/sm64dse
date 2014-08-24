@@ -59,7 +59,7 @@ namespace SM64DSe
             this.btnImportOtherModel = new System.Windows.Forms.ToolStripButton();
             this.btnExportOtherModel = new System.Windows.Forms.ToolStripButton();
             this.btnOffsetAllCoords = new System.Windows.Forms.ToolStripButton();
-            this.glLevelView = new OpenTK.GLControl(new GraphicsMode(32, 24, 8));
+            this.glLevelView = new OpenTK.GLControl(new GraphicsMode(new ColorFormat(32), 24, 8));
             this.tsViewActions = new System.Windows.Forms.ToolStrip();
             this.btnDumpOverlay = new System.Windows.Forms.ToolStripButton();
             this.btnLOL = new System.Windows.Forms.ToolStripButton();
