@@ -53,8 +53,7 @@ namespace SM64DSe
 
         // model settings
         private Vector3 m_Scale;
-        private bool m_ZMirror;
-        private bool m_SwapYZ;
+        private BMDImporter.BMDExtraImportOptions m_ExtraOptions = BMDImporter.BMDExtraImportOptions.DEFAULT;
         private float m_CustomScale;
         private float m_InGameModelScale;
 
@@ -119,9 +118,6 @@ namespace SM64DSe
                 txtInGameSizePreview.Enabled = false;
             }
 
-            m_ZMirror = false;
-            m_SwapYZ = false;
-
             m_DisplayList = 0;
         }
 
@@ -141,7 +137,7 @@ namespace SM64DSe
 
                 BMDImporter importer = new BMDImporter();
                 m_ImportedModel = importer.ConvertModelToBMD(ref m_ImportedModel.m_File,
-                    m_ModelFileName, Vector3.One, false);
+                    m_ModelFileName, Vector3.One, m_ExtraOptions, false);
                 m_Materials = importer.GetModelMaterials(m_ModelFileName);
 
                 m_MdlLoaded = true;
@@ -257,16 +253,8 @@ namespace SM64DSe
             {
                 GL.Disable(EnableCap.Lighting);
                 GL.PushMatrix();
-                if (m_ZMirror)
-                {
-                    GL.Scale(previewScale.X, previewScale.Y, -previewScale.Z);
-                    GL.FrontFace(FrontFaceDirection.Cw);
-                }
-                else
-                {
-                    GL.Scale(previewScale);
-                    GL.FrontFace(FrontFaceDirection.Ccw);
-                }
+                GL.Scale(previewScale);
+                GL.FrontFace(FrontFaceDirection.Ccw);
 
                 m_ImportedModel.PrepareToRender();
 
@@ -473,7 +461,7 @@ namespace SM64DSe
             glModelView.Refresh();
             BMDImporter importer = new BMDImporter();
             m_ImportedModel = importer.ConvertModelToBMD(ref m_ImportedModel.m_File,
-                m_ModelFileName, m_Scale, true);
+                m_ModelFileName, m_Scale, m_ExtraOptions, true);
 
             PrerenderModel();
             glModelView.Refresh();
@@ -667,7 +655,7 @@ namespace SM64DSe
 
         private void cbZMirror_CheckedChanged(object sender, EventArgs e)
         {
-            m_ZMirror = cbZMirror.Checked;
+            //m_ExtraOptions.m_ZMirror = cbZMirror.Checked;
             PrerenderModel();
             glModelView.Refresh();
         }
@@ -711,7 +699,7 @@ namespace SM64DSe
 
         private void cbSwapYZ_CheckedChanged(object sender, EventArgs e)
         {
-            m_SwapYZ = cbSwapYZ.Checked;
+            //m_ExtraOptions.m_SwapYZ = cbSwapYZ.Checked;
             PrerenderModel();
             glModelView.Refresh();
         }
@@ -762,6 +750,11 @@ namespace SM64DSe
                 }
                 catch { }
             }
+        }
+
+        private void chkAlwaysWriteFullVertexCmd23h_CheckedChanged(object sender, EventArgs e)
+        {
+            m_ExtraOptions.m_AlwaysWriteFullVertexCmd23h = chkAlwaysWriteFullVertexCmd23h.Checked;
         }
     }
 }

@@ -18,8 +18,6 @@ namespace SM64DSe.ImportExport.Writers.InternalWriters
     {
         public class GXDisplayListPacker
         {
-            private static readonly bool ALWAYS_WRITE_FULL_VERTEX_CMD_0x23 = true;
-
             public GXDisplayListPacker()
             {
                 m_CommandList = new List<GXCommand>();
@@ -42,7 +40,7 @@ namespace SM64DSe.ImportExport.Writers.InternalWriters
                 m_CommandList.Add(new GXCommand(_cmd, new uint[] { param1, param2 }));
             }
 
-            public void AddVertexCommand(Vector4 _vtx, Vector4 _prev)
+            public void AddVertexCommand(Vector4 _vtx, Vector4 _prev, bool alwaysWriteFullVertexCmd23h = true)
             {
                 if (_prev.W == 12345678f)
                 {
@@ -53,7 +51,7 @@ namespace SM64DSe.ImportExport.Writers.InternalWriters
                 Vector4 vtx = Vector4.Multiply(_vtx, 4096f);
                 Vector4 prev = Vector4.Multiply(_prev, 4096f);
 
-                if (ALWAYS_WRITE_FULL_VERTEX_CMD_0x23)
+                if (alwaysWriteFullVertexCmd23h)
                 {
                     AddVertexCommand(_vtx);
                 }
@@ -498,13 +496,19 @@ namespace SM64DSe.ImportExport.Writers.InternalWriters
 
         public NitroFile m_ModelFile;
 
+        protected bool m_AlwaysWriteFullVertexCmd23h = true;
+
         protected bool m_ZMirror = false;
         protected bool m_SwapYZ = false;
 
         public BMDWriter(ModelBase model, ref NitroFile modelFile) :
+            this(model, ref modelFile, BMDImporter.BMDExtraImportOptions.DEFAULT) { }
+
+        public BMDWriter(ModelBase model, ref NitroFile modelFile, BMDImporter.BMDExtraImportOptions extraOptions) :
             base(model, modelFile.m_Name)
         {
             m_ModelFile = modelFile;
+            m_AlwaysWriteFullVertexCmd23h = extraOptions.m_AlwaysWriteFullVertexCmd23h;
         }
 
         public override void WriteModel(bool save = true)
@@ -963,7 +967,7 @@ namespace SM64DSe.ImportExport.Writers.InternalWriters
                 bmd.SaveChanges();
         }
 
-        private static void AddQuadrilateralToDisplayList(GXDisplayListPacker dlpacker, ref int lastColourARGB, ref Vector2 tcscale,
+        private void AddQuadrilateralToDisplayList(GXDisplayListPacker dlpacker, ref int lastColourARGB, ref Vector2 tcscale,
             ref int lastmatrix, ref Vector4 lastvtx, ModelBase.FaceDef face)
         {
             WriteVertexToDisplayList(dlpacker, ref lastColourARGB, ref tcscale, ref lastmatrix, lastvtx,
@@ -997,7 +1001,7 @@ namespace SM64DSe.ImportExport.Writers.InternalWriters
             }
         }
 
-        private static void AddTriangleToDisplayList(GXDisplayListPacker dlpacker, ref int lastColourARGB, ref Vector2 tcscale, ref int lastmatrix,
+        private void AddTriangleToDisplayList(GXDisplayListPacker dlpacker, ref int lastColourARGB, ref Vector2 tcscale, ref int lastmatrix,
             ref Vector4 lastvtx, ModelBase.FaceDef face)
         {
             WriteVertexToDisplayList(dlpacker, ref lastColourARGB, ref tcscale, ref lastmatrix, lastvtx,
@@ -1025,7 +1029,7 @@ namespace SM64DSe.ImportExport.Writers.InternalWriters
             }
         }
 
-        private static void AddLineToDisplayList(GXDisplayListPacker dlpacker, ref int lastColourARGB, ref Vector2 tcscale, ref int lastmatrix,
+        private void AddLineToDisplayList(GXDisplayListPacker dlpacker, ref int lastColourARGB, ref Vector2 tcscale, ref int lastmatrix,
             ref Vector4 lastvtx, ModelBase.FaceDef face)
         {
             WriteVertexToDisplayList(dlpacker, ref lastColourARGB, ref tcscale, ref lastmatrix, lastvtx,
@@ -1040,7 +1044,7 @@ namespace SM64DSe.ImportExport.Writers.InternalWriters
             lastvtx = new Vector4(face.m_Vertices[1].m_Position, 0f);
         }
 
-        private static void AddSinglePointToDisplayList(GXDisplayListPacker dlpacker, ref int lastColourARGB, ref Vector2 tcscale,
+        private void AddSinglePointToDisplayList(GXDisplayListPacker dlpacker, ref int lastColourARGB, ref Vector2 tcscale,
             ref int lastmatrix, ref Vector4 lastvtx, ModelBase.FaceDef face)
         {
             WriteVertexToDisplayList(dlpacker, ref lastColourARGB, ref tcscale, ref lastmatrix, lastvtx,
@@ -1055,7 +1059,7 @@ namespace SM64DSe.ImportExport.Writers.InternalWriters
             lastvtx = new Vector4(face.m_Vertices[0].m_Position, 0f);
         }
 
-        private static void WriteVertexToDisplayList(GXDisplayListPacker dlpacker, ref int lastColourARGB, ref Vector2 tcscale,
+        private void WriteVertexToDisplayList(GXDisplayListPacker dlpacker, ref int lastColourARGB, ref Vector2 tcscale,
             ref int lastmatrix, Vector4 lastvtx, ModelBase.VertexDef vertex)
         {
             Vector4 vtx = new Vector4(vertex.m_Position, 0f);
@@ -1070,7 +1074,7 @@ namespace SM64DSe.ImportExport.Writers.InternalWriters
                 lastColourARGB = ((Color)vertex.m_VertexColour).ToArgb();
             }
             if (vertex.m_TextureCoordinate != null) dlpacker.AddTexCoordCommand(Vector2.Multiply((Vector2)vertex.m_TextureCoordinate, tcscale));
-            dlpacker.AddVertexCommand(vtx, lastvtx);
+            dlpacker.AddVertexCommand(vtx, lastvtx, m_AlwaysWriteFullVertexCmd23h);
         }
 
     }

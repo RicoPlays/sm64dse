@@ -315,19 +315,19 @@ namespace SM64DSe.ImportExport.Loaders.ExternalLoaders
                     {
                         skeletonRoot = result;
 
-                        node resultParent = FindParentNodeInTree(node0, skeletonRoot);
-                        if (resultParent != null)
-                            skeletonRootParent = resultParent;
+                        if (result != node0)
+                        {
+                            bool foundRoot = IsRootNodeOfChild(node0, skeletonRoot);
+                            if (foundRoot)
+                                skeletonRootParent = node0;
+                        }
 
                         break;
                     }
                 }
             }
 
-            if (skeletonRootParent != null)
-                ReadNode(skeletonRootParent, skeletonRootParent, true);
-            else if (skeletonRootParent == null)
-                ReadNode(skeletonRoot, skeletonRoot, true);
+            ReadNode(skeletonRoot, skeletonRoot, true);
 
             m_Model.m_BoneTree.GetBoneByID(skeletonRoot.id).CalculateBranchTransformations();
         }
@@ -393,6 +393,11 @@ namespace SM64DSe.ImportExport.Loaders.ExternalLoaders
                     }
                 }
             }
+
+            //for (int i = 0; i < jointNames.Length; i++)
+            //{
+            //    m_Model.m_BoneTree.GetBoneByID(jointNames[i]).m_GlobalInverseTransformation = inverseBindPoses[i];
+            //}
 
             float[] weights = new float[0];
             long offsetJoint = -1;
@@ -1274,19 +1279,21 @@ namespace SM64DSe.ImportExport.Loaders.ExternalLoaders
             return null;
         }
 
-        private static node FindParentNodeInTree(node parent, node child)
+        private static bool IsRootNodeOfChild(node parent, node child)
         {
-            if (parent.type.Equals(NodeType.NODE) && parent.node1 != null)
+            if (parent.node1 == null || parent.node1.Length == 0)
+                return false;
+            else
             {
-                foreach (node child0 in parent.node1)
+                foreach (node n in parent.node1)
                 {
-                    if (child0.id.Equals(child.id))
-                    {
-                        return parent;
-                    }
+                    if (child.id.Equals(n.id))
+                        return true;
+                    else if (IsRootNodeOfChild(child, n))
+                        return true;
                 }
             }
-            return null;
+            return false;
         }
 
         private string FindIDFromSIDInSkeleton(string skeletonRoot, string sid)

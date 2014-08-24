@@ -48,6 +48,7 @@
             this.groupBox2 = new System.Windows.Forms.GroupBox();
             this.cbWipeLevel = new System.Windows.Forms.CheckBox();
             this.groupBox1 = new System.Windows.Forms.GroupBox();
+            this.chkAlwaysWriteFullVertexCmd23h = new System.Windows.Forms.CheckBox();
             this.lbl02 = new System.Windows.Forms.Label();
             this.txtThreshold = new System.Windows.Forms.TextBox();
             this.lbl01 = new System.Windows.Forms.Label();
@@ -59,11 +60,11 @@
             this.ofdLoadModel = new System.Windows.Forms.OpenFileDialog();
             this.tsToolBar.SuspendLayout();
             this.ssStatusBar.SuspendLayout();
-            //((System.ComponentModel.ISupportInitialize)(this.spcMainContainer)).BeginInit();
+            ((System.ComponentModel.ISupportInitialize)(this.spcMainContainer)).BeginInit();
             this.spcMainContainer.Panel1.SuspendLayout();
             this.spcMainContainer.Panel2.SuspendLayout();
             this.spcMainContainer.SuspendLayout();
-            //((System.ComponentModel.ISupportInitialize)(this.gridColTypes)).BeginInit();
+            ((System.ComponentModel.ISupportInitialize)(this.gridColTypes)).BeginInit();
             this.groupBox2.SuspendLayout();
             this.groupBox1.SuspendLayout();
             this.SuspendLayout();
@@ -279,6 +280,7 @@
             // 
             this.groupBox1.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left)
                         | System.Windows.Forms.AnchorStyles.Right)));
+            this.groupBox1.Controls.Add(this.chkAlwaysWriteFullVertexCmd23h);
             this.groupBox1.Controls.Add(this.lbl02);
             this.groupBox1.Controls.Add(this.txtThreshold);
             this.groupBox1.Controls.Add(this.lbl01);
@@ -293,6 +295,19 @@
             this.groupBox1.TabIndex = 5;
             this.groupBox1.TabStop = false;
             this.groupBox1.Text = "Model settings";
+            // 
+            // chkAlwaysWriteFullVertexCmd23h
+            // 
+            this.chkAlwaysWriteFullVertexCmd23h.AutoSize = true;
+            this.chkAlwaysWriteFullVertexCmd23h.Checked = true;
+            this.chkAlwaysWriteFullVertexCmd23h.CheckState = System.Windows.Forms.CheckState.Checked;
+            this.chkAlwaysWriteFullVertexCmd23h.Location = new System.Drawing.Point(12, 122);
+            this.chkAlwaysWriteFullVertexCmd23h.Name = "chkAlwaysWriteFullVertexCmd23h";
+            this.chkAlwaysWriteFullVertexCmd23h.Size = new System.Drawing.Size(207, 17);
+            this.chkAlwaysWriteFullVertexCmd23h.TabIndex = 11;
+            this.chkAlwaysWriteFullVertexCmd23h.Text = "Always Cmd 0x23 VTX_16 for Vertices";
+            this.chkAlwaysWriteFullVertexCmd23h.UseVisualStyleBackColor = true;
+            this.chkAlwaysWriteFullVertexCmd23h.CheckedChanged += new System.EventHandler(this.chkAlwaysWriteFullVertexCmd23h_CheckedChanged);
             // 
             // lbl02
             // 
@@ -345,7 +360,7 @@
             // 
             this.cbSwapYZ.AutoSize = true;
             this.cbSwapYZ.Enabled = false;
-            this.cbSwapYZ.Location = new System.Drawing.Point(12, 145);
+            this.cbSwapYZ.Location = new System.Drawing.Point(142, 145);
             this.cbSwapYZ.Name = "cbSwapYZ";
             this.cbSwapYZ.Size = new System.Drawing.Size(94, 17);
             this.cbSwapYZ.TabIndex = 4;
@@ -369,7 +384,7 @@
             // 
             this.cbZMirror.AutoSize = true;
             this.cbZMirror.Enabled = false;
-            this.cbZMirror.Location = new System.Drawing.Point(12, 122);
+            this.cbZMirror.Location = new System.Drawing.Point(12, 145);
             this.cbZMirror.Name = "cbZMirror";
             this.cbZMirror.Size = new System.Drawing.Size(97, 17);
             this.cbZMirror.TabIndex = 2;
@@ -403,9 +418,9 @@
             this.spcMainContainer.Panel1.ResumeLayout(false);
             this.spcMainContainer.Panel1.PerformLayout();
             this.spcMainContainer.Panel2.ResumeLayout(false);
-            //((System.ComponentModel.ISupportInitialize)(this.spcMainContainer)).EndInit();
+            ((System.ComponentModel.ISupportInitialize)(this.spcMainContainer)).EndInit();
             this.spcMainContainer.ResumeLayout(false);
-            //((System.ComponentModel.ISupportInitialize)(this.gridColTypes)).EndInit();
+            ((System.ComponentModel.ISupportInitialize)(this.gridColTypes)).EndInit();
             this.groupBox2.ResumeLayout(false);
             this.groupBox2.PerformLayout();
             this.groupBox1.ResumeLayout(false);
@@ -445,5 +460,6 @@
         private System.Windows.Forms.Button btnEditTextures;
         private System.Windows.Forms.TextBox txtInGameSizePreview;
         private System.Windows.Forms.CheckBox chkInGamePreview;
+        private System.Windows.Forms.CheckBox chkAlwaysWriteFullVertexCmd23h;
     }
 }

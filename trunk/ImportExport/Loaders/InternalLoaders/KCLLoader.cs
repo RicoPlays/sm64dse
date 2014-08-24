@@ -37,8 +37,8 @@ namespace SM64DSe.ImportExport.Loaders.InternalLoaders
                 if (!uniqueCollisionTypes.Contains(plane.type))
                     uniqueCollisionTypes.Add(plane.type);
             }
-
-            List<Color> uniqueColours = GetColours(uniqueCollisionTypes.Count);
+            uniqueCollisionTypes.Sort();
+            List<Color> uniqueColours = GetColours(uniqueCollisionTypes[uniqueCollisionTypes.Count - 1] + 1);
 
             foreach (int type in uniqueCollisionTypes)
             {

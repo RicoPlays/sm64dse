@@ -44,17 +44,23 @@ namespace SM64DSe
         {
             InitializeComponent();
             LoadKCL(kclIn);
+            LoadColours();
+            cmbPolygonMode.Items.Add("Fill");
+            cmbPolygonMode.Items.Add("Wireframe");
+            cmbPolygonMode.SelectedIndex = 0;
+            matColTypes = new Dictionary<string, int>();
+        }
+
+        private void LoadColours()
+        {
             List<int> uniqueCollisionTypes = new List<int>();
             foreach (KCL.ColFace plane in m_Planes)
             {
                 if (!uniqueCollisionTypes.Contains(plane.type))
                     uniqueCollisionTypes.Add(plane.type);
             }
-            colours = KCLLoader.GetColours(uniqueCollisionTypes.Count);
-            cmbPolygonMode.Items.Add("Fill");
-            cmbPolygonMode.Items.Add("Wireframe");
-            cmbPolygonMode.SelectedIndex = 0;
-            matColTypes = new Dictionary<string, int>();
+            uniqueCollisionTypes.Sort();
+            colours = KCLLoader.GetColours(uniqueCollisionTypes[uniqueCollisionTypes.Count - 1] + 1);
         }
 
         public void LoadKCL(NitroFile kcl)
@@ -69,6 +75,8 @@ namespace SM64DSe
             {
                 lbxPlanes.Items.Add("Plane " + i.ToString("00000"));
             }
+
+            LoadColours();
         }
 
         private void WriteChanges()
