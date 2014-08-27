@@ -125,6 +125,7 @@ namespace SM64DSe
 
             lbxLevels.Items.AddRange(Strings.LevelNames);
 
+            this.tvFileList.Nodes.Clear();
             ROMFileSelect.LoadFileList(this.tvFileList);
 
             btnEditTexts.Enabled = true;
