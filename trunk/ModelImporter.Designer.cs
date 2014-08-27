@@ -60,11 +60,11 @@
             this.ofdLoadModel = new System.Windows.Forms.OpenFileDialog();
             this.tsToolBar.SuspendLayout();
             this.ssStatusBar.SuspendLayout();
-            ((System.ComponentModel.ISupportInitialize)(this.spcMainContainer)).BeginInit();
+            //((System.ComponentModel.ISupportInitialize)(this.spcMainContainer)).BeginInit();
             this.spcMainContainer.Panel1.SuspendLayout();
             this.spcMainContainer.Panel2.SuspendLayout();
             this.spcMainContainer.SuspendLayout();
-            ((System.ComponentModel.ISupportInitialize)(this.gridColTypes)).BeginInit();
+            //((System.ComponentModel.ISupportInitialize)(this.gridColTypes)).BeginInit();
             this.groupBox2.SuspendLayout();
             this.groupBox1.SuspendLayout();
             this.SuspendLayout();
@@ -418,9 +418,9 @@
             this.spcMainContainer.Panel1.ResumeLayout(false);
             this.spcMainContainer.Panel1.PerformLayout();
             this.spcMainContainer.Panel2.ResumeLayout(false);
-            ((System.ComponentModel.ISupportInitialize)(this.spcMainContainer)).EndInit();
+            //((System.ComponentModel.ISupportInitialize)(this.spcMainContainer)).EndInit();
             this.spcMainContainer.ResumeLayout(false);
-            ((System.ComponentModel.ISupportInitialize)(this.gridColTypes)).EndInit();
+            //((System.ComponentModel.ISupportInitialize)(this.gridColTypes)).EndInit();
             this.groupBox2.ResumeLayout(false);
             this.groupBox2.PerformLayout();
             this.groupBox1.ResumeLayout(false);

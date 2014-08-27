@@ -73,7 +73,7 @@
             this.tbcMainFormTabControl.SuspendLayout();
             this.tbpLevels.SuspendLayout();
             this.tbpFileSystem.SuspendLayout();
-            ((System.ComponentModel.ISupportInitialize)(this.spcFileSystemTab)).BeginInit();
+            //((System.ComponentModel.ISupportInitialize)(this.spcFileSystemTab)).BeginInit();
             this.spcFileSystemTab.Panel1.SuspendLayout();
             this.spcFileSystemTab.Panel2.SuspendLayout();
             this.spcFileSystemTab.SuspendLayout();
@@ -504,7 +504,7 @@
             this.tbpFileSystem.ResumeLayout(false);
             this.spcFileSystemTab.Panel1.ResumeLayout(false);
             this.spcFileSystemTab.Panel2.ResumeLayout(false);
-            ((System.ComponentModel.ISupportInitialize)(this.spcFileSystemTab)).EndInit();
+            //((System.ComponentModel.ISupportInitialize)(this.spcFileSystemTab)).EndInit();
             this.spcFileSystemTab.ResumeLayout(false);
             this.pnlFileOptions.ResumeLayout(false);
             this.ResumeLayout(false);
