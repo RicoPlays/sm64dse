@@ -80,6 +80,7 @@ namespace SM64DSe
         {
             m_ObjAvailable = ((LevelEditorForm)Owner).m_ObjAvailable;
             m_BasicDescriptions = new Dictionary<ushort, string>();
+            lbxObjectList.BeginUpdate();
             for (int i = 0; i < 326; i++)
             {
                 ObjectDatabase.ObjectInfo objinfo = ObjectDatabase.m_ObjectInfo[i];
@@ -91,6 +92,7 @@ namespace SM64DSe
 
             m_ObjectListText[326] = "511 - Minimap change";
             lbxObjectList.Items.Insert(326, m_ObjectListText[326]);
+            lbxObjectList.EndUpdate();
             lbxObjectList.SelectedIndex = (ObjectID == 511) ? (ushort) 326 : ObjectID;
         }
 
@@ -139,6 +141,7 @@ namespace SM64DSe
             if (matchingIDs.Count > 0)
             {
                 lbxObjectList.Items.Clear();
+                lbxObjectList.BeginUpdate();
                 for (int i = 0; i < matchingIDs.Count; i++)
                 {
                     ushort id = matchingIDs.ElementAt(i);
@@ -148,6 +151,7 @@ namespace SM64DSe
                     else
                         lbxObjectList.Items.Insert(326, "511 - Minimap change");
                 }
+                lbxObjectList.EndUpdate();
             }
         }
     }

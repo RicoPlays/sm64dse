@@ -49,7 +49,7 @@ namespace SM64DSe.ImportExport.Loaders.InternalLoaders
                 foreach (BMD.MaterialGroup matgroup in mdchunk.m_MatGroups)
                 {
                     ModelBase.PolyListDef polyListDef = new ModelBase.PolyListDef("polylist-" + matgroup.m_Name, matgroup.m_Name);
-                    geomDef.m_PolyLists.Add(polyListDef.m_ID, polyListDef);
+                    geomDef.m_PolyLists.Add(polyListDef.m_MaterialName, polyListDef);
 
                     ModelBase.MaterialDef material = new ModelBase.MaterialDef(matgroup.m_Name, m_Model.m_Materials.Count);
                     material.m_DiffuseColour = matgroup.m_DiffuseColor;
