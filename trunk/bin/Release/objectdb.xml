@@ -2,11 +2,11 @@
 
 <!--
 	Super Mario 64 DS Object Info Database
-	built on 03/24/2014 21:33:41 for SM64DS Editor
-	Thanks to Fiachra, Hiccup, skawo for their contributions!
+	built on 03/09/2014 15:27:25 for SM64DS Editor
+	Thanks to Fiachra, Hiccup, jjesss064, Luigi, skawo, StarLand for their contributions!
 -->
 
-<database timestamp='1395693221'>
+<database timestamp='1409772445'>
 
 	<object id='0'>
 		<category>4</category>
@@ -255,7 +255,7 @@ Parameter1:
 		<name>Koopa</name>
 		<internalname>NOKONOKO</internalname>
 		<actorid>203</actorid>
-		<description>Well-known enemy from SMB. Can be kicked out of its shell, and awards a blue coin if killed while shellless.</description>
+		<description>Well-known enemy from SMB. Can be kicked out of its shell, and awards a blue coin if killed while shellless. Eat the red variation for one-off fire breath. And kick the red shell to knock out enemies, like when you eat a green shell.</description>
 		<bankreq>0=1</bankreq>
 		<param n='0'>
 			<name>Color</name>
@@ -387,8 +387,32 @@ Contains:
 		<name>VS. Item Block</name>
 		<internalname>VS_ITEM_BLOCK</internalname>
 		<actorid>22</actorid>
-		<description></description>
+		<description>Yellow ! Box used in multiplayer mode. Spawns a feather any player can use to fly.</description>
 		<bankreq>none</bankreq>
+		<param n='0'>
+			<name>!</name>
+			<offset>0</offset>
+			<length>1</length>
+			<type>uint</type>
+			<values>!</values>
+			<description></description>
+		</param>
+		<param n='1'>
+			<name>!</name>
+			<offset>0</offset>
+			<length>1</length>
+			<type>uint</type>
+			<values>!</values>
+			<description>!</description>
+		</param>
+		<param n='2'>
+			<name>!</name>
+			<offset>0</offset>
+			<length>1</length>
+			<type>uint</type>
+			<values>!</values>
+			<description>!</description>
+		</param>
 	</object>
 
 	<object id='33'>
@@ -513,10 +537,40 @@ Parameter 1:
 		<name>Painting</name>
 		<internalname>PICTURE_GATE</internalname>
 		<actorid>307</actorid>
-		<description>Jump-through paintings in the castle.
+		<description>Jump-through paintings in the castle. Needs an exit to work properly.
+Parameter1:
+Painting/size
 
-Parameter 1:
-Painting/Size</description>
+Units: width from 0 to F
+16s: height from 0-F
+4096s,256s: painting from 00-12
+
+PAINTINGS:
+0= Bob-omb Battlefield
+1= Whomp's Fortress
+2= Jolly Roger Bay (Bubbles)
+3= Cool Cool Mountain (Snowmen)
+4= Hazy Maze Cave (Silver Pool)
+5= Lethal Lava Land (Evil Face)
+6= Shifting Sand Land (Stone Wall)
+7= Dire, Dire Docks (Blue Shimmer)
+8= Snowman's Land (Pale Wallpaper)
+9= Wet-Dry World (Skeeter Enemy)
+A= Tall, Tall Mountain
+B= Mountain Slide (Rocky Wall)
+C= Tiny-Huge Island (Goombas)
+D= Tick Tock Clock (Clock Face)
+E= Goomboss Battle (Mario)
+F= Big Boo Battle (Luigi)
+10= Cheif Chilly Challenge (Wario)
+11= Battle Fort [Unused] (Early Top-down View of the Battle Fort)
+12= Sunshine Isles
+
+other paintings are an individual object (such as OBJ 275) or part of the level model.
+
+e.g.
+0134 painting 01, height 3, width 4
+0168 painting 01, height 6, width 8 ie bigger</description>
 		<bankreq>2=4</bankreq>
 	</object>
 
@@ -548,7 +602,7 @@ Set Parameter 1 of the (ID 25) SW_BLOCK_L bricks to FF00</description>
 		<actorid>12</actorid>
 		<description>Makes a star inside a cage appear.
 		
-The fist two digits of Parameter 1 give the time limit (seconds / 2 possibly) and the second two give the ID of the Star.</description>
+The first two digits of Parameter 1 give the time limit (seconds / 2 possibly) and the second two give the ID of the Star.</description>
 		<bankreq>none</bankreq>
 	</object>
 
@@ -1361,28 +1415,30 @@ Use FFFF.</description>
 
 	<object id='123'>
 		<category>1</category>
-		<name></name>
+		<name>Square Wood Platform</name>
 		<internalname>WC_OBJ01</internalname>
 		<actorid>95</actorid>
-		<description></description>
+		<description>A square wood platform which floats on water.</description>
 		<bankreq>7=22</bankreq>
 	</object>
 
 	<object id='124'>
 		<category>1</category>
-		<name></name>
+		<name>Arrow Lift (Wet Dry World)</name>
 		<internalname>WC_OBJ02</internalname>
 		<actorid>96</actorid>
-		<description></description>
+		<description>It moves when you stand on it.</description>
 		<bankreq>7=22</bankreq>
 	</object>
 
 	<object id='125'>
 		<category>1</category>
-		<name></name>
+		<name>Water Level Diamond</name>
 		<internalname>WC_OBJ03</internalname>
 		<actorid>97</actorid>
-		<description></description>
+		<description>Chances the water level to the level of the diamond.
+
+used in Wet Dry World.</description>
 		<bankreq>7=22</bankreq>
 	</object>
 
@@ -1397,19 +1453,27 @@ Use FFFF.</description>
 
 	<object id='127'>
 		<category>1</category>
-		<name></name>
+		<name>Platform For Cage (Lift)</name>
 		<internalname>WC_OBJ05</internalname>
 		<actorid>99</actorid>
-		<description></description>
+		<description>Used in Wet Dry World</description>
 		<bankreq>7=22</bankreq>
+		<param n='0'>
+			<name>If working</name>
+			<offset>0</offset>
+			<length>1</length>
+			<type>uint</type>
+			<values></values>
+			<description>FF00 for Lift. FF01 for Static object</description>
+		</param>
 	</object>
 
 	<object id='128'>
 		<category>1</category>
-		<name></name>
+		<name>Rectangular Wood Platform</name>
 		<internalname>WC_OBJ06</internalname>
 		<actorid>100</actorid>
-		<description></description>
+		<description>A rectangular wood platform which floats on water.</description>
 		<bankreq>7=22</bankreq>
 	</object>
 
@@ -1454,7 +1518,9 @@ Use FFFF.</description>
 		<name></name>
 		<internalname>FL_LONDON</internalname>
 		<actorid>73</actorid>
-		<description>The little bridge that goes up and down from Lethal Lava Land.</description>
+		<description>The little bridge that goes up and down from Lethal Lava Land.
+
+The name seems to be an interesting reference to London bridge.</description>
 		<bankreq>7=15</bankreq>
 	</object>
 
@@ -1544,7 +1610,7 @@ Use FFFF.</description>
 		<name></name>
 		<internalname>LAVA</internalname>
 		<actorid>196</actorid>
-		<description></description>
+		<description>Adds a 'popping lava bubbles' effect to each plane with either LETHAL LAVA or LETHAL ICE collision applied.</description>
 		<bankreq>none</bankreq>
 	</object>
 
@@ -1669,10 +1735,14 @@ Parameter 1: Star ID</description>
 
 	<object id='157'>
 		<category>1</category>
-		<name></name>
+		<name>Baby Penguin</name>
 		<internalname>PENGUIN_BABY</internalname>
 		<actorid>256</actorid>
-		<description></description>
+		<description>The baby penguin.
+
+Param 1:
+0 - Real
+1 - Fake</description>
 		<bankreq>1=4</bankreq>
 	</object>
 
@@ -1681,7 +1751,11 @@ Parameter 1: Star ID</description>
 		<name>Mother Penguin</name>
 		<internalname>PENGUIN_MOTHER</internalname>
 		<actorid>257</actorid>
-		<description>Bring her the correct baby and she will reward you with a star.</description>
+		<description>Bring her the correct baby and she will reward you with a star.
+
+Param 1: Star ID
+
+Special note: Its position in the level affects where she looks down at player; level needs to be high enough or low enough so it looks right.</description>
 		<bankreq>7=11</bankreq>
 	</object>
 
@@ -2168,7 +2242,7 @@ FF02 - Move up and down</description>
 
 	<object id='210'>
 		<category>1</category>
-		<name></name>
+		<name>Falling Bridge Part</name>
 		<internalname>TH_DOWN_B</internalname>
 		<actorid>66</actorid>
 		<description>Fragile Bridge (Big Boo's Haunt)</description>
@@ -2478,7 +2552,11 @@ Path ID</description>
 		<actorid>287</actorid>
 		<description>A pole. However, it is invisible.
 
-The last two digits in Parameter are the height * 100 (in hex).</description>
+Parameter 1:
+XXYY where:
+
+XX - Whether the player can perform a handstand at the top; 00 - No, 01 - Yes
+YY - (Height of the pole * 100) (in hex).</description>
 		<bankreq>none</bankreq>
 	</object>
 
@@ -2505,7 +2583,18 @@ The last two digits in Parameter are the height * 100 (in hex).</description>
 		<name>Floating Lava Grate</name>
 		<internalname>FL_AMILIFT</internalname>
 		<actorid>69</actorid>
-		<description>A moving metal grate seen in Lethal Lava Land and Bowser in the Fire Sea.</description>
+		<description>A moving metal grate seen in Lethal Lava Land and Bowser in the Fire Sea.
+
+Param 1:
+XYZ
+
+X -?
+
+Y - Start Moving
+0 - From level start
+1 - When touched
+
+Z - Path ID</description>
 		<bankreq>0=3</bankreq>
 	</object>
 
@@ -2819,7 +2908,13 @@ Setting Parameter 1 to FFFF causes it to work the same as when Bowser is defeate
 		<name>Eyerok</name>
 		<internalname>IWANTE</internalname>
 		<actorid>176</actorid>
-		<description>Boss in Shifting Sand Land - pyramid. It uses its hands to attack, and can be killed by hitting the eye on each hand 3 times.</description>
+		<description>Boss in Shifting Sand Land - pyramid. It uses its hands to attack, and can be killed by hitting the eye on each hand 3 times.
+
+PARAM 1:
+XYYY
+X - Star ID
+
+This object will only activate if you stand on it or the area around it in specific coordinates in Shifting Sand Land's Pyramid, and nowhere else.</description>
 		<bankreq>0=5</bankreq>
 	</object>
 
@@ -2900,10 +2995,10 @@ ID (zero-based index) of the path he follows</description>
 
 	<object id='288'>
 		<category>1</category>
-		<name></name>
+		<name>Book Generator</name>
 		<internalname>BOOK_GENERATOR</internalname>
 		<actorid>328</actorid>
-		<description></description>
+		<description>It generates books which will be shooted</description>
 		<bankreq>7=13</bankreq>
 	</object>
 
@@ -3033,11 +3128,12 @@ Appears lower than its position if the two pillars in the castle basement have b
 		<actorid>277</actorid>
 		<description>A mushroom that makes the player huge, stomping everything in their way. If the player is huge and falls into water, the player acts as if they were Metal Wario.
 		
-Parameter1:
+Parameter 1:
 0 - Like spawned from block
 F1 - Not there
 F2 - Flies away when approached
-F3 - Still, doesn't disappear</description>
+F3 - Still, doesn't disappear
+F4 - Mushroom jumps before you touch</description>
 		<bankreq>none</bankreq>
 	</object>
 
@@ -3187,14 +3283,16 @@ Alone, not a really useful object.</description>
 		<description>Makes ENEMY_CREATE function when player steps in the area it defines.
 
 Parameter 1:
-0 - Spawn once
-20 - Spawn continuously as long as the Player is standing in the area of the object.
+XY where:
+
+X - 2: Spawn continuously whilst player within area
+Y - ID of this ENEMY_SWITCH, increments from 0 for each ENEMY_SWITCH within level, used by corresponding ENEMY_CREATE
 
 Parameter 2:
-Size of area
+Size of area, default 1.
 
 Parameter 3:
-Spawn delay, in frames, 0 is the default.</description>
+Spawn delay, in frames, 0 is the default, FFFF.</description>
 		<bankreq>none</bankreq>
 	</object>
 
@@ -3203,7 +3301,19 @@ Spawn delay, in frames, 0 is the default.</description>
 		<name></name>
 		<internalname>ENEMY_CREATE</internalname>
 		<actorid>358</actorid>
-		<description>Spawns Bob-ombs when player steps into an ENEMY_SWITCH. Bob-ombs do not have to be in the loaded level overlays.</description>
+		<description>Spawns Bob-ombs when player steps into an ENEMY_SWITCH. Bob-ombs do not have to be in the loaded level overlays.
+
+Parameter 1:
+Unknown, FFC0
+
+Parameter 2:
+Unknown, 0
+
+Parameter 3:
+XXY where:
+
+XX - Unknown, 3E
+Y - ID of corresponding ENEMY_SWITCH</description>
 		<bankreq>none</bankreq>
 	</object>
 

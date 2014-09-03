@@ -60,11 +60,11 @@ namespace SM64DSe.ImportExport.Writers.ExternalWriters
                                     newBone.m_Geometries.Add(geometry.m_ID, new ModelBase.GeometryDef(geometry.m_ID));
                                 if (!newBone.m_Geometries[geometry.m_ID].m_PolyLists.ContainsKey(polyList.m_MaterialName))
                                     newBone.m_Geometries[geometry.m_ID].m_PolyLists.Add(
-                                        polyList.m_ID, new ModelBase.PolyListDef(polyList.m_ID, polyList.m_MaterialName));
+                                        polyList.m_MaterialName, new ModelBase.PolyListDef(polyList.m_ID, polyList.m_MaterialName));
                                 if (!newBone.m_MaterialsInBranch.Contains(polyList.m_MaterialName))
                                     newBone.m_MaterialsInBranch.Add(polyList.m_MaterialName);
 
-                                newBone.m_Geometries[geometry.m_ID].m_PolyLists[polyList.m_ID].m_Faces.Add(face);
+                                newBone.m_Geometries[geometry.m_ID].m_PolyLists[polyList.m_MaterialName].m_Faces.Add(face);
                                 polyList.m_Faces.RemoveAt(f);
                             }
                         }

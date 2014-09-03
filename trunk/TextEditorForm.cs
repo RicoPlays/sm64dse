@@ -38,6 +38,7 @@ namespace SM64DSe
 
         string[] m_MsgData;
         int[] m_StringLengths;
+        string[] m_ShortVersions;
         NitroFile file;
         uint inf1size;
         uint m_FileSize;
@@ -113,6 +114,7 @@ namespace SM64DSe
 
             m_MsgData = new string[numentries];
             m_StringLengths = new int[numentries];
+            m_ShortVersions = new string[numentries];
             m_FileSize = file.Read32(0x08);
             m_StringHeaderAddr = new uint[numentries];
             m_StringHeaderData = new uint[numentries];
@@ -125,6 +127,7 @@ namespace SM64DSe
             }
 
             lbxMsgList.Items.Clear();//Reset list of messages
+            lbxMsgList.BeginUpdate();// Only draw when EndUpdate is called, much faster, expecially for Mono
 
             for (int i = 0; i < m_MsgData.Length; i++)
             {
@@ -206,13 +209,13 @@ namespace SM64DSe
 
                 m_MsgData[i] = thetext;
                 m_StringLengths[i] = length;
+                m_ShortVersions[i] = ShortVersion(m_MsgData[i], i);
 
-                string shortversion = thetext.Replace("\r\n", " ");
-                shortversion = (thetext.Length > limit) ? thetext.Substring(0, limit - 3) + "..." : thetext;
-                lbxMsgList.Items.Add(string.Format("[{0:X4}] {1}", i, shortversion));
+                lbxMsgList.Items.Add(m_ShortVersions[i]);
 
                 btnImport.Enabled = true; btnExport.Enabled = true;
             }
+            lbxMsgList.EndUpdate();
         }
 
         private List<byte> EncodeString(String msg)
@@ -349,7 +352,9 @@ namespace SM64DSe
         {
             if (lbxMsgList.SelectedIndex != -1)
             {
-                selectedIndex = lbxMsgList.SelectedIndex;
+                string selectedText = lbxMsgList.Items[lbxMsgList.SelectedIndex].ToString();
+                selectedIndex = Int32.Parse(selectedText.Substring(1, 4), System.Globalization.NumberStyles.HexNumber);
+
                 tbxMsgPreview.Text = m_MsgData[selectedIndex];
             }
         }
@@ -358,26 +363,25 @@ namespace SM64DSe
         {
             if (lbxMsgList.SelectedIndex != -1)
             {
-                updateEntries(txtEdit.Text, selectedIndex);
+                UpdateEntries(txtEdit.Text, selectedIndex);
                 m_EditedEntries.Add(selectedIndex);
-                string shortversion = m_MsgData[selectedIndex].Replace("\r\n", " ");
-                shortversion = (m_MsgData[selectedIndex].Length > limit) ? m_MsgData[selectedIndex].Substring(0, limit - 3) + "..." : m_MsgData[selectedIndex];
-                lbxMsgList.Items[selectedIndex] = string.Format("[{0:X4}] {1}", selectedIndex, shortversion);
+                lbxMsgList.Items[lbxMsgList.SelectedIndex] = m_ShortVersions[selectedIndex];
             }
         }
 
         private void btnSaveAll_Click(object sender, EventArgs e)
         {
-            writeData();
+            WriteData();
 
             int index = lbxMsgList.SelectedIndex;
             ReadStrings("data/message/msg_data_" + langNames[langIndex] + ".bin");//Reload texts after saving
             lbxMsgList.SelectedIndex = index;
         }
 
-        private void updateEntries(String msg, int index)
+        private void UpdateEntries(String msg, int index)
         {
             m_MsgData[index] = msg;
+            m_ShortVersions[index] = ShortVersion(msg, index);
             int lengthDif = EncodeString(msg).Count - m_StringLengths[index];
             m_StringLengths[index] += lengthDif;
 
@@ -422,7 +426,15 @@ namespace SM64DSe
             file.Write32(m_DAT1Start - 0x04, (uint)(int)(file.Read32(m_DAT1Start - 0x04) + lengthDif));
         }
 
-        private void writeData()
+        private string ShortVersion(string msg, int index)
+        {
+            string shortversion = msg.Replace("\r\n", " ");
+            shortversion = (msg.Length > limit) ? msg.Substring(0, limit - 3) + "..." : msg;
+            shortversion = string.Format("[{0:X4}] {1}", index, shortversion);
+            return shortversion;
+        }
+
+        private void WriteData()
         {
             // Encode and write all edited string entries
             foreach (int index in m_EditedEntries)
@@ -521,6 +533,7 @@ namespace SM64DSe
                 return;
 
             lbxMsgList.Items.Clear();
+            lbxMsgList.BeginUpdate();
 
             using (XmlReader reader = XmlReader.Create(ofd.FileName))
             {
@@ -550,10 +563,11 @@ namespace SM64DSe
                     }
                 }
             }
+            lbxMsgList.EndUpdate();
 
             for (int i = 0; i < m_MsgData.Length; i++)
             {
-                updateEntries(m_MsgData[i], i);
+                UpdateEntries(m_MsgData[i], i);
                 List<byte> entry = EncodeString(m_MsgData[i]);
                 file.WriteBlock(m_StringHeaderData[i] + m_DAT1Start, entry.ToArray<byte>());
             }
@@ -599,6 +613,42 @@ namespace SM64DSe
         private void btnExport_Click(object sender, EventArgs e)
         {
             ExportXML();
+        }
+
+        private void txtSearch_TextChanged(object sender, EventArgs e)
+        {
+            if (langIndex < 0)
+                return;
+
+            string searchString = txtSearch.Text;
+            if (searchString == null || searchString.Equals(""))
+            {
+                lbxMsgList.BeginUpdate();
+                lbxMsgList.Items.Clear();
+
+                lbxMsgList.Items.AddRange(m_ShortVersions);
+
+                lbxMsgList.EndUpdate();
+            }
+            else
+            {
+                lbxMsgList.BeginUpdate();
+                lbxMsgList.Items.Clear();
+
+                string searchStringLower = searchString.ToLowerInvariant();
+                List<int> matchingIndices = new List<int>();
+                for (int i = 0; i < m_MsgData.Length; i++)
+                {
+                    if (m_MsgData[i].ToLowerInvariant().Contains(searchStringLower))
+                        matchingIndices.Add(i);
+                }
+                foreach (int index in matchingIndices)
+                {
+                    lbxMsgList.Items.Add(m_ShortVersions[index]);
+                }
+                
+                lbxMsgList.EndUpdate();
+            }
         }
 
     }

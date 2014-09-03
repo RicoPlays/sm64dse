@@ -152,10 +152,21 @@ namespace SM64DSe.ImportExport.Loaders.ExternalLoaders
                             imageID = (newparam.Item as fx_surface_common).init_from[0].Value;
                             break;
                         }
-                        string texName = (string)this.library_images.image.Where(img => img.id.Equals(imageID)).ElementAt(0).Item;
-                        if (texName.Contains(m_ModelPath)) 
-                            texName.Replace(m_ModelPath, "");
-                        AddTexture(texName, matDef);
+                        // Sometimes models reference a non-existant image ID; if that's the case, don't throw error, 
+                        // just ignore and set colour to white.
+                        IEnumerable<image> matchingImage;
+                        if (this.library_images != null && this.library_images.image != null &&
+                            (matchingImage = this.library_images.image.Where(img => img.id.Equals(imageID))).Count() > 0)
+                        {
+                            string texName = (string)matchingImage.ElementAt(0).Item;
+                            if (texName.Contains(m_ModelPath))
+                                texName.Replace(m_ModelPath, "");
+                            AddTexture(texName, matDef);
+                        }
+                        else
+                        {
+                            Console.WriteLine("Warning: Material: " + matDef.m_ID + " referenced non-existant Image with ID: " + imageID);
+                        }
 
                         matDef.m_DiffuseColour = Color.White;
                     }
@@ -186,7 +197,7 @@ namespace SM64DSe.ImportExport.Loaders.ExternalLoaders
 
         private void ReadNode(node joint, node parent, bool inSkeleton)
         {
-            string id = joint.id;
+            string id = (joint.id != null ? joint.id : (joint.name != null ? joint.name : DateTime.Now.Millisecond.ToString()));
 
             Vector3 nodeScale = Vector3.One;
             Vector3 nodeRotation = Vector3.Zero;

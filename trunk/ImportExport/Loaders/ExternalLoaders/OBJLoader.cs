@@ -110,11 +110,6 @@ namespace SM64DSe.ImportExport.Loaders.ExternalLoaders
                             curmaterial = "default_white";
                             AddWhiteMat(currentBone);
                         }
-                        // The parent bone should have a list of all materials used by itself and its children
-                        if (!m_Model.m_BoneTree.GetBoneByID(currentBone).GetRoot().m_MaterialsInBranch.Contains(curmaterial))
-                            m_Model.m_BoneTree.GetBoneByID(currentBone).GetRoot().m_MaterialsInBranch.Add(curmaterial);
-                        if (!m_Model.m_BoneTree.GetBoneByID(currentBone).m_MaterialsInBranch.Contains(curmaterial))
-                            m_Model.m_BoneTree.GetBoneByID(currentBone).m_MaterialsInBranch.Add(curmaterial);
                         break;
 
                     case "v": // vertex

@@ -400,7 +400,7 @@ namespace SM64DSe
                 }
             }
             
-            try
+            if (!IsEmpty())
             {
                 uint afterLastname = (uint)(_owner.m_TexAnims[lastNamePos[0]][lastNamePos[1]].m_MatNameOffset +
                     _owner.m_TexAnims[lastNamePos[0]][lastNamePos[1]].getMatName().Length);
@@ -412,7 +412,6 @@ namespace SM64DSe
                     _owner.m_TexAnims[lastNamePos[0]][lastNamePos[1]].getMatName().Length), 4);
                 }
             }
-            catch { /*No texture animation data*/ }
 
             lbxArea.Items.Clear();
             lbxTexAnim.Items.Clear();
@@ -421,6 +420,19 @@ namespace SM64DSe
                 lbxArea.Items.Add("" + i);
             }
             lbxArea.SelectedIndex = 0;//Make sure an area is selected
+        }
+
+        private bool IsEmpty()
+        {
+            bool empty = true;
+
+            foreach (List<LevelTexAnim> list in _owner.m_TexAnims)
+            {
+                if (list.Count > 0)
+                    return false;
+            }
+
+            return empty;
         }
 
         private void txtScale_TextChanged(object sender, EventArgs e)
