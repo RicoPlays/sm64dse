@@ -47,8 +47,9 @@ namespace SM64DSe.ImportExport.Loaders.InternalLoaders
                 m_Model.m_Materials.Add(material.m_ID, material);
 
                 rootBone.m_MaterialsInBranch.Add(material.m_ID);
-                rootBone.m_Geometries[geometry.m_ID].m_PolyLists.Add
-                    ("polylist-" + type, new ModelBase.PolyListDef("polylist-" + type, material.m_ID));
+                ModelBase.PolyListDef tmp = new ModelBase.PolyListDef("polylist-" + type, material.m_ID);
+                tmp.m_FaceLists.Add(new ModelBase.FaceListDef());
+                rootBone.m_Geometries[geometry.m_ID].m_PolyLists.Add("polylist-" + type, tmp);
             }
 
             foreach (KCL.ColFace plane in m_KCL.m_Planes)
@@ -67,7 +68,7 @@ namespace SM64DSe.ImportExport.Loaders.InternalLoaders
                     vert.m_VertexBoneID = 0;
                 }
 
-                geometry.m_PolyLists["polylist-" + plane.type].m_Faces.Add(face);
+                geometry.m_PolyLists["polylist-" + plane.type].m_FaceLists[0].m_Faces.Add(face);
             }
 
             return m_Model;

@@ -54,44 +54,47 @@ namespace SM64DSe.ImportExport.Writers.InternalWriters
                     {
                         string material = polyList.m_MaterialName;
 
-                        foreach (ModelBase.FaceDef face in polyList.m_Faces)
+                        foreach (ModelBase.FaceListDef faceList in polyList.m_FaceLists)
                         {
-                            if (face.m_NumVertices == 3)
+                            foreach (ModelBase.FaceDef face in faceList.m_Faces)
                             {
-                                Vertex u = new Vertex(
-                                    face.m_Vertices[0].m_Position.X, face.m_Vertices[0].m_Position.Y, face.m_Vertices[0].m_Position.Z);
-                                Vertex v = new Vertex(
-                                    face.m_Vertices[1].m_Position.X, face.m_Vertices[1].m_Position.Y, face.m_Vertices[1].m_Position.Z);
-                                Vertex w = new Vertex(
-                                    face.m_Vertices[2].m_Position.X, face.m_Vertices[2].m_Position.Y, face.m_Vertices[2].m_Position.Z);
+                                if (face.m_NumVertices == 3)
+                                {
+                                    Vertex u = new Vertex(
+                                        face.m_Vertices[0].m_Position.X, face.m_Vertices[0].m_Position.Y, face.m_Vertices[0].m_Position.Z);
+                                    Vertex v = new Vertex(
+                                        face.m_Vertices[1].m_Position.X, face.m_Vertices[1].m_Position.Y, face.m_Vertices[1].m_Position.Z);
+                                    Vertex w = new Vertex(
+                                        face.m_Vertices[2].m_Position.X, face.m_Vertices[2].m_Position.Y, face.m_Vertices[2].m_Position.Z);
 
-                                //Below line gets rid of faces that are too small, original 0.001
-                                if (cross(v.sub(u), w.sub(u)).norm_sq() < faceSizeThreshold) { continue; } //#TODO: find a better solution
-                                triangles.Add(new Triangle(u, v, w, matColTypes[material]));
-                            }
-                            else if (face.m_NumVertices == 4)
-                            {
-                                Vertex u1 = new Vertex(
-                                    face.m_Vertices[0].m_Position.X, face.m_Vertices[0].m_Position.Y, face.m_Vertices[0].m_Position.Z);
-                                Vertex v1 = new Vertex(
-                                    face.m_Vertices[1].m_Position.X, face.m_Vertices[1].m_Position.Y, face.m_Vertices[1].m_Position.Z);
-                                Vertex w1 = new Vertex(
-                                    face.m_Vertices[3].m_Position.X, face.m_Vertices[3].m_Position.Y, face.m_Vertices[3].m_Position.Z);
+                                    //Below line gets rid of faces that are too small, original 0.001
+                                    if (cross(v.sub(u), w.sub(u)).norm_sq() < faceSizeThreshold) { continue; } //#TODO: find a better solution
+                                    triangles.Add(new Triangle(u, v, w, matColTypes[material]));
+                                }
+                                else if (face.m_NumVertices == 4)
+                                {
+                                    Vertex u1 = new Vertex(
+                                        face.m_Vertices[0].m_Position.X, face.m_Vertices[0].m_Position.Y, face.m_Vertices[0].m_Position.Z);
+                                    Vertex v1 = new Vertex(
+                                        face.m_Vertices[1].m_Position.X, face.m_Vertices[1].m_Position.Y, face.m_Vertices[1].m_Position.Z);
+                                    Vertex w1 = new Vertex(
+                                        face.m_Vertices[3].m_Position.X, face.m_Vertices[3].m_Position.Y, face.m_Vertices[3].m_Position.Z);
 
-                                //Below line gets rid of faces that are too small, original 0.001
-                                if (cross(v1.sub(u1), w1.sub(u1)).norm_sq() < faceSizeThreshold) { continue; } //#TODO: find a better solution
-                                triangles.Add(new Triangle(u1, v1, w1, matColTypes[material]));
+                                    //Below line gets rid of faces that are too small, original 0.001
+                                    if (cross(v1.sub(u1), w1.sub(u1)).norm_sq() < faceSizeThreshold) { continue; } //#TODO: find a better solution
+                                    triangles.Add(new Triangle(u1, v1, w1, matColTypes[material]));
 
-                                Vertex u2 = new Vertex(
-                                    face.m_Vertices[1].m_Position.X, face.m_Vertices[1].m_Position.Y, face.m_Vertices[1].m_Position.Z);
-                                Vertex v2 = new Vertex(
-                                    face.m_Vertices[2].m_Position.X, face.m_Vertices[2].m_Position.Y, face.m_Vertices[2].m_Position.Z);
-                                Vertex w2 = new Vertex(
-                                    face.m_Vertices[3].m_Position.X, face.m_Vertices[3].m_Position.Y, face.m_Vertices[3].m_Position.Z);
+                                    Vertex u2 = new Vertex(
+                                        face.m_Vertices[1].m_Position.X, face.m_Vertices[1].m_Position.Y, face.m_Vertices[1].m_Position.Z);
+                                    Vertex v2 = new Vertex(
+                                        face.m_Vertices[2].m_Position.X, face.m_Vertices[2].m_Position.Y, face.m_Vertices[2].m_Position.Z);
+                                    Vertex w2 = new Vertex(
+                                        face.m_Vertices[3].m_Position.X, face.m_Vertices[3].m_Position.Y, face.m_Vertices[3].m_Position.Z);
 
-                                //Below line gets rid of faces that are too small, original 0.001
-                                if (cross(v2.sub(u2), w2.sub(u2)).norm_sq() < faceSizeThreshold) { continue; } //#TODO: find a better solution
-                                triangles.Add(new Triangle(u2, v2, w2, matColTypes[material]));
+                                    //Below line gets rid of faces that are too small, original 0.001
+                                    if (cross(v2.sub(u2), w2.sub(u2)).norm_sq() < faceSizeThreshold) { continue; } //#TODO: find a better solution
+                                    triangles.Add(new Triangle(u2, v2, w2, matColTypes[material]));
+                                }
                             }
                         }
                     }

@@ -334,13 +334,35 @@ namespace SM64DSe.ImportExport
         {
             public string m_ID;
             public string m_MaterialName;
-            public List<FaceDef> m_Faces;
+            public List<FaceListDef> m_FaceLists;
 
             public PolyListDef(string id, string materialName)
             {
                 m_ID = id;
                 m_MaterialName = materialName;
+                m_FaceLists = new List<FaceListDef>();
+            }
+        }
+
+        public enum PolyListType
+        {
+            Polygons,
+            Triangles,
+            TriangleStrip
+        };
+
+        public class FaceListDef
+        {
+            public List<FaceDef> m_Faces;
+            public PolyListType m_Type;
+
+            public FaceListDef() :
+                this(PolyListType.Polygons) { }
+
+            public FaceListDef(PolyListType type)
+            {
                 m_Faces = new List<FaceDef>();
+                m_Type = type;
             }
         }
 
@@ -561,16 +583,39 @@ namespace SM64DSe.ImportExport
                 {
                     foreach (PolyListDef polyList in geometry.m_PolyLists.Values)
                     {
-                        foreach (FaceDef face in polyList.m_Faces)
+                        foreach (FaceListDef faceList in polyList.m_FaceLists)
                         {
-                            foreach (VertexDef vert in face.m_Vertices)
+                            foreach (FaceDef face in faceList.m_Faces)
                             {
-                                vert.m_Position.X *= scale.X;
-                                vert.m_Position.Y *= scale.Y;
-                                vert.m_Position.Z *= scale.Z;
+                                foreach (VertexDef vert in face.m_Vertices)
+                                {
+                                    vert.m_Position.X *= scale.X;
+                                    vert.m_Position.Y *= scale.Y;
+                                    vert.m_Position.Z *= scale.Z;
+                                }
                             }
                         }
                     }
+                }
+            }
+        }
+
+        // Use below method can be used as part of a manual hack to export existing animations at a larger scale, 
+        // combine them with a scaled geometry exported from a 3D modeller and replace the existing model. This was 
+        // used to get around the fact Blender only exports matrices in DAE.
+        public void ScaleSkeletonAndAnimations(Vector3 scale)
+        {
+            foreach (BoneDef bone in m_BoneTree)
+            {
+                Vector3 translation = bone.m_Translation;
+                bone.SetTranslation(Vector3.Multiply(translation, scale));
+            }
+            foreach (AnimationDef animDef in m_Animations.Values)
+            {
+                foreach (AnimationFrameDef frame in animDef.m_AnimationFrames)
+                {
+                    Vector3 translation = frame.GetTranslation();
+                    frame.SetTranslation(Vector3.Multiply(translation, scale));
                 }
             }
         }
@@ -584,15 +629,18 @@ namespace SM64DSe.ImportExport
                 {
                     foreach (PolyListDef polyList in geometry.m_PolyLists.Values)
                     {
-                        foreach (FaceDef face in polyList.m_Faces)
+                        foreach (FaceListDef faceList in polyList.m_FaceLists)
                         {
-                            foreach (VertexDef vert in face.m_Vertices)
+                            foreach (FaceDef face in faceList.m_Faces)
                             {
-                                BoneDef currentVertexBone = m_BoneTree.GetAsList()[vert.m_VertexBoneID];
+                                foreach (VertexDef vert in face.m_Vertices)
+                                {
+                                    BoneDef currentVertexBone = m_BoneTree.GetAsList()[vert.m_VertexBoneID];
 
-                                Vector3 vertex = vert.m_Position;
-                                Vector3.Transform(ref vertex, ref currentVertexBone.m_GlobalTransformation, out vertex);
-                                vert.m_Position = vertex;
+                                    Vector3 vertex = vert.m_Position;
+                                    Vector3.Transform(ref vertex, ref currentVertexBone.m_GlobalTransformation, out vertex);
+                                    vert.m_Position = vertex;
+                                }
                             }
                         }
                     }
@@ -613,15 +661,18 @@ namespace SM64DSe.ImportExport
                 {
                     foreach (ModelBase.PolyListDef polyList in geometry.m_PolyLists.Values)
                     {
-                        foreach (FaceDef face in polyList.m_Faces)
+                        foreach (FaceListDef faceList in polyList.m_FaceLists)
                         {
-                            foreach (VertexDef vert in face.m_Vertices)
+                            foreach (FaceDef face in faceList.m_Faces)
                             {
-                                BoneDef currentVertexBone = m_BoneTree.GetAsList()[vert.m_VertexBoneID];
+                                foreach (VertexDef vert in face.m_Vertices)
+                                {
+                                    BoneDef currentVertexBone = m_BoneTree.GetAsList()[vert.m_VertexBoneID];
 
-                                Vector3 vertex = vert.m_Position;
-                                Vector3.Transform(ref vertex, ref currentVertexBone.m_GlobalInverseTransformation, out vertex);
-                                vert.m_Position = vertex;
+                                    Vector3 vertex = vert.m_Position;
+                                    Vector3.Transform(ref vertex, ref currentVertexBone.m_GlobalInverseTransformation, out vertex);
+                                    vert.m_Position = vertex;
+                                }
                             }
                         }
                     }

@@ -46,26 +46,32 @@ namespace SM64DSe.ImportExport.Writers.ExternalWriters
                 {
                     foreach (ModelBase.PolyListDef polyList in geometry.m_PolyLists.Values)
                     {
-                        for (int f = 0; f < polyList.m_Faces.Count; f++)
+                        foreach (ModelBase.FaceListDef faceList in polyList.m_FaceLists)
                         {
-                            ModelBase.FaceDef face = polyList.m_Faces[f];
-
-                            int objSplitBoneID = face.m_Vertices[0].m_VertexBoneID;
-                            if (objSplitBoneID == boneIndex) continue;
-                            else
+                            for (int f = 0; f < faceList.m_Faces.Count; f++)
                             {
-                                ModelBase.BoneDef newBone = flatBoneList[objSplitBoneID];
+                                ModelBase.FaceDef face = faceList.m_Faces[f];
 
-                                if (!newBone.m_Geometries.ContainsKey(geometry.m_ID))
-                                    newBone.m_Geometries.Add(geometry.m_ID, new ModelBase.GeometryDef(geometry.m_ID));
-                                if (!newBone.m_Geometries[geometry.m_ID].m_PolyLists.ContainsKey(polyList.m_MaterialName))
-                                    newBone.m_Geometries[geometry.m_ID].m_PolyLists.Add(
-                                        polyList.m_MaterialName, new ModelBase.PolyListDef(polyList.m_ID, polyList.m_MaterialName));
-                                if (!newBone.m_MaterialsInBranch.Contains(polyList.m_MaterialName))
-                                    newBone.m_MaterialsInBranch.Add(polyList.m_MaterialName);
+                                int objSplitBoneID = face.m_Vertices[0].m_VertexBoneID;
+                                if (objSplitBoneID == boneIndex) continue;
+                                else
+                                {
+                                    ModelBase.BoneDef newBone = flatBoneList[objSplitBoneID];
 
-                                newBone.m_Geometries[geometry.m_ID].m_PolyLists[polyList.m_MaterialName].m_Faces.Add(face);
-                                polyList.m_Faces.RemoveAt(f);
+                                    if (!newBone.m_Geometries.ContainsKey(geometry.m_ID))
+                                        newBone.m_Geometries.Add(geometry.m_ID, new ModelBase.GeometryDef(geometry.m_ID));
+                                    if (!newBone.m_Geometries[geometry.m_ID].m_PolyLists.ContainsKey(polyList.m_MaterialName))
+                                    {
+                                        ModelBase.PolyListDef tmp = new ModelBase.PolyListDef(polyList.m_ID, polyList.m_MaterialName);
+                                        tmp.m_FaceLists.Add(new ModelBase.FaceListDef());
+                                        newBone.m_Geometries[geometry.m_ID].m_PolyLists.Add(polyList.m_MaterialName, tmp);
+                                    }
+                                    if (!newBone.m_MaterialsInBranch.Contains(polyList.m_MaterialName))
+                                        newBone.m_MaterialsInBranch.Add(polyList.m_MaterialName);
+
+                                    newBone.m_Geometries[geometry.m_ID].m_PolyLists[polyList.m_MaterialName].m_FaceLists[0].m_Faces.Add(face);
+                                    polyList.m_FaceLists.RemoveAt(f);
+                                }
                             }
                         }
                     }
@@ -132,24 +138,27 @@ namespace SM64DSe.ImportExport.Writers.ExternalWriters
                 {
                     foreach (ModelBase.PolyListDef polyList in geometry.m_PolyLists.Values)
                     {
-                        foreach (ModelBase.FaceDef face in polyList.m_Faces)
+                        foreach (ModelBase.FaceListDef faceList in polyList.m_FaceLists)
                         {
-                            foreach (ModelBase.VertexDef vert in face.m_Vertices)
+                            foreach (ModelBase.FaceDef face in faceList.m_Faces)
                             {
-                                if (!vertsCurBone.Contains(vert.m_Position))
+                                foreach (ModelBase.VertexDef vert in face.m_Vertices)
                                 {
-                                    vertsCurBone.Add(vert.m_Position);
-                                    verts.Add(vert.m_Position);
-                                }
-                                if (vert.m_TextureCoordinate != null && !textureCoordsCurBone.Contains((Vector2)vert.m_TextureCoordinate))
-                                {
-                                    textureCoordsCurBone.Add((Vector2)vert.m_TextureCoordinate);
-                                    textureCoords.Add((Vector2)vert.m_TextureCoordinate);
-                                }
-                                if (vert.m_VertexColour != null && !vertexColoursCurBone.Contains((Color)vert.m_VertexColour))
-                                {
-                                    vertexColoursCurBone.Add((Color)vert.m_VertexColour);
-                                    vertexColours.Add((Color)vert.m_VertexColour);
+                                    if (!vertsCurBone.Contains(vert.m_Position))
+                                    {
+                                        vertsCurBone.Add(vert.m_Position);
+                                        verts.Add(vert.m_Position);
+                                    }
+                                    if (vert.m_TextureCoordinate != null && !textureCoordsCurBone.Contains((Vector2)vert.m_TextureCoordinate))
+                                    {
+                                        textureCoordsCurBone.Add((Vector2)vert.m_TextureCoordinate);
+                                        textureCoords.Add((Vector2)vert.m_TextureCoordinate);
+                                    }
+                                    if (vert.m_VertexColour != null && !vertexColoursCurBone.Contains((Color)vert.m_VertexColour))
+                                    {
+                                        vertexColoursCurBone.Add((Color)vert.m_VertexColour);
+                                        vertexColours.Add((Color)vert.m_VertexColour);
+                                    }
                                 }
                             }
                         }
@@ -172,23 +181,26 @@ namespace SM64DSe.ImportExport.Writers.ExternalWriters
                     {
                         objWriter.Write("usemtl " + polyList.m_MaterialName + "\n");
 
-                        foreach (ModelBase.FaceDef face in polyList.m_Faces)
+                        foreach (ModelBase.FaceListDef faceList in polyList.m_FaceLists)
                         {
-                            // Each face is a triangle or a quad, as they have already been extracted individually from
-                            // the vertex lists
-                            // Note: Indices start at 1 in OBJ
-                            int numVerticesInFace = face.m_NumVertices;
-
-                            objWriter.Write("f ");
-                            foreach (ModelBase.VertexDef vert in face.m_Vertices)
+                            foreach (ModelBase.FaceDef face in faceList.m_Faces)
                             {
-                                objWriter.Write((verts.LastIndexOf(vert.m_Position) + 1) +
-                                    "/" + ((vert.m_TextureCoordinate != null) ? 
-                                    (textureCoords.LastIndexOf((Vector2)vert.m_TextureCoordinate) + 1).ToString() : "") +
-                                    "//" + ((vert.m_VertexColour != null) ? 
-                                    (vertexColours.LastIndexOf((Color)vert.m_VertexColour) + 1).ToString() : "") + " ");
+                                // Each face is a triangle or a quad, as they have already been extracted individually from
+                                // the vertex lists
+                                // Note: Indices start at 1 in OBJ
+                                int numVerticesInFace = face.m_NumVertices;
+
+                                objWriter.Write("f ");
+                                foreach (ModelBase.VertexDef vert in face.m_Vertices)
+                                {
+                                    objWriter.Write((verts.LastIndexOf(vert.m_Position) + 1) +
+                                        "/" + ((vert.m_TextureCoordinate != null) ?
+                                        (textureCoords.LastIndexOf((Vector2)vert.m_TextureCoordinate) + 1).ToString() : "") +
+                                        "//" + ((vert.m_VertexColour != null) ?
+                                        (vertexColours.LastIndexOf((Color)vert.m_VertexColour) + 1).ToString() : "") + " ");
+                                }
+                                objWriter.Write("\n");
                             }
-                            objWriter.Write("\n");
                         }
                     }
                 }

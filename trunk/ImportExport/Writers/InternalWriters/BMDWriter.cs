@@ -494,6 +494,14 @@ namespace SM64DSe.ImportExport.Writers.InternalWriters
             return new ConvertedTexture(dstp, tex, pal, texname, palname);
         }
 
+        public enum VertexListPrimitiveTypes
+        {
+            SeparateTriangles = 0,
+            SeparateQuadrilaterals = 1,
+            TriangleStrip = 2,
+            QuadrilateralStrip = 3
+        };
+
         public NitroFile m_ModelFile;
 
         protected bool m_AlwaysWriteFullVertexCmd23h = true;
@@ -533,19 +541,22 @@ namespace SM64DSe.ImportExport.Writers.InternalWriters
                 {
                     foreach (ModelBase.PolyListDef polyList in geometry.m_PolyLists.Values)
                     {
-                        foreach (ModelBase.FaceDef face in polyList.m_Faces)
+                        foreach (ModelBase.FaceListDef faceList in polyList.m_FaceLists)
                         {
-                            foreach (ModelBase.VertexDef vert in face.m_Vertices)
+                            foreach (ModelBase.FaceDef face in faceList.m_Faces)
                             {
-                                Vector3 vtx = vert.m_Position;
+                                foreach (ModelBase.VertexDef vert in face.m_Vertices)
+                                {
+                                    Vector3 vtx = vert.m_Position;
 
-                                if (vtx.X > largest) largest = vtx.X;
-                                if (vtx.Y > largest) largest = vtx.Y;
-                                if (vtx.Z > largest) largest = vtx.Z;
+                                    if (vtx.X > largest) largest = vtx.X;
+                                    if (vtx.Y > largest) largest = vtx.Y;
+                                    if (vtx.Z > largest) largest = vtx.Z;
 
-                                if (-vtx.X > largest) largest = -vtx.X;
-                                if (-vtx.Y > largest) largest = -vtx.Y;
-                                if (-vtx.Z > largest) largest = -vtx.Z;
+                                    if (-vtx.X > largest) largest = -vtx.X;
+                                    if (-vtx.Y > largest) largest = -vtx.Y;
+                                    if (-vtx.Z > largest) largest = -vtx.Z;
+                                }
                             }
                         }
                     }
@@ -572,13 +583,16 @@ namespace SM64DSe.ImportExport.Writers.InternalWriters
                 {
                     foreach (ModelBase.PolyListDef polyList in geometry.m_PolyLists.Values)
                     {
-                        foreach (ModelBase.FaceDef face in polyList.m_Faces)
+                        foreach (ModelBase.FaceListDef faceList in polyList.m_FaceLists)
                         {
-                            foreach (ModelBase.VertexDef vert in face.m_Vertices)
+                            foreach (ModelBase.FaceDef face in faceList.m_Faces)
                             {
-                                vert.m_Position.X *= scaleModel;
-                                vert.m_Position.Y *= scaleModel;
-                                vert.m_Position.Z *= scaleModel;
+                                foreach (ModelBase.VertexDef vert in face.m_Vertices)
+                                {
+                                    vert.m_Position.X *= scaleModel;
+                                    vert.m_Position.Y *= scaleModel;
+                                    vert.m_Position.Z *= scaleModel;
+                                }
                             }
                         }
                     }
@@ -653,15 +667,18 @@ namespace SM64DSe.ImportExport.Writers.InternalWriters
                         {
                             if (!polyList.m_MaterialName.Equals(curmaterial))
                                 continue;
-                            foreach (ModelBase.FaceDef face in polyList.m_Faces)
+                            foreach (ModelBase.FaceListDef faceList in polyList.m_FaceLists)
                             {
-                                foreach (ModelBase.VertexDef vert in face.m_Vertices)
+                                foreach (ModelBase.FaceDef face in faceList.m_Faces)
                                 {
-                                    Vector2? txc = vert.m_TextureCoordinate;
-                                    if (txc == null) continue;
-                                    Vector2 scaledTxc = Vector2.Multiply((Vector2)txc, tcscale);
-                                    if (Math.Abs(scaledTxc.X) > largesttc) largesttc = Math.Abs(scaledTxc.X);
-                                    if (Math.Abs(scaledTxc.Y) > largesttc) largesttc = Math.Abs(scaledTxc.Y);
+                                    foreach (ModelBase.VertexDef vert in face.m_Vertices)
+                                    {
+                                        Vector2? txc = vert.m_TextureCoordinate;
+                                        if (txc == null) continue;
+                                        Vector2 scaledTxc = Vector2.Multiply((Vector2)txc, tcscale);
+                                        if (Math.Abs(scaledTxc.X) > largesttc) largesttc = Math.Abs(scaledTxc.X);
+                                        if (Math.Abs(scaledTxc.Y) > largesttc) largesttc = Math.Abs(scaledTxc.Y);
+                                    }
                                 }
                             }
                         }
@@ -689,65 +706,75 @@ namespace SM64DSe.ImportExport.Writers.InternalWriters
                         {
                             if (!polyList.m_MaterialName.Equals(curmaterial))
                                 continue;
-                            foreach (ModelBase.FaceDef face in polyList.m_Faces)
+                            foreach (ModelBase.FaceListDef faceList in polyList.m_FaceLists)
                             {
-                                // DEBUG ONLY
-                                //Console.WriteLine("face in material " + curmaterial + ":");
-                                //foreach (Vector3 vec in face.m_Vertices)
-                                //    Console.WriteLine(vec.ToString());
-
-                                int nvtx = face.m_NumVertices;
-
-                                if (nvtx != lastface || lastface > 4)
+                                if (faceList.m_Type.Equals(ModelBase.PolyListType.TriangleStrip))
                                 {
-                                    uint vtxtype = 0;
-                                    switch (nvtx)
+                                    dlpacker.AddCommand(0x40, (uint)VertexListPrimitiveTypes.TriangleStrip);// Begin Vertex List
+                                    AddTriangleStripToDisplayList(dlpacker, ref lastColourARGB, ref tcscale, ref lastmatrix,
+                                                    ref lastvtx, faceList.m_Faces);
+                                    dlpacker.AddCommand(0x41);//End Vertex List
+                                }
+                                else
+                                {
+                                    foreach (ModelBase.FaceDef face in faceList.m_Faces)
                                     {
-                                        case 1:
-                                        case 2:
-                                        case 3: vtxtype = 0; break;
-                                        case 4: vtxtype = 1; break;
-                                        default: vtxtype = 2; break;
+                                        int nvtx = face.m_NumVertices;
+
+                                        if (nvtx != lastface || lastface > 4)
+                                        {
+                                            uint vtxtype = 0;
+                                            switch (nvtx)
+                                            {
+                                                case 1:
+                                                case 2:
+                                                case 3: vtxtype = (uint)VertexListPrimitiveTypes.SeparateTriangles; break;
+                                                case 4: vtxtype = (uint)VertexListPrimitiveTypes.SeparateQuadrilaterals; break;
+                                                default: vtxtype = (uint)VertexListPrimitiveTypes.TriangleStrip; break;
+                                            }
+
+                                            if (lastface != -1) dlpacker.AddCommand(0x41);// End Vertex List
+
+                                            dlpacker.AddCommand(0x40, vtxtype);// Begin Vertex List
+
+                                            lastface = nvtx;
+                                        }
+
+                                        switch (nvtx)
+                                        {
+                                            case 1: // point
+                                                AddSinglePointToDisplayList(dlpacker, ref lastColourARGB, ref tcscale, ref lastmatrix,
+                                                    ref lastvtx, face);
+                                                break;
+
+                                            case 2: // line
+                                                AddLineToDisplayList(dlpacker, ref lastColourARGB, ref tcscale, ref lastmatrix,
+                                                    ref lastvtx, face);
+                                                break;
+
+                                            case 3: // triangle
+                                                AddTriangleToDisplayList(dlpacker, ref lastColourARGB, ref tcscale, ref lastmatrix,
+                                                    ref lastvtx, face);
+                                                break;
+
+                                            case 4: // quad
+                                                AddQuadrilateralToDisplayList(dlpacker, ref lastColourARGB, ref tcscale, ref lastmatrix,
+                                                    ref lastvtx, face);
+                                                break;
+
+                                            default: // whatever (import as triangle strip)
+                                                // todo
+                                                break;
+                                        }
                                     }
 
-                                    if (lastface != -1) dlpacker.AddCommand(0x41);// End Vertex List
-
-                                    dlpacker.AddCommand(0x40, vtxtype);// Begin Vertex List
-
-                                    lastface = nvtx;
-                                }
-
-                                switch (nvtx)
-                                {
-                                    case 1: // point
-                                        AddSinglePointToDisplayList(dlpacker, ref lastColourARGB, ref tcscale, ref lastmatrix,
-                                            ref lastvtx, face);
-                                        break;
-
-                                    case 2: // line
-                                        AddLineToDisplayList(dlpacker, ref lastColourARGB, ref tcscale, ref lastmatrix,
-                                            ref lastvtx, face);
-                                        break;
-
-                                    case 3: // triangle
-                                        AddTriangleToDisplayList(dlpacker, ref lastColourARGB, ref tcscale, ref lastmatrix,
-                                            ref lastvtx, face);
-                                        break;
-
-                                    case 4: // quad
-                                        AddQuadrilateralToDisplayList(dlpacker, ref lastColourARGB, ref tcscale, ref lastmatrix,
-                                            ref lastvtx, face);
-                                        break;
-
-                                    default: // whatever (import as triangle strip)
-                                        // todo
-                                        break;
+                                    dlpacker.AddCommand(0x41);
+                                    lastface = -1;
                                 }
                             }
                         }
                     }
                 }
-                dlpacker.AddCommand(0x41);
                 byte[] dlist = dlpacker.GetDisplayList();
 
                 // Display list header
@@ -870,6 +897,7 @@ namespace SM64DSe.ImportExport.Writers.InternalWriters
 
                 uint alpha = (uint)(mat.m_Opacity >> 3);
                 uint polyattr = 0x00000080 | (alpha << 16);
+                if (_mat.Value.m_IsDoubleSided) polyattr |= 0xC0;
                 // if (alpha < 0x1F) polyattr |= 0x40;
 
                 // Set material colours
@@ -965,6 +993,28 @@ namespace SM64DSe.ImportExport.Writers.InternalWriters
 
             if (save)
                 bmd.SaveChanges();
+        }
+
+        private void AddTriangleStripToDisplayList(GXDisplayListPacker dlpacker, ref int lastColourARGB, ref Vector2 tcscale,
+            ref int lastmatrix, ref Vector4 lastvtx, List<ModelBase.FaceDef> faces)
+        {
+            if (faces.Count < 1)
+                return;
+
+            AddTriangleToDisplayList(dlpacker, ref lastColourARGB, ref tcscale, ref lastmatrix, ref lastvtx, faces.ElementAt(0));
+
+            bool even = false;
+            for (int i = 1; i < faces.Count; i++)
+            {
+                if (even)
+                    WriteVertexToDisplayList(dlpacker, ref lastColourARGB, ref tcscale, ref lastmatrix, lastvtx,
+                        faces[i].m_Vertices[2]);
+                else
+                    WriteVertexToDisplayList(dlpacker, ref lastColourARGB, ref tcscale, ref lastmatrix, lastvtx,
+                        faces[i].m_Vertices[0]);
+
+                even = !even;
+            }
         }
 
         private void AddQuadrilateralToDisplayList(GXDisplayListPacker dlpacker, ref int lastColourARGB, ref Vector2 tcscale,

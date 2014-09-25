@@ -44,7 +44,7 @@ namespace SM64DSe
                 case 7: ret = new NormalBMDRenderer("data/normal_obj/obj_updnlift/obj_updnlift.bmd", 0.008f); break;
                 case 8: ret = new NormalBMDRenderer("data/special_obj/hs_updown_lift/hs_updown_lift.bmd", 0.008f); break;
                 case 9: ret = new NormalBMDRenderer("data/normal_obj/obj_pathlift/obj_pathlift.bmd", 0.008f); break;
-                //case 10: ret = new NormalBMDRenderer("data/enemy/wanwan/wanwan.bmd", 0.008f); break; CHAIN CHOMP
+                case 10: ret = new ChainedWanWanRenderer(); break;
                 // 11 -- CAMERA_TAG -- non-graphical
                 case 12: ret = new NormalBMDRenderer("data/normal_obj/obj_seesaw/obj_seesaw.bmd", 0.008f); break;
                 case 13: ret = new NormalBMDRenderer("data/enemy/iron_ball/iron_ball.bmd", 0.008f); break;
@@ -82,7 +82,7 @@ namespace SM64DSe
                 case 45: ret = new NormalBMDRenderer("data/special_obj/b_ana_shutter/b_ana_shutter.bmd", 0.008f); break;
                 case 46: ret = new NormalBMDRenderer("data/special_obj/cv_shutter/cv_shutter.bmd", 0.008f); break;
                 case 47: ret = new NormalBMDRenderer("data/special_obj/cv_news_lift/cv_news_lift.bmd", 0.008f); break;
-                //case 48: ret = new NormalBMDRenderer("data/enemy/wanwan/wanwan.bmd", 0.008f); break; CHAIN CHOMP LOOSE
+                case 48: ret = new LooseWanWanRenderer(); break;
                 case 49: ret = new NormalBMDRenderer("data/normal_obj/oneup_kinoko/oneup_kinoko.bmd", 0.008f); break;
                 case 50: ret = new NormalBMDRenderer("data/normal_obj/obj_cannon/houdai.bmd", 0.008f); break;
                 case 51: ret = new NormalBMDRenderer("data/special_obj/b_wan_shutter/b_wan_shutter.bmd", 0.008f); break;
@@ -867,6 +867,75 @@ namespace SM64DSe
                 GL.Translate(0f, 0f, -15f);
                 renderer.Render(mode);
             }
+        }
+    }
+
+    class LooseWanWanRenderer : ObjectRenderer
+    {
+        private NormalBMDRenderer m_BodyRenderer, m_ChainRenderer;
+
+        public LooseWanWanRenderer()
+        {
+            m_BodyRenderer = new NormalBMDRenderer("data/enemy/wanwan/wanwan.bmd", 1f);
+            m_ChainRenderer = new NormalBMDRenderer("data/enemy/wanwan/chain.bmd", 1f);
+            this.m_Filename = m_BodyRenderer.m_Filename + ";" + m_ChainRenderer.m_Filename;
+        }
+
+        public override void Release()
+        {
+            m_BodyRenderer.Release();
+            m_ChainRenderer.Release();
+        }
+
+        public override bool GottaRender(RenderMode mode)
+        {
+            return m_BodyRenderer.GottaRender(mode) || m_ChainRenderer.GottaRender(mode);
+        }
+
+        public override void Render(RenderMode mode)
+        {
+            GL.PushMatrix();
+            GL.Scale(0.008f, 0.008f, 0.008f);
+            for (int i = 0; i < 6; i++)
+            {
+                GL.Translate(0f, 3.25f, 10f);
+                m_ChainRenderer.Render(mode);
+            }
+
+            GL.Translate(0f, 3.25f, 40f);
+            m_BodyRenderer.Render(mode);
+            GL.PopMatrix();
+        }
+    }
+
+    class ChainedWanWanRenderer : LooseWanWanRenderer
+    {
+        private NormalBMDRenderer m_PoleRenderer;
+
+        public ChainedWanWanRenderer()
+        {
+            m_PoleRenderer = new NormalBMDRenderer("data/normal_obj/obj_pile/pile.bmd", 0.008f);
+            this.m_Filename = base.m_Filename + ";" + m_PoleRenderer.m_Filename;
+        }
+
+        public override void Release()
+        {
+            base.Release();
+            m_PoleRenderer.Release();
+        }
+
+        public override bool GottaRender(RenderMode mode)
+        {
+            return base.GottaRender(mode) || m_PoleRenderer.GottaRender(mode);
+        }
+
+        public override void Render(RenderMode mode)
+        {
+            GL.PushMatrix();
+            m_PoleRenderer.Render(mode);
+            GL.PopMatrix();
+
+            base.Render(mode);
         }
     }
 

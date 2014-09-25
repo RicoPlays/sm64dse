@@ -178,6 +178,26 @@ namespace SM64DSe.ImportExport.Loaders.ExternalLoaders
                     matDef.m_Opacity = (int)(value * 255f);
                 }
 
+                if (profileCommon.extra != null)
+                {
+                    foreach (extra ext in profileCommon.extra)
+                    {
+                        if (ext.technique == null) continue;
+                        foreach (technique tnq in ext.technique)
+                        {
+                            if (tnq.Any == null) continue;
+                            foreach (XmlElement elem in tnq.Any)
+                            {
+                                if (elem.LocalName.ToLowerInvariant().Equals("double_sided"))
+                                {
+                                    matDef.m_IsDoubleSided = (elem.InnerText.Equals("1")) ? true : false;
+                                    break;
+                                }
+                            }
+                        }
+                    }
+                }
+
                 break;
             }
         }
@@ -197,7 +217,7 @@ namespace SM64DSe.ImportExport.Loaders.ExternalLoaders
 
         private void ReadNode(node joint, node parent, bool inSkeleton)
         {
-            string id = (joint.id != null ? joint.id : (joint.name != null ? joint.name : DateTime.Now.Millisecond.ToString()));
+            string id = (joint.id != null ? joint.id : (joint.name != null ? joint.name : m_Model.m_BoneTree.Count.ToString()));
 
             Vector3 nodeScale = Vector3.One;
             Vector3 nodeRotation = Vector3.Zero;
@@ -668,31 +688,34 @@ namespace SM64DSe.ImportExport.Loaders.ExternalLoaders
                 }
                 foreach (var item in geomMesh.Items)
                 {
-                    if ((item as triangles != null) || (item as polylist != null) || (item as polygons != null))
+                    if ((item as triangles != null) || (item as polylist != null) || (item as polygons != null) || 
+                        (item as tristrips != null))
                     {
                         ModelBase.PolyListDef polyListDef;
-                        string material;
+                        string material = null;
                         ulong count;
-                        InputLocalOffset[] inputs;
-                        int[] vcount;
-                        int[] p;
+                        InputLocalOffset[] inputs = new InputLocalOffset[0];
+                        int[] vcount = new int[0];
+                        List<int[]> p = new List<int[]>();
+                        ModelBase.PolyListType polyListType = ModelBase.PolyListType.Polygons;
 
                         if (item as triangles != null)
                         {
                             triangles tris = item as triangles;
+                            polyListType = ModelBase.PolyListType.Triangles;
                             string matAttr = (tris.material != null) ? tris.material : "default_white";
                             material = (bindMaterials != null && bindMaterials.Count > 0 && bindMaterials.ContainsKey(matAttr)) ?
                                 bindMaterials[matAttr] : matAttr;
                             count = tris.count;
                             inputs = tris.input;
-                            vcount = new int[count];
-                            for (ulong i = 0; i < count; i++) vcount[i] = 3;
-                            p = Array.ConvertAll<string, int>
-                                (tris.p.Split(new string[] { " ", "\n", "\r\n" }, StringSplitOptions.RemoveEmptyEntries), Convert.ToInt32);
+                            vcount = new int[] { 3 };
+                            p.Add(Array.ConvertAll<string, int>
+                                (tris.p.Split(new string[] { " ", "\n", "\r\n" }, StringSplitOptions.RemoveEmptyEntries), Convert.ToInt32));
                         }
                         else if (item as polylist != null)
                         {
                             polylist plist = item as polylist;
+                            polyListType = ModelBase.PolyListType.Polygons;
                             string matAttr = (plist.material != null) ? plist.material : "default_white";
                             material = (bindMaterials != null && bindMaterials.Count > 0 && bindMaterials.ContainsKey(matAttr)) ?
                                 bindMaterials[matAttr] : matAttr;
@@ -700,19 +723,20 @@ namespace SM64DSe.ImportExport.Loaders.ExternalLoaders
                             inputs = plist.input;
                             vcount = Array.ConvertAll<string, int>
                                 (plist.vcount.Split(new string[] { " ", "\n", "\r\n" }, StringSplitOptions.RemoveEmptyEntries), Convert.ToInt32);
-                            p = Array.ConvertAll<string, int>
-                                (plist.p.Split(new string[] { " ", "\n", "\r\n" }, StringSplitOptions.RemoveEmptyEntries), Convert.ToInt32);
+                            p.Add(Array.ConvertAll<string, int>
+                                (plist.p.Split(new string[] { " ", "\n", "\r\n" }, StringSplitOptions.RemoveEmptyEntries), Convert.ToInt32));
                         }
-                        else
+                        else if (item as polygons != null)
                         {
                             polygons pgons = item as polygons;
+                            polyListType = ModelBase.PolyListType.Polygons;
                             string matAttr = (pgons.material != null) ? pgons.material : "default_white";
                             material = (bindMaterials != null && bindMaterials.Count > 0 && bindMaterials.ContainsKey(matAttr)) ?
                                 bindMaterials[matAttr] : matAttr;
                             count = pgons.count;
                             inputs = pgons.input;
                             vcount = new int[count];
-                            p = new int[count];
+                            int[] pTmp = new int[count];
                             int counter = 0;
                             for (int i = 0; i < pgons.Items.Length; i++)
                             {
@@ -723,10 +747,51 @@ namespace SM64DSe.ImportExport.Loaders.ExternalLoaders
                                         ((element as string).Split(new string[] { " ", "\n", "\r\n" }, StringSplitOptions.RemoveEmptyEntries), 
                                         Convert.ToInt32);
                                     vcount[i] = tmp.Length / inputs.Length;
-                                    Array.Copy(tmp, 0, p, counter, vcount[i]);
+                                    Array.Copy(tmp, 0, pTmp, counter, vcount[i]);
                                     counter += tmp.Length;
                                 }
                             }
+                            p.Add(pTmp);
+                        }
+                        else if (item as tristrips != null)
+                        {
+                            tristrips tristrips = item as tristrips;
+                            polyListType = ModelBase.PolyListType.TriangleStrip;
+                            string matAttr = (tristrips.material != null) ? tristrips.material : "default_white";
+                            material = (bindMaterials != null && bindMaterials.Count > 0 && bindMaterials.ContainsKey(matAttr)) ?
+                                bindMaterials[matAttr] : matAttr;
+                            count = tristrips.count;
+                            inputs = tristrips.input;
+                            vcount = new int[] { 3 };
+                            // Go through <p> elements and convert it so the format is similar to <polylist> for parsing below
+                            // Eg. given: (0,(1,(2),(3),4),5)
+                            // convert to separate triangles: (0,1,2),(1,2,3),(2,3,4),(3,4,5)
+                            // These will be converted back to triangle strips when writing the BMD model
+                            for (int i = 0; i < tristrips.p.Length; i++)
+                            {
+                                var element = tristrips.p[i];
+                                if (element as string != null)
+                                {
+                                    int[] tmp = Array.ConvertAll<string, int>
+                                        ((element as string).Split(new string[] { " ", "\n", "\r\n" }, StringSplitOptions.RemoveEmptyEntries),
+                                        Convert.ToInt32);
+                                    int numTris = ((tmp.Length / inputs.Length) - 3) + 1;
+                                    int numVertsToTris = numTris * 3;
+                                    int[] tmpConv = new int[numVertsToTris * inputs.Length];
+                                    Array.Copy(tmp, tmpConv, (3 * inputs.Length));
+                                    if (tmp.Length > (3 * inputs.Length))
+                                    {
+                                        int startInd = 3 * inputs.Length;
+                                        for (int sourceInd = startInd, destInd = startInd; sourceInd < tmp.Length;
+                                            sourceInd += inputs.Length, destInd += (3 * inputs.Length))
+                                        {
+                                            Array.Copy(tmp, sourceInd - (2 * inputs.Length), tmpConv, destInd, (3 * inputs.Length));
+                                        }
+                                    }
+                                    p.Add(tmpConv);
+                                }
+                            }
+
                         }
 
                         polyListDef = new ModelBase.PolyListDef(id + "." + material, material);
@@ -766,57 +831,88 @@ namespace SM64DSe.ImportExport.Loaders.ExternalLoaders
                         if (vertexOffset != -1) inputCount++; if (normalOffset != -1) inputCount++;
                         if (texCoordOffset != -1) inputCount++; if (colourOffset != -1) inputCount++;
 
-                        for (ulong pIndex = 0, vcountInd = 0; pIndex < (ulong)p.Length; vcountInd++)
+                        foreach (int[] pArr in p)
                         {
-                            ModelBase.FaceDef faceDef = new ModelBase.FaceDef(vcount[vcountInd]);
+                            ModelBase.FaceListDef faceList = new ModelBase.FaceListDef(polyListType);
 
-                            for (int i = 0; i < faceDef.m_NumVertices; i++)
+                            bool even = true;
+                            for (ulong pIndex = 0, vcountInd = 0; pIndex < (ulong)pArr.Length; vcountInd++)
                             {
-                                ModelBase.VertexDef vert = new ModelBase.VertexDef();
+                                ModelBase.FaceDef faceDef = new ModelBase.FaceDef(
+                                    vcount[(polyListType.Equals(ModelBase.PolyListType.Triangles) || 
+                                    polyListType.Equals(ModelBase.PolyListType.TriangleStrip)) ? 0 : vcountInd]);
+                                List<ModelBase.VertexDef> vertices = new List<ModelBase.VertexDef>();
 
-                                int vertexIndex = p[pIndex + (ulong)vertexOffset];
-                                float[] tmp = GetValueFromFloatArraySource(sources[vertexSource], vertexIndex);
-                                vert.m_Position = new Vector3(tmp[0], tmp[1], tmp[2]);
-
-                                if (normalOffset != -1)
+                                for (int i = 0; i < faceDef.m_NumVertices; i++)
                                 {
-                                    tmp = GetValueFromFloatArraySource(sources[normalSource], p[pIndex + (ulong)normalOffset]);
-                                    vert.m_Normal = new Vector3(tmp[0], tmp[1], tmp[2]);
+                                    ModelBase.VertexDef vert = new ModelBase.VertexDef();
+
+                                    int vertexIndex = pArr[pIndex + (ulong)vertexOffset];
+                                    float[] tmp = GetValueFromFloatArraySource(sources[vertexSource], vertexIndex);
+                                    vert.m_Position = new Vector3(tmp[0], tmp[1], tmp[2]);
+
+                                    if (normalOffset != -1)
+                                    {
+                                        tmp = GetValueFromFloatArraySource(sources[normalSource], pArr[pIndex + (ulong)normalOffset]);
+                                        vert.m_Normal = new Vector3(tmp[0], tmp[1], tmp[2]);
+                                    }
+                                    else
+                                    {
+                                        vert.m_Normal = null;
+                                    }
+
+                                    if (texCoordOffset != -1 && m_Model.m_Materials[material].m_HasTextures)
+                                    {
+                                        tmp = GetValueFromFloatArraySource(sources[texCoordSource], pArr[pIndex + (ulong)texCoordOffset]);
+                                        vert.m_TextureCoordinate = new Vector2(tmp[0], tmp[1]);
+                                    }
+                                    else
+                                    {
+                                        vert.m_TextureCoordinate = null;
+                                    }
+
+                                    if (colourOffset != -1)
+                                    {
+                                        tmp = GetValueFromFloatArraySource(sources[colourSource], pArr[pIndex + (ulong)colourOffset]);
+                                        vert.m_VertexColour = Color.FromArgb((int)(tmp[0] * 255f),
+                                            (int)(tmp[1] * 255f), (int)(tmp[2] * 255f));
+                                    }
+                                    else
+                                    {
+                                        vert.m_VertexColour = Color.White;
+                                    }
+
+                                    vert.m_VertexBoneID = (vertexBoneIDs != null) ? vertexBoneIDs[vertexIndex] : boneIndex;
+
+                                    vertices.Add(vert);
+
+                                    pIndex += (ulong)inputCount;
+                                }
+
+                                if (polyListType.Equals(ModelBase.PolyListType.TriangleStrip))
+                                {
+                                    if (even)
+                                    {
+                                        for (int v = 0; v < vertices.Count; v++)
+                                            faceDef.m_Vertices[v] = vertices[v];
+                                    }
+                                    else
+                                    {
+                                        for (int v = 0; v < vertices.Count; v++)
+                                            faceDef.m_Vertices[2 - v] = vertices[v];
+                                    }
+                                    even = !even;
                                 }
                                 else
                                 {
-                                    vert.m_Normal = null;
+                                    for (int v = 0; v < vertices.Count; v++)
+                                        faceDef.m_Vertices[v] = vertices[v];
                                 }
 
-                                if (texCoordOffset != -1 && m_Model.m_Materials[material].m_HasTextures)
-                                {
-                                    tmp = GetValueFromFloatArraySource(sources[texCoordSource], p[pIndex + (ulong)texCoordOffset]);
-                                    vert.m_TextureCoordinate = new Vector2(tmp[0], tmp[1]);
-                                }
-                                else
-                                {
-                                    vert.m_TextureCoordinate = null;
-                                }
-
-                                if (colourOffset != -1)
-                                {
-                                    tmp = GetValueFromFloatArraySource(sources[colourSource], p[pIndex + (ulong)colourOffset]);
-                                    vert.m_VertexColour = Color.FromArgb((int)(tmp[0] * 255f),
-                                        (int)(tmp[1] * 255f), (int)(tmp[2] * 255f));
-                                }
-                                else
-                                {
-                                    vert.m_VertexColour = Color.White;
-                                }
-
-                                vert.m_VertexBoneID = (vertexBoneIDs != null) ? vertexBoneIDs[vertexIndex] : boneIndex;
-
-                                faceDef.m_Vertices[i] = vert;
-
-                                pIndex += (ulong)inputCount;
+                                faceList.m_Faces.Add(faceDef);
                             }
 
-                            polyListDef.m_Faces.Add(faceDef);
+                            polyListDef.m_FaceLists.Add(faceList);
                         }
 
                         geomDef.m_PolyLists.Add(boneID + "." + material, polyListDef);

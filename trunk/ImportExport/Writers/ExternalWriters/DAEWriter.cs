@@ -288,12 +288,15 @@ namespace SM64DSe.ImportExport.Writers.ExternalWriters
                     {
                         foreach (ModelBase.PolyListDef polyList in geometry.m_PolyLists.Values)
                         {
-                            foreach (ModelBase.FaceDef face in polyList.m_Faces)
+                            foreach (ModelBase.FaceListDef faceList in polyList.m_FaceLists)
                             {
-                                foreach (ModelBase.VertexDef vert in face.m_Vertices)
+                                foreach (ModelBase.FaceDef face in faceList.m_Faces)
                                 {
-                                    if (!verticesInBranch.Contains(vert))
-                                        verticesInBranch.Add(vert);
+                                    foreach (ModelBase.VertexDef vert in face.m_Vertices)
+                                    {
+                                        if (!verticesInBranch.Contains(vert))
+                                            verticesInBranch.Add(vert);
+                                    }
                                 }
                             }
                         }
@@ -341,7 +344,12 @@ namespace SM64DSe.ImportExport.Writers.ExternalWriters
                             IEnumerable<KeyValuePair<string, ModelBase.PolyListDef>> polyListForMat =
                                 geometry.m_PolyLists.Where(pl => pl.Value.m_MaterialName.Equals(matName));
                             foreach (KeyValuePair<string, ModelBase.PolyListDef> polyList in polyListForMat)
-                                faces.AddRange(polyList.Value.m_Faces);
+                            {
+                                foreach (ModelBase.FaceListDef faceList in polyList.Value.m_FaceLists)
+                                {
+                                    faces.AddRange(faceList.m_Faces);
+                                }
+                            }
                         }
                     }
 
@@ -557,12 +565,15 @@ namespace SM64DSe.ImportExport.Writers.ExternalWriters
                     {
                         foreach (ModelBase.PolyListDef polyList in geometry.m_PolyLists.Values)
                         {
-                            foreach (ModelBase.FaceDef face in polyList.m_Faces)
+                            foreach (ModelBase.FaceListDef faceList in polyList.m_FaceLists)
                             {
-                                foreach (ModelBase.VertexDef vert in face.m_Vertices)
+                                foreach (ModelBase.FaceDef face in faceList.m_Faces)
                                 {
-                                    if (!verticesInBranch.Contains(vert))
-                                        verticesInBranch.Add(vert);
+                                    foreach (ModelBase.VertexDef vert in face.m_Vertices)
+                                    {
+                                        if (!verticesInBranch.Contains(vert))
+                                            verticesInBranch.Add(vert);
+                                    }
                                 }
                             }
                         }

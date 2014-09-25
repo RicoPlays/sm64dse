@@ -184,8 +184,9 @@ namespace SM64DSe.ImportExport.Loaders.ExternalLoaders
                             ModelBase.BoneDef bone = m_Model.m_BoneTree.GetBoneByID(currentBone);
                             if (!bone.m_Geometries.Values.ElementAt(0).m_PolyLists.ContainsKey(curmaterial))
                             {
-                                bone.m_Geometries.Values.ElementAt(0).m_PolyLists.Add(
-                                    curmaterial, new ModelBase.PolyListDef(currentBone + "." + curmaterial, curmaterial));
+                                ModelBase.PolyListDef tmp = new ModelBase.PolyListDef(currentBone + "." + curmaterial, curmaterial);
+                                tmp.m_FaceLists.Add(new ModelBase.FaceListDef());
+                                bone.m_Geometries.Values.ElementAt(0).m_PolyLists.Add(curmaterial, tmp);
                             }
                             ModelBase.PolyListDef polyList = bone.m_Geometries.Values.ElementAt(0).m_PolyLists[curmaterial];
 
@@ -220,7 +221,7 @@ namespace SM64DSe.ImportExport.Loaders.ExternalLoaders
                                 face.m_Vertices[i] = vert;
                             }
 
-                            polyList.m_Faces.Add(face);
+                            polyList.m_FaceLists[0].m_Faces.Add(face);
                         }
                         break;
                 }
