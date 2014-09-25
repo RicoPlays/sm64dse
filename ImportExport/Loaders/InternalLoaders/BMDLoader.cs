@@ -48,8 +48,12 @@ namespace SM64DSe.ImportExport.Loaders.InternalLoaders
 
                 foreach (BMD.MaterialGroup matgroup in mdchunk.m_MatGroups)
                 {
-                    ModelBase.PolyListDef polyListDef = new ModelBase.PolyListDef("polylist-" + matgroup.m_Name, matgroup.m_Name);
-                    geomDef.m_PolyLists.Add(polyListDef.m_MaterialName, polyListDef);
+                    if (!geomDef.m_PolyLists.ContainsKey(matgroup.m_Name))
+                    {
+                        ModelBase.PolyListDef pld = new ModelBase.PolyListDef("polylist-" + matgroup.m_Name, matgroup.m_Name);
+                        geomDef.m_PolyLists.Add(pld.m_MaterialName, pld);
+                    }
+                    ModelBase.PolyListDef polyListDef = geomDef.m_PolyLists[matgroup.m_Name];
 
                     ModelBase.MaterialDef material = new ModelBase.MaterialDef(matgroup.m_Name, m_Model.m_Materials.Count);
                     material.m_DiffuseColour = matgroup.m_DiffuseColor;
@@ -84,6 +88,7 @@ namespace SM64DSe.ImportExport.Loaders.InternalLoaders
                         {
                             case 0://Separate Triangles
                                 {
+                                    ModelBase.FaceListDef faceList = new ModelBase.FaceListDef(ModelBase.PolyListType.Triangles);
                                     if (vtxList.Count <= 3)//Just 1 triangle
                                     {
                                         ModelBase.FaceDef face = new ModelBase.FaceDef(3);
@@ -95,7 +100,7 @@ namespace SM64DSe.ImportExport.Loaders.InternalLoaders
                                         face.m_Vertices[2] = new ModelBase.VertexDef(vtxList[2].m_Position, vtxList[2].m_TexCoord,
                                             vtxList[2].m_Normal, vtxList[2].m_Color, (int)matgroup.m_BoneIDs[vtxList[2].m_MatrixID]);
 
-                                        polyListDef.m_Faces.Add(face);
+                                        faceList.m_Faces.Add(face);
                                     }
                                     else if (vtxList.Count > 3 && (float)vtxList.Count % 3 == 0.0f)//Eg. 9 vertices in 3 triangles
                                     {
@@ -111,13 +116,15 @@ namespace SM64DSe.ImportExport.Loaders.InternalLoaders
                                             face.m_Vertices[2] = new ModelBase.VertexDef(vtxList[b + 2].m_Position, vtxList[b + 2].m_TexCoord,
                                                 vtxList[b + 2].m_Normal, vtxList[b + 2].m_Color, (int)matgroup.m_BoneIDs[vtxList[b + 2].m_MatrixID]);
 
-                                            polyListDef.m_Faces.Add(face);
+                                            faceList.m_Faces.Add(face);
                                         }
                                     }
+                                    polyListDef.m_FaceLists.Add(faceList);
                                     break;
                                 }
                             case 1://Separate Quadrilaterals
                                 {
+                                    ModelBase.FaceListDef faceList = new ModelBase.FaceListDef(ModelBase.PolyListType.Polygons);
                                     if (vtxList.Count <= 4)//Just 1 quadrilateral
                                     {
                                         ModelBase.FaceDef face = new ModelBase.FaceDef(4);
@@ -131,7 +138,7 @@ namespace SM64DSe.ImportExport.Loaders.InternalLoaders
                                         face.m_Vertices[3] = new ModelBase.VertexDef(vtxList[3].m_Position, vtxList[3].m_TexCoord,
                                             vtxList[3].m_Normal, vtxList[3].m_Color, (int)matgroup.m_BoneIDs[vtxList[3].m_MatrixID]);
 
-                                        polyListDef.m_Faces.Add(face);
+                                        faceList.m_Faces.Add(face);
                                     }
                                     else if (vtxList.Count > 4 && (float)vtxList.Count % 4 == 0.0f)//Eg. 8 vertices in 2 quadrilaterals
                                     {
@@ -149,9 +156,10 @@ namespace SM64DSe.ImportExport.Loaders.InternalLoaders
                                             face.m_Vertices[3] = new ModelBase.VertexDef(vtxList[b + 3].m_Position, vtxList[b + 3].m_TexCoord,
                                                 vtxList[b + 3].m_Normal, vtxList[b + 3].m_Color, (int)matgroup.m_BoneIDs[vtxList[b + 3].m_MatrixID]);
 
-                                            polyListDef.m_Faces.Add(face);
+                                            faceList.m_Faces.Add(face);
                                         }
                                     }
+                                    polyListDef.m_FaceLists.Add(faceList);
                                     break;
                                 }
                             case 2://Triangle Strips
@@ -161,6 +169,7 @@ namespace SM64DSe.ImportExport.Loaders.InternalLoaders
                                     int numFaces = vtxList.Count - 2;
                                     if (vtxList.Count < 3)//Should never be
                                         break;
+                                    ModelBase.FaceListDef faceList = new ModelBase.FaceListDef(ModelBase.PolyListType.TriangleStrip);
                                     //Convert all faces with more than 3 vertices to ones with only 3
                                     for (int n = 0; n < numFaces; n++)
                                     {
@@ -175,7 +184,7 @@ namespace SM64DSe.ImportExport.Loaders.InternalLoaders
                                             face.m_Vertices[2] = new ModelBase.VertexDef(vtxList[n + 2].m_Position, vtxList[n + 2].m_TexCoord,
                                                 vtxList[n + 2].m_Normal, vtxList[n + 2].m_Color, (int)matgroup.m_BoneIDs[vtxList[n + 2].m_MatrixID]);
 
-                                            polyListDef.m_Faces.Add(face);
+                                            faceList.m_Faces.Add(face);
                                         }
                                         else
                                         {
@@ -188,10 +197,11 @@ namespace SM64DSe.ImportExport.Loaders.InternalLoaders
                                             face.m_Vertices[2] = new ModelBase.VertexDef(vtxList[n + 0].m_Position, vtxList[n + 0].m_TexCoord,
                                                 vtxList[n + 0].m_Normal, vtxList[n + 0].m_Color, (int)matgroup.m_BoneIDs[vtxList[n + 0].m_MatrixID]);
 
-                                            polyListDef.m_Faces.Add(face);
+                                            faceList.m_Faces.Add(face);
                                         }
                                         //Because of how normals are defined in triangle strips, every 2nd triangle is clockwise, whereas all others are anti-clockwise
                                     }
+                                    polyListDef.m_FaceLists.Add(faceList);
                                     break;
                                 }
                             case 3://Quadrilateral Strips
@@ -201,6 +211,7 @@ namespace SM64DSe.ImportExport.Loaders.InternalLoaders
                                     int numFaces = ((vtxList.Count - 4) / 2) + 1;
                                     if (vtxList.Count < 4)//Should never be
                                         break;
+                                    ModelBase.FaceListDef faceList = new ModelBase.FaceListDef();
                                     for (int n = 0, p = 0; n < numFaces; n++, p = p + 2)
                                     {
                                         ModelBase.FaceDef face = new ModelBase.FaceDef(4);
@@ -214,8 +225,9 @@ namespace SM64DSe.ImportExport.Loaders.InternalLoaders
                                         face.m_Vertices[3] = new ModelBase.VertexDef(vtxList[p + 2].m_Position, vtxList[p + 2].m_TexCoord,
                                             vtxList[p + 3].m_Normal, vtxList[p + 2].m_Color, (int)matgroup.m_BoneIDs[vtxList[p + 2].m_MatrixID]);
 
-                                        polyListDef.m_Faces.Add(face);
+                                        faceList.m_Faces.Add(face);
                                     }
+                                    polyListDef.m_FaceLists.Add(faceList);
                                     break;
                                 }
                             default: MessageBox.Show("Unknown polygon type."); break;

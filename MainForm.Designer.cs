@@ -59,7 +59,6 @@
             this.spcFileSystemTab = new System.Windows.Forms.SplitContainer();
             this.tvFileList = new System.Windows.Forms.TreeView();
             this.pnlFileOptions = new System.Windows.Forms.Panel();
-            this.btnDecompressOverlay = new System.Windows.Forms.Button();
             this.btnLZForceCompression = new System.Windows.Forms.Button();
             this.btnLZCompressWithHeader = new System.Windows.Forms.Button();
             this.btnLZForceDecompression = new System.Windows.Forms.Button();
@@ -68,6 +67,12 @@
             this.btnReplaceRaw = new System.Windows.Forms.Button();
             this.btnExtractExport = new System.Windows.Forms.Button();
             this.btnExtractRaw = new System.Windows.Forms.Button();
+            this.tbpARM9Overlays = new System.Windows.Forms.TabPage();
+            this.spcARM9Overlays = new System.Windows.Forms.SplitContainer();
+            this.tvARM9Overlays = new System.Windows.Forms.TreeView();
+            this.btnReplaceOverlay = new System.Windows.Forms.Button();
+            this.btnExtractOverlay = new System.Windows.Forms.Button();
+            this.btnDecompressOverlay = new System.Windows.Forms.Button();
             this.tsToolBar.SuspendLayout();
             this.ssStatusBar.SuspendLayout();
             this.tbcMainFormTabControl.SuspendLayout();
@@ -78,6 +83,11 @@
             this.spcFileSystemTab.Panel2.SuspendLayout();
             this.spcFileSystemTab.SuspendLayout();
             this.pnlFileOptions.SuspendLayout();
+            this.tbpARM9Overlays.SuspendLayout();
+            //((System.ComponentModel.ISupportInitialize)(this.spcARM9Overlays)).BeginInit();
+            this.spcARM9Overlays.Panel1.SuspendLayout();
+            this.spcARM9Overlays.Panel2.SuspendLayout();
+            this.spcARM9Overlays.SuspendLayout();
             this.SuspendLayout();
             // 
             // tsToolBar
@@ -314,6 +324,7 @@
             // 
             this.tbcMainFormTabControl.Controls.Add(this.tbpLevels);
             this.tbcMainFormTabControl.Controls.Add(this.tbpFileSystem);
+            this.tbcMainFormTabControl.Controls.Add(this.tbpARM9Overlays);
             this.tbcMainFormTabControl.Dock = System.Windows.Forms.DockStyle.Fill;
             this.tbcMainFormTabControl.Location = new System.Drawing.Point(0, 25);
             this.tbcMainFormTabControl.Name = "tbcMainFormTabControl";
@@ -374,7 +385,6 @@
             // 
             // pnlFileOptions
             // 
-            this.pnlFileOptions.Controls.Add(this.btnDecompressOverlay);
             this.pnlFileOptions.Controls.Add(this.btnLZForceCompression);
             this.pnlFileOptions.Controls.Add(this.btnLZCompressWithHeader);
             this.pnlFileOptions.Controls.Add(this.btnLZForceDecompression);
@@ -388,18 +398,6 @@
             this.pnlFileOptions.Name = "pnlFileOptions";
             this.pnlFileOptions.Size = new System.Drawing.Size(494, 77);
             this.pnlFileOptions.TabIndex = 1;
-            // 
-            // btnDecompressOverlay
-            // 
-            this.btnDecompressOverlay.Enabled = false;
-            this.btnDecompressOverlay.Location = new System.Drawing.Point(217, 51);
-            this.btnDecompressOverlay.Name = "btnDecompressOverlay";
-            this.btnDecompressOverlay.Size = new System.Drawing.Size(137, 23);
-            this.btnDecompressOverlay.TabIndex = 8;
-            this.btnDecompressOverlay.Text = "Decompress Overlay";
-            this.btnDecompressOverlay.UseVisualStyleBackColor = true;
-            this.btnDecompressOverlay.Visible = false;
-            this.btnDecompressOverlay.Click += new System.EventHandler(this.btnDecompressOverlay_Click);
             // 
             // btnLZForceCompression
             // 
@@ -483,6 +481,76 @@
             this.btnExtractRaw.UseVisualStyleBackColor = true;
             this.btnExtractRaw.Click += new System.EventHandler(this.btnExtractRaw_Click);
             // 
+            // tbpARM9Overlays
+            // 
+            this.tbpARM9Overlays.Controls.Add(this.spcARM9Overlays);
+            this.tbpARM9Overlays.Location = new System.Drawing.Point(4, 22);
+            this.tbpARM9Overlays.Name = "tbpARM9Overlays";
+            this.tbpARM9Overlays.Padding = new System.Windows.Forms.Padding(3);
+            this.tbpARM9Overlays.Size = new System.Drawing.Size(500, 362);
+            this.tbpARM9Overlays.TabIndex = 2;
+            this.tbpARM9Overlays.Text = "ARM 9 Overlays";
+            this.tbpARM9Overlays.UseVisualStyleBackColor = true;
+            // 
+            // spcARM9Overlays
+            // 
+            this.spcARM9Overlays.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.spcARM9Overlays.FixedPanel = System.Windows.Forms.FixedPanel.Panel2;
+            this.spcARM9Overlays.IsSplitterFixed = true;
+            this.spcARM9Overlays.Location = new System.Drawing.Point(3, 3);
+            this.spcARM9Overlays.Name = "spcARM9Overlays";
+            this.spcARM9Overlays.Orientation = System.Windows.Forms.Orientation.Horizontal;
+            // 
+            // spcARM9Overlays.Panel1
+            // 
+            this.spcARM9Overlays.Panel1.Controls.Add(this.tvARM9Overlays);
+            // 
+            // spcARM9Overlays.Panel2
+            // 
+            this.spcARM9Overlays.Panel2.Controls.Add(this.btnReplaceOverlay);
+            this.spcARM9Overlays.Panel2.Controls.Add(this.btnExtractOverlay);
+            this.spcARM9Overlays.Panel2.Controls.Add(this.btnDecompressOverlay);
+            this.spcARM9Overlays.Size = new System.Drawing.Size(494, 356);
+            this.spcARM9Overlays.SplitterDistance = 275;
+            this.spcARM9Overlays.TabIndex = 0;
+            // 
+            // tvARM9Overlays
+            // 
+            this.tvARM9Overlays.Location = new System.Drawing.Point(0, 0);
+            this.tvARM9Overlays.Name = "tvARM9Overlays";
+            this.tvARM9Overlays.Size = new System.Drawing.Size(494, 275);
+            this.tvARM9Overlays.TabIndex = 0;
+            this.tvARM9Overlays.AfterSelect += new System.Windows.Forms.TreeViewEventHandler(this.tvARM9Overlays_AfterSelect);
+            // 
+            // btnReplaceOverlay
+            // 
+            this.btnReplaceOverlay.Location = new System.Drawing.Point(122, 3);
+            this.btnReplaceOverlay.Name = "btnReplaceOverlay";
+            this.btnReplaceOverlay.Size = new System.Drawing.Size(113, 23);
+            this.btnReplaceOverlay.TabIndex = 11;
+            this.btnReplaceOverlay.Text = "Replace Overlay";
+            this.btnReplaceOverlay.UseVisualStyleBackColor = true;
+            this.btnReplaceOverlay.Click += new System.EventHandler(this.btnReplaceOverlay_Click);
+            // 
+            // btnExtractOverlay
+            // 
+            this.btnExtractOverlay.Location = new System.Drawing.Point(3, 2);
+            this.btnExtractOverlay.Name = "btnExtractOverlay";
+            this.btnExtractOverlay.Size = new System.Drawing.Size(113, 23);
+            this.btnExtractOverlay.TabIndex = 10;
+            this.btnExtractOverlay.Text = "Extract Overlay";
+            this.btnExtractOverlay.UseVisualStyleBackColor = true;
+            this.btnExtractOverlay.Click += new System.EventHandler(this.btnExtractOverlay_Click);
+            // 
+            // btnDecompressOverlay
+            // 
+            this.btnDecompressOverlay.Location = new System.Drawing.Point(241, 3);
+            this.btnDecompressOverlay.Name = "btnDecompressOverlay";
+            this.btnDecompressOverlay.Size = new System.Drawing.Size(137, 23);
+            this.btnDecompressOverlay.TabIndex = 9;
+            this.btnDecompressOverlay.Text = "Decompress Overlay";
+            this.btnDecompressOverlay.UseVisualStyleBackColor = true;
+            // 
             // MainForm
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
@@ -507,6 +575,11 @@
             //((System.ComponentModel.ISupportInitialize)(this.spcFileSystemTab)).EndInit();
             this.spcFileSystemTab.ResumeLayout(false);
             this.pnlFileOptions.ResumeLayout(false);
+            this.tbpARM9Overlays.ResumeLayout(false);
+            this.spcARM9Overlays.Panel1.ResumeLayout(false);
+            this.spcARM9Overlays.Panel2.ResumeLayout(false);
+            //((System.ComponentModel.ISupportInitialize)(this.spcARM9Overlays)).EndInit();
+            this.spcARM9Overlays.ResumeLayout(false);
             this.ResumeLayout(false);
             this.PerformLayout();
 
@@ -551,8 +624,13 @@
         private System.Windows.Forms.Button btnLZForceDecompression;
         private System.Windows.Forms.Button btnLZDecompressWithHeader;
         private System.Windows.Forms.SplitContainer spcFileSystemTab;
-        private System.Windows.Forms.Button btnDecompressOverlay;
         private System.Windows.Forms.ToolStripMenuItem mnitEditSDATINFOBlockToolStripMenuItem;
+        private System.Windows.Forms.TabPage tbpARM9Overlays;
+        private System.Windows.Forms.SplitContainer spcARM9Overlays;
+        private System.Windows.Forms.Button btnReplaceOverlay;
+        private System.Windows.Forms.Button btnExtractOverlay;
+        private System.Windows.Forms.Button btnDecompressOverlay;
+        private System.Windows.Forms.TreeView tvARM9Overlays;
     }
 }
 

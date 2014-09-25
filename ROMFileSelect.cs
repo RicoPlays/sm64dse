@@ -86,6 +86,19 @@ namespace SM64DSe
             }
         }
 
+        public static void LoadOverlayList(TreeView tvFileList)
+        {
+            NitroROM.FileEntry[] files = Program.m_ROM.GetFileEntries();
+            TreeNode ovlNode = tvFileList.Nodes.Add("root", "ARM 9 Overlays");
+
+            NitroROM.OverlayEntry[] ovls = Program.m_ROM.GetOverlayEntries();
+            for (int i = 0; i < ovls.Length; i++)
+            {
+                string ind = String.Format("{0:D3}", i);
+                ovlNode.Nodes.Add("Overlay_" + ind).Tag = "Overlay_" + ind;
+            }
+        }
+
         private void tvFiles_AfterSelect(object sender, TreeViewEventArgs e)
         {
             if (e.Node == null || e.Node.Tag == null)

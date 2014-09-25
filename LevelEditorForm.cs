@@ -440,8 +440,7 @@ namespace SM64DSe
             m_LevelModel = new BMD(m_ROM.GetFileFromInternalID(m_LevelSettings.BMDFileID));
             m_LevelModel.PrepareToRender();
 
-            if (m_LevelModelDLs == null)
-                m_LevelModelDLs = new int[m_LevelModel.m_ModelChunks.Length, 3];
+            m_LevelModelDLs = new int[m_LevelModel.m_ModelChunks.Length, 3];
 
             for (int c = 0; c < m_LevelModel.m_ModelChunks.Length; c++)
             {
@@ -1217,7 +1216,7 @@ namespace SM64DSe
 
             LevelObject obj = AddObject(type, id, objectToCopy.m_Layer, objectToCopy.m_Area);
             obj.Position = objectToCopy.Position;
-            obj.Parameters = objectToCopy.Parameters;
+            if (obj.Parameters != null) Array.Copy(objectToCopy.Parameters, obj.Parameters, obj.Parameters.Length);
             obj.GenerateProperties();
             pgObjectProperties.SelectedObject = obj.m_Properties;
 
@@ -2264,8 +2263,10 @@ namespace SM64DSe
             if (objlist.ObjectID > 0x145 && objlist.ObjectID != 0x1FF) return;
 
             m_ObjectBeingPlaced = objlist.ObjectID;
-            slStatusLabel.Text = string.Format("Click anywhere in the level to place your new object ({0} - {1}). Hold Shift while clicking to place multiple objects. Hit Escape to abort.",
-                objlist.ObjectID, ObjectDatabase.m_ObjectInfo[objlist.ObjectID].m_Name);
+            string placementMsg = "Click anywhere in the level to place your new object ({0} - {1}). Hold Shift while clicking to place multiple objects. Hit Escape to abort.";
+            slStatusLabel.Text = (objlist.ObjectID < 326) ? 
+                string.Format(placementMsg, objlist.ObjectID, ObjectDatabase.m_ObjectInfo[objlist.ObjectID].m_Name) : 
+                string.Format(placementMsg, 511, "Minimap change");
         }
 
         private void btnAddWhatever_Click(object sender, EventArgs e)

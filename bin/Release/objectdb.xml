@@ -2,11 +2,11 @@
 
 <!--
 	Super Mario 64 DS Object Info Database
-	built on 03/09/2014 15:27:25 for SM64DS Editor
+	built on 2014/09/25 12:32:52 for SM64DS Editor
 	Thanks to Fiachra, Hiccup, jjesss064, Luigi, skawo, StarLand for their contributions!
 -->
 
-<database timestamp='1409772445'>
+<database timestamp='1411662772'>
 
 	<object id='0'>
 		<category>4</category>
@@ -178,7 +178,9 @@ Star ID followed by:
 02 - Spawn one, rolling, without a star, without looking at player distance
 03 - Spawn one, rolling, with a star, without looking at player distance
 04 - Spawn one, not rolling, with a star.
-Later same as 02</description>
+Later same as 02
+
+Set Star ID to FF if you do not want a star to spawn when breaking the rock, eg. FF04 will spawn a stationary  rock that does nothing when broken.</description>
 		<bankreq>7=14</bankreq>
 	</object>
 
@@ -724,7 +726,16 @@ Parameter 1:
 		<name>King Bob-omb</name>
 		<internalname>BOMBKING</internalname>
 		<actorid>189</actorid>
-		<description>King of the bob-ombs, can be found on top summit of Bob-omb Battlefield.</description>
+		<description>King of the bob-ombs, can be found on top summit of Bob-omb Battlefield.
+
+Parameter 1:
+FF followed by the Star ID.
+
+Notes: 
+- The behaviour of King Bob-Omb is hard-coded to match the Star ID with which the level was entered, ie.: Star 1 - Fight 1, Star 4 - Fight 2.
+- King Bob-Omb's position in a level is hard-coded to only work properly if placed at -2.998, 4.192, -4.597
+
+Important: Using King Bob-Omb requires that the level contains a Bob-Omb object (can be hidden under level), otherwise during behaviour 1, after throwing a couple of Bob-Ombs, all subsequent Bob-Ombs will have totally corrupted textures. Reason for this is unknown.</description>
 		<bankreq>2=2</bankreq>
 	</object>
 
@@ -1702,7 +1713,11 @@ Parameter 1: Star ID</description>
 		<name>Amp</name>
 		<internalname>BIRIKYU</internalname>
 		<actorid>266</actorid>
-		<description>Black, electric ball that moves around in a circle. When touched, the player will be electricuted and stunned for a second. Metal Wario will not take damage, and Invisible Luigi can walk through them.</description>
+		<description>Black, electric ball that moves around in a circle. When touched, the player will be electricuted and stunned for a second. Metal Wario will not take damage, and Invisible Luigi can walk through them.
+
+Parameter 1:
+
+(Diameter of Amp's path) * 10</description>
 		<bankreq>1=2</bankreq>
 	</object>
 
@@ -3034,7 +3049,13 @@ ID (zero-based index) of the path he follows</description>
 		<name>Treasure Chest</name>
 		<internalname>TREASURE_BOX</internalname>
 		<actorid>13</actorid>
-		<description>A treasure chest.</description>
+		<description>A treasure chest.
+
+Parameter 1:
+XXYY where:
+
+XX - The Star ID, for the first chests this is FF, for the final chest this should be the Star ID and match the Star ID of a Star Marker
+YY - The order of the current chest.</description>
 		<bankreq>0=3</bankreq>
 	</object>
 

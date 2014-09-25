@@ -497,7 +497,7 @@ namespace SM64DSe
             glModelView.Refresh();
         }
 
-        private void btnExportToOBJ_Click(object sender, EventArgs e)
+        private void btnExportKCLModel_Click(object sender, EventArgs e)
         {
             SaveFileDialog saveModel = new SaveFileDialog();
             saveModel.FileName = "CollisionMap";//Default name

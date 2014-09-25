@@ -458,7 +458,7 @@ namespace SM64DSe
             {
                 try
                 {
-                    if (_owner.m_MinimapFileIDs[j] != 0)
+                    if (j < _owner.m_MinimapFileIDs.Length && _owner.m_MinimapFileIDs[j] != 0)
                     {
                         tmapfiles[j] = (Program.m_ROM.GetFileFromInternalID(_owner.m_MinimapFileIDs[j]));
                         tsMinimapEditor.Items[1 + j].Enabled = true;

@@ -127,6 +127,8 @@ namespace SM64DSe
 
             this.tvFileList.Nodes.Clear();
             ROMFileSelect.LoadFileList(this.tvFileList);
+            this.tvARM9Overlays.Nodes.Clear();
+            ROMFileSelect.LoadOverlayList(this.tvARM9Overlays);
 
             btnEditTexts.Enabled = true;
             btnAnimationEditor.Enabled = true;
@@ -387,6 +389,7 @@ namespace SM64DSe
         }
 
         private string m_SelectedFile;
+        private string m_SelectedOverlay;
 
         private void tvFileList_AfterSelect(object sender, TreeViewEventArgs e)
         {
@@ -484,7 +487,47 @@ namespace SM64DSe
 
         private void btnDecompressOverlay_Click(object sender, EventArgs e)
         {
-            // TODO
+            uint ovlID = uint.Parse(m_SelectedOverlay.Substring(8));
+            NitroOverlay ovl = new NitroOverlay(Program.m_ROM, ovlID);
+            ovl.SaveChanges();
+        }
+
+        private void btnExtractOverlay_Click(object sender, EventArgs e)
+        {
+            if (m_SelectedOverlay == null || m_SelectedOverlay.Equals(""))
+                return;
+
+            SaveFileDialog sfd = new SaveFileDialog();
+            sfd.FileName = m_SelectedOverlay;
+            if (sfd.ShowDialog() == DialogResult.Cancel)
+                return;
+
+            uint ovlID = uint.Parse(m_SelectedOverlay.Substring(8));
+            System.IO.File.WriteAllBytes(sfd.FileName, new NitroOverlay(Program.m_ROM, ovlID).m_Data);
+        }
+
+        private void btnReplaceOverlay_Click(object sender, EventArgs e)
+        {
+            if (m_SelectedOverlay == null || m_SelectedOverlay.Equals(""))
+                return;
+
+            OpenFileDialog ofd = new OpenFileDialog();
+            if (ofd.ShowDialog() == DialogResult.Cancel)
+                return;
+
+            uint ovlID = uint.Parse(m_SelectedOverlay.Substring(8));
+            NitroOverlay ovl = new NitroOverlay(Program.m_ROM, ovlID);
+            ovl.Clear();
+            ovl.WriteBlock(0, System.IO.File.ReadAllBytes(ofd.FileName));
+            ovl.SaveChanges();
+        }
+
+        private void tvARM9Overlays_AfterSelect(object sender, TreeViewEventArgs e)
+        {
+            if (e.Node == null || e.Node.Tag == null)
+                m_SelectedOverlay = "";
+            else
+                m_SelectedOverlay = e.Node.Tag.ToString();
         }
 
     }

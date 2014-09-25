@@ -66,7 +66,7 @@
             this.btnOpen = new System.Windows.Forms.ToolStripButton();
             this.btnSave = new System.Windows.Forms.ToolStripButton();
             this.toolStripSeparator1 = new System.Windows.Forms.ToolStripSeparator();
-            this.btnExportToOBJ = new System.Windows.Forms.ToolStripButton();
+            this.btnExportKCLModel = new System.Windows.Forms.ToolStripButton();
             this.cmbPolygonMode = new System.Windows.Forms.ComboBox();
             //((System.ComponentModel.ISupportInitialize)(this.splitContainer1)).BeginInit();
             this.splitContainer1.Panel1.SuspendLayout();
@@ -457,7 +457,7 @@
             this.btnOpen,
             this.btnSave,
             this.toolStripSeparator1,
-            this.btnExportToOBJ});
+            this.btnExportKCLModel});
             this.toolStrip1.Location = new System.Drawing.Point(0, 0);
             this.toolStrip1.Name = "toolStrip1";
             this.toolStrip1.Size = new System.Drawing.Size(900, 25);
@@ -490,12 +490,12 @@
             // 
             // btnExportToOBJ
             // 
-            this.btnExportToOBJ.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Text;
-            this.btnExportToOBJ.ImageTransparentColor = System.Drawing.Color.Magenta;
-            this.btnExportToOBJ.Name = "btnExportToOBJ";
-            this.btnExportToOBJ.Size = new System.Drawing.Size(81, 22);
-            this.btnExportToOBJ.Text = "Export to OBJ";
-            this.btnExportToOBJ.Click += new System.EventHandler(this.btnExportToOBJ_Click);
+            this.btnExportKCLModel.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Text;
+            this.btnExportKCLModel.ImageTransparentColor = System.Drawing.Color.Magenta;
+            this.btnExportKCLModel.Name = "btnExportToOBJ";
+            this.btnExportKCLModel.Size = new System.Drawing.Size(81, 22);
+            this.btnExportKCLModel.Text = "Export KCL Model";
+            this.btnExportKCLModel.Click += new System.EventHandler(this.btnExportKCLModel_Click);
             // 
             // cmbPolygonMode
             // 
@@ -564,7 +564,7 @@
         private System.Windows.Forms.Label lblD1;
         private System.Windows.Forms.Label lblNormal;
         private System.Windows.Forms.ToolStripSeparator toolStripSeparator1;
-        private System.Windows.Forms.ToolStripButton btnExportToOBJ;
+        private System.Windows.Forms.ToolStripButton btnExportKCLModel;
         private System.Windows.Forms.ToolStripButton btnOpen;
         private System.Windows.Forms.TabControl tabDetailsImport;
         private System.Windows.Forms.TabPage tpgDetails;

@@ -65,6 +65,7 @@ namespace SM64DSe
             Matrix4[] matrices = new Matrix4[chunks.Length];
             for (int i = 0; i < chunks.Length; i++)
             {
+                if (i >= m_AnimationData.Length) break;
                 matrices[i] = m_AnimationData[i].GetMatrix(chunks, i, matrices, frame);
             }
             return matrices;
@@ -266,10 +267,34 @@ namespace SM64DSe
                 {
                     values[i] = (float)(int)m_BCA.m_File.Read32(offset + (uint)(i * 4)) / 4096.0f;
                 }
-
+                
                 return values;
             }
 
+            /*
+            * As well as reading the rotation values, the below code checks for and corrects the following scenario:
+            * Example:
+            * The rotation of a bone is set to use interpolation and has the values -170 followed by 170.
+            * Here, during interpolation the mid-point will be calculated as 0 instead of 180 as (-170 + 170) / 2 equals 0.
+            * What we want is for the second value to be -190 so that during interpolation the midpoint is calculated as 
+            * (-170 + -190) / 2 equals -180
+            * 
+            * To correct this, the code checks:
+            * 1)
+            * eg. -170, 170: change to -170, -190
+            * eg. -5, 5: don't change
+            * if (val1 < 0 && val2 > 0)
+            *      if ( abs(val2 - (val1 + 360)) < abs(val2 - val1)) then val2 -= 360  
+            *      // If the difference between values 1 and 2 is smaller when both are less than zero, make both less than zero
+            * 2)
+            * eg. 170, -170: change to 170, 190
+            * eg. 5, -5: don't change
+            * if (val1 > 0 && val2 < 0)
+            *      if (abs(val1 - (val2 + 360)) < abs(val1 - val2)) then val2 += 360
+            *      // If the difference between values 1 and 2 is smaller when both are greater then zero, math both greater than zero
+            *      
+            * (Degress used instead of radians to aid understanding)
+            */
             private float[] Read4_12Rotation(uint offset, int count)
             {
                 float[] values = new float[count];
@@ -277,6 +302,23 @@ namespace SM64DSe
                 for (int i = 0; i < count; i++)
                 {
                     values[i] = ((float)((short)m_BCA.m_File.Read16(offset + (uint)(i * 2))) * (float)Math.PI) / 2048.0f;
+                }
+                for (int i = 0; i < values.Length - 1; i++)
+                {
+                    if (values[i] < 0f && values[i + 1] > 0f)
+                    {
+                        if (Math.Abs(values[i + 1] - (values[i] + (Math.PI * 2f))) < Math.Abs(values[i + 1] - values[i]))
+                        {
+                            values[i + 1] -= (float)(Math.PI * 2f);
+                        }
+                    }
+                    else if (values[i] > 0f && values[i + 1] < 0f)
+                    {
+                        if (Math.Abs(values[i] - (values[i + 1] + (Math.PI * 2f))) < Math.Abs(values[i] - values[i + 1]))
+                        {
+                            values[i + 1] += (float)(Math.PI * 2f);
+                        }
+                    }
                 }
 
                 return values;

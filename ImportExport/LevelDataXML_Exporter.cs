@@ -34,6 +34,8 @@ namespace SM64DSe.ImportExport
             m_Path = Path.GetDirectoryName(m_FileName);
 
             ExportXML();
+
+            System.IO.File.WriteAllBytes(m_Path + "/OVL_" + (m_LevelID + 103) + ".bin", m_Overlay.m_Data);
         }
 
         private static void ExportXML()
