@@ -76,6 +76,7 @@ namespace SM64DSe
             Matrix4[] matrices = new Matrix4[chunks.Length];
             for (int i = 0; i < chunks.Length; i++)
             {
+                if (i >= m_AnimationData.Length) break;
                 matrices[i] = m_AnimationData[i].GetLocalMatrix(frame);
             }
             return matrices;
@@ -91,6 +92,7 @@ namespace SM64DSe
             SRTContainer[] localSRTValues = new SRTContainer[numChunks];
             for (int i = 0; i < numChunks; i++)
             {
+                if (i >= m_AnimationData.Length) break;
                 localSRTValues[i] = m_AnimationData[i].GetScaleRotationTranslation(frame);
             }
             return localSRTValues;

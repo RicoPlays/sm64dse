@@ -135,22 +135,26 @@ namespace SM64DSe.ImportExport.Loaders.ExternalLoaders
 
                         string samplerID = diffuseTexture.texture;
                         string surfaceID = null;
-                        foreach (var item0 in profileCommon.Items)
-                        {
-                            var newparam = item0 as common_newparam_type;
-                            if (newparam == null || !newparam.sid.Equals(samplerID)) continue;
-
-                            surfaceID = (newparam.Item as fx_sampler2D_common).source;
-                            break;
-                        }
                         string imageID = null;
-                        foreach (var item0 in profileCommon.Items)
+                        if (profileCommon.Items != null)
                         {
-                            var newparam = item0 as common_newparam_type;
-                            if (newparam == null || !newparam.sid.Equals(surfaceID)) continue;
+                            foreach (var item0 in profileCommon.Items)
+                            {
+                                var newparam = item0 as common_newparam_type;
+                                if (newparam == null || !newparam.sid.Equals(samplerID)) continue;
 
-                            imageID = (newparam.Item as fx_surface_common).init_from[0].Value;
-                            break;
+                                surfaceID = (newparam.Item as fx_sampler2D_common).source;
+                                break;
+                            }
+                            
+                            foreach (var item0 in profileCommon.Items)
+                            {
+                                var newparam = item0 as common_newparam_type;
+                                if (newparam == null || !newparam.sid.Equals(surfaceID)) continue;
+
+                                imageID = (newparam.Item as fx_surface_common).init_from[0].Value;
+                                break;
+                            }
                         }
                         // Sometimes models reference a non-existant image ID; if that's the case, don't throw error, 
                         // just ignore and set colour to white.
@@ -282,9 +286,34 @@ namespace SM64DSe.ImportExport.Loaders.ExternalLoaders
                     controller cntl = this.library_controllers.controller.Where(cntl0 => cntl0.id.Equals(controllerID)).ElementAt(0);
                     if (cntl.Item as skin != null)
                     {
-
-                        string geometryID = (cntl.Item as skin).source1.Replace("#", "");
-                        int[] vertexBoneIDs = ReadSkinController(controllerID, skeletonRoot);
+                        // Currently there is only support for skin controllers. Where a skin uses as its source another 
+                        // controller eg. a morph, we'll just recursively go through until we find a skin with a geometry 
+                        // as the source and return the geometry's ID. 
+                        // I've seen a skin use a skin as a source where the first skin gave joint indices of -1 from 3DS Max and 
+                        // OpenCOLLAD, in cases like this, we do as above and just take the geometry ID and attach the skin being 
+                        // read to that.
+                        string skinSourceID = null;
+                        var queue = new Queue<controller>();
+                        queue.Enqueue(cntl);
+                        while (queue.Count > 0)
+                        {
+                            controller cont = queue.Dequeue();
+                            string srcID = (cont.Item as skin).source1.Replace("#", "");
+                            if (this.library_geometries != null &&
+                                this.library_geometries.geometry.Where(geom0 => geom0.id.Equals(srcID)).Count() < 1)
+                            {
+                                IEnumerable<controller> res = this.library_controllers.controller.Where(cont0 => cont0.id.Equals(srcID));
+                                if (res.Count() > 0)
+                                {
+                                    queue.Enqueue(res.ElementAt(0));
+                                }
+                            }
+                            else
+                            {
+                                skinSourceID = srcID;
+                            }
+                        }
+                        int[] vertexBoneIDs = ReadSkinController(controllerID, skeletonRoot, skinSourceID);
 
                         Dictionary<string, string> bindMaterials = new Dictionary<string, string>();
                         if (instanceController.bind_material != null)
@@ -295,8 +324,8 @@ namespace SM64DSe.ImportExport.Loaders.ExternalLoaders
                             }
                         }
 
-                        ModelBase.GeometryDef geomDef = ReadGeometry(geometryID, skeletonRoot, bindMaterials, vertexBoneIDs);
-                        m_Model.m_BoneTree.GetBoneByID(skeletonRoot).m_Geometries.Add(geometryID, geomDef);
+                        ModelBase.GeometryDef geomDef = ReadGeometry(skinSourceID, skeletonRoot, bindMaterials, vertexBoneIDs);
+                        m_Model.m_BoneTree.GetBoneByID(skeletonRoot).m_Geometries.Add(skinSourceID, geomDef);
                     }
                 }
             }
@@ -363,7 +392,7 @@ namespace SM64DSe.ImportExport.Loaders.ExternalLoaders
             m_Model.m_BoneTree.GetBoneByID(skeletonRoot.id).CalculateBranchTransformations();
         }
 
-        private int[] ReadSkinController(string id, string skeletonRoot)
+        private int[] ReadSkinController(string id, string skeletonRoot, string geometryID)
         {
             controller controller = this.library_controllers.controller.Where(cntl => cntl.id.Equals(id)).ElementAt(0);
 
@@ -371,8 +400,6 @@ namespace SM64DSe.ImportExport.Loaders.ExternalLoaders
                 return null;
 
             skin skin = controller.Item as skin;
-
-            string geometryID = skin.source1.Replace("#", "");
 
             string[] jointNames = new string[0];
             Matrix4[] inverseBindPoses = new Matrix4[0];
@@ -736,7 +763,7 @@ namespace SM64DSe.ImportExport.Loaders.ExternalLoaders
                             count = pgons.count;
                             inputs = pgons.input;
                             vcount = new int[count];
-                            int[] pTmp = new int[count];
+                            int[] pTmp = new int[0];
                             int counter = 0;
                             for (int i = 0; i < pgons.Items.Length; i++)
                             {
@@ -747,7 +774,8 @@ namespace SM64DSe.ImportExport.Loaders.ExternalLoaders
                                         ((element as string).Split(new string[] { " ", "\n", "\r\n" }, StringSplitOptions.RemoveEmptyEntries), 
                                         Convert.ToInt32);
                                     vcount[i] = tmp.Length / inputs.Length;
-                                    Array.Copy(tmp, 0, pTmp, counter, vcount[i]);
+                                    Array.Resize(ref pTmp, pTmp.Length + (vcount[i] * inputs.Length));
+                                    Array.Copy(tmp, 0, pTmp, counter, tmp.Length);
                                     counter += tmp.Length;
                                 }
                             }
@@ -802,7 +830,7 @@ namespace SM64DSe.ImportExport.Loaders.ExternalLoaders
                         if (!m_Model.m_BoneTree.GetBoneByID(boneID).m_MaterialsInBranch.Contains(material))
                             m_Model.m_BoneTree.GetBoneByID(boneID).m_MaterialsInBranch.Add(material);
 
-                        int inputCount = 0;
+                        int inputCount = inputs.Length;
                         int vertexOffset = -1, normalOffset = -1, texCoordOffset = -1, colourOffset = -1;
                         string vertexSource = "", normalSource = "", texCoordSource = "", colourSource = "";
                         foreach (InputLocalOffset input in inputs)
@@ -828,8 +856,6 @@ namespace SM64DSe.ImportExport.Loaders.ExternalLoaders
                                 colourSource = input.source.Replace("#", "");
                             }
                         }
-                        if (vertexOffset != -1) inputCount++; if (normalOffset != -1) inputCount++;
-                        if (texCoordOffset != -1) inputCount++; if (colourOffset != -1) inputCount++;
 
                         foreach (int[] pArr in p)
                         {
@@ -1210,7 +1236,8 @@ namespace SM64DSe.ImportExport.Loaders.ExternalLoaders
 
         protected float[] InterpolateFramesAndExtractOneOverFrameRateFPS(float[]time, float smallestInterval, float[] outputValues)
         {
-            int numFrames = (int)Math.Ceiling(time[time.Length - 1] * FRAMES_PER_SECOND);
+            float timeByFPS = (float)Math.Round((double)(time[time.Length - 1] * FRAMES_PER_SECOND), 1);
+            int numFrames = (timeByFPS % 1f == 0f) ? (int)(timeByFPS + 1) : (int)Math.Ceiling(timeByFPS);
             float[] alignedFrameValues = new float[numFrames];
 
             float lastFrameTime = time[time.Length - 1];
@@ -1354,6 +1381,9 @@ namespace SM64DSe.ImportExport.Loaders.ExternalLoaders
 
         private node FindNodeInTree(node parent, string nodeID)
         {
+            if (parent.id == null)
+                return null;
+
             if (parent.id.Equals(nodeID))
             {
                 return parent;
