@@ -23,8 +23,11 @@ namespace SM64DSe.ImportExport
 
             public void AddRootBone(BoneDef root)
             {
-                m_Bones.Add(root);
-                root.CalculateInverseTransformation();
+                if (GetBoneIndex(root.m_ID) == -1)
+                {
+                    m_Bones.Add(root);
+                    root.CalculateInverseTransformation();
+                }
             }
 
             public BoneDef GetBoneByID(string id)
@@ -297,7 +300,7 @@ namespace SM64DSe.ImportExport
             public static uint[] ConvertVector3ToUInt20_12(Vector3 vector)
             {
                 return new uint[] { (uint)(vector.X * 4096.0f), 
-                            (uint)(vector.Y * 4096.0f), (uint)(vector.Z * 4096.0f) };
+                    (uint)(vector.Y * 4096.0f), (uint)(vector.Z * 4096.0f) };
             }
 
             public static Vector3 ConvertUShort4_12ToVector3(ushort[] values)
@@ -309,7 +312,7 @@ namespace SM64DSe.ImportExport
             public static ushort[] ConvertVector3ToUShort4_12(Vector3 vector)
             {
                 return new ushort[] { (ushort)((vector.X * 2048.0f) / Math.PI), 
-                            (ushort)((vector.Y * 2048.0f) / Math.PI), (ushort)((vector.Z * 2048.0f) / Math.PI) };
+                    (ushort)((vector.Y * 2048.0f) / Math.PI), (ushort)((vector.Z * 2048.0f) / Math.PI) };
             }
 
             public int Count

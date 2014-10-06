@@ -46,15 +46,19 @@ namespace SM64DSe.ImportExport.Writers.ExternalWriters
                 {
                     foreach (ModelBase.PolyListDef polyList in geometry.m_PolyLists.Values)
                     {
-                        foreach (ModelBase.FaceListDef faceList in polyList.m_FaceLists)
+                        int fl = 0;
+                        while (fl < polyList.m_FaceLists.Count)
                         {
-                            for (int f = 0; f < faceList.m_Faces.Count; f++)
+                            ModelBase.FaceListDef faceList = polyList.m_FaceLists[fl];
+
+                            int f = 0;
+                            int count = faceList.m_Faces.Count;
+                            while (f < faceList.m_Faces.Count)
                             {
                                 ModelBase.FaceDef face = faceList.m_Faces[f];
 
                                 int objSplitBoneID = face.m_Vertices[0].m_VertexBoneID;
-                                if (objSplitBoneID == boneIndex) continue;
-                                else
+                                if (objSplitBoneID != boneIndex)
                                 {
                                     ModelBase.BoneDef newBone = flatBoneList[objSplitBoneID];
 
@@ -70,9 +74,13 @@ namespace SM64DSe.ImportExport.Writers.ExternalWriters
                                         newBone.m_MaterialsInBranch.Add(polyList.m_MaterialName);
 
                                     newBone.m_Geometries[geometry.m_ID].m_PolyLists[polyList.m_MaterialName].m_FaceLists[0].m_Faces.Add(face);
-                                    polyList.m_FaceLists.RemoveAt(f);
+                                    faceList.m_Faces.RemoveAt(f);
                                 }
+
+                                f++;
                             }
+
+                            fl++;
                         }
                     }
                 }
