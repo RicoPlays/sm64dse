@@ -47,6 +47,7 @@
             this.mnitDecompressOverlaysWithinGame = new System.Windows.Forms.ToolStripMenuItem();
             this.mnitHexDumpToBinaryFile = new System.Windows.Forms.ToolStripMenuItem();
             this.mnitEditSDATINFOBlockToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.mnitToggleSuitabilityForNSMBeASMPatchingToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.lbxLevels = new System.Windows.Forms.ListBox();
             this.ofdOpenFile = new System.Windows.Forms.OpenFileDialog();
             this.sfdSaveFile = new System.Windows.Forms.SaveFileDialog();
@@ -224,40 +225,41 @@
             this.mnitDumpAllOvls,
             this.mnitDecompressOverlaysWithinGame,
             this.mnitHexDumpToBinaryFile,
-            this.mnitEditSDATINFOBlockToolStripMenuItem});
+            this.mnitEditSDATINFOBlockToolStripMenuItem,
+            this.mnitToggleSuitabilityForNSMBeASMPatchingToolStripMenuItem});
             this.btnMore.Enabled = false;
             this.btnMore.Image = ((System.Drawing.Image)(resources.GetObject("btnMore.Image")));
             this.btnMore.ImageTransparentColor = System.Drawing.Color.Magenta;
             this.btnMore.Name = "btnMore";
-            this.btnMore.Size = new System.Drawing.Size(48, 22);
+            this.btnMore.Size = new System.Drawing.Size(48, 19);
             this.btnMore.Text = "More";
             this.btnMore.ToolTipText = "Debug crap. Don\'t touch unless you know what you\'re doing.";
             // 
             // mnitAdditionalPatches
             // 
             this.mnitAdditionalPatches.Name = "mnitAdditionalPatches";
-            this.mnitAdditionalPatches.Size = new System.Drawing.Size(259, 22);
+            this.mnitAdditionalPatches.Size = new System.Drawing.Size(294, 22);
             this.mnitAdditionalPatches.Text = "Additional Patches";
             this.mnitAdditionalPatches.Click += new System.EventHandler(this.mnitAdditionalPatches_Click);
             // 
             // mnitDumpAllOvls
             // 
             this.mnitDumpAllOvls.Name = "mnitDumpAllOvls";
-            this.mnitDumpAllOvls.Size = new System.Drawing.Size(259, 22);
+            this.mnitDumpAllOvls.Size = new System.Drawing.Size(294, 22);
             this.mnitDumpAllOvls.Text = "Dump All Overlays";
             this.mnitDumpAllOvls.Click += new System.EventHandler(this.mnitDumpAllOvls_Click);
             // 
             // mnitDecompressOverlaysWithinGame
             // 
             this.mnitDecompressOverlaysWithinGame.Name = "mnitDecompressOverlaysWithinGame";
-            this.mnitDecompressOverlaysWithinGame.Size = new System.Drawing.Size(259, 22);
+            this.mnitDecompressOverlaysWithinGame.Size = new System.Drawing.Size(294, 22);
             this.mnitDecompressOverlaysWithinGame.Text = "Decompress Overlays Within Game";
             this.mnitDecompressOverlaysWithinGame.Click += new System.EventHandler(this.mnitDecompressOverlaysWithinGame_Click);
             // 
             // mnitHexDumpToBinaryFile
             // 
             this.mnitHexDumpToBinaryFile.Name = "mnitHexDumpToBinaryFile";
-            this.mnitHexDumpToBinaryFile.Size = new System.Drawing.Size(259, 22);
+            this.mnitHexDumpToBinaryFile.Size = new System.Drawing.Size(294, 22);
             this.mnitHexDumpToBinaryFile.Text = "Hex Dump to Binary File";
             this.mnitHexDumpToBinaryFile.Click += new System.EventHandler(this.mnitHexDumpToBinaryFile_Click);
             // 
@@ -265,10 +267,17 @@
             // 
             this.mnitEditSDATINFOBlockToolStripMenuItem.Enabled = false;
             this.mnitEditSDATINFOBlockToolStripMenuItem.Name = "mnitEditSDATINFOBlockToolStripMenuItem";
-            this.mnitEditSDATINFOBlockToolStripMenuItem.Size = new System.Drawing.Size(259, 22);
+            this.mnitEditSDATINFOBlockToolStripMenuItem.Size = new System.Drawing.Size(294, 22);
             this.mnitEditSDATINFOBlockToolStripMenuItem.Text = "Edit SDAT INFO Block";
             this.mnitEditSDATINFOBlockToolStripMenuItem.Visible = false;
             this.mnitEditSDATINFOBlockToolStripMenuItem.Click += new System.EventHandler(this.mnitEditSDATINFOBlockToolStripMenuItem_Click);
+            // 
+            // mnitToggleSuitabilityForNSMBeASMPatchingToolStripMenuItem
+            // 
+            this.mnitToggleSuitabilityForNSMBeASMPatchingToolStripMenuItem.Name = "mnitToggleSuitabilityForNSMBeASMPatchingToolStripMenuItem";
+            this.mnitToggleSuitabilityForNSMBeASMPatchingToolStripMenuItem.Size = new System.Drawing.Size(294, 22);
+            this.mnitToggleSuitabilityForNSMBeASMPatchingToolStripMenuItem.Text = "Toggle Suitability for NSMBe ASM Patching";
+            this.mnitToggleSuitabilityForNSMBeASMPatchingToolStripMenuItem.Click += new System.EventHandler(mnitToggleSuitabilityForNSMBeASMPatchingToolStripMenuItem_Click);
             // 
             // lbxLevels
             // 
@@ -631,6 +640,7 @@
         private System.Windows.Forms.Button btnExtractOverlay;
         private System.Windows.Forms.Button btnDecompressOverlay;
         private System.Windows.Forms.TreeView tvARM9Overlays;
+        private System.Windows.Forms.ToolStripMenuItem mnitToggleSuitabilityForNSMBeASMPatchingToolStripMenuItem;
     }
 }
 
