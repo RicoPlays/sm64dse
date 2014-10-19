@@ -535,10 +535,7 @@ namespace SM64DSe
             // The v3 patch applied at the beginning prevents patched ROM's working with NSMBe's useful 
             // ASM patching feature - this simply toggles the application of that patch on and off.
 
-            bool canRW = Program.m_ROM.CanRW();
-
-            if (!canRW)
-                Program.m_ROM.BeginRW();
+            Program.m_ROM.BeginRW();
 
             bool suitable = (Program.m_ROM.Read32(0x4AF4) == 0xDEC00621 && Program.m_ROM.Read32(0x4AF8) == 0x2106C0DE) ? true : false;
             if (!suitable)
@@ -556,9 +553,7 @@ namespace SM64DSe
                 Program.m_ROM.Write32(binend, 0x00000000);
             }
 
-            // If we couldn't RW before, set it back to false
-            if (!canRW)
-                Program.m_ROM.EndRW();
+            Program.m_ROM.EndRW();
 
             MessageBox.Show("ROM is " + ((suitable) ? "no longer " : "now ") + "suitable for use with NSMBe's ASM patch insertion feature");
         }
