@@ -125,7 +125,7 @@ namespace SM64DSe.ImportExport.Loaders.ExternalLoaders
                     {
                         var diffuseColour = diffuse.Item as common_color_or_texture_typeColor;
 
-                        matDef.m_DiffuseColour = Color.FromArgb((int)(diffuseColour.Values[0] * 255f),
+                        matDef.m_Diffuse = Color.FromArgb((int)(diffuseColour.Values[0] * 255f),
                             (int)(diffuseColour.Values[1] * 255f), (int)(diffuseColour.Values[2] * 255f));
 
                     }
@@ -158,28 +158,33 @@ namespace SM64DSe.ImportExport.Loaders.ExternalLoaders
                         }
                         // Sometimes models reference a non-existant image ID; if that's the case, don't throw error, 
                         // just ignore and set colour to white.
+                        // Some exporters such as 3DS Max output the Image ID the texture.texture attribute. This is 
+                        // wrong but I'm allowing it for convenience
                         IEnumerable<image> matchingImage;
                         if (this.library_images != null && this.library_images.image != null &&
-                            (matchingImage = this.library_images.image.Where(img => img.id.Equals(imageID))).Count() > 0)
+                            (matchingImage = this.library_images.image.Where(img => img.id.Equals(imageID))).Count() > 0 ||
+                            (matchingImage = this.library_images.image.Where(img => img.id.Equals(samplerID))).Count() > 0)
                         {
                             string texName = (string)matchingImage.ElementAt(0).Item;
                             if (texName.Contains(m_ModelPath))
                                 texName.Replace(m_ModelPath, "");
-                            AddTexture(texName, matDef);
+                            ModelBase.TextureDefBase texture = new ModelBase.TextureDefExternalBitmap(
+                                texName, m_ModelPath + Path.DirectorySeparatorChar + texName);
+                            AddTexture(texture, matDef);
                         }
                         else
                         {
                             Console.WriteLine("Warning: Material: " + matDef.m_ID + " referenced non-existant Image with ID: " + imageID);
                         }
 
-                        matDef.m_DiffuseColour = Color.White;
+                        matDef.m_Diffuse = Color.White;
                     }
                 }
 
                 if (transparency != null && transparency.Item != null)
                 {
                     var value = (transparency.Item as common_float_or_param_typeFloat).Value;
-                    matDef.m_Opacity = (int)(value * 255f);
+                    matDef.m_Alpha = (int)(value * 255f);
                 }
 
                 if (profileCommon.extra != null)
@@ -194,7 +199,8 @@ namespace SM64DSe.ImportExport.Loaders.ExternalLoaders
                             {
                                 if (elem.LocalName.ToLowerInvariant().Equals("double_sided"))
                                 {
-                                    matDef.m_IsDoubleSided = (elem.InnerText.Equals("1")) ? true : false;
+                                    if (elem.InnerText.Equals("1"))
+                                        matDef.m_PolygonDrawingFace = ModelBase.MaterialDef.PolygonDrawingFace.FrontAndBack;
                                     break;
                                 }
                             }
@@ -240,6 +246,8 @@ namespace SM64DSe.ImportExport.Loaders.ExternalLoaders
                 rootBone.SetTranslation(nodeTranslation);
 
                 m_Model.m_BoneTree.AddRootBone(rootBone);
+
+                m_Model.m_BoneTransformsMap.Add(id, m_Model.m_BoneTree.GetBoneIndex(id));
 
                 foreach (instance_geometry instanceGeometry in joint.instance_geometry)
                 {
@@ -313,6 +321,9 @@ namespace SM64DSe.ImportExport.Loaders.ExternalLoaders
                                 skinSourceID = srcID;
                             }
                         }
+
+                        m_Model.m_BoneTransformsMap.Clear();
+
                         int[] vertexBoneIDs = ReadSkinController(controllerID, skeletonRoot, skinSourceID);
 
                         Dictionary<string, string> bindMaterials = new Dictionary<string, string>();
@@ -450,6 +461,13 @@ namespace SM64DSe.ImportExport.Loaders.ExternalLoaders
                         }
                     }
                 }
+            }
+
+            if (jointNames.Length > 31) Console.WriteLine("WARN: More than 31 matrices, your model will not import correctly.");
+
+            for (int i = 0; i < jointNames.Length; i++)
+            {
+                m_Model.m_BoneTransformsMap.Add(jointNames[i], i);
             }
 
             //for (int i = 0; i < jointNames.Length; i++)
@@ -887,7 +905,7 @@ namespace SM64DSe.ImportExport.Loaders.ExternalLoaders
                                         vert.m_Normal = null;
                                     }
 
-                                    if (texCoordOffset != -1 && m_Model.m_Materials[material].m_HasTextures)
+                                    if (texCoordOffset != -1 && m_Model.m_Materials[material].m_TextureDefID != null)
                                     {
                                         tmp = GetValueFromFloatArraySource(sources[texCoordSource], pArr[pIndex + (ulong)texCoordOffset]);
                                         vert.m_TextureCoordinate = new Vector2(tmp[0], tmp[1]);
@@ -959,11 +977,16 @@ namespace SM64DSe.ImportExport.Loaders.ExternalLoaders
 
             if (this.library_animations.animation != null && this.library_animations.animation.Length > 0)
             {
-                Dictionary<string, List<Tuple<ModelBase.AnimationDef, TransformationType>>> boneAnimations = 
-                    new Dictionary<string, List<Tuple<ModelBase.AnimationDef, TransformationType>>>();
+                Dictionary<string, ModelBase.AnimationDef> boneAnimations = new Dictionary<string, ModelBase.AnimationDef>();
 
+                Queue<animation> animations = new Queue<animation>();
                 foreach (animation anim in this.library_animations.animation)
+                    animations.Enqueue(anim);
+
+                while (animations.Count > 0)
                 {
+                    animation anim = animations.Dequeue();
+
                     string id = anim.id;
 
                     List<source> animSources = new List<source>();
@@ -998,32 +1021,49 @@ namespace SM64DSe.ImportExport.Loaders.ExternalLoaders
 
                         string targetParam = (targetTransformationSID.IndexOf('.') != -1) ?
                             targetTransformationSID.Substring(targetTransformationSID.IndexOf('.') + 1) : null;
-                        targetTransformationSID = (targetParam != null) ? targetTransformationSID.Replace("." + targetParam, "") : 
+                        targetTransformationSID = (targetParam != null) ? targetTransformationSID.Replace("." + targetParam, "") :
                             targetTransformationSID;
 
-                        if (!boneAnimations.ContainsKey(targetNodeID))
-                            boneAnimations.Add(targetNodeID, new List<Tuple<ModelBase.AnimationDef, TransformationType>>());
-                        List<Tuple<ModelBase.AnimationDef, TransformationType>> currentBoneAnimations = boneAnimations[targetNodeID];
+                        string boneID = targetNodeID;
 
                         node targetNode = FindNodeInLibraryVisualScenes(targetNodeID);
                         for (int i = 0; i < targetNode.Items.Length; i++)
                         {
                             var item = targetNode.Items[i];
 
-                            if (item.GetType().Equals(typeof(matrix)) && (item as matrix).sid.Equals(targetTransformationSID))
+                            if (item.GetType().Equals(typeof(matrix)) &&
+                                ((item as matrix).sid != null && (item as matrix).sid.Equals(targetTransformationSID)))
                             {
                                 animType = TransformationType.TransformationMatrix;
                                 break;
                             }
-                            else if (item.GetType().Equals(typeof(TargetableFloat3)) && (item as TargetableFloat3).sid.Equals(targetTransformationSID))
+                            else if (item.GetType().Equals(typeof(TargetableFloat3)) &&
+                                ((item as TargetableFloat3).sid != null && (item as TargetableFloat3).sid.Equals(targetTransformationSID)))
                             {
                                 if (targetNode.ItemsElementName[i].Equals(ItemsChoiceType2.scale))
-                                    animType = TransformationType.ScaleXYZ;
+                                {
+                                    switch ((targetParam != null) ? targetParam.ToUpperInvariant() : null)
+                                    {
+                                        case null: animType = TransformationType.ScaleXYZ; break;
+                                        case "X": animType = TransformationType.ScaleX; break;
+                                        case "Y": animType = TransformationType.ScaleY; break;
+                                        case "Z": animType = TransformationType.ScaleZ; break;
+                                    }
+                                }
                                 else if (targetNode.ItemsElementName[i].Equals(ItemsChoiceType2.translate))
-                                    animType = TransformationType.TranslationXYZ;
+                                {
+                                    switch ((targetParam != null) ? targetParam.ToUpperInvariant() : null)
+                                    {
+                                        case null: animType = TransformationType.TranslationXYZ; break;
+                                        case "X": animType = TransformationType.TranslationX; break;
+                                        case "Y": animType = TransformationType.TranslationY; break;
+                                        case "Z": animType = TransformationType.TranslationZ; break;
+                                    }
+                                }
                                 break;
                             }
-                            else if (item.GetType().Equals(typeof(rotate)) && (item as rotate).sid.Equals(targetTransformationSID))
+                            else if (item.GetType().Equals(typeof(rotate)) &&
+                                ((item as rotate).sid != null && (item as rotate).sid.Equals(targetTransformationSID)))
                             {
                                 animType = GetRotationType((item as rotate));
                                 break;
@@ -1059,182 +1099,192 @@ namespace SM64DSe.ImportExport.Loaders.ExternalLoaders
                             finalOutputs = outputs;
                         }
 
-                        List<ModelBase.AnimationFrameDef> animFrames = new List<ModelBase.AnimationFrameDef>();
-                        for (int i = 0; i < finalOutputs[0].Length; i++)
+                        int numFrames = finalOutputs[0].Length;
+
+                        if (!boneAnimations.ContainsKey(boneID))
+                            boneAnimations.Add(boneID, new ModelBase.AnimationDef(boneID + "-animation", boneID, numFrames));
+                        ModelBase.AnimationDef animationDef = boneAnimations[boneID];
+
+                        switch (animType)
                         {
-                            ModelBase.AnimationFrameDef frame = new ModelBase.AnimationFrameDef();
-                            switch (animType)
-                            {
-                                case TransformationType.TransformationMatrix:
-                                    {
-                                        float[] vals = new float[] { 
-                                            finalOutputs[0][i], finalOutputs[1][i], finalOutputs[2][i], finalOutputs[3][i], 
-                                            finalOutputs[4][i], finalOutputs[5][i], finalOutputs[6][i], finalOutputs[7][i], 
-                                            finalOutputs[8][i], finalOutputs[9][i], finalOutputs[10][i], finalOutputs[11][i], 
-                                            finalOutputs[12][i], finalOutputs[13][i], finalOutputs[14][i], finalOutputs[15][i] };
-                                        Matrix4 mat = Helper.FloatArrayToMatrix4(vals);
-                                        Vector3 scale, rotation, translation;
-                                        Helper.DecomposeSRTMatrix1(mat, out scale, out rotation, out translation);
-                                        frame.SetScale(scale);
-                                        frame.SetRotation(rotation);
-                                        frame.SetTranslation(translation);
-                                    }
-                                    break;
-                                case TransformationType.ScaleXYZ:
-                                    {
-                                        frame.SetScale(new Vector3(finalOutputs[0][i], finalOutputs[1][i], finalOutputs[2][i]));
-                                    }
-                                    break;
-                                case TransformationType.RotationX:
-                                    {
-                                        Vector3 tmp = frame.GetRotation();
-                                        frame.SetRotation(new Vector3(finalOutputs[0][i], tmp.Y, tmp.Z));
-                                    }
-                                    break;
-                                case TransformationType.RotationY:
-                                    {
-                                        Vector3 tmp = frame.GetRotation();
-                                        frame.SetRotation(new Vector3(tmp.X, finalOutputs[0][i], tmp.Z));
-                                    }
-                                    break;
-                                case TransformationType.RotationZ:
-                                    {
-                                        Vector3 tmp = frame.GetRotation();
-                                        frame.SetRotation(new Vector3(tmp.X, tmp.Y, finalOutputs[0][i]));
-                                    }
-                                    break;
-                                case TransformationType.TranslationXYZ:
-                                    {
-                                        frame.SetTranslation(new Vector3(finalOutputs[0][i], finalOutputs[1][i], finalOutputs[2][i]));
-                                    }
-                                    break;
-                            }
-                            animFrames.Add(frame);
-                        }
-                        ModelBase.AnimationDef animation = new ModelBase.AnimationDef(id, targetNodeID, animFrames);
-                        currentBoneAnimations.Add(new Tuple<ModelBase.AnimationDef, TransformationType>(animation, animType));
-                    }
-
-                }
-
-                Dictionary<string, ModelBase.AnimationDef> finalBoneAnimations =
-                    new Dictionary<string, ModelBase.AnimationDef>();
-
-                // Merge all individual animations for a particular bone into one animation
-                foreach (string boneID in boneAnimations.Keys)
-                {
-                    List<Tuple<ModelBase.AnimationDef, TransformationType>> currentBoneAnimations = boneAnimations[boneID];
-
-                    if (currentBoneAnimations.Count <= 1)
-                    {
-                        if (currentBoneAnimations.Count == 1)
-                            finalBoneAnimations.Add(boneID, currentBoneAnimations[0].Item1);
-                    }
-                    else
-                    {
-                        ModelBase.AnimationDef anim = new ModelBase.AnimationDef(boneID, boneID);
-                        int numFrames = currentBoneAnimations[0].Item1.m_AnimationFrames.Count;
-                        ModelBase.AnimationFrameDef[] frames = new ModelBase.AnimationFrameDef[numFrames];
-
-                        for (int i = 0; i < numFrames; i++)
-                        {
-                            frames[i] = new ModelBase.AnimationFrameDef();
-
-                            for (int j = 0; j < currentBoneAnimations.Count; j++)
-                            {
-                                switch (currentBoneAnimations[j].Item2)
+                            case TransformationType.ScaleXYZ:
                                 {
-                                    case TransformationType.TransformationMatrix:
-                                        frames[i].SetScale(currentBoneAnimations[j].Item1.m_AnimationFrames[i].GetScale());
-                                        frames[i].SetRotation(currentBoneAnimations[j].Item1.m_AnimationFrames[i].GetRotation());
-                                        frames[i].SetTranslation(currentBoneAnimations[j].Item1.m_AnimationFrames[i].GetTranslation());
-                                        break;
-                                    case TransformationType.ScaleXYZ:
-                                        frames[i].SetScale(currentBoneAnimations[j].Item1.m_AnimationFrames[i].GetScale());
-                                        break;
-                                    case TransformationType.ScaleX:
-                                        {
-                                            Vector3 tmp = frames[i].GetScale();
-                                            frames[i].SetScale(new Vector3(
-                                                currentBoneAnimations[j].Item1.m_AnimationFrames[i].GetScale().X, tmp.Y, tmp.Z));
-                                        }
-                                        break;
-                                    case TransformationType.ScaleY:
-                                        {
-                                            Vector3 tmp = frames[i].GetScale();
-                                            frames[i].SetScale(new Vector3(
-                                                tmp.X, currentBoneAnimations[j].Item1.m_AnimationFrames[i].GetScale().Y, tmp.Z));
-                                        }
-                                        break;
-                                    case TransformationType.ScaleZ:
-                                        {
-                                            Vector3 tmp = frames[i].GetScale();
-                                            frames[i].SetScale(new Vector3(
-                                                tmp.X, tmp.Y, currentBoneAnimations[j].Item1.m_AnimationFrames[i].GetScale().Z));
-                                        }
-                                        break;
-                                    case TransformationType.RotationX:
-                                        {
-                                            Vector3 tmp = frames[i].GetRotation();
-                                            frames[i].SetRotation(new Vector3(
-                                                currentBoneAnimations[j].Item1.m_AnimationFrames[i].GetRotation().X * Helper.Deg2Rad, 
-                                                tmp.Y, tmp.Z));
-                                        }
-                                        break;
-                                    case TransformationType.RotationY:
-                                        {
-                                            Vector3 tmp = frames[i].GetRotation();
-                                            frames[i].SetRotation(new Vector3(
-                                                tmp.X, currentBoneAnimations[j].Item1.m_AnimationFrames[i].GetRotation().Y * Helper.Deg2Rad, 
-                                                tmp.Z));
-                                        }
-                                        break;
-                                    case TransformationType.RotationZ:
-                                        {
-                                            Vector3 tmp = frames[i].GetRotation();
-                                            frames[i].SetRotation(new Vector3(
-                                                tmp.X, tmp.Y, 
-                                                currentBoneAnimations[j].Item1.m_AnimationFrames[i].GetRotation().Z * Helper.Deg2Rad));
-                                        }
-                                        break;
-                                    case TransformationType.TranslationXYZ:
-                                        frames[i].SetTranslation(currentBoneAnimations[j].Item1.m_AnimationFrames[i].GetTranslation());
-                                        break;
-                                    case TransformationType.TranslationX:
-                                        {
-                                            Vector3 tmp = frames[i].GetTranslation();
-                                            frames[i].SetTranslation(new Vector3(
-                                                currentBoneAnimations[j].Item1.m_AnimationFrames[i].GetTranslation().X, tmp.Y, tmp.Z));
-                                        }
-                                        break;
-                                    case TransformationType.TranslationY:
-                                        {
-                                            Vector3 tmp = frames[i].GetTranslation();
-                                            frames[i].SetTranslation(new Vector3(
-                                                tmp.X, currentBoneAnimations[j].Item1.m_AnimationFrames[i].GetTranslation().Y, tmp.Z));
-                                        }
-                                        break;
-                                    case TransformationType.TranslationZ:
-                                        {
-                                            Vector3 tmp = frames[i].GetTranslation();
-                                            frames[i].SetTranslation(new Vector3(
-                                                tmp.X, tmp.Y, currentBoneAnimations[j].Item1.m_AnimationFrames[i].GetTranslation().Z));
-                                        }
-                                        break;
+                                    AddConstantAnimationDefComponent(finalOutputs[0], numFrames, animationDef, 
+                                        ModelBase.AnimationComponentType.ScaleX);
+                                    AddConstantAnimationDefComponent(finalOutputs[1], numFrames, animationDef,
+                                        ModelBase.AnimationComponentType.ScaleY);
+                                    AddConstantAnimationDefComponent(finalOutputs[2], numFrames, animationDef,
+                                        ModelBase.AnimationComponentType.ScaleZ);
                                 }
-                            }
+                                break;
+                            case TransformationType.ScaleX:
+                                AddConstantAnimationDefComponent(finalOutputs[0], numFrames, animationDef,
+                                        ModelBase.AnimationComponentType.ScaleX);
+                                break;
+                            case TransformationType.ScaleY:
+                                AddConstantAnimationDefComponent(finalOutputs[0], numFrames, animationDef,
+                                        ModelBase.AnimationComponentType.ScaleY);
+                                break;
+                            case TransformationType.ScaleZ:
+                                AddConstantAnimationDefComponent(finalOutputs[0], numFrames, animationDef,
+                                        ModelBase.AnimationComponentType.ScaleZ);
+                                break;
+                            case TransformationType.RotationX:
+                                finalOutputs[0] = Array.ConvertAll(finalOutputs[0], x => x * Helper.Deg2Rad);
+                                AddConstantAnimationDefComponent(finalOutputs[0], numFrames, animationDef,
+                                        ModelBase.AnimationComponentType.RotateX);
+                                break;
+                            case TransformationType.RotationY:
+                                finalOutputs[0] = Array.ConvertAll(finalOutputs[0], x => x * Helper.Deg2Rad);
+                                AddConstantAnimationDefComponent(finalOutputs[0], numFrames, animationDef,
+                                        ModelBase.AnimationComponentType.RotateY);
+                                break;
+                            case TransformationType.RotationZ:
+                                finalOutputs[0] = Array.ConvertAll(finalOutputs[0], x => x * Helper.Deg2Rad);
+                                AddConstantAnimationDefComponent(finalOutputs[0], numFrames, animationDef,
+                                        ModelBase.AnimationComponentType.RotateZ);
+                                break;
+                            case TransformationType.TranslationXYZ:
+                                {
+                                    AddConstantAnimationDefComponent(finalOutputs[0], numFrames, animationDef,
+                                        ModelBase.AnimationComponentType.TranslateX);
+                                    AddConstantAnimationDefComponent(finalOutputs[1], numFrames, animationDef,
+                                        ModelBase.AnimationComponentType.TranslateY);
+                                    AddConstantAnimationDefComponent(finalOutputs[2], numFrames, animationDef,
+                                        ModelBase.AnimationComponentType.TranslateZ);
+                                }
+                                break;
+                            case TransformationType.TranslationX:
+                                AddConstantAnimationDefComponent(finalOutputs[0], numFrames, animationDef,
+                                        ModelBase.AnimationComponentType.TranslateX);
+                                break;
+                            case TransformationType.TranslationY:
+                                AddConstantAnimationDefComponent(finalOutputs[0], numFrames, animationDef,
+                                        ModelBase.AnimationComponentType.TranslateY);
+                                break;
+                            case TransformationType.TranslationZ:
+                                AddConstantAnimationDefComponent(finalOutputs[0], numFrames, animationDef,
+                                        ModelBase.AnimationComponentType.TranslateZ);
+                                break;
+                            case TransformationType.TransformationMatrix:
+                                {
+                                    float[][] decomposedValues = MergeAndDecomposeMatrixTransformations(finalOutputs, numFrames);
+                                    AddConstantAnimationDefComponent(decomposedValues[0], numFrames, animationDef,
+                                        ModelBase.AnimationComponentType.ScaleX);
+                                    AddConstantAnimationDefComponent(decomposedValues[1], numFrames, animationDef,
+                                        ModelBase.AnimationComponentType.ScaleY);
+                                    AddConstantAnimationDefComponent(decomposedValues[2], numFrames, animationDef,
+                                        ModelBase.AnimationComponentType.ScaleZ);
+                                    AddConstantAnimationDefComponent(decomposedValues[3], numFrames, animationDef,
+                                        ModelBase.AnimationComponentType.RotateX);
+                                    AddConstantAnimationDefComponent(decomposedValues[4], numFrames, animationDef,
+                                        ModelBase.AnimationComponentType.RotateY);
+                                    AddConstantAnimationDefComponent(decomposedValues[5], numFrames, animationDef,
+                                        ModelBase.AnimationComponentType.RotateZ);
+                                    AddConstantAnimationDefComponent(decomposedValues[6], numFrames, animationDef,
+                                        ModelBase.AnimationComponentType.TranslateX);
+                                    AddConstantAnimationDefComponent(decomposedValues[7], numFrames, animationDef,
+                                        ModelBase.AnimationComponentType.TranslateY);
+                                    AddConstantAnimationDefComponent(decomposedValues[8], numFrames, animationDef,
+                                        ModelBase.AnimationComponentType.TranslateZ);
+                                }
+                                break;
                         }
+                    }
 
-                        anim.m_AnimationFrames = frames.ToList();
-                        finalBoneAnimations.Add(anim.m_ID, anim);
+                    foreach (var item in anim.Items)
+                    {
+                        if (item as animation != null)
+                            animations.Enqueue(item as animation);
                     }
                 }
 
-                m_Model.m_Animations = finalBoneAnimations;
+                // Make sure each animation contains a Scale, Rotation and Translation component. If not specified in library_animations, 
+                // then these are just the bone's transformations throughout.
+                foreach (ModelBase.AnimationDef anim in boneAnimations.Values)
+                {
+                    if (!anim.m_AnimationComponents.ContainsKey(ModelBase.AnimationComponentType.ScaleX))
+                        anim.m_AnimationComponents.Add(ModelBase.AnimationComponentType.ScaleX,
+                            new ModelBase.AnimationComponentDataDef(new float[] { m_Model.m_BoneTree.GetBoneByID(anim.m_BoneID).m_Scale.X },
+                                anim.m_NumFrames, true, 1, ModelBase.AnimationComponentType.ScaleX));
+                    if (!anim.m_AnimationComponents.ContainsKey(ModelBase.AnimationComponentType.ScaleY))
+                        anim.m_AnimationComponents.Add(ModelBase.AnimationComponentType.ScaleY,
+                            new ModelBase.AnimationComponentDataDef(new float[] { m_Model.m_BoneTree.GetBoneByID(anim.m_BoneID).m_Scale.Y },
+                                anim.m_NumFrames, true, 1, ModelBase.AnimationComponentType.ScaleX));
+                    if (!anim.m_AnimationComponents.ContainsKey(ModelBase.AnimationComponentType.ScaleZ))
+                        anim.m_AnimationComponents.Add(ModelBase.AnimationComponentType.ScaleZ,
+                            new ModelBase.AnimationComponentDataDef(new float[] { m_Model.m_BoneTree.GetBoneByID(anim.m_BoneID).m_Scale.Z },
+                                anim.m_NumFrames, true, 1, ModelBase.AnimationComponentType.ScaleZ));
+                    if (!anim.m_AnimationComponents.ContainsKey(ModelBase.AnimationComponentType.RotateX))
+                        anim.m_AnimationComponents.Add(ModelBase.AnimationComponentType.RotateX,
+                            new ModelBase.AnimationComponentDataDef(new float[] { m_Model.m_BoneTree.GetBoneByID(anim.m_BoneID).m_Rotation.X },
+                                anim.m_NumFrames, true, 1, ModelBase.AnimationComponentType.RotateX));
+                    if (!anim.m_AnimationComponents.ContainsKey(ModelBase.AnimationComponentType.RotateY))
+                        anim.m_AnimationComponents.Add(ModelBase.AnimationComponentType.RotateY,
+                            new ModelBase.AnimationComponentDataDef(new float[] { m_Model.m_BoneTree.GetBoneByID(anim.m_BoneID).m_Rotation.Y },
+                                anim.m_NumFrames, true, 1, ModelBase.AnimationComponentType.RotateX));
+                    if (!anim.m_AnimationComponents.ContainsKey(ModelBase.AnimationComponentType.RotateZ))
+                        anim.m_AnimationComponents.Add(ModelBase.AnimationComponentType.RotateZ,
+                            new ModelBase.AnimationComponentDataDef(new float[] { m_Model.m_BoneTree.GetBoneByID(anim.m_BoneID).m_Rotation.Z },
+                                anim.m_NumFrames, true, 1, ModelBase.AnimationComponentType.RotateZ));
+                    if (!anim.m_AnimationComponents.ContainsKey(ModelBase.AnimationComponentType.TranslateX))
+                        anim.m_AnimationComponents.Add(ModelBase.AnimationComponentType.TranslateX,
+                            new ModelBase.AnimationComponentDataDef(new float[] { m_Model.m_BoneTree.GetBoneByID(anim.m_BoneID).m_Translation.X },
+                                anim.m_NumFrames, true, 1, ModelBase.AnimationComponentType.TranslateX));
+                    if (!anim.m_AnimationComponents.ContainsKey(ModelBase.AnimationComponentType.TranslateY))
+                        anim.m_AnimationComponents.Add(ModelBase.AnimationComponentType.TranslateY,
+                            new ModelBase.AnimationComponentDataDef(new float[] { m_Model.m_BoneTree.GetBoneByID(anim.m_BoneID).m_Translation.Y },
+                                anim.m_NumFrames, true, 1, ModelBase.AnimationComponentType.TranslateX));
+                    if (!anim.m_AnimationComponents.ContainsKey(ModelBase.AnimationComponentType.TranslateZ))
+                        anim.m_AnimationComponents.Add(ModelBase.AnimationComponentType.TranslateZ,
+                            new ModelBase.AnimationComponentDataDef(new float[] { m_Model.m_BoneTree.GetBoneByID(anim.m_BoneID).m_Translation.Z },
+                                anim.m_NumFrames, true, 1, ModelBase.AnimationComponentType.TranslateZ));
+                }
+
+                m_Model.m_Animations = boneAnimations;
             }
         }
 
-        protected float[] InterpolateFramesAndExtractOneOverFrameRateFPS(float[]time, float smallestInterval, float[] outputValues)
+        private static void AddConstantAnimationDefComponent(float[] values, int numFrames, ModelBase.AnimationDef animationDef, 
+            ModelBase.AnimationComponentType animationComponentType)
+        {
+            animationDef.m_AnimationComponents.Add(animationComponentType,
+                new ModelBase.AnimationComponentDataDef(
+                values, numFrames, false, 1, animationComponentType));
+        }
+
+        private static float[][] MergeAndDecomposeMatrixTransformations(float[][] individualValues, int numFrames)
+        {
+            float[][] merged = new float[9][];
+            for (int i = 0; i < merged.Length; i++)
+                merged[i] = new float[numFrames];
+
+            for (int i = 0; i < numFrames; i++)
+            {
+                float[] vals = new float[] { 
+                    individualValues[0][i], individualValues[1][i], individualValues[2][i], individualValues[3][i], 
+                    individualValues[4][i], individualValues[5][i], individualValues[6][i], individualValues[7][i], 
+                    individualValues[8][i], individualValues[9][i], individualValues[10][i], individualValues[11][i], 
+                    individualValues[12][i], individualValues[13][i], individualValues[14][i], individualValues[15][i] };
+                Matrix4 mat = Helper.FloatArrayToMatrix4(vals);
+                Vector3 scale, rotation, translation;
+                Helper.DecomposeSRTMatrix1(mat, out scale, out rotation, out translation);
+
+                merged[0][i] = scale.X;
+                merged[1][i] = scale.Y;
+                merged[2][i] = scale.Z;
+                merged[3][i] = rotation.X;
+                merged[4][i] = rotation.Y;
+                merged[5][i] = rotation.Z;
+                merged[6][i] = translation.X;
+                merged[7][i] = translation.Y;
+                merged[8][i] = translation.Z;
+            }
+
+            return merged;
+        }
+
+        protected float[] InterpolateFramesAndExtractOneOverFrameRateFPS(float[] time, float smallestInterval, float[] outputValues)
         {
             float timeByFPS = (float)Math.Round((double)(time[time.Length - 1] * FRAMES_PER_SECOND), 1);
             int numFrames = (timeByFPS % 1f == 0f) ? (int)(timeByFPS + 1) : (int)Math.Ceiling(timeByFPS);

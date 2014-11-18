@@ -82,6 +82,7 @@ namespace SM64DSe
         private BMD m_ImportedModel;
 
         private Dictionary<string, ModelBase.MaterialDef> m_Materials;
+        private Dictionary<string, int> m_MatColTypes = new Dictionary<string, int>();
 
         // misc
         private Vector3 m_MarioPosition;
@@ -157,6 +158,12 @@ namespace SM64DSe
 
         private void PopulateColTypes()
         {
+            m_MatColTypes.Clear();
+            foreach (string matName in m_Materials.Keys)
+            {
+                m_MatColTypes.Add(matName, 0);
+            }
+
             gridColTypes.ColumnCount = 2;
             gridColTypes.Columns[0].HeaderText = "Material";
             gridColTypes.Columns[1].HeaderText = "Col. Type";
@@ -165,8 +172,8 @@ namespace SM64DSe
             gridColTypes.RowCount = numMats;
             for (int i = 0; i < numMats; i++)
             {
-                gridColTypes.Rows[i].Cells[0].Value = m_Materials.Keys.ElementAt(i);
-                gridColTypes.Rows[i].Cells[1].Value = m_Materials.Values.ElementAt(i).m_ColType;
+                gridColTypes.Rows[i].Cells[0].Value = m_MatColTypes.Keys.ElementAt(i);
+                gridColTypes.Rows[i].Cells[1].Value = m_MatColTypes.Values.ElementAt(i).ToString();
             }
         }
 
@@ -450,11 +457,6 @@ namespace SM64DSe
                 try { faceSizeThreshold = float.Parse(txtThreshold.Text, Helper.USA); }
                 catch { MessageBox.Show(txtThreshold.Text + "\nis not a valid float value. Please enter a value in format 0.123"); return; }
             }
-            Dictionary<string, int> matColTypes = new Dictionary<string, int>();
-            for (int i = 0; i < m_Materials.Count; i++)
-            {
-                matColTypes[m_Materials.Keys.ElementAt(i)] = m_Materials.Values.ElementAt(i).m_ColType;
-            }
             NitroFile kcl;//This'll hold the KCL file that is to be replaced, either a level's or an object's
             //If it's an object it'll be scaled down - need to get back to original value
             slStatus.Text = "Importing model...";
@@ -472,7 +474,7 @@ namespace SM64DSe
                 try
                 {
                     kcl = Program.m_ROM.GetFileFromName(m_KCLName);
-                    new KCLImporter().ConvertModelToKCL(kcl, m_ModelFileName, kclScale, faceSizeThreshold, matColTypes);
+                    new KCLImporter().ConvertModelToKCL(kcl, m_ModelFileName, kclScale, faceSizeThreshold, m_MatColTypes);
                 }
                 catch (Exception e)
                 {
@@ -706,9 +708,10 @@ namespace SM64DSe
 
         private void btnAssignTypes_Click(object sender, EventArgs e)
         {
-            for (int i = 0; i < gridColTypes.RowCount; i++)
+            int count = 0;
+            foreach (string mat in m_MatColTypes.Keys)
             {
-                m_Materials.Values.ElementAt(i).m_ColType = int.Parse(gridColTypes.Rows[i].Cells[1].Value.ToString());
+                m_MatColTypes[mat] = int.Parse(gridColTypes.Rows[count++].Cells[1].Value.ToString());
             }
         }
 

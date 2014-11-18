@@ -1,4 +1,4 @@
-SM64DS BTP (BMD Texture Sequence Animation) format
+SM64DS BTP (Binary Texture Pattern) format
 
 Fiachra
 2014/03/17

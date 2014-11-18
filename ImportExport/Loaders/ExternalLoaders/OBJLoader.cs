@@ -200,7 +200,7 @@ namespace SM64DSe.ImportExport.Loaders.ExternalLoaders
                                 ModelBase.VertexDef vert = new ModelBase.VertexDef();
 
                                 vert.m_Position = new Vector3(m_Vertices[int.Parse(idxs[0]) - 1].Xyz);
-                                if (m_Model.m_Materials[curmaterial].m_HasTextures && idxs.Length >= 2 && idxs[1].Length > 0)
+                                if (m_Model.m_Materials[curmaterial].m_TextureDefID != null && idxs.Length >= 2 && idxs[1].Length > 0)
                                     vert.m_TextureCoordinate = new Vector2(m_TexCoords[int.Parse(idxs[1]) - 1]);
                                 else
                                     vert.m_TextureCoordinate = null;
@@ -225,6 +225,13 @@ namespace SM64DSe.ImportExport.Loaders.ExternalLoaders
                         }
                         break;
                 }
+            }
+
+            int count = 0;
+            foreach (ModelBase.BoneDef boneDef in m_Model.m_BoneTree)
+            {
+                m_Model.m_BoneTransformsMap.Add(boneDef.m_ID, count);
+                count++;
             }
 
             sr.Close();
@@ -293,7 +300,7 @@ namespace SM64DSe.ImportExport.Loaders.ExternalLoaders
                                 o *= 255;
 
                             ModelBase.MaterialDef mat = (ModelBase.MaterialDef)m_Model.m_Materials[curmaterial];
-                            mat.m_Opacity = Math.Max(0, Math.Min(255, (int)(o * 255)));
+                            mat.m_Alpha = Math.Max(0, Math.Min(255, (int)(o * 255)));
                         }
                         break;
 
@@ -306,7 +313,33 @@ namespace SM64DSe.ImportExport.Loaders.ExternalLoaders
                             Color col = Color.FromArgb((int)(r * 255), (int)(g * 255), (int)(b * 255));
 
                             ModelBase.MaterialDef mat = (ModelBase.MaterialDef)m_Model.m_Materials[curmaterial];
-                            mat.m_DiffuseColour = col;
+                            mat.m_Diffuse = col;
+                        }
+                        break;
+
+                    case "Ka": // ambient colour
+                        {
+                            if (parts.Length < 4) continue;
+                            float r = float.Parse(parts[1], USA);
+                            float g = float.Parse(parts[2], USA);
+                            float b = float.Parse(parts[3], USA);
+                            Color col = Color.FromArgb((int)(r * 255), (int)(g * 255), (int)(b * 255));
+
+                            ModelBase.MaterialDef mat = (ModelBase.MaterialDef)m_Model.m_Materials[curmaterial];
+                            mat.m_Ambient = col;
+                        }
+                        break;
+
+                    case "Ks": // specular colour
+                        {
+                            if (parts.Length < 4) continue;
+                            float r = float.Parse(parts[1], USA);
+                            float g = float.Parse(parts[2], USA);
+                            float b = float.Parse(parts[3], USA);
+                            Color col = Color.FromArgb((int)(r * 255), (int)(g * 255), (int)(b * 255));
+
+                            ModelBase.MaterialDef mat = (ModelBase.MaterialDef)m_Model.m_Materials[curmaterial];
+                            mat.m_Specular = col;
                         }
                         break;
 
@@ -314,7 +347,9 @@ namespace SM64DSe.ImportExport.Loaders.ExternalLoaders
                     case "mapKd": // diffuse map (texture)
                         {
                             string texname = curline.Substring(parts[0].Length + 1).Trim();
-                            AddTexture(texname, m_Model.m_Materials[curmaterial]);
+                            ModelBase.TextureDefBase texture = new
+                                ModelBase.TextureDefExternalBitmap(texname, m_ModelPath + Path.DirectorySeparatorChar + texname);
+                            AddTexture(texture, m_Model.m_Materials[curmaterial]);
                             break;
                         }
                 }

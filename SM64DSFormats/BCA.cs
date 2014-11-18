@@ -18,7 +18,7 @@ namespace SM64DSe
     {
         public ushort m_NumBones;
         public ushort m_NumFrames;
-        public uint m_Unknown0x04;
+        public uint m_Looped;
         public uint m_ScaleValuesOffset;
         public uint m_RotationValuesOffset;
         public uint m_TranslationValuesOffset;
@@ -43,7 +43,7 @@ namespace SM64DSe
         {
             m_NumBones = m_File.Read16(0x00);
             m_NumFrames = m_File.Read16(0x02);
-            m_Unknown0x04 = m_File.Read32(0x04);
+            m_Looped = m_File.Read32(0x04);
             m_ScaleValuesOffset = m_File.Read32(0x08);
             m_RotationValuesOffset = m_File.Read32(0x0C);
             m_TranslationValuesOffset = m_File.Read32(0x10);
@@ -94,6 +94,16 @@ namespace SM64DSe
             {
                 if (i >= m_AnimationData.Length) break;
                 localSRTValues[i] = m_AnimationData[i].GetScaleRotationTranslation(frame);
+            }
+            return localSRTValues;
+        }
+
+        public SRTContainer[] GetAllLocalSRTValuesForBone(int boneIndex)
+        {
+            SRTContainer[] localSRTValues = new SRTContainer[m_NumFrames];
+            for (int i = 0; i < m_NumFrames; i++)
+            {
+                localSRTValues[i] = m_AnimationData[boneIndex].GetScaleRotationTranslation(i);
             }
             return localSRTValues;
         }
@@ -195,9 +205,9 @@ namespace SM64DSe
                     GetFrameValueForDescriptor(m_ScaleY, m_ScaleYValues, frame),
                     GetFrameValueForDescriptor(m_ScaleZ, m_ScaleZValues, frame));
                 Vector3 rotation = new Vector3(
-                    GetFrameValueForDescriptor(m_RotationX, m_RotationXValues, frame),
-                    GetFrameValueForDescriptor(m_RotationY, m_RotationYValues, frame),
-                    GetFrameValueForDescriptor(m_RotationZ, m_RotationZValues, frame));
+                    GetFrameValueForDescriptor(m_RotationX, m_RotationXValues, frame, true),
+                    GetFrameValueForDescriptor(m_RotationY, m_RotationYValues, frame, true),
+                    GetFrameValueForDescriptor(m_RotationZ, m_RotationZValues, frame, true));
                 Vector3 translation = new Vector3(
                     GetFrameValueForDescriptor(m_TranslationX, m_TranslationXValues, frame),
                     GetFrameValueForDescriptor(m_TranslationY, m_TranslationYValues, frame),
@@ -206,7 +216,7 @@ namespace SM64DSe
                 return new SRTContainer(scale, rotation, translation);
             }
 
-            private float GetFrameValueForDescriptor(AnimationDescriptor descriptor, float[] values, int frameNum)
+            private float GetFrameValueForDescriptor(AnimationDescriptor descriptor, float[] values, int frameNum, bool isRotation = false)
             {
                 float val;
 
@@ -218,16 +228,65 @@ namespace SM64DSe
                 {
                     if (descriptor.m_Interpolate == 1)
                     {
+                        // Odd frames
                         if ((frameNum & 1) != 0)
                         {
-                            // Odd frames
+                            
                             if ((frameNum >> 1) + 1 > values.Length - 1)
                             {
+                                // if floor(frameNum / 2) + 1 > number of values, use floor(frameNum / 2)
                                 val = values[frameNum >> 1];
                             }
-                            else
+                            else if (frameNum == (m_BCA.m_NumFrames - 1))
                             {
-                                val = (values[frameNum >> 1] + values[(frameNum >> 1) + 1]) / 2f;
+                                // else if it's the last frame, don't interpolate
+                                val = values[(frameNum >> 1) + 1];
+                            }
+                            else // else interpolate between current and next values
+                            {
+                                /* The below code checks for and corrects the following scenario:
+                                * Example:
+                                * The rotation of a bone is set to use interpolation and has the values -170 followed by 170.
+                                * Here, during interpolation the mid-point will be calculated as 0 instead of 180 as (-170 + 170) / 2 equals 0.
+                                * What we want is for the second value to be -190 so that during interpolation the midpoint is calculated as 
+                                * (-170 + -190) / 2 equals -180
+                                * 
+                                * To correct this, the code checks:
+                                * 1)
+                                * eg. -170, 170: change to -170, -190
+                                * eg. -5, 5: don't change
+                                * if (val1 < 0 && val2 > 0)
+                                *      if ( abs(val2 - (val1 + 360)) < abs(val2 - val1)) then val2 -= 360  
+                                *      // If the difference between values 1 and 2 is smaller when both are less than zero, make both less than zero
+                                * 2)
+                                * eg. 170, -170: change to 170, 190
+                                * eg. 5, -5: don't change
+                                * if (val1 > 0 && val2 < 0)
+                                *      if (abs(val1 - (val2 + 360)) < abs(val1 - val2)) then val2 += 360
+                                *      // If the difference between values 1 and 2 is smaller when both are greater then zero, math both greater than zero
+                                *      
+                                * (Degrees used instead of radians to aid understanding)
+                                */
+                                float val1 = values[frameNum >> 1];
+                                float val2 = values[(frameNum >> 1) + 1];
+                                if (isRotation)
+                                {
+                                    if (val1 < 0f && val2 > 0f)
+                                    {
+                                        if (Math.Abs(val2 - (val1 + (Math.PI * 2f))) < Math.Abs(val2 - val1))
+                                        {
+                                            val2 -= (float)(Math.PI * 2f);
+                                        }
+                                    }
+                                    else if (val1 > 0f && val2 < 0f)
+                                    {
+                                        if (Math.Abs(val1 - (val2 + (Math.PI * 2f))) < Math.Abs(val1 - val2))
+                                        {
+                                            val2 += (float)(Math.PI * 2f);
+                                        }
+                                    }
+                                }
+                                val = (val1 + val2) / 2f;
                             }
                         }
                         else
@@ -273,30 +332,6 @@ namespace SM64DSe
                 return values;
             }
 
-            /*
-            * As well as reading the rotation values, the below code checks for and corrects the following scenario:
-            * Example:
-            * The rotation of a bone is set to use interpolation and has the values -170 followed by 170.
-            * Here, during interpolation the mid-point will be calculated as 0 instead of 180 as (-170 + 170) / 2 equals 0.
-            * What we want is for the second value to be -190 so that during interpolation the midpoint is calculated as 
-            * (-170 + -190) / 2 equals -180
-            * 
-            * To correct this, the code checks:
-            * 1)
-            * eg. -170, 170: change to -170, -190
-            * eg. -5, 5: don't change
-            * if (val1 < 0 && val2 > 0)
-            *      if ( abs(val2 - (val1 + 360)) < abs(val2 - val1)) then val2 -= 360  
-            *      // If the difference between values 1 and 2 is smaller when both are less than zero, make both less than zero
-            * 2)
-            * eg. 170, -170: change to 170, 190
-            * eg. 5, -5: don't change
-            * if (val1 > 0 && val2 < 0)
-            *      if (abs(val1 - (val2 + 360)) < abs(val1 - val2)) then val2 += 360
-            *      // If the difference between values 1 and 2 is smaller when both are greater then zero, math both greater than zero
-            *      
-            * (Degress used instead of radians to aid understanding)
-            */
             private float[] Read4_12Rotation(uint offset, int count)
             {
                 float[] values = new float[count];
@@ -304,23 +339,6 @@ namespace SM64DSe
                 for (int i = 0; i < count; i++)
                 {
                     values[i] = ((float)((short)m_BCA.m_File.Read16(offset + (uint)(i * 2))) * (float)Math.PI) / 2048.0f;
-                }
-                for (int i = 0; i < values.Length - 1; i++)
-                {
-                    if (values[i] < 0f && values[i + 1] > 0f)
-                    {
-                        if (Math.Abs(values[i + 1] - (values[i] + (Math.PI * 2f))) < Math.Abs(values[i + 1] - values[i]))
-                        {
-                            values[i + 1] -= (float)(Math.PI * 2f);
-                        }
-                    }
-                    else if (values[i] > 0f && values[i + 1] < 0f)
-                    {
-                        if (Math.Abs(values[i] - (values[i + 1] + (Math.PI * 2f))) < Math.Abs(values[i] - values[i + 1]))
-                        {
-                            values[i + 1] += (float)(Math.PI * 2f);
-                        }
-                    }
                 }
 
                 return values;

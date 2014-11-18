@@ -8,6 +8,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using OpenTK;
 
 namespace SM64DSe.ImportExport.Loaders.InternalLoaders
 {
@@ -15,8 +16,8 @@ namespace SM64DSe.ImportExport.Loaders.InternalLoaders
     {
         BCA m_BCA;
 
-        public BCALoader(ModelBase model, BCA animation, string modelFileName) :
-            base(modelFileName)
+        public BCALoader(ModelBase model, BCA animation) :
+            base(null)
         {
             m_BCA = animation;
             m_Model = model;
@@ -28,24 +29,56 @@ namespace SM64DSe.ImportExport.Loaders.InternalLoaders
             for (int i = 0; i < m_BCA.m_AnimationData.Length; i++)
             {
                 string boneID = flatBoneList[i].m_ID;
-                ModelBase.AnimationDef animation = new ModelBase.AnimationDef(boneID + "-animation", boneID);
-                m_Model.m_Animations.Add(animation.m_ID, animation);
-            }
 
-            int numBones = flatBoneList.Count;
-            for (int i = 0; i < m_BCA.m_NumFrames; i++)
-            {
-                BCA.SRTContainer[] transformations = m_BCA.GetAllLocalSRTValuesForFrame(numBones, i);
+                BCA.SRTContainer[] boneTransformations = m_BCA.GetAllLocalSRTValuesForBone(i);
 
-                for (int j = 0; j < m_Model.m_Animations.Count; j++)
+                Dictionary<ModelBase.AnimationComponentType, ModelBase.AnimationComponentDataDef> animationComponentDataDefs =
+                    new Dictionary<ModelBase.AnimationComponentType, ModelBase.AnimationComponentDataDef>();
+
+                float[] valuesSx = new float[boneTransformations.Length];
+                float[] valuesSy = new float[boneTransformations.Length];
+                float[] valuesSz = new float[boneTransformations.Length];
+                float[] valuesRx = new float[boneTransformations.Length];
+                float[] valuesRy = new float[boneTransformations.Length];
+                float[] valuesRz = new float[boneTransformations.Length];
+                float[] valuesTx = new float[boneTransformations.Length];
+                float[] valuesTy = new float[boneTransformations.Length];
+                float[] valuesTz = new float[boneTransformations.Length];
+                for (int j = 0; j < boneTransformations.Length; j++)
                 {
-                    ModelBase.AnimationFrameDef frame = new ModelBase.AnimationFrameDef();
-                    frame.SetScale(transformations[j].m_Scale);
-                    frame.SetRotation(transformations[j].m_Rotation);
-                    frame.SetTranslation(transformations[j].m_Translation);
-
-                    m_Model.m_Animations.Values.ElementAt(j).m_AnimationFrames.Add(frame);
+                    valuesSx[j] = boneTransformations[j].m_Scale.X;
+                    valuesSy[j] = boneTransformations[j].m_Scale.Y;
+                    valuesSz[j] = boneTransformations[j].m_Scale.Z;
+                    valuesRx[j] = boneTransformations[j].m_Rotation.X;
+                    valuesRy[j] = boneTransformations[j].m_Rotation.Y;
+                    valuesRz[j] = boneTransformations[j].m_Rotation.Z;
+                    valuesTx[j] = boneTransformations[j].m_Translation.X;
+                    valuesTy[j] = boneTransformations[j].m_Translation.Y;
+                    valuesTz[j] = boneTransformations[j].m_Translation.Z;
                 }
+
+                animationComponentDataDefs.Add(ModelBase.AnimationComponentType.ScaleX,
+                    new ModelBase.AnimationComponentDataDef(valuesSx, m_BCA.m_NumFrames, false, 1, ModelBase.AnimationComponentType.ScaleX));
+                animationComponentDataDefs.Add(ModelBase.AnimationComponentType.ScaleY,
+                    new ModelBase.AnimationComponentDataDef(valuesSy, m_BCA.m_NumFrames, false, 1, ModelBase.AnimationComponentType.ScaleY));
+                animationComponentDataDefs.Add(ModelBase.AnimationComponentType.ScaleZ,
+                    new ModelBase.AnimationComponentDataDef(valuesSz, m_BCA.m_NumFrames, false, 1, ModelBase.AnimationComponentType.ScaleZ));
+                animationComponentDataDefs.Add(ModelBase.AnimationComponentType.RotateX,
+                    new ModelBase.AnimationComponentDataDef(valuesRx, m_BCA.m_NumFrames, false, 1, ModelBase.AnimationComponentType.RotateX));
+                animationComponentDataDefs.Add(ModelBase.AnimationComponentType.RotateY,
+                    new ModelBase.AnimationComponentDataDef(valuesRy, m_BCA.m_NumFrames, false, 1, ModelBase.AnimationComponentType.RotateY));
+                animationComponentDataDefs.Add(ModelBase.AnimationComponentType.RotateZ,
+                    new ModelBase.AnimationComponentDataDef(valuesRz, m_BCA.m_NumFrames, false, 1, ModelBase.AnimationComponentType.RotateZ));
+                animationComponentDataDefs.Add(ModelBase.AnimationComponentType.TranslateX,
+                    new ModelBase.AnimationComponentDataDef(valuesTx, m_BCA.m_NumFrames, false, 1, ModelBase.AnimationComponentType.TranslateX));
+                animationComponentDataDefs.Add(ModelBase.AnimationComponentType.TranslateY,
+                    new ModelBase.AnimationComponentDataDef(valuesTy, m_BCA.m_NumFrames, false, 1, ModelBase.AnimationComponentType.TranslateY));
+                animationComponentDataDefs.Add(ModelBase.AnimationComponentType.TranslateZ,
+                    new ModelBase.AnimationComponentDataDef(valuesTz, m_BCA.m_NumFrames, false, 1, ModelBase.AnimationComponentType.TranslateZ));
+
+                ModelBase.AnimationDef animation = new ModelBase.AnimationDef(boneID + "-animation", boneID, m_BCA.m_NumFrames, 
+                    animationComponentDataDefs);
+                m_Model.m_Animations.Add(animation.m_ID, animation);
             }
 
             return m_Model;

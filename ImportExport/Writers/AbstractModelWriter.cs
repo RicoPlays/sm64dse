@@ -26,16 +26,15 @@ namespace SM64DSe.ImportExport.Writers
 
         public abstract void WriteModel(bool save = true);
 
-        protected static void ExportTextureToPNG(string destDir, string destName, string bitmapLocation)
+        protected static void ExportTextureToPNG(string destDir, ModelBase.TextureDefBase texture)
         {
             try
             {
-                Bitmap bmp = new Bitmap(bitmapLocation);
-                ExportTextureToPNG(destDir, destName, bmp);
+                ExportTextureToPNG(destDir, texture.m_ID, texture.GetBitmap());
             }
             catch (IOException)
             {
-                Console.Write("Cannot read image: " + bitmapLocation);
+                Console.Write("Cannot write image for texture: " + texture.m_ID);
             }
         }
 

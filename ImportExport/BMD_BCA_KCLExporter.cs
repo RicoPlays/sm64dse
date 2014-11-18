@@ -22,7 +22,7 @@ namespace SM64DSe.ImportExport
 
         public static void ExportAnimatedModel(BMD model, BCA animation, string fileName)
         {
-            AbstractModelLoader animatedLoader = new BCALoader(new BMDLoader(fileName, model).LoadModel(), animation, fileName);
+            AbstractModelLoader animatedLoader = new BCALoader(new BMDLoader(fileName, model).LoadModel(), animation);
 
             ModelBase loadedModel = animatedLoader.LoadModel();
 

@@ -49,6 +49,11 @@ namespace SM64DSe.ImportExport
                 return null; // Not found
             }
 
+            public BoneDef GetBoneByIndex(int index)
+            {
+                return (index < Count) ? GetAsList().ElementAt(index) : null; 
+            }
+
             public IEnumerator<BoneDef> GetEnumerator()
             {
                 List<BoneDef> bones = GetAsList();
@@ -351,7 +356,8 @@ namespace SM64DSe.ImportExport
         {
             Polygons,
             Triangles,
-            TriangleStrip
+            TriangleStrip,
+            QuadrilateralStrip
         };
 
         public class FaceListDef
@@ -391,7 +397,12 @@ namespace SM64DSe.ImportExport
             public Color m_VertexColour;
             public int m_VertexBoneID;
 
-            public VertexDef() { }
+            public VertexDef() 
+            {
+                m_TextureCoordinate = null;
+                m_Normal = null;
+                m_VertexColour = Color.White;
+            }
 
             public VertexDef(Vector3 position, Vector2? textureCoordinate, Vector3? normal, Color vertexColour, int vertexBoneID)
             {
@@ -440,41 +451,273 @@ namespace SM64DSe.ImportExport
         {
             public string m_ID;
             public int m_Index;
-
-            public Color m_DiffuseColour;
-            public Color m_AmbientColour;
-            public Color m_SpecularColour;
-            public Color m_EmissionColour;
-            public int m_Opacity;
-
-            public bool m_HasTextures;
-
-            public bool m_IsDoubleSided;
-
-            public int m_ColType;
-
-            public string m_DiffuseMapName;
-            public Vector2 m_DiffuseMapSize;
-            public bool m_DiffuseMapInMemory;
-
-            // haxx
-            public float m_TexCoordScale;
+            public string m_TextureDefID;
+            public bool[] m_Lights;
+            public PolygonDrawingFace m_PolygonDrawingFace;
+            public int m_Alpha;
+            public bool m_WireMode;
+            public PolygonMode m_PolygonMode;
+            public bool m_FogFlag;
+            public bool m_DepthTestDecal;
+            public bool m_RenderOnePixelPolygons;
+            public bool m_FarClipping;
+            public Color m_Diffuse;
+            public Color m_Ambient;
+            public Color m_Specular;
+            public Color m_Emission;
+            public TexTiling[] m_TexTiling;
+            public Vector2 m_TextureScale;
+            public float m_TextureRotation;
+            public Vector2 m_TextureTranslation;
 
             public MaterialDef(string id, int index)
             {
                 m_ID = id;
                 m_Index = index;
-                m_DiffuseColour = Color.White;
-                m_AmbientColour = Color.White;
-                m_SpecularColour = Color.White;
-                m_EmissionColour = Color.White;
-                m_Opacity = 255; // oops
-                m_HasTextures = false;
-                m_IsDoubleSided = false;
-                m_DiffuseMapName = "";
-                m_DiffuseMapSize = new Vector2(0f, 0f);
-                m_DiffuseMapInMemory = false;
-                m_ColType = 0;
+                m_TextureDefID = null;
+                m_Lights = new bool[] { false, false, false, false };
+                m_PolygonDrawingFace = PolygonDrawingFace.Front;
+                m_Alpha = 255;
+                m_WireMode = false;
+                m_PolygonMode = PolygonMode.Modulation;
+                m_FogFlag = true;
+                m_DepthTestDecal = false;
+                m_RenderOnePixelPolygons = false;
+                m_FarClipping = true;
+                m_Diffuse = Color.White;
+                m_Ambient = Color.White;
+                m_Specular = Color.White;
+                m_Emission = Color.Black;
+                m_TexTiling = new TexTiling[] { TexTiling.Repeat, TexTiling.Repeat };
+                m_TextureScale = new Vector2(1f, 1f);
+                m_TextureRotation = 0.0f;
+                m_TextureTranslation = new Vector2(0f, 0f);
+            }
+
+            public enum PolygonDrawingFace
+            {
+                Front,
+                Back,
+                FrontAndBack
+            };
+
+            public enum PolygonMode
+            {
+                Modulation,
+                Decal,
+                Toon_HighlightShading,
+                Shadow
+            };
+
+            public enum TexTiling
+            {
+                Clamp,
+                Repeat,
+                Flip
+            };
+        }
+
+        public enum TextureFormat
+        {
+            Nitro_A3I5 = 1,
+            Nitro_Palette4 = 2,
+            Nitro_Palette16 = 3,
+            Nitro_Palette256 = 4,
+            Nitro_Tex4x4 = 5,
+            Nitro_A5I3 = 6,
+            Nitro_Direct = 7,
+            ExternalBitmap = 8,
+            InMemoryBitmap = 9
+        };
+
+        public class TextureDefBase
+        {
+            public string m_ID;
+            public string m_ImgHash;
+            public TextureFormat m_Format;
+            protected uint m_Width;
+            protected uint m_Height;
+            protected string m_TexName;
+            protected string m_PalName;
+
+            public virtual uint GetWidth() { return m_Width; }
+            public virtual uint GetHeight() { return m_Height; }
+            public virtual string GetTexName() { return m_TexName; }
+            public virtual string GetPalName() { return m_PalName; }
+            public virtual string CalculateHash() { return null; }
+            public virtual bool IsNitro() { return false; }
+            public virtual Bitmap GetBitmap() { return null; }
+            public virtual byte[] GetNitroTexData() { return null; }
+            public virtual bool HasNitroPalette() { return false; }
+            public virtual byte[] GetNitroPalette() { return null; }
+            public virtual byte GetColor0Mode() { return 0; }
+        }
+
+        public class TextureDefBitmapBase : TextureDefBase
+        {
+            protected void TexAndPalNamesFromFilename(string name)
+            {
+                string path_separator = (name.Contains("/")) ? "/" : "\\";
+                m_TexName = name.Substring(name.LastIndexOf(path_separator) + 1).Replace('.', '_');
+                m_PalName = m_TexName + "_pl";
+            }
+
+            public override string CalculateHash()
+            {
+                Bitmap tex = GetBitmap();
+
+                int width = 8, height = 8;
+                while (width < GetWidth()) width *= 2;
+                while (height < GetHeight()) height *= 2;
+
+                // cheap resizing for textures whose dimensions aren't power-of-two
+                if ((width != GetWidth()) || (height != GetHeight()))
+                {
+                    Bitmap newbmp = new Bitmap(width, height);
+                    Graphics g = Graphics.FromImage(newbmp);
+                    g.DrawImage(tex, new Rectangle(0, 0, width, height));
+                    tex = newbmp;
+                }
+
+                byte[] map = new byte[tex.Width * tex.Height * 4];
+                for (int y = 0; y < tex.Height; y++)
+                {
+                    for (int x = 0; x < tex.Width; x++)
+                    {
+                        Color pixel = tex.GetPixel(x, y);
+                        int pos = ((y * tex.Width) + x) * 4;
+
+                        map[pos] = pixel.B;
+                        map[pos + 1] = pixel.G;
+                        map[pos + 2] = pixel.R;
+                        map[pos + 3] = pixel.A;
+                    }
+                }
+
+                string imghash = Helper.HexString(Helper.m_MD5.ComputeHash(map));
+                return imghash;
+            }
+        }
+
+        public class TextureDefExternalBitmap : TextureDefBitmapBase
+        {
+            public string m_FileName;
+
+            public TextureDefExternalBitmap(string id, string fileName)
+            {
+                m_ID = id;
+                m_FileName = fileName;
+                m_Format = TextureFormat.ExternalBitmap;
+                using (Bitmap tmp = new Bitmap(fileName))
+                {
+                    m_Width = (uint)tmp.Width;
+                    m_Height = (uint)tmp.Height;
+                }
+                TexAndPalNamesFromFilename(fileName);
+                m_ImgHash = CalculateHash();
+            }
+
+            public override Bitmap GetBitmap()
+            {
+                return new Bitmap(m_FileName);
+            }
+        }
+
+        public class TextureDefInMemoryBitmap : TextureDefBitmapBase
+        {
+            protected Bitmap m_Bitmap;
+
+            public TextureDefInMemoryBitmap(string id, Bitmap bmp)
+            {
+                m_ID = id;
+                m_Format = TextureFormat.InMemoryBitmap;
+                m_Bitmap = bmp;
+                m_TexName = id;
+                m_PalName = id + "_pl";
+                m_ImgHash = CalculateHash();
+            }
+
+            public override Bitmap GetBitmap()
+            {
+                return m_Bitmap;
+            }
+        }
+
+        public class TextureDefNitro : TextureDefBase
+        {
+            protected byte[] m_TexData;
+            protected byte[] m_PalData;
+            protected byte m_Color0Mode;
+
+            public TextureDefNitro(string texID, byte[] texData, uint width, uint height, byte color0Mode, TextureFormat format)
+            {
+                m_ID = texID;
+                m_TexName = texID;
+                m_TexData = texData;
+                m_Format = format;
+                m_Width = width;
+                m_Height = height;
+                m_Color0Mode = color0Mode;
+                m_ImgHash = CalculateHash();
+            }
+
+            public TextureDefNitro(string texID, byte[] texData, string palID, byte[] palData, 
+                uint width, uint height, byte color0Mode, TextureFormat format)
+            {
+                m_ID = texID;
+                m_TexName = texID;
+                m_TexData = texData;
+                m_PalName = palID;
+                m_PalData = palData;
+                m_Width = width;
+                m_Height = height;
+                m_Color0Mode = color0Mode;
+                m_Format = format;
+                m_ImgHash = CalculateHash();
+            }
+
+            public override string CalculateHash()
+            {
+                if (!HasNitroPalette())
+                    return Helper.HexString(Helper.m_MD5.ComputeHash(m_TexData));
+                else
+                {
+                    byte[] hashtmp = new byte[m_TexData.Length + m_PalData.Length];
+                    Array.Copy(m_TexData, hashtmp, m_TexData.Length);
+                    Array.Copy(m_PalData, 0, hashtmp, m_TexData.Length, m_PalData.Length);
+                    return Helper.HexString(Helper.m_MD5.ComputeHash(hashtmp));
+                }
+            }
+
+            public override Bitmap GetBitmap()
+            {
+                throw new NotImplementedException();
+                // May implement for exporting IMD directly to OBJ or DAE in future (but why?)
+            }
+
+            public override bool IsNitro()
+            {
+                return true;
+            }
+
+            public override byte[] GetNitroTexData()
+            {
+                return m_TexData;
+            }
+
+            public override bool HasNitroPalette()
+            {
+                return (m_Format != TextureFormat.Nitro_Direct);
+            }
+
+            public override byte[] GetNitroPalette()
+            {
+                return m_PalData;
+            }
+
+            public override byte GetColor0Mode()
+            {
+                return m_Color0Mode;
             }
         }
 
@@ -482,85 +725,233 @@ namespace SM64DSe.ImportExport
         {
             public string m_ID;
             public string m_BoneID;
-            public List<AnimationFrameDef> m_AnimationFrames;
+            public Dictionary<AnimationComponentType, AnimationComponentDataDef> m_AnimationComponents;
+            public int m_NumFrames;
 
-            public AnimationDef(string id, string boneID)
+            public AnimationDef(string id, string boneID, int numFrames)
             {
                 m_ID = id;
                 m_BoneID = boneID;
-                m_AnimationFrames = new List<AnimationFrameDef>();
+                m_NumFrames = numFrames;
+                m_AnimationComponents = new Dictionary<AnimationComponentType, AnimationComponentDataDef>();
             }
 
-            public AnimationDef(string id, string boneID, List<AnimationFrameDef> animationFrames)
+            public AnimationDef(string id, string boneID, int numFrames, 
+                Dictionary<AnimationComponentType, AnimationComponentDataDef> animationComponents)
             {
                 m_ID = id;
                 m_BoneID = boneID;
-                m_AnimationFrames = animationFrames;
+                m_NumFrames = numFrames;
+                m_AnimationComponents = animationComponents;
             }
 
-            public int m_NumFrames
+            public int GetTotalNumberOfFrameValues()
             {
-                get { return this.m_AnimationFrames.Count; }
+                int sum = 0;
+                foreach (AnimationComponentDataDef comp in m_AnimationComponents.Values)
+                    sum += comp.GetNumValues();
+
+                return sum;
+            }
+
+            public int GetScaleValuesCount()
+            {
+                return m_AnimationComponents[AnimationComponentType.ScaleX].GetNumValues() +
+                    m_AnimationComponents[AnimationComponentType.ScaleY].GetNumValues() +
+                    m_AnimationComponents[AnimationComponentType.ScaleZ].GetNumValues();
+            }
+
+            public int GetRotateValuesCount()
+            {
+                return m_AnimationComponents[AnimationComponentType.RotateX].GetNumValues() +
+                    m_AnimationComponents[AnimationComponentType.RotateY].GetNumValues() +
+                    m_AnimationComponents[AnimationComponentType.RotateZ].GetNumValues();
+            }
+
+            public int GetTranslateValuesCount()
+            {
+                return m_AnimationComponents[AnimationComponentType.TranslateX].GetNumValues() +
+                    m_AnimationComponents[AnimationComponentType.TranslateY].GetNumValues() +
+                    m_AnimationComponents[AnimationComponentType.TranslateZ].GetNumValues();
+            }
+
+            public Vector3 GetFrameScale(int frame)
+            {
+                return new Vector3(m_AnimationComponents[AnimationComponentType.ScaleX].GetFrameValue(frame),
+                    m_AnimationComponents[AnimationComponentType.ScaleY].GetFrameValue(frame),
+                    m_AnimationComponents[AnimationComponentType.ScaleZ].GetFrameValue(frame));
+            }
+
+            public Vector3 GetFrameRotation(int frame)
+            {
+                return new Vector3(m_AnimationComponents[AnimationComponentType.RotateX].GetFrameValue(frame),
+                    m_AnimationComponents[AnimationComponentType.RotateY].GetFrameValue(frame),
+                    m_AnimationComponents[AnimationComponentType.RotateZ].GetFrameValue(frame));
+            }
+
+            public Vector3 GetFrameTranslation(int frame)
+            {
+                return new Vector3(m_AnimationComponents[AnimationComponentType.TranslateX].GetFrameValue(frame),
+                    m_AnimationComponents[AnimationComponentType.TranslateY].GetFrameValue(frame),
+                    m_AnimationComponents[AnimationComponentType.TranslateZ].GetFrameValue(frame));
+            }
+
+            public BCA.SRTContainer GetFrame(int frame)
+            {
+                Vector3 scale = new Vector3(GetFrameScale(frame));
+                Vector3 rotation = new Vector3(GetFrameRotation(frame));
+                Vector3 translation = new Vector3(GetFrameTranslation(frame));
+
+                return new BCA.SRTContainer(scale, rotation, translation);
+            }
+
+            public BCA.SRTContainer[] GetAllFrames()
+            {
+                BCA.SRTContainer[] frames = new BCA.SRTContainer[m_NumFrames];
+
+                for (int i = 0; i < m_NumFrames; i++)
+                {
+                    frames[i] = GetFrame(i);
+                }
+
+                return frames;
             }
         }
+        
+        // Note: Rotation is stored in Radians
 
-        public class AnimationFrameDef
+        public class AnimationComponentDataDef
         {
-            private Vector3 m_Scale;
-            private Vector3 m_Rotation;
-            private Vector3 m_Translation;
-            private Matrix4 m_Transformation;
+            public AnimationComponentType m_AnimationComponentType;
+            private float[] m_Values;
+            private int m_NumFrames;
+            private bool m_IsConstant;
+            private int m_FrameStep;
 
-            public AnimationFrameDef()
+            public AnimationComponentDataDef(float[] values, int numFrames, bool isConstant, int frameStep, 
+                AnimationComponentType animationComponentType)
             {
-                m_Scale = new Vector3(1f, 1f, 1f);
-                m_Rotation = new Vector3(0f, 0f, 0f);
-                m_Translation = new Vector3(0f, 0f, 0f);
-                m_Transformation = Helper.SRTToMatrix(m_Scale, m_Rotation, m_Translation);
+                m_Values = values;
+                m_NumFrames = numFrames;
+                m_IsConstant = isConstant;
+                m_FrameStep = frameStep;
+                m_AnimationComponentType = animationComponentType;
             }
 
-            public AnimationFrameDef(Vector3 scale, Vector3 rotation, Vector3 tranlation)
+            public float GetValue(int index) { return m_Values[index]; }
+            public void SetValue(int index, float value) { m_Values[index] = value; }
+
+            public byte[] GetFixedPointValues()
             {
-                m_Scale = scale;
-                m_Rotation = rotation;
-                m_Translation = tranlation;
-                m_Transformation = Helper.SRTToMatrix(m_Scale, m_Rotation, m_Translation);
+                byte[] result = new byte[0];
+                if (m_AnimationComponentType == AnimationComponentType.RotateX ||
+                    m_AnimationComponentType == AnimationComponentType.RotateY ||
+                    m_AnimationComponentType == AnimationComponentType.RotateZ)
+                {
+                    result = new byte[m_Values.Length * sizeof(ushort)];
+                    Buffer.BlockCopy(Array.ConvertAll<float, ushort>(m_Values, x => (ushort)((x * 2048.0f) / Math.PI)), 
+                        0, result, 0, result.Length);
+                }
+                else
+                {
+                    result = new byte[m_Values.Length * sizeof(uint)];
+                    Buffer.BlockCopy(Array.ConvertAll<float, uint>(m_Values, x => (uint)(x * 4096f)), 
+                        0, result, 0, result.Length);
+                }
+                return result;
             }
 
-            public void SetScale(Vector3 scale)
-            {
-                m_Scale = scale;
-                m_Transformation = Helper.SRTToMatrix(m_Scale, m_Rotation, m_Translation);
-            }
+            public int GetNumValues() { return m_Values.Length; }
 
-            public void SetRotation(Vector3 rotation)
-            {
-                m_Rotation = rotation;
-                m_Transformation = Helper.SRTToMatrix(m_Scale, m_Rotation, m_Translation);
-            }
+            public int GetFrameStep() { return m_FrameStep; }
+            public bool GetIsConstant() { return m_IsConstant; }
 
-            public void SetTranslation(Vector3 translation)
+            public float GetFrameValue(int frameNum)
             {
-                m_Translation = translation;
-                m_Transformation = Helper.SRTToMatrix(m_Scale, m_Rotation, m_Translation);
-            }
+                if (m_IsConstant)
+                {
+                    return m_Values[0];
+                }
+                else
+                {
+                    if (m_FrameStep == 1)
+                    {
+                        return m_Values[frameNum];
+                    }
+                    else
+                    {
+                        // Odd frames
+                        if ((frameNum & 1) != 0)
+                        {
 
-            public Vector3 GetScale() { return m_Scale; }
-            public Vector3 GetRotation() { return m_Rotation; }
-            public Vector3 GetRotationInDegrees()
-            {
-                return new Vector3(m_Rotation.X * Helper.Rad2Deg, m_Rotation.Y * Helper.Rad2Deg, m_Rotation.Z * Helper.Rad2Deg);
+                            if ((frameNum / m_FrameStep) + 1 > m_Values.Length - 1)
+                            {
+                                // if floor(frameNum / 2) + 1 > number of values, use floor(frameNum / 2)
+                                return m_Values[(frameNum / m_FrameStep)];
+                            }
+                            else if (frameNum == (m_NumFrames - 1))
+                            {
+                                // else if it's the last frame, don't interpolate
+                                return m_Values[(frameNum / m_FrameStep) + 1];
+                            }
+                            else
+                            {
+                                float val1 = m_Values[frameNum >> 1];
+                                float val2 = m_Values[(frameNum >> 1) + 1];
+                                if (m_AnimationComponentType == AnimationComponentType.RotateX ||
+                                    m_AnimationComponentType == AnimationComponentType.RotateY ||
+                                    m_AnimationComponentType == AnimationComponentType.RotateZ)
+                                {
+                                    if (val1 < 0f && val2 > 0f)
+                                    {
+                                        if (Math.Abs(val2 - (val1 + (Math.PI * 2f))) < Math.Abs(val2 - val1))
+                                        {
+                                            val2 -= (float)(Math.PI * 2f);
+                                        }
+                                    }
+                                    else if (val1 > 0f && val2 < 0f)
+                                    {
+                                        if (Math.Abs(val1 - (val2 + (Math.PI * 2f))) < Math.Abs(val1 - val2))
+                                        {
+                                            val2 += (float)(Math.PI * 2f);
+                                        }
+                                    }
+                                }
+                                return val1 + (((val1 + val2) / 2f) * (frameNum % m_FrameStep));
+                            }
+                        }
+                        else
+                        {
+                            // Even frames
+                            return m_Values[frameNum / m_FrameStep];
+                        }
+                    }
+                }
             }
-            public Vector3 GetTranslation() { return m_Translation; }
-            public Matrix4 GetTransformation() { return m_Transformation; }
         }
+
+        public enum AnimationComponentType
+        {
+            ScaleX,
+            ScaleY,
+            ScaleZ,
+            RotateX,
+            RotateY,
+            RotateZ,
+            TranslateX,
+            TranslateY,
+            TranslateZ
+        };
 
         public BoneDefRoot m_BoneTree;
         public Dictionary<string, MaterialDef> m_Materials;
-        public Dictionary<string, MaterialDef> m_Textures;
+        public Dictionary<string, TextureDefBase> m_Textures;
         public Dictionary<string, AnimationDef> m_Animations;
+        public BiDictionaryOneToOne<string, int> m_BoneTransformsMap;
 
-        public Dictionary<string, Bitmap> m_ConvertedTexturesBitmap;
+        // Should just be temporary, need to work out how to properly import IMD models where pos_scale > 0, 
+        // result of (1 << pos_scale), default pos_scale = 0
+        public uint m_PosScaleFactor = 1;
 
         public string m_ModelFileName;
         public string m_ModelPath;
@@ -572,10 +963,9 @@ namespace SM64DSe.ImportExport
 
             m_BoneTree = new BoneDefRoot();
             m_Materials = new Dictionary<string, MaterialDef>();
-            m_Textures = new Dictionary<string, MaterialDef>();
+            m_Textures = new Dictionary<string, TextureDefBase>();
             m_Animations = new Dictionary<string, AnimationDef>();
-
-            m_ConvertedTexturesBitmap = new Dictionary<string, Bitmap>();
+            m_BoneTransformsMap = new BiDictionaryOneToOne<string, int>();
         }
 
         public void ScaleModel(Vector3 scale)
@@ -615,10 +1005,29 @@ namespace SM64DSe.ImportExport
             }
             foreach (AnimationDef animDef in m_Animations.Values)
             {
-                foreach (AnimationFrameDef frame in animDef.m_AnimationFrames)
+                foreach (AnimationComponentDataDef comp in animDef.m_AnimationComponents.Values)
                 {
-                    Vector3 translation = frame.GetTranslation();
-                    frame.SetTranslation(Vector3.Multiply(translation, scale));
+                    switch (comp.m_AnimationComponentType)
+                    {
+                        case AnimationComponentType.TranslateX:
+                            {
+                                for (int i = 0; i < comp.GetNumValues(); i++)
+                                    comp.SetValue(i, comp.GetValue(i) * scale.X);
+                            }
+                            break;
+                        case AnimationComponentType.TranslateY:
+                            {
+                                for (int i = 0; i < comp.GetNumValues(); i++)
+                                    comp.SetValue(i, comp.GetValue(i) * scale.Y);
+                            }
+                            break;
+                        case AnimationComponentType.TranslateZ:
+                            {
+                                for (int i = 0; i < comp.GetNumValues(); i++)
+                                    comp.SetValue(i, comp.GetValue(i) * scale.Z);
+                            }
+                            break;
+                    }
                 }
             }
         }

@@ -56,23 +56,29 @@ namespace SM64DSe.ImportExport.Loaders.InternalLoaders
                     ModelBase.PolyListDef polyListDef = geomDef.m_PolyLists[matgroup.m_Name];
 
                     ModelBase.MaterialDef material = new ModelBase.MaterialDef(matgroup.m_Name, m_Model.m_Materials.Count);
-                    material.m_DiffuseColour = matgroup.m_DiffuseColor;
-                    material.m_AmbientColour = matgroup.m_AmbientColor;
-                    material.m_SpecularColour = matgroup.m_SpecularColor;
-                    material.m_EmissionColour = matgroup.m_EmissionColor;
-                    material.m_HasTextures = (matgroup.m_Texture != null);
-                    if (material.m_HasTextures)
+                    material.m_Diffuse = matgroup.m_DiffuseColor;
+                    material.m_Ambient = matgroup.m_AmbientColor;
+                    material.m_Specular = matgroup.m_SpecularColor;
+                    material.m_Emission = matgroup.m_EmissionColor;
+                    bool hasTextures = (matgroup.m_Texture != null);
+                    if (hasTextures)
                     {
-                        if (!m_Model.m_ConvertedTexturesBitmap.ContainsKey(matgroup.m_Texture.m_TexName))
-                            m_Model.m_ConvertedTexturesBitmap.Add(matgroup.m_Texture.m_TexName, ConvertBMDTextureToBitmap(matgroup.m_Texture));
+                        if (!m_Model.m_Textures.ContainsKey(matgroup.m_Texture.m_TexName))
+                        {
+                            ModelBase.TextureDefBase texture = new ModelBase.TextureDefInMemoryBitmap(
+                                matgroup.m_Texture.m_TexName, ConvertBMDTextureToBitmap(matgroup.m_Texture));
+                            m_Model.m_Textures.Add(texture.m_ID, texture);
+                        }
 
-                        material.m_DiffuseMapName = matgroup.m_Texture.m_TexName;
-                        material.m_DiffuseMapInMemory = true;
-                        material.m_DiffuseMapSize = new Vector2(matgroup.m_Texture.m_Width, matgroup.m_Texture.m_Height);
+                        material.m_TextureDefID = matgroup.m_Texture.m_TexName;
                     }
-                    material.m_Opacity = matgroup.m_Alpha;
+                    material.m_Alpha = matgroup.m_Alpha;
                     if ((matgroup.m_PolyAttribs & 0xC0) == 0xC0)
-                        material.m_IsDoubleSided = true;
+                        material.m_PolygonDrawingFace = ModelBase.MaterialDef.PolygonDrawingFace.FrontAndBack;
+                    else if ((matgroup.m_PolyAttribs & 0xC0) == 0x80)
+                        material.m_PolygonDrawingFace = ModelBase.MaterialDef.PolygonDrawingFace.Front;
+                    else if ((matgroup.m_PolyAttribs & 0xC0) == 0x40)
+                        material.m_PolygonDrawingFace = ModelBase.MaterialDef.PolygonDrawingFace.Back;
 
                     if (!m_Model.m_Materials.ContainsKey(material.m_ID))
                         m_Model.m_Materials.Add(material.m_ID, material);
@@ -221,9 +227,9 @@ namespace SM64DSe.ImportExport.Loaders.InternalLoaders
                                         face.m_Vertices[1] = new ModelBase.VertexDef(vtxList[p + 1].m_Position, vtxList[p + 1].m_TexCoord,
                                             vtxList[p + 1].m_Normal, vtxList[p + 1].m_Color, (int)matgroup.m_BoneIDs[vtxList[p + 1].m_MatrixID]);
                                         face.m_Vertices[2] = new ModelBase.VertexDef(vtxList[p + 3].m_Position, vtxList[p + 3].m_TexCoord,
-                                            vtxList[p + 2].m_Normal, vtxList[p + 3].m_Color, (int)matgroup.m_BoneIDs[vtxList[p + 3].m_MatrixID]);
+                                            vtxList[p + 3].m_Normal, vtxList[p + 3].m_Color, (int)matgroup.m_BoneIDs[vtxList[p + 3].m_MatrixID]);
                                         face.m_Vertices[3] = new ModelBase.VertexDef(vtxList[p + 2].m_Position, vtxList[p + 2].m_TexCoord,
-                                            vtxList[p + 3].m_Normal, vtxList[p + 2].m_Color, (int)matgroup.m_BoneIDs[vtxList[p + 2].m_MatrixID]);
+                                            vtxList[p + 2].m_Normal, vtxList[p + 2].m_Color, (int)matgroup.m_BoneIDs[vtxList[p + 2].m_MatrixID]);
 
                                         faceList.m_Faces.Add(face);
                                     }

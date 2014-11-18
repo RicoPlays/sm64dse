@@ -92,25 +92,25 @@ namespace SM64DSe.ImportExport.Writers.ExternalWriters
             foreach (ModelBase.MaterialDef material in m_Model.m_Materials.Values)
             {
                 //For every texture,
-                string textureName = material.m_DiffuseMapName;
+                string textureName = (material.m_TextureDefID != null) ? m_Model.m_Textures[material.m_TextureDefID].m_ID : null;
                 //Create new material
                 mtlWriter.Write("newmtl " /*+ ((i * 2) + j)*/ + material.m_ID + "\n");
                 //Specify ambient colour - RGB 0-1
-                mtlWriter.Write("Ka " + (material.m_AmbientColour.R / 255.0f).ToString(usa) +
-                    " " + (material.m_AmbientColour.G / 255.0f).ToString(usa) +
-                    " " + (material.m_AmbientColour.B / 255.0f).ToString(usa) + "\n");
+                mtlWriter.Write("Ka " + (material.m_Ambient.R / 255.0f).ToString(usa) +
+                    " " + (material.m_Ambient.G / 255.0f).ToString(usa) +
+                    " " + (material.m_Ambient.B / 255.0f).ToString(usa) + "\n");
                 //Specify diffuse colour - RGB 0-1
-                mtlWriter.Write("Kd " + (material.m_DiffuseColour.R / 255.0f).ToString(usa) +
-                    " " + (material.m_DiffuseColour.G / 255.0f).ToString(usa) +
-                    " " + (material.m_DiffuseColour.B / 255.0f).ToString(usa) + "\n");
+                mtlWriter.Write("Kd " + (material.m_Diffuse.R / 255.0f).ToString(usa) +
+                    " " + (material.m_Diffuse.G / 255.0f).ToString(usa) +
+                    " " + (material.m_Diffuse.B / 255.0f).ToString(usa) + "\n");
                 //Specify specular colour - RGB 0-1
-                mtlWriter.Write("Ks " + (material.m_SpecularColour.R / 255.0f).ToString(usa) +
-                    " " + (material.m_SpecularColour.G / 255.0f).ToString(usa) +
-                    " " + (material.m_SpecularColour.B / 255.0f).ToString(usa) + "\n");
+                mtlWriter.Write("Ks " + (material.m_Specular.R / 255.0f).ToString(usa) +
+                    " " + (material.m_Specular.G / 255.0f).ToString(usa) +
+                    " " + (material.m_Specular.B / 255.0f).ToString(usa) + "\n");
                 //Specify specular colour co-efficient - RGB 0-1
                 //mtllib += "Ns " + material.m_SpeEmiColors.ToString(usa) + "\n";
                 //Specify transparency - RGB Alpha channel 0-1
-                mtlWriter.Write("d " + (material.m_Opacity / 255.0f).ToString(usa) + "\n");
+                mtlWriter.Write("d " + (material.m_Alpha / 255.0f).ToString(usa) + "\n");
                 //Specify texture type 0 - 10
                 //uint textype = (currentTexture.m_Params >> 26) & 0x7;
                 mtlWriter.Write("illum 2\n");
@@ -118,10 +118,7 @@ namespace SM64DSe.ImportExport.Writers.ExternalWriters
                 {
                     //Specify name of texture image
                     mtlWriter.Write("map_Kd " + textureName + ".png" + "\n\n");
-                    if (!material.m_DiffuseMapInMemory)
-                        ExportTextureToPNG(dir, textureName, m_ModelPath + Path.DirectorySeparatorChar + textureName);
-                    else
-                        ExportTextureToPNG(dir, textureName, m_Model.m_ConvertedTexturesBitmap[textureName]);
+                    ExportTextureToPNG(dir, m_Model.m_Textures[material.m_TextureDefID]);
                 }
                 else
                     mtlWriter.Write("\n\n");

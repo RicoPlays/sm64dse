@@ -37,17 +37,14 @@ namespace SM64DSe.ImportExport.Writers.ExternalWriters
             // Export textures to PNG
             foreach (ModelBase.MaterialDef material in m_Model.m_Materials.Values)
             {
-                if (material.m_DiffuseMapName != null && !material.m_DiffuseMapName.Equals(""))
+                if (material.m_TextureDefID != null)
                 {
-                    string textureName = material.m_DiffuseMapName;
+                    string textureName = material.m_TextureDefID;
                     if (exportedTextures.Contains(textureName)) 
                         continue;
                     exportedTextures.Add(textureName);
 
-                    if (!material.m_DiffuseMapInMemory)
-                        ExportTextureToPNG(dir, textureName, m_ModelPath + Path.DirectorySeparatorChar + textureName);
-                    else
-                        ExportTextureToPNG(dir, textureName, m_Model.m_ConvertedTexturesBitmap[textureName]);
+                    ExportTextureToPNG(dir, m_Model.m_Textures[textureName]);
                 }
             }
 
@@ -73,7 +70,7 @@ namespace SM64DSe.ImportExport.Writers.ExternalWriters
 
                 WriteDAE_LibraryImages(writer, exportedTextures, dir);
 
-                WriteDAE_LibraryEffects(writer, m_Model.m_Materials);
+                WriteDAE_LibraryEffects(writer, m_Model.m_Materials, m_Model.m_Textures);
 
                 WriteDAE_LibraryMaterials(writer, m_Model.m_Materials);
 
@@ -134,7 +131,8 @@ namespace SM64DSe.ImportExport.Writers.ExternalWriters
             writer.WriteEndElement();
         }
 
-        private static void WriteDAE_LibraryEffects(XmlWriter writer, Dictionary<string, ModelBase.MaterialDef> materials)
+        private static void WriteDAE_LibraryEffects(XmlWriter writer, Dictionary<string, ModelBase.MaterialDef> materials, 
+            Dictionary<string, ModelBase.TextureDefBase> textures)
         {
             writer.WriteStartElement("library_effects");
 
@@ -144,23 +142,25 @@ namespace SM64DSe.ImportExport.Writers.ExternalWriters
                 writer.WriteAttributeString("id", mat.m_ID + "-effect");
                 writer.WriteStartElement("profile_COMMON");
 
-                if (mat.m_HasTextures)
+                if (mat.m_TextureDefID != null)
                 {
+                    ModelBase.TextureDefBase texture = textures[mat.m_TextureDefID];
+
                     writer.WriteStartElement("newparam");
-                    writer.WriteAttributeString("sid", mat.m_DiffuseMapName + "-img-surface");
+                    writer.WriteAttributeString("sid", texture.m_ID + "-img-surface");
 
                     writer.WriteStartElement("surface");
                     writer.WriteAttributeString("type", "2D");
-                    writer.WriteElementString("init_from", mat.m_DiffuseMapName + "-img");
+                    writer.WriteElementString("init_from", texture.m_ID + "-img");
                     writer.WriteEndElement();// surface
 
                     writer.WriteEndElement();// newparam
 
                     writer.WriteStartElement("newparam");
-                    writer.WriteAttributeString("sid", mat.m_DiffuseMapName + "-img-sampler");
+                    writer.WriteAttributeString("sid", texture.m_ID + "-img-sampler");
 
                     writer.WriteStartElement("sampler2D");
-                    writer.WriteElementString("source", mat.m_DiffuseMapName + "-img-surface");
+                    writer.WriteElementString("source", texture.m_ID + "-img-surface");
                     writer.WriteEndElement();// sampler2D
 
                     writer.WriteEndElement();// newparam
@@ -173,24 +173,24 @@ namespace SM64DSe.ImportExport.Writers.ExternalWriters
                 writer.WriteStartElement("emission");
                 writer.WriteStartElement("color");
                 writer.WriteAttributeString("sid", "emission");
-                writer.WriteString((mat.m_EmissionColour.R / 255.0f).ToString(usa) + " " + (mat.m_EmissionColour.G / 255.0f).ToString(usa) + " " +
-                    (mat.m_EmissionColour.B / 255.0f).ToString(usa) + " " + "1.0");
+                writer.WriteString((mat.m_Emission.R / 255.0f).ToString(usa) + " " + (mat.m_Emission.G / 255.0f).ToString(usa) + " " +
+                    (mat.m_Emission.B / 255.0f).ToString(usa) + " " + "1.0");
                 writer.WriteEndElement();// color
                 writer.WriteEndElement();// emission
 
                 writer.WriteStartElement("ambient");
                 writer.WriteStartElement("color");
                 writer.WriteAttributeString("sid", "ambient");
-                writer.WriteString((mat.m_AmbientColour.R / 255.0f).ToString(usa) + " " + (mat.m_AmbientColour.G / 255.0f).ToString(usa) + " " +
-                    (mat.m_AmbientColour.B / 255.0f).ToString(usa) + " " + "1.0");
+                writer.WriteString((mat.m_Ambient.R / 255.0f).ToString(usa) + " " + (mat.m_Ambient.G / 255.0f).ToString(usa) + " " +
+                    (mat.m_Ambient.B / 255.0f).ToString(usa) + " " + "1.0");
                 writer.WriteEndElement();// color
                 writer.WriteEndElement();// ambient
 
                 writer.WriteStartElement("diffuse");
-                if (mat.m_HasTextures)
+                if (mat.m_TextureDefID != null)
                 {
                     writer.WriteStartElement("texture");
-                    writer.WriteAttributeString("texture", mat.m_DiffuseMapName + "-img-sampler");
+                    writer.WriteAttributeString("texture", mat.m_TextureDefID + "-img-sampler");
                     writer.WriteAttributeString("texcoord", "UVMap");
 
                     writer.WriteEndElement();// texture
@@ -199,8 +199,8 @@ namespace SM64DSe.ImportExport.Writers.ExternalWriters
                 {
                     writer.WriteStartElement("color");
                     writer.WriteAttributeString("sid", "diffuse");
-                    writer.WriteString((mat.m_DiffuseColour.R / 255.0f).ToString(usa) + " " + (mat.m_DiffuseColour.G / 255.0f).ToString(usa) + " " +
-                        (mat.m_DiffuseColour.B / 255.0f).ToString(usa) + " " + "1.0");
+                    writer.WriteString((mat.m_Diffuse.R / 255.0f).ToString(usa) + " " + (mat.m_Diffuse.G / 255.0f).ToString(usa) + " " +
+                        (mat.m_Diffuse.B / 255.0f).ToString(usa) + " " + "1.0");
                     writer.WriteEndElement();// color
                 }
                 writer.WriteEndElement();// diffuse
@@ -208,22 +208,22 @@ namespace SM64DSe.ImportExport.Writers.ExternalWriters
                 writer.WriteStartElement("specular");
                 writer.WriteStartElement("color");
                 writer.WriteAttributeString("sid", "specular");
-                writer.WriteString((mat.m_SpecularColour.R / 255.0f).ToString(usa) + " " + (mat.m_SpecularColour.G / 255.0f).ToString(usa) + " " +
-                    (mat.m_SpecularColour.B / 255.0f).ToString(usa) + " " + "1.0");
+                writer.WriteString((mat.m_Specular.R / 255.0f).ToString(usa) + " " + (mat.m_Specular.G / 255.0f).ToString(usa) + " " +
+                    (mat.m_Specular.B / 255.0f).ToString(usa) + " " + "1.0");
                 writer.WriteEndElement();// color
                 writer.WriteEndElement();// specular
 
                 writer.WriteStartElement("transparency");
                 writer.WriteStartElement("float");
                 writer.WriteAttributeString("sid", "transparency");
-                writer.WriteString((mat.m_Opacity / 255.0f).ToString(usa));
+                writer.WriteString((mat.m_Alpha / 255.0f).ToString(usa));
                 writer.WriteEndElement();// float
                 writer.WriteEndElement();// transparency
 
                 writer.WriteEndElement();// phong
                 writer.WriteEndElement();// technique
 
-                if (mat.m_IsDoubleSided)
+                if (mat.m_PolygonDrawingFace == ModelBase.MaterialDef.PolygonDrawingFace.FrontAndBack)
                 {
                     writer.WriteStartElement("extra");
                     writer.WriteStartElement("technique");
@@ -234,7 +234,7 @@ namespace SM64DSe.ImportExport.Writers.ExternalWriters
                 }
 
                 writer.WriteEndElement();// profile_COMMON
-                if (mat.m_IsDoubleSided)
+                if (mat.m_PolygonDrawingFace == ModelBase.MaterialDef.PolygonDrawingFace.FrontAndBack)
                 {
                     writer.WriteStartElement("extra");
                     writer.WriteStartElement("technique");
@@ -356,7 +356,7 @@ namespace SM64DSe.ImportExport.Writers.ExternalWriters
                     WriteDAE_Polylist(writer, root.m_ID, matName, faces,
                         positionsInBranch, 
                         ((normalsInBranch.Count > 0) ? normalsInBranch : null), 
-                        ((model.m_Materials[matName].m_HasTextures) ? texCoordsInBranch : null), 
+                        ((model.m_Materials[matName].m_TextureDefID != null) ? texCoordsInBranch : null), 
                         vColoursInBranch);
                 }
 
@@ -888,13 +888,14 @@ namespace SM64DSe.ImportExport.Writers.ExternalWriters
             foreach (ModelBase.AnimationDef animation in model.m_Animations.Values)
             {
                 ModelBase.BoneDef bone = model.m_BoneTree.GetBoneByID(animation.m_BoneID);
+                BCA.SRTContainer[] frames = animation.GetAllFrames();
 
                 if (useSRTMatricesForTransforms)
                 {
                     writer.WriteStartElement("animation");
                     writer.WriteAttributeString("id", bone.m_ID + "_transform");
                     WriteDAE_Animation_Source_time(writer, animation, bone, "transform");
-                    WriteDAE_Animation_Source_matrixOutput(writer, animation, bone);
+                    WriteDAE_Animation_Source_matrixOutput(writer, frames, bone);
                     WriteDAE_Animation_Source_interpolations(writer, animation, bone, "transform");
                     WriteDAE_Animation_Sampler(writer, bone, "transform");
                     WriteDAE_Animation_Channel(writer, bone, "transform", "transform");
@@ -905,7 +906,7 @@ namespace SM64DSe.ImportExport.Writers.ExternalWriters
                     writer.WriteStartElement("animation");
                     writer.WriteAttributeString("id", bone.m_ID + "_translate");
                     WriteDAE_Animation_Source_time(writer, animation, bone, "translate");
-                    WriteDAE_Animation_Source_translationOutput(writer, animation, bone);
+                    WriteDAE_Animation_Source_translationOutput(writer, frames, bone);
                     WriteDAE_Animation_Source_interpolations(writer, animation, bone, "translate");
                     WriteDAE_Animation_Sampler(writer, bone, "translate");
                     WriteDAE_Animation_Channel(writer, bone, "translate", "translate");
@@ -914,7 +915,7 @@ namespace SM64DSe.ImportExport.Writers.ExternalWriters
                     writer.WriteStartElement("animation");
                     writer.WriteAttributeString("id", bone.m_ID + "_rotationZ");
                     WriteDAE_Animation_Source_time(writer, animation, bone, "rotationZ");
-                    WriteDAE_Animation_Source_rotationOutput(writer, animation, bone, "Z");
+                    WriteDAE_Animation_Source_rotationOutput(writer, frames, bone, "Z");
                     WriteDAE_Animation_Source_interpolations(writer, animation, bone, "rotationZ");
                     WriteDAE_Animation_Sampler(writer, bone, "rotationZ");
                     WriteDAE_Animation_Channel(writer, bone, "rotationZ", "rotationZ.ANGLE");
@@ -923,7 +924,7 @@ namespace SM64DSe.ImportExport.Writers.ExternalWriters
                     writer.WriteStartElement("animation");
                     writer.WriteAttributeString("id", bone.m_ID + "_rotationY");
                     WriteDAE_Animation_Source_time(writer, animation, bone, "rotationY");
-                    WriteDAE_Animation_Source_rotationOutput(writer, animation, bone, "Y");
+                    WriteDAE_Animation_Source_rotationOutput(writer, frames, bone, "Y");
                     WriteDAE_Animation_Source_interpolations(writer, animation, bone, "rotationY");
                     WriteDAE_Animation_Sampler(writer, bone, "rotationY");
                     WriteDAE_Animation_Channel(writer, bone, "rotationY", "rotationY.ANGLE");
@@ -932,7 +933,7 @@ namespace SM64DSe.ImportExport.Writers.ExternalWriters
                     writer.WriteStartElement("animation");
                     writer.WriteAttributeString("id", bone.m_ID + "_rotationX");
                     WriteDAE_Animation_Source_time(writer, animation, bone, "rotationX");
-                    WriteDAE_Animation_Source_rotationOutput(writer, animation, bone, "X");
+                    WriteDAE_Animation_Source_rotationOutput(writer, frames, bone, "X");
                     WriteDAE_Animation_Source_interpolations(writer, animation, bone, "rotationX");
                     WriteDAE_Animation_Sampler(writer, bone, "rotationX");
                     WriteDAE_Animation_Channel(writer, bone, "rotationX", "rotationX.ANGLE");
@@ -941,7 +942,7 @@ namespace SM64DSe.ImportExport.Writers.ExternalWriters
                     writer.WriteStartElement("animation");
                     writer.WriteAttributeString("id", bone.m_ID + "_scale");
                     WriteDAE_Animation_Source_time(writer, animation, bone, "scale");
-                    WriteDAE_Animation_Source_scaleOutput(writer, animation, bone);
+                    WriteDAE_Animation_Source_scaleOutput(writer, frames, bone);
                     WriteDAE_Animation_Source_interpolations(writer, animation, bone, "scale");
                     WriteDAE_Animation_Sampler(writer, bone, "scale");
                     WriteDAE_Animation_Channel(writer, bone, "scale", "scale");
@@ -954,17 +955,17 @@ namespace SM64DSe.ImportExport.Writers.ExternalWriters
             writer.WriteEndElement();// library_animations
         }
 
-        private static void WriteDAE_Animation_Source_matrixOutput(XmlWriter writer, ModelBase.AnimationDef animation, ModelBase.BoneDef bone)
+        private static void WriteDAE_Animation_Source_matrixOutput(XmlWriter writer, BCA.SRTContainer[] frames, ModelBase.BoneDef bone)
         {
             writer.WriteStartElement("source");
             writer.WriteAttributeString("id", bone.m_ID + "_transform-output");
             writer.WriteStartElement("float_array");
             writer.WriteAttributeString("id", bone.m_ID + "_transform-output-array");
-            writer.WriteAttributeString("count", "" + (animation.m_NumFrames * 16));
+            writer.WriteAttributeString("count", "" + (frames.Length * 16));
             StringBuilder sb = new StringBuilder();
-            for (int i = 0; i < animation.m_NumFrames; i++)
+            for (int i = 0; i < frames.Length; i++)
             {
-                Matrix4 matrix = animation.m_AnimationFrames[i].GetTransformation();
+                Matrix4 matrix = frames[i].m_Matrix;
                 sb.Append(matrix.Column0.X.ToString(usa) + " " + matrix.Column0.Y.ToString(usa) + " " +
                     matrix.Column0.Z.ToString(usa) + " " + matrix.Column0.W.ToString(usa) + " ");
                 sb.Append(matrix.Column1.X.ToString(usa) + " " + matrix.Column1.Y.ToString(usa) + " " +
@@ -979,7 +980,7 @@ namespace SM64DSe.ImportExport.Writers.ExternalWriters
             writer.WriteEndElement();// float_array
             writer.WriteStartElement("technique_common");
             writer.WriteStartElement("accessor");
-            writer.WriteAttributeString("count", "" + animation.m_NumFrames);
+            writer.WriteAttributeString("count", "" + frames.Length);
             writer.WriteAttributeString("offset", "0");
             writer.WriteAttributeString("source", "#" + bone.m_ID + "_transform-output-array");
             writer.WriteAttributeString("stride", "16");
@@ -988,23 +989,21 @@ namespace SM64DSe.ImportExport.Writers.ExternalWriters
             writer.WriteEndElement();// technique_common
             writer.WriteEndElement();// source
         }
-        /* 
-         * EXPORING ANIMATIONS AS SEPARATE SCALE, ROTATION AND TRANSLATION NOT CURRENTLY WORKING
-         */
-        private static void WriteDAE_Animation_Source_translationOutput(XmlWriter writer, ModelBase.AnimationDef animation, 
+
+        private static void WriteDAE_Animation_Source_translationOutput(XmlWriter writer, BCA.SRTContainer[] frames, 
             ModelBase.BoneDef bone)
         {
             writer.WriteStartElement("source");
             writer.WriteAttributeString("id", bone.m_ID + "_translate-output");
             writer.WriteStartElement("float_array");
             writer.WriteAttributeString("id", bone.m_ID + "_translate-output-array");
-            writer.WriteAttributeString("count", "" + (animation.m_NumFrames * 3));
+            writer.WriteAttributeString("count", "" + (frames.Length * 3));
             StringBuilder trans = new StringBuilder();
-            for (int i = 0; i < animation.m_NumFrames; i++)
+            for (int i = 0; i < frames.Length; i++)
             {
-                float x = animation.m_AnimationFrames[i].GetTranslation().X;
-                float y = animation.m_AnimationFrames[i].GetTranslation().Y;
-                float z = animation.m_AnimationFrames[i].GetTranslation().Z;
+                float x = frames[i].m_Translation.X;
+                float y = frames[i].m_Translation.Y;
+                float z = frames[i].m_Translation.Z;
 
                 trans.Append(x.ToString(usa) + " " + y.ToString(usa) + " " + z.ToString(usa) + " ");
             }
@@ -1013,7 +1012,7 @@ namespace SM64DSe.ImportExport.Writers.ExternalWriters
             writer.WriteEndElement();// float_array
             writer.WriteStartElement("technique_common");
             writer.WriteStartElement("accessor");
-            writer.WriteAttributeString("count", "" + animation.m_NumFrames);
+            writer.WriteAttributeString("count", "" + frames.Length);
             writer.WriteAttributeString("offset", "0");
             writer.WriteAttributeString("source", "#" + bone.m_ID + "_translate-output-array");
             writer.WriteAttributeString("stride", "3");
@@ -1025,19 +1024,19 @@ namespace SM64DSe.ImportExport.Writers.ExternalWriters
             writer.WriteEndElement();// source
         }
 
-        private static void WriteDAE_Animation_Source_rotationOutput(XmlWriter writer, ModelBase.AnimationDef animation,
+        private static void WriteDAE_Animation_Source_rotationOutput(XmlWriter writer, BCA.SRTContainer[] frames,
             ModelBase.BoneDef bone, string component)
         {
             writer.WriteStartElement("source");
             writer.WriteAttributeString("id", bone.m_ID + "_rotation" + component + "-output");
             writer.WriteStartElement("float_array");
             writer.WriteAttributeString("id", bone.m_ID + "_rotation" + component + "-output-array");
-            writer.WriteAttributeString("count", "" + animation.m_NumFrames);
+            writer.WriteAttributeString("count", "" + frames.Length);
             StringBuilder rot = new StringBuilder();
-            for (int i = 0; i < animation.m_NumFrames; i++)
+            for (int i = 0; i < frames.Length; i++)
             {
                 float angle = 0.0f;
-                Vector3 rotDeg = animation.m_AnimationFrames[i].GetRotationInDegrees();
+                Vector3 rotDeg = frames[i].GetRotationInDegrees();
 
                 switch (component.ToUpperInvariant())
                 {
@@ -1059,7 +1058,7 @@ namespace SM64DSe.ImportExport.Writers.ExternalWriters
             writer.WriteEndElement();// float_array
             writer.WriteStartElement("technique_common");
             writer.WriteStartElement("accessor");
-            writer.WriteAttributeString("count", "" + animation.m_NumFrames);
+            writer.WriteAttributeString("count", "" + frames.Length);
             writer.WriteAttributeString("offset", "0");
             writer.WriteAttributeString("source", "#" + bone.m_ID + "_rotation" + component + "-output-array");
             writer.WriteAttributeString("stride", "1");
@@ -1069,20 +1068,20 @@ namespace SM64DSe.ImportExport.Writers.ExternalWriters
             writer.WriteEndElement();// source
         }
 
-        private static void WriteDAE_Animation_Source_scaleOutput(XmlWriter writer, ModelBase.AnimationDef animation,
+        private static void WriteDAE_Animation_Source_scaleOutput(XmlWriter writer, BCA.SRTContainer[] frames,
             ModelBase.BoneDef bone)
         {
             writer.WriteStartElement("source");
             writer.WriteAttributeString("id", bone.m_ID + "_scale-output");
             writer.WriteStartElement("float_array");
             writer.WriteAttributeString("id", bone.m_ID + "_scale-output-array");
-            writer.WriteAttributeString("count", "" + (animation.m_NumFrames * 3));
+            writer.WriteAttributeString("count", "" + (frames.Length * 3));
             StringBuilder scale = new StringBuilder();
-            for (int i = 0; i < animation.m_NumFrames; i++)
+            for (int i = 0; i < frames.Length; i++)
             {
-                float x = animation.m_AnimationFrames[i].GetScale().X;
-                float y = animation.m_AnimationFrames[i].GetScale().Y;
-                float z = animation.m_AnimationFrames[i].GetScale().Z;
+                float x = frames[i].m_Scale.X;
+                float y = frames[i].m_Scale.Y;
+                float z = frames[i].m_Scale.Z;
 
                 scale.Append(x.ToString(usa) + " " + y.ToString(usa) + " " + z.ToString(usa) + " ");
             }
@@ -1091,7 +1090,7 @@ namespace SM64DSe.ImportExport.Writers.ExternalWriters
             writer.WriteEndElement();// float_array
             writer.WriteStartElement("technique_common");
             writer.WriteStartElement("accessor");
-            writer.WriteAttributeString("count", "" + animation.m_NumFrames);
+            writer.WriteAttributeString("count", "" + frames.Length);
             writer.WriteAttributeString("offset", "0");
             writer.WriteAttributeString("source", "#" + bone.m_ID + "_scale-output-array");
             writer.WriteAttributeString("stride", "3");

@@ -30,6 +30,14 @@
         {
             System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(AnimationEditorForm));
             this.splitContainer1 = new System.Windows.Forms.SplitContainer();
+            this.gbImportAnimation = new System.Windows.Forms.GroupBox();
+            this.btnImportAnimation = new System.Windows.Forms.Button();
+            this.btnSelectInputModel = new System.Windows.Forms.Button();
+            this.txtInputModel = new System.Windows.Forms.TextBox();
+            this.label4 = new System.Windows.Forms.Label();
+            this.btnSelectInputAnimation = new System.Windows.Forms.Button();
+            this.txtInputAnimation = new System.Windows.Forms.TextBox();
+            this.label3 = new System.Windows.Forms.Label();
             this.txtNumFrames = new System.Windows.Forms.TextBox();
             this.lblFrameNum = new System.Windows.Forms.Label();
             this.txtCurrentFrameNum = new System.Windows.Forms.TextBox();
@@ -49,12 +57,12 @@
             this.txtBMDName = new System.Windows.Forms.TextBox();
             this.glModelView = new OpenTK.GLControl();
             this.toolStrip1 = new System.Windows.Forms.ToolStrip();
-            this.btnImportDAE = new System.Windows.Forms.ToolStripButton();
             this.btnExportDAE = new System.Windows.Forms.ToolStripButton();
-            //((System.ComponentModel.ISupportInitialize)(this.splitContainer1)).BeginInit();
+            ((System.ComponentModel.ISupportInitialize)(this.splitContainer1)).BeginInit();
             this.splitContainer1.Panel1.SuspendLayout();
             this.splitContainer1.Panel2.SuspendLayout();
             this.splitContainer1.SuspendLayout();
+            this.gbImportAnimation.SuspendLayout();
             this.toolStrip1.SuspendLayout();
             this.SuspendLayout();
             // 
@@ -70,6 +78,7 @@
             // 
             // splitContainer1.Panel1
             // 
+            this.splitContainer1.Panel1.Controls.Add(this.gbImportAnimation);
             this.splitContainer1.Panel1.Controls.Add(this.txtNumFrames);
             this.splitContainer1.Panel1.Controls.Add(this.lblFrameNum);
             this.splitContainer1.Panel1.Controls.Add(this.txtCurrentFrameNum);
@@ -95,9 +104,87 @@
             this.splitContainer1.SplitterDistance = 230;
             this.splitContainer1.TabIndex = 0;
             // 
+            // gbImportAnimation
+            // 
+            this.gbImportAnimation.Controls.Add(this.btnImportAnimation);
+            this.gbImportAnimation.Controls.Add(this.btnSelectInputModel);
+            this.gbImportAnimation.Controls.Add(this.txtInputModel);
+            this.gbImportAnimation.Controls.Add(this.label4);
+            this.gbImportAnimation.Controls.Add(this.btnSelectInputAnimation);
+            this.gbImportAnimation.Controls.Add(this.txtInputAnimation);
+            this.gbImportAnimation.Controls.Add(this.label3);
+            this.gbImportAnimation.Location = new System.Drawing.Point(3, 295);
+            this.gbImportAnimation.Name = "gbImportAnimation";
+            this.gbImportAnimation.Size = new System.Drawing.Size(225, 133);
+            this.gbImportAnimation.TabIndex = 19;
+            this.gbImportAnimation.TabStop = false;
+            this.gbImportAnimation.Text = "Import Animation";
+            // 
+            // btnImportAnimation
+            // 
+            this.btnImportAnimation.Location = new System.Drawing.Point(3, 106);
+            this.btnImportAnimation.Name = "btnImportAnimation";
+            this.btnImportAnimation.Size = new System.Drawing.Size(107, 23);
+            this.btnImportAnimation.TabIndex = 8;
+            this.btnImportAnimation.Text = "Import Animation";
+            this.btnImportAnimation.UseVisualStyleBackColor = true;
+            this.btnImportAnimation.Click += new System.EventHandler(this.btnImportAnimation_Click);
+            // 
+            // btnSelectInputModel
+            // 
+            this.btnSelectInputModel.Location = new System.Drawing.Point(190, 78);
+            this.btnSelectInputModel.Name = "btnSelectInputModel";
+            this.btnSelectInputModel.Size = new System.Drawing.Size(31, 23);
+            this.btnSelectInputModel.TabIndex = 7;
+            this.btnSelectInputModel.Text = "...";
+            this.btnSelectInputModel.UseVisualStyleBackColor = true;
+            this.btnSelectInputModel.Click += new System.EventHandler(this.btnSelectInputModel_Click);
+            // 
+            // txtInputModel
+            // 
+            this.txtInputModel.Location = new System.Drawing.Point(3, 80);
+            this.txtInputModel.Name = "txtInputModel";
+            this.txtInputModel.Size = new System.Drawing.Size(183, 20);
+            this.txtInputModel.TabIndex = 6;
+            // 
+            // label4
+            // 
+            this.label4.AutoSize = true;
+            this.label4.Location = new System.Drawing.Point(0, 64);
+            this.label4.Name = "label4";
+            this.label4.Size = new System.Drawing.Size(131, 13);
+            this.label4.TabIndex = 5;
+            this.label4.Text = "(Optional) Model to Import:";
+            // 
+            // btnSelectInputAnimation
+            // 
+            this.btnSelectInputAnimation.Location = new System.Drawing.Point(190, 39);
+            this.btnSelectInputAnimation.Name = "btnSelectInputAnimation";
+            this.btnSelectInputAnimation.Size = new System.Drawing.Size(31, 23);
+            this.btnSelectInputAnimation.TabIndex = 4;
+            this.btnSelectInputAnimation.Text = "...";
+            this.btnSelectInputAnimation.UseVisualStyleBackColor = true;
+            this.btnSelectInputAnimation.Click += new System.EventHandler(this.btnSelectInputAnimation_Click);
+            // 
+            // txtInputAnimation
+            // 
+            this.txtInputAnimation.Location = new System.Drawing.Point(3, 41);
+            this.txtInputAnimation.Name = "txtInputAnimation";
+            this.txtInputAnimation.Size = new System.Drawing.Size(183, 20);
+            this.txtInputAnimation.TabIndex = 3;
+            // 
+            // label3
+            // 
+            this.label3.AutoSize = true;
+            this.label3.Location = new System.Drawing.Point(0, 25);
+            this.label3.Name = "label3";
+            this.label3.Size = new System.Drawing.Size(156, 13);
+            this.label3.TabIndex = 0;
+            this.label3.Text = "Animation File/Animated Model:";
+            // 
             // txtNumFrames
             // 
-            this.txtNumFrames.Location = new System.Drawing.Point(119, 243);
+            this.txtNumFrames.Location = new System.Drawing.Point(119, 182);
             this.txtNumFrames.Name = "txtNumFrames";
             this.txtNumFrames.ReadOnly = true;
             this.txtNumFrames.Size = new System.Drawing.Size(54, 20);
@@ -106,7 +193,7 @@
             // lblFrameNum
             // 
             this.lblFrameNum.AutoSize = true;
-            this.lblFrameNum.Location = new System.Drawing.Point(101, 246);
+            this.lblFrameNum.Location = new System.Drawing.Point(101, 185);
             this.lblFrameNum.Name = "lblFrameNum";
             this.lblFrameNum.Size = new System.Drawing.Size(12, 13);
             this.lblFrameNum.TabIndex = 17;
@@ -114,7 +201,7 @@
             // 
             // txtCurrentFrameNum
             // 
-            this.txtCurrentFrameNum.Location = new System.Drawing.Point(41, 243);
+            this.txtCurrentFrameNum.Location = new System.Drawing.Point(41, 182);
             this.txtCurrentFrameNum.Name = "txtCurrentFrameNum";
             this.txtCurrentFrameNum.Size = new System.Drawing.Size(54, 20);
             this.txtCurrentFrameNum.TabIndex = 16;
@@ -123,7 +210,7 @@
             // label9
             // 
             this.label9.AutoSize = true;
-            this.label9.Location = new System.Drawing.Point(2, 246);
+            this.label9.Location = new System.Drawing.Point(2, 185);
             this.label9.Name = "label9";
             this.label9.Size = new System.Drawing.Size(39, 13);
             this.label9.TabIndex = 15;
@@ -276,22 +363,12 @@
             // toolStrip1
             // 
             this.toolStrip1.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {
-            this.btnImportDAE,
             this.btnExportDAE});
             this.toolStrip1.Location = new System.Drawing.Point(0, 0);
             this.toolStrip1.Name = "toolStrip1";
             this.toolStrip1.Size = new System.Drawing.Size(794, 25);
             this.toolStrip1.TabIndex = 1;
             this.toolStrip1.Text = "toolStrip1";
-            // 
-            // btnImportDAE
-            // 
-            this.btnImportDAE.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Text;
-            this.btnImportDAE.ImageTransparentColor = System.Drawing.Color.Magenta;
-            this.btnImportDAE.Name = "btnImportDAE";
-            this.btnImportDAE.Size = new System.Drawing.Size(72, 22);
-            this.btnImportDAE.Text = "Import DAE";
-            this.btnImportDAE.Click += new System.EventHandler(this.btnImportDAE_Click);
             // 
             // btnExportDAE
             // 
@@ -317,8 +394,10 @@
             this.splitContainer1.Panel1.ResumeLayout(false);
             this.splitContainer1.Panel1.PerformLayout();
             this.splitContainer1.Panel2.ResumeLayout(false);
-            //((System.ComponentModel.ISupportInitialize)(this.splitContainer1)).EndInit();
+            ((System.ComponentModel.ISupportInitialize)(this.splitContainer1)).EndInit();
             this.splitContainer1.ResumeLayout(false);
+            this.gbImportAnimation.ResumeLayout(false);
+            this.gbImportAnimation.PerformLayout();
             this.toolStrip1.ResumeLayout(false);
             this.toolStrip1.PerformLayout();
             this.ResumeLayout(false);
@@ -349,6 +428,13 @@
         private System.Windows.Forms.Label lblFrameNum;
         private System.Windows.Forms.TextBox txtCurrentFrameNum;
         private System.Windows.Forms.Label label9;
-        private System.Windows.Forms.ToolStripButton btnImportDAE;
+        private System.Windows.Forms.GroupBox gbImportAnimation;
+        private System.Windows.Forms.Button btnImportAnimation;
+        private System.Windows.Forms.Button btnSelectInputModel;
+        private System.Windows.Forms.TextBox txtInputModel;
+        private System.Windows.Forms.Label label4;
+        private System.Windows.Forms.Button btnSelectInputAnimation;
+        private System.Windows.Forms.TextBox txtInputAnimation;
+        private System.Windows.Forms.Label label3;
     }
 }

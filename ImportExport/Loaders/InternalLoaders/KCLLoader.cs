@@ -43,7 +43,7 @@ namespace SM64DSe.ImportExport.Loaders.InternalLoaders
             foreach (int type in uniqueCollisionTypes)
             {
                 ModelBase.MaterialDef material = new ModelBase.MaterialDef("material-" + type, m_Model.m_Materials.Count);
-                material.m_DiffuseColour = uniqueColours[type];
+                material.m_Diffuse = uniqueColours[type];
                 m_Model.m_Materials.Add(material.m_ID, material);
 
                 rootBone.m_MaterialsInBranch.Add(material.m_ID);

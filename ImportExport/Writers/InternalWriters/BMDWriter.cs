@@ -313,33 +313,43 @@ namespace SM64DSe.ImportExport.Writers.InternalWriters
             public bool[] m_Referenced;
         }
 
-        public static ConvertedTexture ConvertTexture(string filename)
+        public static ConvertedTexture ConvertTexture(ModelBase.TextureDefBase texture)
         {
-            Bitmap bmp = new Bitmap(filename);
+            if (!texture.IsNitro())
+            {
+                return ConvertTexture(texture.m_ID, texture.GetTexName(), texture.GetPalName(), texture.GetBitmap());
+            }
+            else
+            {
+                int textype = (int)texture.m_Format;
+                int dswidth = 0, dsheight = 0, widthPowerOfTwo = 8, heightPowerOfTwo = 8;
+                GetDSWidthAndHeight((int)texture.GetWidth(), (int)texture.GetHeight(), out dswidth, out dsheight, 
+                    out widthPowerOfTwo, out heightPowerOfTwo);
+                uint dstp = GetDSTextureParamsPart1(dswidth, dsheight, textype, texture.GetColor0Mode());
 
-            return ConvertTexture(bmp, filename);
+                return new ConvertedTexture(dstp, texture.GetNitroTexData(), texture.GetNitroPalette(), texture.GetTexName(),
+                    texture.GetPalName());
+            }
         }
 
-        public static ConvertedTexture ConvertTexture(Bitmap bmp, string filename)
+        public static ConvertedTexture ConvertTexture(string name, string texname, string palname, Bitmap bmp)
         {
-            int width = 8, height = 8;
-            int dswidth = 0, dsheight = 0;
-            while (width < bmp.Width) { width *= 2; dswidth++; }
-            while (height < bmp.Height) { height *= 2; dsheight++; }
+            int dswidth = 0, dsheight = 0, widthPowerOfTwo = 8, heightPowerOfTwo = 8;
+            GetDSWidthAndHeight(bmp.Width, bmp.Height, out dswidth, out dsheight, out widthPowerOfTwo, out heightPowerOfTwo);
 
             // cheap resizing for textures whose dimensions aren't power-of-two
-            if ((width != bmp.Width) || (height != bmp.Height))
+            if ((widthPowerOfTwo != bmp.Width) || (heightPowerOfTwo != bmp.Height))
             {
-                Bitmap newbmp = new Bitmap(width, height);
+                Bitmap newbmp = new Bitmap(widthPowerOfTwo, heightPowerOfTwo);
                 Graphics g = Graphics.FromImage(newbmp);
-                g.DrawImage(bmp, new Rectangle(0, 0, width, height));
+                g.DrawImage(bmp, new Rectangle(0, 0, widthPowerOfTwo, heightPowerOfTwo));
                 bmp = newbmp;
             }
 
             bool alpha = false;
-            for (int y = 0; y < height; y++)
+            for (int y = 0; y < heightPowerOfTwo; y++)
             {
-                for (int x = 0; x < width; x++)
+                for (int x = 0; x < widthPowerOfTwo; x++)
                 {
                     int a = bmp.GetPixel(x, y).A;
                     if (a >= 8 && a <= 248)
@@ -357,7 +367,7 @@ namespace SM64DSe.ImportExport.Writers.InternalWriters
             if (alpha)
             {
                 // a5i3/a3i5
-                tex = new byte[width * height];
+                tex = new byte[widthPowerOfTwo * heightPowerOfTwo];
                 Palette _pal = new Palette(bmp, new Rectangle(0, 0, bmp.Width, bmp.Height), 32);
                 int alphamask = 0;
 
@@ -372,16 +382,16 @@ namespace SM64DSe.ImportExport.Writers.InternalWriters
                     alphamask = 0xE0;
                 }
 
-                for (int y = 0; y < height; y++)
+                for (int y = 0; y < heightPowerOfTwo; y++)
                 {
-                    for (int x = 0; x < width; x++)
+                    for (int x = 0; x < widthPowerOfTwo; x++)
                     {
                         Color c = bmp.GetPixel(x, y);
                         ushort bgr15 = Helper.ColorToBGR15(c);
                         int a = c.A & alphamask;
 
                         byte val = (byte)(_pal.FindClosestColorID(bgr15) | a);
-                        tex[(y * width) + x] = val;
+                        tex[(y * widthPowerOfTwo) + x] = val;
                     }
                 }
 
@@ -396,16 +406,16 @@ namespace SM64DSe.ImportExport.Writers.InternalWriters
             {
                 // type5 - compressed
                 textype = 5;
-                tex = new byte[((width * height) / 16) * 6];
+                tex = new byte[((widthPowerOfTwo * heightPowerOfTwo) / 16) * 6];
                 List<Palette> pallist = new List<Palette>();
                 List<ushort> paldata = new List<ushort>();
 
                 int texoffset = 0;
-                int palidxoffset = ((width * height) / 16) * 4;
+                int palidxoffset = ((widthPowerOfTwo * heightPowerOfTwo) / 16) * 4;
 
-                for (int y = 0; y < height; y += 4)
+                for (int y = 0; y < heightPowerOfTwo; y += 4)
                 {
-                    for (int x = 0; x < width; x += 4)
+                    for (int x = 0; x < widthPowerOfTwo; x += 4)
                     {
                         bool transp = false;
 
@@ -486,12 +496,25 @@ namespace SM64DSe.ImportExport.Writers.InternalWriters
                 }
             }
 
-            string path_separator = (filename.Contains("/")) ? "/" : "\\";
-            string texname = filename.Substring(filename.LastIndexOf(path_separator) + 1).Replace('.', '_');
-            string palname = (pal == null) ? null : texname + "_pl";
-
-            uint dstp = (uint)((dswidth << 20) | (dsheight << 23) | (textype << 26));
+            uint dstp = GetDSTextureParamsPart1(dswidth, dsheight, textype, 0);
             return new ConvertedTexture(dstp, tex, pal, texname, palname);
+        }
+
+        public static void GetDSWidthAndHeight(int texWidth, int texHeight, out int dswidth, out int dsheight,
+            out int widthPowerOfTwo, out int heightPowerOfTwo)
+        {
+            // (for N=0..7: Size=(8 SHL N); ie. 8..1024 texels)
+            widthPowerOfTwo = 8; heightPowerOfTwo = 8;
+            dswidth = 0; dsheight = 0;
+            while (widthPowerOfTwo < texWidth) { widthPowerOfTwo *= 2; dswidth++; }
+            while (heightPowerOfTwo < texHeight) { heightPowerOfTwo *= 2; dsheight++; }
+        }
+
+        public static uint GetDSTextureParamsPart1(int dswidth, int dsheight, int textype, byte color0mode)
+        {
+            uint dstp = (uint)((dswidth << 20) | (dsheight << 23) |
+                    (textype << 26) | (color0mode << 29));
+            return dstp;
         }
 
         public enum VertexListPrimitiveTypes
@@ -526,6 +549,7 @@ namespace SM64DSe.ImportExport.Writers.InternalWriters
 
             ModelBase.BoneDefRoot boneTree = m_Model.m_BoneTree;
             Dictionary<string, ModelBase.MaterialDef> materials = m_Model.m_Materials;
+            Dictionary<string, ModelBase.TextureDefBase> textures = m_Model.m_Textures;
 
             NitroFile bmd = m_ModelFile;
             bmd.Clear();
@@ -607,21 +631,18 @@ namespace SM64DSe.ImportExport.Writers.InternalWriters
                 ModelBase.MaterialDef mat = _mat.Value;
                 string matname = _mat.Key;
 
-                if (!mat.m_DiffuseMapName.Equals(""))
+                if (mat.m_TextureDefID != null)
                 {
-                    if (!convertedTextures.ContainsKey(mat.m_DiffuseMapName))
+                    ModelBase.TextureDefBase texture = m_Model.m_Textures[mat.m_TextureDefID];
+
+                    if (!convertedTextures.ContainsKey(texture.m_ID))
                     {
-                        ConvertedTexture tex = null;
-                        if (!mat.m_DiffuseMapInMemory)
-                            tex = ConvertTexture(m_Model.m_ModelPath + Path.DirectorySeparatorChar + mat.m_DiffuseMapName);
-                        else
-                            tex = ConvertTexture(m_Model.m_ConvertedTexturesBitmap[mat.m_DiffuseMapName],
-                                m_Model.m_ModelPath + Path.DirectorySeparatorChar + mat.m_DiffuseMapName);
+                        ConvertedTexture tex = ConvertTexture(texture);
                         tex.m_TextureID = ntex;
                         tex.m_PaletteID = npal;
                         if (tex.m_TextureData != null) { ntex++; texsize += tex.m_TextureData.Length; }
                         if (tex.m_PaletteData != null) { npal++; texsize += tex.m_PaletteData.Length; }
-                        convertedTextures.Add(mat.m_DiffuseMapName, tex);
+                        convertedTextures.Add(texture.m_ID, tex);
                     }
                 }
             }
@@ -652,7 +673,9 @@ namespace SM64DSe.ImportExport.Writers.InternalWriters
                 bmd.Write32(dllistoffset + 0x4, curoffset);
                 dllistoffset += 0x8;
 
-                Vector2 tcscale = mat.m_DiffuseMapSize;
+                Vector2 tcscale = (mat.m_TextureDefID != null) ?
+                    new Vector2(textures[mat.m_TextureDefID].GetWidth(), textures[mat.m_TextureDefID].GetHeight()) :
+                    Vector2.Zero;
 
                 string curmaterial = mat.m_ID;
 
@@ -688,11 +711,11 @@ namespace SM64DSe.ImportExport.Writers.InternalWriters
                 if (_tcscale > 1f)
                 {
                     _tcscale = (float)Math.Ceiling(_tcscale * 4096f) / 4096f;
-                    mat.m_TexCoordScale = _tcscale;
+                    mat.m_TextureScale = new Vector2(_tcscale, _tcscale);
                     Vector2.Divide(ref tcscale, _tcscale, out tcscale);
                 }
                 else
-                    mat.m_TexCoordScale = 0f;
+                    mat.m_TextureScale = Vector2.Zero;
 
                 dlpacker.ClearCommands();
                 int lastface = -1;
@@ -779,7 +802,7 @@ namespace SM64DSe.ImportExport.Writers.InternalWriters
 
                 // Display list header
                 uint dllist_data_offset = (uint)(((curoffset + 0x10 + (boneTree.Count)) + 3) & ~3);
-                bmd.Write32(curoffset, (uint)boneTree.Count);// Number of transforms
+                bmd.Write32(curoffset, (uint)m_Model.m_BoneTransformsMap.Count);// Number of transforms
                 bmd.Write32(curoffset + 0x4, curoffset + 0x10);// Offset to transforms list
                 bmd.Write32(curoffset + 0x8, (uint)dlist.Length);// Size of the display list data in bytes
                 bmd.Write32(curoffset + 0xC, dllist_data_offset);// Offset to the display list data, make room for transforms list
@@ -791,7 +814,7 @@ namespace SM64DSe.ImportExport.Writers.InternalWriters
                  * the transform/bone map (series of shorts whose offset is defined in the file header, at 0x2C). The ID finally obtained
                  * is the ID of the bone whose transform matrix will be used to transform oncoming geometry.
                  */
-                for (int j = 0; j < boneTree.Count; j++)
+                for (int j = 0; j < m_Model.m_BoneTransformsMap.Count; j++)
                 {
                     bmd.Write8(curoffset, (byte)j);
                     curoffset += 0x1;
@@ -807,9 +830,11 @@ namespace SM64DSe.ImportExport.Writers.InternalWriters
 
             bmd.Write32(0x2C, curoffset);
             // transform / bone map
-            for (int j = 0; j < boneTree.Count; j++)
+            // Eg. Bone 26 may be mapped to matrix 6. If a Matrix Restore command is issued with Matrix ID of 6, 
+            // it'll be used as an index into this list and should return bone ID 26.
+            foreach (string key in m_Model.m_BoneTransformsMap.GetFirstToSecond().Keys)
             {
-                bmd.Write16(curoffset, (ushort)j);
+                bmd.Write16(curoffset, (ushort)m_Model.m_BoneTree.GetBoneIndex(key));
                 curoffset += 2;
             }
             curoffset = (uint)((curoffset + 3) & ~3);
@@ -837,9 +862,7 @@ namespace SM64DSe.ImportExport.Writers.InternalWriters
                 bmd.Write32(curoffset + 0x24, (uint)bone.m_20_12Translation[0]);// X translation (32-bit signed, 20:12 fixed point. Think GX command 0x1C)
                 bmd.Write32(curoffset + 0x28, (uint)bone.m_20_12Translation[1]);// Y translation
                 bmd.Write32(curoffset + 0x2C, (uint)bone.m_20_12Translation[2]);// Z translation
-                bmd.Write32(curoffset + 0x30, (!bone.m_HasChildren &&
-                    boneTree.GetParentOffset(bone) != 0) ? (uint)0 :
-                    (uint)bone.m_MaterialsInBranch.Count);// Number of displaylist/material pairs
+                bmd.Write32(curoffset + 0x30, (uint)bone.m_MaterialsInBranch.Count);// Number of displaylist/material pairs
                 bmd.Write32(curoffset + 0x3C, (bone.m_Billboard) ? (uint)1 : (uint)0);// Bit0: bone is rendered facing the camera (billboard); Bit2: ???
 
                 bmd.Write32(curoffset + 0x34, bextraoffset);// Material IDs list
@@ -878,44 +901,102 @@ namespace SM64DSe.ImportExport.Writers.InternalWriters
                 string matname = _mat.Key;
 
                 uint texid = 0xFFFFFFFF, palid = 0xFFFFFFFF;
-                uint texrepeat = 0;
-                uint texscale = 0x00001000;
-                if (convertedTextures.ContainsKey(mat.m_DiffuseMapName))
+                uint teximage_param = 0x00000000;
+                uint texscaleS = 0x00001000;
+                uint texscaleT = 0x00001000;
+                if (mat.m_TextureDefID != null && convertedTextures.ContainsKey(mat.m_TextureDefID))
                 {
-                    ConvertedTexture tex = convertedTextures[mat.m_DiffuseMapName];
+                    ConvertedTexture tex = convertedTextures[mat.m_TextureDefID];
                     texid = tex.m_TextureID;
                     palid = (tex.m_PaletteData != null) ? tex.m_PaletteID : 0xFFFFFFFF;
 
-                    texrepeat = 0x00030000;
+                    // 16    Repeat in S Direction (0=Clamp Texture, 1=Repeat Texture)
+                    // 17    Repeat in T Direction (0=Clamp Texture, 1=Repeat Texture)
+                    // 18    Flip in S Direction   (0=No, 1=Flip each 2nd Texture) (requires Repeat)
+                    // 19    Flip in T Direction   (0=No, 1=Flip each 2nd Texture) (requires Repeat)
+                    if (mat.m_TexTiling[0] == ModelBase.MaterialDef.TexTiling.Repeat)
+                        teximage_param |= 0x00010000;
+                    else if (mat.m_TexTiling[0] == ModelBase.MaterialDef.TexTiling.Flip)
+                        teximage_param |= 0x00040000;
+                    if (mat.m_TexTiling[1] == ModelBase.MaterialDef.TexTiling.Repeat)
+                        teximage_param |= 0x00030000;
+                    else if (mat.m_TexTiling[1] == ModelBase.MaterialDef.TexTiling.Flip)
+                        teximage_param |= 0x00080000;
 
-                    if (mat.m_TexCoordScale > 0f)
+                    if (mat.m_TextureScale.X > 0f && mat.m_TextureScale.Y > 0f)
                     {
-                        texrepeat |= 0x40000000;
-                        texscale = (uint)(int)(mat.m_TexCoordScale * 4096);
+                        // 30-31 Texture Coordinates Transformation Mode (0..3, see below)
+                        // Texture Coordinates Transformation Modes:
+                        // 0  Do not Transform texture coordinates
+                        // 1  TexCoord source
+                        // 2  Normal source
+                        // 3  Vertex source
+                        teximage_param |= 0x40000000;
+
+                        texscaleS = (uint)(int)(mat.m_TextureScale.X * 4096);
+                        texscaleT = (uint)(int)(mat.m_TextureScale.Y * 4096);
                     }
                 }
 
-                uint alpha = (uint)(mat.m_Opacity >> 3);
-                uint polyattr = 0x00000080 | (alpha << 16);
-                if (_mat.Value.m_IsDoubleSided) polyattr |= 0xC0;
-                // if (alpha < 0x1F) polyattr |= 0x40;
+                // Cmd 29h POLYGON_ATTR - Set Polygon Attributes (W)
+                uint polyattr = 0x00000000;
+                // 0-3   Light 0..3 Enable Flags (each bit: 0=Disable, 1=Enable)
+                for (int i = 0; i < 4; i++)
+                {
+                    if (mat.m_Lights[i] == true)
+                        polyattr |= (uint)(0x01 << i);
+                }
+                // 4-5   Polygon Mode  (0=Modulation,1=Decal,2=Toon/Highlight Shading,3=Shadow)
+                switch (mat.m_PolygonMode)
+                {
+                    case ModelBase.MaterialDef.PolygonMode.Decal:
+                        polyattr |= 0x10;
+                        break;
+                    case ModelBase.MaterialDef.PolygonMode.Toon_HighlightShading:
+                        polyattr |= 0x20;
+                        break;
+                    case ModelBase.MaterialDef.PolygonMode.Shadow:
+                        polyattr |= 0x30;
+                        break;
+                }
+                // 6     Polygon Back Surface   (0=Hide, 1=Render)  ;Line-segments are always
+                // 7     Polygon Front Surface  (0=Hide, 1=Render)  ;rendered (no front/back)
+                if (_mat.Value.m_PolygonDrawingFace == ModelBase.MaterialDef.PolygonDrawingFace.FrontAndBack) polyattr |= 0xC0;
+                else if (_mat.Value.m_PolygonDrawingFace == ModelBase.MaterialDef.PolygonDrawingFace.Front) polyattr |= 0x80;
+                else if (_mat.Value.m_PolygonDrawingFace == ModelBase.MaterialDef.PolygonDrawingFace.Back) polyattr |= 0x40;
+                // 12    Far-plane intersecting polygons       (0=Hide, 1=Render/clipped)
+                if (mat.m_FarClipping) polyattr |= 0x1000;
+                // 13    1-Dot polygons behind DISP_1DOT_DEPTH (0=Hide, 1=Render)
+                if (mat.m_RenderOnePixelPolygons) polyattr |= 0x2000;
+                // 14    Depth Test, Draw Pixels with Depth    (0=Less, 1=Equal) (usually 0)
+                if (mat.m_DepthTestDecal) polyattr |= 0x4000;
+                // 15    Fog Enable                            (0=Disable, 1=Enable)
+                if (mat.m_FogFlag) polyattr |= 0x8000;
+                // 16-20 Alpha      (0=Wire-Frame, 1..30=Translucent, 31=Solid)
+                uint alpha = (uint)(mat.m_Alpha >> 3);
+                polyattr |= (alpha << 16);
 
                 // Set material colours
-                ushort diffuse_ambient = 0;
-                diffuse_ambient = (ushort)(Helper.ColorToBGR15(mat.m_DiffuseColour));
+                uint diffuse_ambient = 0x00000000;
+                diffuse_ambient |= Helper.ColorToBGR15(mat.m_Diffuse);
+                diffuse_ambient |= 0x8000;
+                diffuse_ambient |= (uint)(Helper.ColorToBGR15(mat.m_Diffuse) << 0x10);
+                uint specular_emission = 0x00000000;
+                specular_emission |= Helper.ColorToBGR15(mat.m_Specular);
+                specular_emission |= (uint)(Helper.ColorToBGR15(mat.m_Emission) << 0x10);
 
                 bmd.Write32(curoffset + 0x04, texid);
                 bmd.Write32(curoffset + 0x08, palid);
-                bmd.Write32(curoffset + 0x0C, texscale);
-                bmd.Write32(curoffset + 0x10, texscale);
-                bmd.Write16(curoffset + 0x14, 0x0000);
+                bmd.Write32(curoffset + 0x0C, texscaleS);
+                bmd.Write32(curoffset + 0x10, texscaleT);
+                bmd.Write16(curoffset + 0x14, (ushort)((mat.m_TextureRotation * 2048.0f) / Math.PI));
                 bmd.Write16(curoffset + 0x16, 0);
-                bmd.Write32(curoffset + 0x18, 0x00000000);
-                bmd.Write32(curoffset + 0x1C, 0x00000000);
-                bmd.Write32(curoffset + 0x20, texrepeat);
+                bmd.Write32(curoffset + 0x18, (uint)(mat.m_TextureTranslation.X * 4096.0f));
+                bmd.Write32(curoffset + 0x1C, (uint)(mat.m_TextureTranslation.X * 4096.0f));
+                bmd.Write32(curoffset + 0x20, teximage_param);
                 bmd.Write32(curoffset + 0x24, polyattr);
-                bmd.Write32(curoffset + 0x28, (ushort)(diffuse_ambient | 0x8000));
-                bmd.Write32(curoffset + 0x2C, 0x00000000);
+                bmd.Write32(curoffset + 0x28, diffuse_ambient);
+                bmd.Write32(curoffset + 0x2C, specular_emission);
 
                 bmd.Write32(curoffset + 0x00, mextraoffset);
                 bmd.WriteString(mextraoffset, matname, 0);
@@ -1113,10 +1194,11 @@ namespace SM64DSe.ImportExport.Writers.InternalWriters
             ref int lastmatrix, Vector4 lastvtx, ModelBase.VertexDef vertex)
         {
             Vector4 vtx = new Vector4(vertex.m_Position, 0f);
-            if (lastmatrix != vertex.m_VertexBoneID)
+            int matrixID = m_Model.m_BoneTransformsMap.GetByFirst(m_Model.m_BoneTree.GetBoneByIndex(vertex.m_VertexBoneID).m_ID);
+            if (lastmatrix != matrixID)
             {
-                dlpacker.AddCommand(0x14, (uint)vertex.m_VertexBoneID);// Matrix Restore ID for current vertex
-                lastmatrix = vertex.m_VertexBoneID;
+                dlpacker.AddCommand(0x14, (uint)matrixID);// Matrix Restore ID for current vertex
+                lastmatrix = matrixID;
             }
             if (vertex.m_VertexColour != null && ((Color)vertex.m_VertexColour).ToArgb() != lastColourARGB)
             {
