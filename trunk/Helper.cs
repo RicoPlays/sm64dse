@@ -26,6 +26,7 @@ using System.Globalization;
 using System.IO;
 using System.Xml;
 using System.Windows.Forms;
+using System.Security.Cryptography;
 
 namespace SM64DSe
 {
@@ -33,6 +34,7 @@ namespace SM64DSe
     {
         public static uint ACT_SELECTOR_ID_TABLE;
         public static CultureInfo USA = new CultureInfo("en-US");
+        public static MD5CryptoServiceProvider m_MD5 = new MD5CryptoServiceProvider();
 
         static Helper()
         {
@@ -534,6 +536,14 @@ namespace SM64DSe
             }
 
             return binaryData;
+        }
+
+        public static string HexString(byte[] crap)
+        {
+            string ret = "";
+            foreach (byte b in crap)
+                ret += b.ToString("X2");
+            return ret;
         }
     }
 

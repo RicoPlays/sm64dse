@@ -1,4 +1,4 @@
-SM64DS BMD (3D model) format documentation -- by Mega-Mario
+SM64DS BMD (Binary Model Data) format documentation -- by Mega-Mario
 
 0. File header
 It is 60 bytes long and laid out as such:
@@ -110,7 +110,7 @@ Offset	Size	Desc.
 0x14	2		Texture rotation (16-bit signed, 0x0400 = 90°)
 0x18	4		Texture S translation (32-bit signed, 20:12 fixed point)
 0x1C	4		Texture T translation
-0x20	4		Texture paramters (think GX command 0x2A) (part 2, tells how to apply the texture)
+0x20	4		Texture parameters (think GX command 0x2A) (part 2, tells how to apply the texture)
 0x24	4		Polygon attributes (think GX command 0x29)
 0x28	4		Diffuse/ambient parameters (think GX command 0x30)
 0x2C	4		Specular/emission parameters (think GX command 0x31)

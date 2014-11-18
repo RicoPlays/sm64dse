@@ -493,5 +493,96 @@ namespace SM64DSe
                 }
             }
         }
+
+        private void btnSelectInputAnimation_Click(object sender, EventArgs e)
+        {
+            OpenFileDialog ofd = new OpenFileDialog();
+            ofd.Filter = "All Supported Animation Formats|*.dae;*.ica|" + 
+                "COLLADA DAE|*.dae|NITRO Intermediate Character Animation|*.ica";//Filter by .dae and .ica
+
+            if (ofd.ShowDialog() == DialogResult.OK)
+            {
+                txtInputAnimation.Text = ofd.FileName;
+                string modelFormat = ofd.FileName.Substring(ofd.FileName.Length - 3, 3).ToLower();
+                if (modelFormat.Equals("dae"))
+                    txtInputModel.Text = ofd.FileName;
+            }
+        }
+
+        private void btnSelectInputModel_Click(object sender, EventArgs e)
+        {
+            OpenFileDialog ofd = new OpenFileDialog();
+            ofd.Filter = "All Supported Models|*.dae;*.imd;*.obj|" +
+                "COLLADA DAE|*.dae|NITRO Intermediate Model Data|*.imd|Wavefront OBJ|*.obj";
+
+            if (ofd.ShowDialog() == DialogResult.OK)
+            {
+                txtInputModel.Text = ofd.FileName;
+            }
+        }
+
+        private void btnImportAnimation_Click(object sender, EventArgs e)
+        {
+            if (m_BMD == null || m_BCA == null)
+            {
+                MessageBox.Show("Please select a valid model (BMD) and animation (BCA) to replace.");
+                return;
+            }
+            if (txtInputAnimation.Text == null || txtInputAnimation.Text.Equals(""))
+            {
+                MessageBox.Show("Please select an animation file or model to import.");
+                return;
+            }
+
+            string animationFormat = txtInputAnimation.Text.Substring(txtInputAnimation.Text.Length - 3).ToLowerInvariant();
+
+            bool wasRunning = m_Running;
+            StopTimer();
+
+            BMDImporter importer = new BMDImporter();
+
+            try
+            {
+                switch (animationFormat)
+                {
+                    case "dae":
+                        {
+                            if (txtInputModel.Text != null && !txtInputModel.Text.Equals(""))
+                                m_BMD = importer.ConvertDAEToBMD(ref m_BMD.m_File, txtInputAnimation.Text, true);
+                            // >>> TODO <<<
+                            // Below line in necessary to an obscure bug with NARC files, if you have two file from the same 
+                            // NARC open and modify and save the first, when you then go to save the second, it won't have 
+                            // picked up the changes from the first file and when saved will write the original first file and 
+                            // the modified second file.
+                            NitroFile animationFile = Program.m_ROM.GetFileFromName(m_BCA.m_FileName);
+                            m_BCA = importer.ConvertAnimatedDAEToBCA(ref animationFile, txtInputAnimation.Text, true);
+                        }
+                        break;
+                    case "ica":
+                        {
+                            if (txtInputModel.Text != null && !txtInputModel.Text.Equals(""))
+                                m_BMD = importer.ConvertIMDToBMD(ref m_BMD.m_File, txtInputModel.Text, true);
+                            NitroFile animationFile = Program.m_ROM.GetFileFromName(m_BCA.m_FileName);
+                            m_BCA = importer.ConvertICAToBCA(ref animationFile, txtInputAnimation.Text, true);
+                        }
+                        break;
+                }
+
+                m_AnimationFrameNumber = 0;
+                m_AnimationNumFrames = m_BCA.m_NumFrames;
+                txtCurrentFrameNum.Text = "" + m_AnimationFrameNumber;
+                txtNumFrames.Text = "" + (m_BCA.m_NumFrames - 1);
+
+                PrerenderModel();
+
+                if (wasRunning) StartTimer();
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show("An error occurred: \n" + ex.Message + "\n\n" + ex.StackTrace);
+                m_BMD = new BMD(Program.m_ROM.GetFileFromName(m_BMD.m_FileName));
+                m_BCA = new BCA(Program.m_ROM.GetFileFromName(m_BCA.m_FileName));
+            }
+        }
     }
 }

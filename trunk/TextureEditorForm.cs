@@ -228,7 +228,9 @@ namespace SM64DSe
 
                 try
                 {
-                    BMDWriter.ConvertedTexture tex = BMDWriter.ConvertTexture(ofd.FileName);
+                    BMDWriter.ConvertedTexture tex = BMDWriter.ConvertTexture(ofd.FileName, 
+                        m_Model.m_Textures[lbxTextures.SelectedItem.ToString()].m_TexName, 
+                        m_Model.m_Textures[lbxTextures.SelectedItem.ToString()].m_PalName, new Bitmap(ofd.FileName));
                     tex.m_TextureID = (uint)texIndex;
                     tex.m_PaletteID = (uint)palIndex;
 

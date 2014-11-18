@@ -19,7 +19,6 @@ namespace SM64DSe.ImportExport.Loaders
         protected string m_ModelFileName;
         protected string m_ModelPath;
 
-        protected MD5CryptoServiceProvider m_MD5;
         protected static CultureInfo USA = Helper.USA;
 
         public ModelBase LoadModel() { return LoadModel(new Vector3(1f, 1f, 1f)); }
@@ -32,8 +31,6 @@ namespace SM64DSe.ImportExport.Loaders
 
             m_ModelFileName = modelFileName;
             m_ModelPath = Path.GetDirectoryName(m_ModelFileName);
-
-            m_MD5 = new MD5CryptoServiceProvider();
         }
 
         protected void AddWhiteMat()
@@ -53,70 +50,19 @@ namespace SM64DSe.ImportExport.Loaders
                 m_Model.m_BoneTree.GetBoneByID(bone).m_MaterialsInBranch.Add("default_white");
         }
 
-        protected void AddTexture(string texName, ModelBase.MaterialDef matDef)
+        protected void AddTexture(ModelBase.TextureDefBase texture, ModelBase.MaterialDef matDef)
         {
-            Bitmap tex;
-            try
+            matDef.m_TextureDefID = texture.m_ID;
+
+            IEnumerable<ModelBase.TextureDefBase> matchingHash = m_Model.m_Textures.Values.Where(
+                tex0 => tex0.m_ImgHash.Equals(texture.m_ImgHash));
+            if (matchingHash.Count() > 0)
             {
-                tex = new Bitmap(m_ModelPath + Path.DirectorySeparatorChar + texName);
-
-                int width = 8, height = 8;
-                while (width < tex.Width) width *= 2;
-                while (height < tex.Height) height *= 2;
-
-                // cheap resizing for textures whose dimensions aren't power-of-two
-                if ((width != tex.Width) || (height != tex.Height))
-                {
-                    Bitmap newbmp = new Bitmap(width, height);
-                    Graphics g = Graphics.FromImage(newbmp);
-                    g.DrawImage(tex, new Rectangle(0, 0, width, height));
-                    tex = newbmp;
-                }
-
-                matDef.m_HasTextures = true;
-
-                byte[] map = new byte[tex.Width * tex.Height * 4];
-                for (int y = 0; y < tex.Height; y++)
-                {
-                    for (int x = 0; x < tex.Width; x++)
-                    {
-                        Color pixel = tex.GetPixel(x, y);
-                        int pos = ((y * tex.Width) + x) * 4;
-
-                        map[pos] = pixel.B;
-                        map[pos + 1] = pixel.G;
-                        map[pos + 2] = pixel.R;
-                        map[pos + 3] = pixel.A;
-                    }
-                }
-
-                string imghash = HexString(m_MD5.ComputeHash(map));
-                if (m_Model.m_Textures.ContainsKey(imghash))
-                {
-                    ModelBase.MaterialDef mat2 = m_Model.m_Textures[imghash];
-                    matDef.m_DiffuseMapName = mat2.m_DiffuseMapName;
-                    matDef.m_DiffuseMapSize = mat2.m_DiffuseMapSize;
-                    return;
-                }
-
-                matDef.m_DiffuseMapName = texName;
-                m_Model.m_Textures.Add(imghash, matDef);
-
-                matDef.m_DiffuseMapSize.X = tex.Width;
-                matDef.m_DiffuseMapSize.Y = tex.Height;
+                matDef.m_TextureDefID = matchingHash.ElementAt(0).m_ID;
+                return;
             }
-            catch
-            {
-                Console.WriteLine("Image not found: " + m_ModelPath + Path.DirectorySeparatorChar + texName);
-            }
-        }
 
-        protected static string HexString(byte[] crap)
-        {
-            string ret = "";
-            foreach (byte b in crap)
-                ret += b.ToString("X2");
-            return ret;
+            m_Model.m_Textures.Add(texture.m_ID, texture);
         }
 
     }

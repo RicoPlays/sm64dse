@@ -395,7 +395,8 @@
             // 
             // ofdLoadModel
             // 
-            this.ofdLoadModel.Filter = "Supported Models (*.obj, *.dae)|*.obj;*.dae";
+            this.ofdLoadModel.Filter = "All Supported Models|*.dae;*.imd;*.obj|" + 
+                "COLLADA DAE|*.dae|NITRO Intermediate Model Data|*.imd|Wavefront OBJ|*.obj";
             this.ofdLoadModel.Title = "Load model file...";
             // 
             // ModelImporter
