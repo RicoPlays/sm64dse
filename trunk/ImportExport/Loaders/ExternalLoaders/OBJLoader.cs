@@ -197,7 +197,7 @@ namespace SM64DSe.ImportExport.Loaders.ExternalLoaders
                                 string vtx = parts[i + 1];
                                 string[] idxs = vtx.Split(new char[] { '/' });
 
-                                ModelBase.VertexDef vert = new ModelBase.VertexDef();
+                                ModelBase.VertexDef vert = ModelBase.EMPTY_VERTEX;
 
                                 vert.m_Position = new Vector3(m_Vertices[int.Parse(idxs[0]) - 1].Xyz);
                                 if (m_Model.m_Materials[curmaterial].m_TextureDefID != null && idxs.Length >= 2 && idxs[1].Length > 0)

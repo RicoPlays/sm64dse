@@ -167,7 +167,13 @@ namespace SM64DSe.ImportExport
 
         public BCA ConvertICAToBCA(ref NitroFile animationFile, string fileName, bool save = true)
         {
-            m_LoadedModel = new NITROIntermediateCharacterAnimationLoader(m_LoadedModel, fileName).LoadModel();
+            return ConvertICAToBCA(ref animationFile, fileName, Vector3.One, BMDExtraImportOptions.DEFAULT, save);
+        }
+
+        public BCA ConvertICAToBCA(ref NitroFile animationFile, string fileName, Vector3 scale,
+            BMDExtraImportOptions extraOptions, bool save = true)
+        {
+            m_LoadedModel = new NITROIntermediateCharacterAnimationLoader(m_LoadedModel, fileName).LoadModel(scale);
 
             BCA importedAnimation = CallBCAWriter(ref animationFile, m_LoadedModel, save);
 

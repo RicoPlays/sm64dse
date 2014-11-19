@@ -60,12 +60,12 @@ namespace SM64DSe.ImportExport.Loaders.InternalLoaders
                 face.m_Vertices[1].m_Position = plane.point2;
                 face.m_Vertices[2].m_Position = plane.point3;
 
-                foreach (ModelBase.VertexDef vert in face.m_Vertices)
+                for (int vert = 0; vert < face.m_Vertices.Length; vert++)
                 {
-                    vert.m_TextureCoordinate = Vector2.Zero;
-                    vert.m_Normal = null;
-                    vert.m_VertexColour = Color.White;
-                    vert.m_VertexBoneID = 0;
+                    face.m_Vertices[vert].m_TextureCoordinate = Vector2.Zero;
+                    face.m_Vertices[vert].m_Normal = null;
+                    face.m_Vertices[vert].m_VertexColour = Color.White;
+                    face.m_Vertices[vert].m_VertexBoneID = 0;
                 }
 
                 geometry.m_PolyLists["polylist-" + plane.type].m_FaceLists[0].m_Faces.Add(face);

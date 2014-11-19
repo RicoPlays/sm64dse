@@ -171,8 +171,7 @@ namespace SM64DSe
             GL.Enable(EnableCap.LineSmooth);
             GL.Enable(EnableCap.PolygonSmooth);
             GL.DepthMask(true);
-            if (m_BMD != null)
-                GL.Scale(1f / m_BMD.m_ScaleFactor, 1f / m_BMD.m_ScaleFactor, 1f / m_BMD.m_ScaleFactor);
+
             GL.CallList(m_DisplayList);
 
             glModelView.SwapBuffers();
@@ -445,55 +444,6 @@ namespace SM64DSe
             catch (Exception ex) { }
         }
 
-        private void btnImportDAE_Click(object sender, EventArgs e)
-        {
-            if (m_BMD == null || m_BCA == null)
-            {
-                MessageBox.Show("Please select a valid model (BMD) and animation (BCA) to replace.");
-                return;
-            }
-
-            bool wasRunning = m_Running;
-
-            OpenFileDialog ofd = new OpenFileDialog();
-            ofd.DefaultExt = ".dae";//Default file extension
-            ofd.Filter = "COLLADA DAE (.dae)|*.dae";//Filter by .dae
-
-            if (ofd.ShowDialog() == DialogResult.OK)
-            {
-                StopTimer();
-
-                BMDImporter importer = new BMDImporter();
-                try
-                {
-                    m_BMD = importer.ConvertDAEToBMD(ref m_BMD.m_File, ofd.FileName, true);
-                    // >>> TODO <<<
-                    // Below line in necessary to an obscure bug with NARC files, if you have two file from the same 
-                    // NARC open and modify and save the first, when you then go to save the second, it won't have 
-                    // picked up the changes from the first file and when saved will write the original first file and 
-                    // the modified second file.
-                    NitroFile animationFile = Program.m_ROM.GetFileFromName(m_BCA.m_FileName);
-                    m_BCA = importer.ConvertAnimatedDAEToBCA(ref animationFile, ofd.FileName, true);
-
-                    m_AnimationFrameNumber = 0;
-                    m_AnimationNumFrames = m_BCA.m_NumFrames;
-                    txtCurrentFrameNum.Text = "" + m_AnimationFrameNumber;
-                    txtNumFrames.Text = "" + (m_BCA.m_NumFrames - 1);
-
-                    PrerenderModel();
-
-                    if (wasRunning)
-                        StartTimer();
-                }
-                catch (Exception ex)
-                {
-                    MessageBox.Show("An error occurred: \n" + ex.Message + "\n\n" + ex.StackTrace);
-                    m_BMD = new BMD(Program.m_ROM.GetFileFromName(m_BMD.m_FileName));
-                    m_BCA = new BCA(Program.m_ROM.GetFileFromName(m_BCA.m_FileName));
-                }
-            }
-        }
-
         private void btnSelectInputAnimation_Click(object sender, EventArgs e)
         {
             OpenFileDialog ofd = new OpenFileDialog();
@@ -534,6 +484,18 @@ namespace SM64DSe
                 return;
             }
 
+            Vector3 scale;
+            try
+            {
+                float val = float.Parse(txtScale.Text, Helper.USA);
+                scale = new Vector3(val, val, val);
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show("Please enter a valid Scale value as a decimal value, eg. 1.234");
+                return;
+            }
+
             string animationFormat = txtInputAnimation.Text.Substring(txtInputAnimation.Text.Length - 3).ToLowerInvariant();
 
             bool wasRunning = m_Running;
@@ -548,7 +510,8 @@ namespace SM64DSe
                     case "dae":
                         {
                             if (txtInputModel.Text != null && !txtInputModel.Text.Equals(""))
-                                m_BMD = importer.ConvertDAEToBMD(ref m_BMD.m_File, txtInputAnimation.Text, true);
+                                m_BMD = importer.ConvertDAEToBMD(ref m_BMD.m_File, txtInputAnimation.Text, scale, 
+                                    BMDImporter.BMDExtraImportOptions.DEFAULT, true);
                             // >>> TODO <<<
                             // Below line in necessary to an obscure bug with NARC files, if you have two file from the same 
                             // NARC open and modify and save the first, when you then go to save the second, it won't have 
@@ -561,9 +524,11 @@ namespace SM64DSe
                     case "ica":
                         {
                             if (txtInputModel.Text != null && !txtInputModel.Text.Equals(""))
-                                m_BMD = importer.ConvertIMDToBMD(ref m_BMD.m_File, txtInputModel.Text, true);
+                                m_BMD = importer.ConvertIMDToBMD(ref m_BMD.m_File, txtInputModel.Text, scale,
+                                    BMDImporter.BMDExtraImportOptions.DEFAULT, true);
                             NitroFile animationFile = Program.m_ROM.GetFileFromName(m_BCA.m_FileName);
-                            m_BCA = importer.ConvertICAToBCA(ref animationFile, txtInputAnimation.Text, true);
+                            m_BCA = importer.ConvertICAToBCA(ref animationFile, txtInputAnimation.Text, scale,
+                                    BMDImporter.BMDExtraImportOptions.DEFAULT, true);
                         }
                         break;
                 }

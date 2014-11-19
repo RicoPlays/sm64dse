@@ -47,10 +47,11 @@ namespace SM64DSe.ImportExport.Loaders.ExternalLoaders
 
             XmlNode node_translate_data = doc.SelectSingleNode("/ica/body/node_translate_data");
             this.node_translate_data = ReadNodeTransformationData(node_translate_data);
-            this.node_translate_data = Array.ConvertAll(this.node_translate_data, x => x / m_Model.m_PosScaleFactor);
 
             XmlNode node_anm_array = doc.SelectSingleNode("/ica/body/node_anm_array");
             ReadNodeAnimations(node_anm_array);
+
+            m_Model.ScaleAnimations(scale);
 
             return m_Model;
         }

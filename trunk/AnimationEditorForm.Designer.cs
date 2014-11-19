@@ -31,6 +31,8 @@
             System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(AnimationEditorForm));
             this.splitContainer1 = new System.Windows.Forms.SplitContainer();
             this.gbImportAnimation = new System.Windows.Forms.GroupBox();
+            this.txtScale = new System.Windows.Forms.TextBox();
+            this.label5 = new System.Windows.Forms.Label();
             this.btnImportAnimation = new System.Windows.Forms.Button();
             this.btnSelectInputModel = new System.Windows.Forms.Button();
             this.txtInputModel = new System.Windows.Forms.TextBox();
@@ -58,7 +60,7 @@
             this.glModelView = new OpenTK.GLControl();
             this.toolStrip1 = new System.Windows.Forms.ToolStrip();
             this.btnExportDAE = new System.Windows.Forms.ToolStripButton();
-            ((System.ComponentModel.ISupportInitialize)(this.splitContainer1)).BeginInit();
+            //((System.ComponentModel.ISupportInitialize)(this.splitContainer1)).BeginInit();
             this.splitContainer1.Panel1.SuspendLayout();
             this.splitContainer1.Panel2.SuspendLayout();
             this.splitContainer1.SuspendLayout();
@@ -106,6 +108,8 @@
             // 
             // gbImportAnimation
             // 
+            this.gbImportAnimation.Controls.Add(this.txtScale);
+            this.gbImportAnimation.Controls.Add(this.label5);
             this.gbImportAnimation.Controls.Add(this.btnImportAnimation);
             this.gbImportAnimation.Controls.Add(this.btnSelectInputModel);
             this.gbImportAnimation.Controls.Add(this.txtInputModel);
@@ -113,16 +117,34 @@
             this.gbImportAnimation.Controls.Add(this.btnSelectInputAnimation);
             this.gbImportAnimation.Controls.Add(this.txtInputAnimation);
             this.gbImportAnimation.Controls.Add(this.label3);
-            this.gbImportAnimation.Location = new System.Drawing.Point(3, 295);
+            this.gbImportAnimation.Location = new System.Drawing.Point(3, 265);
             this.gbImportAnimation.Name = "gbImportAnimation";
-            this.gbImportAnimation.Size = new System.Drawing.Size(225, 133);
+            this.gbImportAnimation.Size = new System.Drawing.Size(225, 163);
             this.gbImportAnimation.TabIndex = 19;
             this.gbImportAnimation.TabStop = false;
             this.gbImportAnimation.Text = "Import Animation";
             // 
+            // txtScale
+            // 
+            this.txtScale.Location = new System.Drawing.Point(84, 106);
+            this.txtScale.Name = "txtScale";
+            this.txtScale.Size = new System.Drawing.Size(102, 20);
+            this.txtScale.TabIndex = 10;
+            this.txtScale.Text = "1";
+            this.txtScale.TextAlign = System.Windows.Forms.HorizontalAlignment.Right;
+            // 
+            // label5
+            // 
+            this.label5.AutoSize = true;
+            this.label5.Location = new System.Drawing.Point(6, 109);
+            this.label5.Name = "label5";
+            this.label5.Size = new System.Drawing.Size(37, 13);
+            this.label5.TabIndex = 9;
+            this.label5.Text = "Scale:";
+            // 
             // btnImportAnimation
             // 
-            this.btnImportAnimation.Location = new System.Drawing.Point(3, 106);
+            this.btnImportAnimation.Location = new System.Drawing.Point(3, 132);
             this.btnImportAnimation.Name = "btnImportAnimation";
             this.btnImportAnimation.Size = new System.Drawing.Size(107, 23);
             this.btnImportAnimation.TabIndex = 8;
@@ -394,7 +416,7 @@
             this.splitContainer1.Panel1.ResumeLayout(false);
             this.splitContainer1.Panel1.PerformLayout();
             this.splitContainer1.Panel2.ResumeLayout(false);
-            ((System.ComponentModel.ISupportInitialize)(this.splitContainer1)).EndInit();
+            //((System.ComponentModel.ISupportInitialize)(this.splitContainer1)).EndInit();
             this.splitContainer1.ResumeLayout(false);
             this.gbImportAnimation.ResumeLayout(false);
             this.gbImportAnimation.PerformLayout();
@@ -436,5 +458,7 @@
         private System.Windows.Forms.Button btnSelectInputAnimation;
         private System.Windows.Forms.TextBox txtInputAnimation;
         private System.Windows.Forms.Label label3;
+        private System.Windows.Forms.TextBox txtScale;
+        private System.Windows.Forms.Label label5;
     }
 }

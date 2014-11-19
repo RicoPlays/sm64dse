@@ -68,6 +68,8 @@ namespace SM64DSe.ImportExport.Loaders.ExternalLoaders
             XmlNode matrix_array = doc.SelectSingleNode("/imd/body/matrix_array");
             ReadNodes(node_array, polygon_array, matrix_array);
 
+            m_Model.ScaleModel(scale);
+
             return m_Model;
         }
 
@@ -93,8 +95,6 @@ namespace SM64DSe.ImportExport.Loaders.ExternalLoaders
             this.model_info.output_texture = model_info.Attributes["output_texture"].Value;
             this.model_info.force_full_weight = model_info.Attributes["force_full_weight"].Value.Equals("on");
             this.model_info.use_primitive_strip = model_info.Attributes["use_primitive_strip"].Value.Equals("on");
-
-            m_Model.m_PosScaleFactor = ((uint)1 << this.model_info.pos_scale);
         }
 
         protected void ReadIndexedVertexData(XmlNode vtx_pos_data, XmlNode vtx_color_data)
@@ -429,9 +429,7 @@ namespace SM64DSe.ImportExport.Loaders.ExternalLoaders
                 ModelBase.BoneDef boneDef = new ModelBase.BoneDef(name);
                 boneDef.SetScale(new Vector3(scale[0], scale[1], scale[2]));
                 boneDef.SetRotation(new Vector3(rotate[0] * Helper.Deg2Rad, rotate[1] * Helper.Deg2Rad, rotate[2] * Helper.Deg2Rad));
-                //boneDef.SetTranslation(new Vector3(translate[0], translate[1], translate[2]));
-                boneDef.SetTranslation(new Vector3(translate[0] / m_Model.m_PosScaleFactor, translate[1] / m_Model.m_PosScaleFactor,
-                    translate[2] / m_Model.m_PosScaleFactor));
+                boneDef.SetTranslation(new Vector3(translate[0], translate[1], translate[2]));
                 boneDef.CalculateBranchTransformations();
 
                 if (display_size > 0)
@@ -480,10 +478,8 @@ namespace SM64DSe.ImportExport.Loaders.ExternalLoaders
                 
                 boneDef.m_Geometries.Add(geometryDef.m_ID, geometryDef);
             }
-
+            
             m_Model.ApplyTransformations();
-            Console.WriteLine("bones from tree: ");
-            foreach (ModelBase.BoneDef bone in m_Model.m_BoneTree) Console.WriteLine(bone.m_ID);
         }
 
         protected void ReadPolygon(int polygonIndex, XmlNode polygon_array, string materialID, ModelBase.GeometryDef geometryDef)
@@ -758,8 +754,8 @@ namespace SM64DSe.ImportExport.Loaders.ExternalLoaders
         protected static void AddVertexToList(int boneID, Vector2? tex, Vector3? nrm, Vector3 pos, int pos_scale, 
             Color clr, List<ModelBase.VertexDef> vertexList)
         {
-            //Vector3 scaledPos = Vector3.Multiply(pos, (1 << pos_scale));
-            ModelBase.VertexDef vertex = new ModelBase.VertexDef(/*scaledPos*/pos, tex, nrm, clr, boneID);
+            Vector3 scaledPos = Vector3.Multiply(pos, (1 << pos_scale));
+            ModelBase.VertexDef vertex = new ModelBase.VertexDef(scaledPos, tex, nrm, clr, boneID);
             vertexList.Add(vertex);
         }
 
