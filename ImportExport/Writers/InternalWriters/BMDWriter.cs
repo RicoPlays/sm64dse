@@ -611,11 +611,11 @@ namespace SM64DSe.ImportExport.Writers.InternalWriters
                         {
                             foreach (ModelBase.FaceDef face in faceList.m_Faces)
                             {
-                                foreach (ModelBase.VertexDef vert in face.m_Vertices)
+                                for (int vert = 0; vert < face.m_Vertices.Length; vert++)
                                 {
-                                    vert.m_Position.X *= scaleModel;
-                                    vert.m_Position.Y *= scaleModel;
-                                    vert.m_Position.Z *= scaleModel;
+                                    face.m_Vertices[vert].m_Position.X *= scaleModel;
+                                    face.m_Vertices[vert].m_Position.Y *= scaleModel;
+                                    face.m_Vertices[vert].m_Position.Z *= scaleModel;
                                 }
                             }
                         }

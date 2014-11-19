@@ -389,20 +389,15 @@ namespace SM64DSe.ImportExport
             }
         }
 
-        public class VertexDef
+        // NOTE: VertexDef is a Value Type. This is avoid issues such as scaling the same vertex twice 
+        // because it's been referenced in two faces with faces[i].m_Vertices[2] = faces[i - 1].m_Vertices[0]
+        public struct VertexDef
         {
             public Vector3 m_Position;
             public Vector2? m_TextureCoordinate;
             public Vector3? m_Normal;
             public Color m_VertexColour;
             public int m_VertexBoneID;
-
-            public VertexDef() 
-            {
-                m_TextureCoordinate = null;
-                m_Normal = null;
-                m_VertexColour = Color.White;
-            }
 
             public VertexDef(Vector3 position, Vector2? textureCoordinate, Vector3? normal, Color vertexColour, int vertexBoneID)
             {
@@ -415,9 +410,9 @@ namespace SM64DSe.ImportExport
 
             public override bool Equals(object obj)
             {
-                var fv = obj as VertexDef;
-                if (fv == null)
+                if (!(obj is VertexDef))
                     return false;
+                VertexDef fv = (VertexDef)obj;
 
                 if (!(fv.m_Position.X == m_Position.X && fv.m_Position.Y == m_Position.Y && fv.m_Position.Z == this.m_Position.Z))
                     return false;
@@ -446,6 +441,8 @@ namespace SM64DSe.ImportExport
                 return true;
             }
         }
+
+        public static readonly VertexDef EMPTY_VERTEX = new VertexDef(Vector3.Zero, null, null, Color.White, 0);
 
         public class MaterialDef
         {
@@ -949,10 +946,6 @@ namespace SM64DSe.ImportExport
         public Dictionary<string, AnimationDef> m_Animations;
         public BiDictionaryOneToOne<string, int> m_BoneTransformsMap;
 
-        // Should just be temporary, need to work out how to properly import IMD models where pos_scale > 0, 
-        // result of (1 << pos_scale), default pos_scale = 0
-        public uint m_PosScaleFactor = 1;
-
         public string m_ModelFileName;
         public string m_ModelPath;
 
@@ -972,6 +965,9 @@ namespace SM64DSe.ImportExport
         {
             foreach (BoneDef bone in m_BoneTree)
             {
+                Vector3 translation = bone.m_Translation;
+                bone.SetTranslation(Vector3.Multiply(translation, scale));
+
                 foreach (GeometryDef geometry in bone.m_Geometries.Values)
                 {
                     foreach (PolyListDef polyList in geometry.m_PolyLists.Values)
@@ -980,29 +976,25 @@ namespace SM64DSe.ImportExport
                         {
                             foreach (FaceDef face in faceList.m_Faces)
                             {
-                                foreach (VertexDef vert in face.m_Vertices)
+                                for (int vert = 0; vert < face.m_Vertices.Length; vert++)
                                 {
-                                    vert.m_Position.X *= scale.X;
-                                    vert.m_Position.Y *= scale.Y;
-                                    vert.m_Position.Z *= scale.Z;
+                                    face.m_Vertices[vert].m_Position.X *= scale.X;
+                                    face.m_Vertices[vert].m_Position.Y *= scale.Y;
+                                    face.m_Vertices[vert].m_Position.Z *= scale.Z;
                                 }
                             }
                         }
                     }
                 }
             }
+            foreach (BoneDef root in m_BoneTree.GetRootBones())
+            {
+                root.CalculateBranchTransformations();
+            }
         }
 
-        // Use below method can be used as part of a manual hack to export existing animations at a larger scale, 
-        // combine them with a scaled geometry exported from a 3D modeller and replace the existing model. This was 
-        // used to get around the fact Blender only exports matrices in DAE.
-        public void ScaleSkeletonAndAnimations(Vector3 scale)
+        public void ScaleAnimations(Vector3 scale)
         {
-            foreach (BoneDef bone in m_BoneTree)
-            {
-                Vector3 translation = bone.m_Translation;
-                bone.SetTranslation(Vector3.Multiply(translation, scale));
-            }
             foreach (AnimationDef animDef in m_Animations.Values)
             {
                 foreach (AnimationComponentDataDef comp in animDef.m_AnimationComponents.Values)
@@ -1045,13 +1037,13 @@ namespace SM64DSe.ImportExport
                         {
                             foreach (FaceDef face in faceList.m_Faces)
                             {
-                                foreach (VertexDef vert in face.m_Vertices)
+                                for (int vert = 0; vert < face.m_Vertices.Length; vert++)
                                 {
-                                    BoneDef currentVertexBone = m_BoneTree.GetAsList()[vert.m_VertexBoneID];
+                                    BoneDef currentVertexBone = m_BoneTree.GetAsList()[face.m_Vertices[vert].m_VertexBoneID];
 
-                                    Vector3 vertex = vert.m_Position;
+                                    Vector3 vertex = face.m_Vertices[vert].m_Position;
                                     Vector3.Transform(ref vertex, ref currentVertexBone.m_GlobalTransformation, out vertex);
-                                    vert.m_Position = vertex;
+                                    face.m_Vertices[vert].m_Position = vertex;
                                 }
                             }
                         }
@@ -1077,13 +1069,13 @@ namespace SM64DSe.ImportExport
                         {
                             foreach (FaceDef face in faceList.m_Faces)
                             {
-                                foreach (VertexDef vert in face.m_Vertices)
+                                for (int vert = 0; vert < face.m_Vertices.Length; vert++)
                                 {
-                                    BoneDef currentVertexBone = m_BoneTree.GetAsList()[vert.m_VertexBoneID];
+                                    BoneDef currentVertexBone = m_BoneTree.GetAsList()[face.m_Vertices[vert].m_VertexBoneID];
 
-                                    Vector3 vertex = vert.m_Position;
+                                    Vector3 vertex = face.m_Vertices[vert].m_Position;
                                     Vector3.Transform(ref vertex, ref currentVertexBone.m_GlobalInverseTransformation, out vertex);
-                                    vert.m_Position = vertex;
+                                    face.m_Vertices[vert].m_Position = vertex;
                                 }
                             }
                         }

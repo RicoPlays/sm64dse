@@ -59,8 +59,9 @@ namespace SM64DSe.ImportExport.Loaders.ExternalLoaders
             ReadVisualScenes();
 
             ReadAnimations();
-
+            
             m_Model.ScaleModel(scale);
+            m_Model.ScaleAnimations(scale);
 
             return m_Model;
         }
@@ -889,7 +890,7 @@ namespace SM64DSe.ImportExport.Loaders.ExternalLoaders
 
                                 for (int i = 0; i < faceDef.m_NumVertices; i++)
                                 {
-                                    ModelBase.VertexDef vert = new ModelBase.VertexDef();
+                                    ModelBase.VertexDef vert = ModelBase.EMPTY_VERTEX;
 
                                     int vertexIndex = pArr[pIndex + (ulong)vertexOffset];
                                     float[] tmp = GetValueFromFloatArraySource(sources[vertexSource], vertexIndex);

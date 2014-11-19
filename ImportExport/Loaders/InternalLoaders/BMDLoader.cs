@@ -43,8 +43,12 @@ namespace SM64DSe.ImportExport.Loaders.InternalLoaders
                     listOfBones[listOfBones.Count + mdchunk.m_ParentOffset].AddChild(bone);
                 }
 
-                ModelBase.GeometryDef geomDef = new ModelBase.GeometryDef("geometry-0");
-                bone.m_Geometries.Add(geomDef.m_ID, geomDef);
+                ModelBase.GeometryDef geomDef = null;
+                if (mdchunk.m_MatGroups.Length > 0)
+                {
+                    geomDef = new ModelBase.GeometryDef("geometry-0");
+                    bone.m_Geometries.Add(geomDef.m_ID, geomDef);
+                }
 
                 foreach (BMD.MaterialGroup matgroup in mdchunk.m_MatGroups)
                 {
@@ -84,6 +88,12 @@ namespace SM64DSe.ImportExport.Loaders.InternalLoaders
                         m_Model.m_Materials.Add(material.m_ID, material);
 
                     bone.m_MaterialsInBranch.Add(matgroup.m_Name);
+                    ModelBase.BoneDef upToRoot = bone;
+                    while ((upToRoot = upToRoot.m_Parent) != null)
+                    {
+                        if (!upToRoot.m_MaterialsInBranch.Contains(matgroup.m_Name))
+                            upToRoot.m_MaterialsInBranch.Add(matgroup.m_Name);
+                    }
 
                     foreach (BMD.VertexList geometry in matgroup.m_Geometry)
                     {
