@@ -15,10 +15,6 @@
  * 
  * Current limitiations:
  *  - The option "Force Full Weight" under "Imd Options" in the NITRO Export dialogue must be selected.
- *  - I haven't been able to get certain models working which use a large pos_scale value so currently 
- *      vertices are not scaled by it and bone translations both in the IMD and ICA files a multiplied 
- *      by (1 / (1 << pos_scale)). This results in the model and animations importing correctly however 
- *      the model's size is limited to (-8..8, -8..8, -8..8).
  */
 
 using System;

@@ -1110,83 +1110,83 @@ namespace SM64DSe.ImportExport.Loaders.ExternalLoaders
                         {
                             case TransformationType.ScaleXYZ:
                                 {
-                                    AddConstantAnimationDefComponent(finalOutputs[0], numFrames, animationDef, 
+                                    AddNonConstantAnimationDefComponent(finalOutputs[0], numFrames, animationDef, 
                                         ModelBase.AnimationComponentType.ScaleX);
-                                    AddConstantAnimationDefComponent(finalOutputs[1], numFrames, animationDef,
+                                    AddNonConstantAnimationDefComponent(finalOutputs[1], numFrames, animationDef,
                                         ModelBase.AnimationComponentType.ScaleY);
-                                    AddConstantAnimationDefComponent(finalOutputs[2], numFrames, animationDef,
+                                    AddNonConstantAnimationDefComponent(finalOutputs[2], numFrames, animationDef,
                                         ModelBase.AnimationComponentType.ScaleZ);
                                 }
                                 break;
                             case TransformationType.ScaleX:
-                                AddConstantAnimationDefComponent(finalOutputs[0], numFrames, animationDef,
+                                AddNonConstantAnimationDefComponent(finalOutputs[0], numFrames, animationDef,
                                         ModelBase.AnimationComponentType.ScaleX);
                                 break;
                             case TransformationType.ScaleY:
-                                AddConstantAnimationDefComponent(finalOutputs[0], numFrames, animationDef,
+                                AddNonConstantAnimationDefComponent(finalOutputs[0], numFrames, animationDef,
                                         ModelBase.AnimationComponentType.ScaleY);
                                 break;
                             case TransformationType.ScaleZ:
-                                AddConstantAnimationDefComponent(finalOutputs[0], numFrames, animationDef,
+                                AddNonConstantAnimationDefComponent(finalOutputs[0], numFrames, animationDef,
                                         ModelBase.AnimationComponentType.ScaleZ);
                                 break;
                             case TransformationType.RotationX:
                                 finalOutputs[0] = Array.ConvertAll(finalOutputs[0], x => x * Helper.Deg2Rad);
-                                AddConstantAnimationDefComponent(finalOutputs[0], numFrames, animationDef,
+                                AddNonConstantAnimationDefComponent(finalOutputs[0], numFrames, animationDef,
                                         ModelBase.AnimationComponentType.RotateX);
                                 break;
                             case TransformationType.RotationY:
                                 finalOutputs[0] = Array.ConvertAll(finalOutputs[0], x => x * Helper.Deg2Rad);
-                                AddConstantAnimationDefComponent(finalOutputs[0], numFrames, animationDef,
+                                AddNonConstantAnimationDefComponent(finalOutputs[0], numFrames, animationDef,
                                         ModelBase.AnimationComponentType.RotateY);
                                 break;
                             case TransformationType.RotationZ:
                                 finalOutputs[0] = Array.ConvertAll(finalOutputs[0], x => x * Helper.Deg2Rad);
-                                AddConstantAnimationDefComponent(finalOutputs[0], numFrames, animationDef,
+                                AddNonConstantAnimationDefComponent(finalOutputs[0], numFrames, animationDef,
                                         ModelBase.AnimationComponentType.RotateZ);
                                 break;
                             case TransformationType.TranslationXYZ:
                                 {
-                                    AddConstantAnimationDefComponent(finalOutputs[0], numFrames, animationDef,
+                                    AddNonConstantAnimationDefComponent(finalOutputs[0], numFrames, animationDef,
                                         ModelBase.AnimationComponentType.TranslateX);
-                                    AddConstantAnimationDefComponent(finalOutputs[1], numFrames, animationDef,
+                                    AddNonConstantAnimationDefComponent(finalOutputs[1], numFrames, animationDef,
                                         ModelBase.AnimationComponentType.TranslateY);
-                                    AddConstantAnimationDefComponent(finalOutputs[2], numFrames, animationDef,
+                                    AddNonConstantAnimationDefComponent(finalOutputs[2], numFrames, animationDef,
                                         ModelBase.AnimationComponentType.TranslateZ);
                                 }
                                 break;
                             case TransformationType.TranslationX:
-                                AddConstantAnimationDefComponent(finalOutputs[0], numFrames, animationDef,
+                                AddNonConstantAnimationDefComponent(finalOutputs[0], numFrames, animationDef,
                                         ModelBase.AnimationComponentType.TranslateX);
                                 break;
                             case TransformationType.TranslationY:
-                                AddConstantAnimationDefComponent(finalOutputs[0], numFrames, animationDef,
+                                AddNonConstantAnimationDefComponent(finalOutputs[0], numFrames, animationDef,
                                         ModelBase.AnimationComponentType.TranslateY);
                                 break;
                             case TransformationType.TranslationZ:
-                                AddConstantAnimationDefComponent(finalOutputs[0], numFrames, animationDef,
+                                AddNonConstantAnimationDefComponent(finalOutputs[0], numFrames, animationDef,
                                         ModelBase.AnimationComponentType.TranslateZ);
                                 break;
                             case TransformationType.TransformationMatrix:
                                 {
                                     float[][] decomposedValues = MergeAndDecomposeMatrixTransformations(finalOutputs, numFrames);
-                                    AddConstantAnimationDefComponent(decomposedValues[0], numFrames, animationDef,
+                                    AddNonConstantAnimationDefComponent(decomposedValues[0], numFrames, animationDef,
                                         ModelBase.AnimationComponentType.ScaleX);
-                                    AddConstantAnimationDefComponent(decomposedValues[1], numFrames, animationDef,
+                                    AddNonConstantAnimationDefComponent(decomposedValues[1], numFrames, animationDef,
                                         ModelBase.AnimationComponentType.ScaleY);
-                                    AddConstantAnimationDefComponent(decomposedValues[2], numFrames, animationDef,
+                                    AddNonConstantAnimationDefComponent(decomposedValues[2], numFrames, animationDef,
                                         ModelBase.AnimationComponentType.ScaleZ);
-                                    AddConstantAnimationDefComponent(decomposedValues[3], numFrames, animationDef,
+                                    AddNonConstantAnimationDefComponent(decomposedValues[3], numFrames, animationDef,
                                         ModelBase.AnimationComponentType.RotateX);
-                                    AddConstantAnimationDefComponent(decomposedValues[4], numFrames, animationDef,
+                                    AddNonConstantAnimationDefComponent(decomposedValues[4], numFrames, animationDef,
                                         ModelBase.AnimationComponentType.RotateY);
-                                    AddConstantAnimationDefComponent(decomposedValues[5], numFrames, animationDef,
+                                    AddNonConstantAnimationDefComponent(decomposedValues[5], numFrames, animationDef,
                                         ModelBase.AnimationComponentType.RotateZ);
-                                    AddConstantAnimationDefComponent(decomposedValues[6], numFrames, animationDef,
+                                    AddNonConstantAnimationDefComponent(decomposedValues[6], numFrames, animationDef,
                                         ModelBase.AnimationComponentType.TranslateX);
-                                    AddConstantAnimationDefComponent(decomposedValues[7], numFrames, animationDef,
+                                    AddNonConstantAnimationDefComponent(decomposedValues[7], numFrames, animationDef,
                                         ModelBase.AnimationComponentType.TranslateY);
-                                    AddConstantAnimationDefComponent(decomposedValues[8], numFrames, animationDef,
+                                    AddNonConstantAnimationDefComponent(decomposedValues[8], numFrames, animationDef,
                                         ModelBase.AnimationComponentType.TranslateZ);
                                 }
                                 break;
@@ -1207,51 +1207,51 @@ namespace SM64DSe.ImportExport.Loaders.ExternalLoaders
                     if (!anim.m_AnimationComponents.ContainsKey(ModelBase.AnimationComponentType.ScaleX))
                         anim.m_AnimationComponents.Add(ModelBase.AnimationComponentType.ScaleX,
                             new ModelBase.AnimationComponentDataDef(new float[] { m_Model.m_BoneTree.GetBoneByID(anim.m_BoneID).m_Scale.X },
-                                anim.m_NumFrames, true, 1, ModelBase.AnimationComponentType.ScaleX));
+                                anim.m_NumFrames, true, 1, true, ModelBase.AnimationComponentType.ScaleX));
                     if (!anim.m_AnimationComponents.ContainsKey(ModelBase.AnimationComponentType.ScaleY))
                         anim.m_AnimationComponents.Add(ModelBase.AnimationComponentType.ScaleY,
                             new ModelBase.AnimationComponentDataDef(new float[] { m_Model.m_BoneTree.GetBoneByID(anim.m_BoneID).m_Scale.Y },
-                                anim.m_NumFrames, true, 1, ModelBase.AnimationComponentType.ScaleX));
+                                anim.m_NumFrames, true, 1, true, ModelBase.AnimationComponentType.ScaleX));
                     if (!anim.m_AnimationComponents.ContainsKey(ModelBase.AnimationComponentType.ScaleZ))
                         anim.m_AnimationComponents.Add(ModelBase.AnimationComponentType.ScaleZ,
                             new ModelBase.AnimationComponentDataDef(new float[] { m_Model.m_BoneTree.GetBoneByID(anim.m_BoneID).m_Scale.Z },
-                                anim.m_NumFrames, true, 1, ModelBase.AnimationComponentType.ScaleZ));
+                                anim.m_NumFrames, true, 1, true, ModelBase.AnimationComponentType.ScaleZ));
                     if (!anim.m_AnimationComponents.ContainsKey(ModelBase.AnimationComponentType.RotateX))
                         anim.m_AnimationComponents.Add(ModelBase.AnimationComponentType.RotateX,
                             new ModelBase.AnimationComponentDataDef(new float[] { m_Model.m_BoneTree.GetBoneByID(anim.m_BoneID).m_Rotation.X },
-                                anim.m_NumFrames, true, 1, ModelBase.AnimationComponentType.RotateX));
+                                anim.m_NumFrames, true, 1, true, ModelBase.AnimationComponentType.RotateX));
                     if (!anim.m_AnimationComponents.ContainsKey(ModelBase.AnimationComponentType.RotateY))
                         anim.m_AnimationComponents.Add(ModelBase.AnimationComponentType.RotateY,
                             new ModelBase.AnimationComponentDataDef(new float[] { m_Model.m_BoneTree.GetBoneByID(anim.m_BoneID).m_Rotation.Y },
-                                anim.m_NumFrames, true, 1, ModelBase.AnimationComponentType.RotateX));
+                                anim.m_NumFrames, true, 1, true, ModelBase.AnimationComponentType.RotateX));
                     if (!anim.m_AnimationComponents.ContainsKey(ModelBase.AnimationComponentType.RotateZ))
                         anim.m_AnimationComponents.Add(ModelBase.AnimationComponentType.RotateZ,
                             new ModelBase.AnimationComponentDataDef(new float[] { m_Model.m_BoneTree.GetBoneByID(anim.m_BoneID).m_Rotation.Z },
-                                anim.m_NumFrames, true, 1, ModelBase.AnimationComponentType.RotateZ));
+                                anim.m_NumFrames, true, 1, true, ModelBase.AnimationComponentType.RotateZ));
                     if (!anim.m_AnimationComponents.ContainsKey(ModelBase.AnimationComponentType.TranslateX))
                         anim.m_AnimationComponents.Add(ModelBase.AnimationComponentType.TranslateX,
                             new ModelBase.AnimationComponentDataDef(new float[] { m_Model.m_BoneTree.GetBoneByID(anim.m_BoneID).m_Translation.X },
-                                anim.m_NumFrames, true, 1, ModelBase.AnimationComponentType.TranslateX));
+                                anim.m_NumFrames, true, 1, true, ModelBase.AnimationComponentType.TranslateX));
                     if (!anim.m_AnimationComponents.ContainsKey(ModelBase.AnimationComponentType.TranslateY))
                         anim.m_AnimationComponents.Add(ModelBase.AnimationComponentType.TranslateY,
                             new ModelBase.AnimationComponentDataDef(new float[] { m_Model.m_BoneTree.GetBoneByID(anim.m_BoneID).m_Translation.Y },
-                                anim.m_NumFrames, true, 1, ModelBase.AnimationComponentType.TranslateX));
+                                anim.m_NumFrames, true, 1, true, ModelBase.AnimationComponentType.TranslateX));
                     if (!anim.m_AnimationComponents.ContainsKey(ModelBase.AnimationComponentType.TranslateZ))
                         anim.m_AnimationComponents.Add(ModelBase.AnimationComponentType.TranslateZ,
                             new ModelBase.AnimationComponentDataDef(new float[] { m_Model.m_BoneTree.GetBoneByID(anim.m_BoneID).m_Translation.Z },
-                                anim.m_NumFrames, true, 1, ModelBase.AnimationComponentType.TranslateZ));
+                                anim.m_NumFrames, true, 1, true, ModelBase.AnimationComponentType.TranslateZ));
                 }
 
                 m_Model.m_Animations = boneAnimations;
             }
         }
 
-        private static void AddConstantAnimationDefComponent(float[] values, int numFrames, ModelBase.AnimationDef animationDef, 
+        private static void AddNonConstantAnimationDefComponent(float[] values, int numFrames, ModelBase.AnimationDef animationDef, 
             ModelBase.AnimationComponentType animationComponentType)
         {
             animationDef.m_AnimationComponents.Add(animationComponentType,
                 new ModelBase.AnimationComponentDataDef(
-                values, numFrames, false, 1, animationComponentType));
+                values, numFrames, false, 1, false, animationComponentType));
         }
 
         private static float[][] MergeAndDecomposeMatrixTransformations(float[][] individualValues, int numFrames)

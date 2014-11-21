@@ -155,9 +155,10 @@ namespace SM64DSe.ImportExport.Loaders.ExternalLoaders
             int data_size = int.Parse(descriptor.Attributes["data_size"].Value);
             int data_head = int.Parse(descriptor.Attributes["data_head"].Value);
             bool isConstant = (data_size == 1);
+            bool useIdentity = (isConstant && data_head == 0);
 
             float[] values = new float[data_size];
-            if (!(isConstant && data_head == 0))
+            if (!useIdentity)
             {
                 switch (componentType)
                 {
@@ -204,7 +205,8 @@ namespace SM64DSe.ImportExport.Loaders.ExternalLoaders
                 }
             }
 
-            return new ModelBase.AnimationComponentDataDef(values, this.node_anm_info.frame_size, isConstant, frame_step, componentType);
+            return new ModelBase.AnimationComponentDataDef(values, this.node_anm_info.frame_size, isConstant, frame_step, 
+                useIdentity, componentType);
         }
 
         public override Dictionary<string, ModelBase.MaterialDef> GetModelMaterials()

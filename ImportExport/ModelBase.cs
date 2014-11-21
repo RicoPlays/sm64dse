@@ -824,14 +824,16 @@ namespace SM64DSe.ImportExport
             private int m_NumFrames;
             private bool m_IsConstant;
             private int m_FrameStep;
+            private bool m_UseIdentity;
 
-            public AnimationComponentDataDef(float[] values, int numFrames, bool isConstant, int frameStep, 
+            public AnimationComponentDataDef(float[] values, int numFrames, bool isConstant, int frameStep, bool useIdentity, 
                 AnimationComponentType animationComponentType)
             {
                 m_Values = values;
                 m_NumFrames = numFrames;
                 m_IsConstant = isConstant;
                 m_FrameStep = frameStep;
+                m_UseIdentity = useIdentity;
                 m_AnimationComponentType = animationComponentType;
             }
 
@@ -862,6 +864,7 @@ namespace SM64DSe.ImportExport
 
             public int GetFrameStep() { return m_FrameStep; }
             public bool GetIsConstant() { return m_IsConstant; }
+            public bool GetUseIdentity() { return m_UseIdentity; }
 
             public float GetFrameValue(int frameNum)
             {
@@ -999,6 +1002,9 @@ namespace SM64DSe.ImportExport
             {
                 foreach (AnimationComponentDataDef comp in animDef.m_AnimationComponents.Values)
                 {
+                    // Bone's translation was already scaled, don't want it scaled a second time in the animation
+                    if (comp.GetUseIdentity()) continue; 
+
                     switch (comp.m_AnimationComponentType)
                     {
                         case AnimationComponentType.TranslateX:

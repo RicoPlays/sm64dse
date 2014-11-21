@@ -58,23 +58,23 @@ namespace SM64DSe.ImportExport.Loaders.InternalLoaders
                 }
 
                 animationComponentDataDefs.Add(ModelBase.AnimationComponentType.ScaleX,
-                    new ModelBase.AnimationComponentDataDef(valuesSx, m_BCA.m_NumFrames, false, 1, ModelBase.AnimationComponentType.ScaleX));
+                    new ModelBase.AnimationComponentDataDef(valuesSx, m_BCA.m_NumFrames, false, 1, false, ModelBase.AnimationComponentType.ScaleX));
                 animationComponentDataDefs.Add(ModelBase.AnimationComponentType.ScaleY,
-                    new ModelBase.AnimationComponentDataDef(valuesSy, m_BCA.m_NumFrames, false, 1, ModelBase.AnimationComponentType.ScaleY));
+                    new ModelBase.AnimationComponentDataDef(valuesSy, m_BCA.m_NumFrames, false, 1, false, ModelBase.AnimationComponentType.ScaleY));
                 animationComponentDataDefs.Add(ModelBase.AnimationComponentType.ScaleZ,
-                    new ModelBase.AnimationComponentDataDef(valuesSz, m_BCA.m_NumFrames, false, 1, ModelBase.AnimationComponentType.ScaleZ));
+                    new ModelBase.AnimationComponentDataDef(valuesSz, m_BCA.m_NumFrames, false, 1, false, ModelBase.AnimationComponentType.ScaleZ));
                 animationComponentDataDefs.Add(ModelBase.AnimationComponentType.RotateX,
-                    new ModelBase.AnimationComponentDataDef(valuesRx, m_BCA.m_NumFrames, false, 1, ModelBase.AnimationComponentType.RotateX));
+                    new ModelBase.AnimationComponentDataDef(valuesRx, m_BCA.m_NumFrames, false, 1, false, ModelBase.AnimationComponentType.RotateX));
                 animationComponentDataDefs.Add(ModelBase.AnimationComponentType.RotateY,
-                    new ModelBase.AnimationComponentDataDef(valuesRy, m_BCA.m_NumFrames, false, 1, ModelBase.AnimationComponentType.RotateY));
+                    new ModelBase.AnimationComponentDataDef(valuesRy, m_BCA.m_NumFrames, false, 1, false, ModelBase.AnimationComponentType.RotateY));
                 animationComponentDataDefs.Add(ModelBase.AnimationComponentType.RotateZ,
-                    new ModelBase.AnimationComponentDataDef(valuesRz, m_BCA.m_NumFrames, false, 1, ModelBase.AnimationComponentType.RotateZ));
+                    new ModelBase.AnimationComponentDataDef(valuesRz, m_BCA.m_NumFrames, false, 1, false, ModelBase.AnimationComponentType.RotateZ));
                 animationComponentDataDefs.Add(ModelBase.AnimationComponentType.TranslateX,
-                    new ModelBase.AnimationComponentDataDef(valuesTx, m_BCA.m_NumFrames, false, 1, ModelBase.AnimationComponentType.TranslateX));
+                    new ModelBase.AnimationComponentDataDef(valuesTx, m_BCA.m_NumFrames, false, 1, false, ModelBase.AnimationComponentType.TranslateX));
                 animationComponentDataDefs.Add(ModelBase.AnimationComponentType.TranslateY,
-                    new ModelBase.AnimationComponentDataDef(valuesTy, m_BCA.m_NumFrames, false, 1, ModelBase.AnimationComponentType.TranslateY));
+                    new ModelBase.AnimationComponentDataDef(valuesTy, m_BCA.m_NumFrames, false, 1, false, ModelBase.AnimationComponentType.TranslateY));
                 animationComponentDataDefs.Add(ModelBase.AnimationComponentType.TranslateZ,
-                    new ModelBase.AnimationComponentDataDef(valuesTz, m_BCA.m_NumFrames, false, 1, ModelBase.AnimationComponentType.TranslateZ));
+                    new ModelBase.AnimationComponentDataDef(valuesTz, m_BCA.m_NumFrames, false, 1, false, ModelBase.AnimationComponentType.TranslateZ));
 
                 ModelBase.AnimationDef animation = new ModelBase.AnimationDef(boneID + "-animation", boneID, m_BCA.m_NumFrames, 
                     animationComponentDataDefs);
