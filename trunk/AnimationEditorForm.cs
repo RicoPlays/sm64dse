@@ -288,7 +288,6 @@ namespace SM64DSe
         private void StopTimer()
         {
             m_AnimationTimer.Stop();
-            m_AnimationFrameNumber = -1;
             m_Running = false;
         }
 
@@ -399,6 +398,8 @@ namespace SM64DSe
         {
             if (m_AnimationFrameNumber > 0)
                 SetFrame(--m_AnimationFrameNumber);
+            else
+                SetFrame((m_AnimationFrameNumber = m_AnimationNumFrames  - 1));
         }
 
         private void btnNextFrame_Click(object sender, EventArgs e)
