@@ -727,13 +727,13 @@ namespace SM64DSe.ImportExport.Loaders.ExternalLoaders
                                 //((N-4)/2) + 1 Quads. per N Vertices
                                 int numFaces = ((primitive_vertex_size - 4) / 2) + 1;
                                 int numVertsPerFace = 4;
-                                for (int i = 0; i < numFaces; i++)
+                                for (int n = 0, p = 0; n < numFaces; n++, p = p + 2)
                                 {
                                     ModelBase.FaceDef face = new ModelBase.FaceDef(numVertsPerFace);
-                                    face.m_Vertices[0] = vertexList[(i * numVertsPerFace) + 0];
-                                    face.m_Vertices[1] = vertexList[(i * numVertsPerFace) + 1];
-                                    face.m_Vertices[2] = vertexList[(i * numVertsPerFace) + 3];
-                                    face.m_Vertices[3] = vertexList[(i * numVertsPerFace) + 2];
+                                    face.m_Vertices[0] = vertexList[p + 0];
+                                    face.m_Vertices[1] = vertexList[p + 1];
+                                    face.m_Vertices[2] = vertexList[p + 3];
+                                    face.m_Vertices[3] = vertexList[p + 2];
                                     faceListDef.m_Faces.Add(face);
                                 }
                             }
