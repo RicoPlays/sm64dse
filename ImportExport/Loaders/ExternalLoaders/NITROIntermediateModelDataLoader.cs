@@ -189,7 +189,8 @@ namespace SM64DSe.ImportExport.Loaders.ExternalLoaders
 
                     texture = new ModelBase.TextureDefNitro(name, dataTex, palette_name, dataPal,
                         (uint)width, (uint)height, 
-                        (byte)((color0_mode != null && color0_mode.Equals("transparency")) ? 1 : 0), textureFormat);
+                        (byte)((color0_mode != null && color0_mode.Equals("transparency")) ? 1 : 0), 
+                        textureFormat);
                 }
                 else
                 {
@@ -315,6 +316,16 @@ namespace SM64DSe.ImportExport.Loaders.ExternalLoaders
                     material.Attributes["tex_translate"].Value.Split(new string[] { " " }, StringSplitOptions.RemoveEmptyEntries),
                     Convert.ToSingle) : null;
                 string tex_gen_mode = (tex_image_idx >= 0) ? material.Attributes["tex_gen_mode"].Value : null;
+                ModelBase.TexGenMode texGenMode;
+                switch (tex_gen_mode)
+                {
+                    case "none": texGenMode = ModelBase.TexGenMode.None; break;
+                    case null: goto case "none";
+                    case "tex": texGenMode = ModelBase.TexGenMode.Tex; break;
+                    case "nrm": texGenMode = ModelBase.TexGenMode.Normal; break;
+                    case "pos": texGenMode = ModelBase.TexGenMode.Pos; break;
+                    default: goto case "none";
+                }
                 string tex_gen_st_src = (material.Attributes["tex_gen_st_src"] != null) ? material.Attributes["tex_gen_st_src"].Value : null;
                 string tex_effect_mtx = (material.Attributes["tex_effect_mtx"] != null) ? material.Attributes["tex_effect_mtx"].Value : null;
 
@@ -341,6 +352,7 @@ namespace SM64DSe.ImportExport.Loaders.ExternalLoaders
                 matDef.m_TextureScale = (tex_scale != null) ? new Vector2(tex_scale[0], tex_scale[1]) : Vector2.One;
                 matDef.m_TextureRotation = tex_rotate;
                 matDef.m_TextureTranslation = (tex_translate != null) ? new Vector2(tex_translate[0], tex_translate[1]) : Vector2.Zero;
+                matDef.m_TexGenMode = texGenMode;
 
                 m_Model.m_Materials.Add(matDef.m_ID, matDef);
             }

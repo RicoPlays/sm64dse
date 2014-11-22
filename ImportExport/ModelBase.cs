@@ -466,6 +466,7 @@ namespace SM64DSe.ImportExport
             public Vector2 m_TextureScale;
             public float m_TextureRotation;
             public Vector2 m_TextureTranslation;
+            public TexGenMode m_TexGenMode;
 
             public MaterialDef(string id, int index)
             {
@@ -489,6 +490,7 @@ namespace SM64DSe.ImportExport
                 m_TextureScale = new Vector2(1f, 1f);
                 m_TextureRotation = 0.0f;
                 m_TextureTranslation = new Vector2(0f, 0f);
+                m_TexGenMode = TexGenMode.None;
             }
 
             public enum PolygonDrawingFace
@@ -525,6 +527,14 @@ namespace SM64DSe.ImportExport
             Nitro_Direct = 7,
             ExternalBitmap = 8,
             InMemoryBitmap = 9
+        };
+
+        public enum TexGenMode
+        {
+            None = 0,
+            Tex = 1,
+            Normal = 2,
+            Pos = 3
         };
 
         public class TextureDefBase
