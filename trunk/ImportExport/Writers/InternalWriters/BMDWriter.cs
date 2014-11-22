@@ -109,6 +109,16 @@ namespace SM64DSe.ImportExport.Writers.InternalWriters
                 AddCommand(0x20, Helper.ColorToBGR15(color));
             }
 
+            public void AddNormalCommand(Vector3 nrm)
+            {
+                short x = (short)(nrm.X * 512.0f);
+                short y = (short)(nrm.Y * 512.0f);
+                short z = (short)(nrm.Z * 512.0f);
+                uint param = (uint)(((ushort)x) >> 6 | ((((ushort)y) << 4) & 0xFFC00) |
+                    ((((ushort)z) << 14) & 0x3FF00000));
+                AddCommand(0x21, param);
+            }
+
             public void ClearCommands()
             {
                 m_CommandList.Clear();
@@ -721,6 +731,7 @@ namespace SM64DSe.ImportExport.Writers.InternalWriters
                 int lastface = -1;
                 int lastmatrix = -1;
                 Vector4 lastvtx = new Vector4(0f, 0f, 0f, 12345678f);
+                Vector3 lastnrm = Vector3.Zero;
                 foreach (ModelBase.BoneDef bone in boneTree)
                 {
                     foreach (ModelBase.GeometryDef geometry in bone.m_Geometries.Values)
@@ -735,7 +746,7 @@ namespace SM64DSe.ImportExport.Writers.InternalWriters
                                 {
                                     dlpacker.AddCommand(0x40, (uint)VertexListPrimitiveTypes.TriangleStrip);// Begin Vertex List
                                     AddTriangleStripToDisplayList(dlpacker, ref lastColourARGB, ref tcscale, ref lastmatrix,
-                                                    ref lastvtx, faceList.m_Faces);
+                                                    ref lastvtx, ref lastnrm, faceList.m_Faces);
                                     dlpacker.AddCommand(0x41);//End Vertex List
                                 }
                                 else
@@ -767,22 +778,22 @@ namespace SM64DSe.ImportExport.Writers.InternalWriters
                                         {
                                             case 1: // point
                                                 AddSinglePointToDisplayList(dlpacker, ref lastColourARGB, ref tcscale, ref lastmatrix,
-                                                    ref lastvtx, face);
+                                                    ref lastvtx, ref lastnrm, face);
                                                 break;
 
                                             case 2: // line
                                                 AddLineToDisplayList(dlpacker, ref lastColourARGB, ref tcscale, ref lastmatrix,
-                                                    ref lastvtx, face);
+                                                    ref lastvtx, ref lastnrm, face);
                                                 break;
 
                                             case 3: // triangle
                                                 AddTriangleToDisplayList(dlpacker, ref lastColourARGB, ref tcscale, ref lastmatrix,
-                                                    ref lastvtx, face);
+                                                    ref lastvtx, ref lastnrm, face);
                                                 break;
 
                                             case 4: // quad
                                                 AddQuadrilateralToDisplayList(dlpacker, ref lastColourARGB, ref tcscale, ref lastmatrix,
-                                                    ref lastvtx, face);
+                                                    ref lastvtx, ref lastnrm, face);
                                                 break;
 
                                             default: // whatever (import as triangle strip)
@@ -925,17 +936,19 @@ namespace SM64DSe.ImportExport.Writers.InternalWriters
 
                     if (mat.m_TextureScale.X > 0f && mat.m_TextureScale.Y > 0f)
                     {
-                        // 30-31 Texture Coordinates Transformation Mode (0..3, see below)
-                        // Texture Coordinates Transformation Modes:
-                        // 0  Do not Transform texture coordinates
-                        // 1  TexCoord source
-                        // 2  Normal source
-                        // 3  Vertex source
                         teximage_param |= 0x40000000;
 
                         texscaleS = (uint)(int)(mat.m_TextureScale.X * 4096);
                         texscaleT = (uint)(int)(mat.m_TextureScale.Y * 4096);
                     }
+
+                    // 30-31 Texture Coordinates Transformation Mode (0..3, see below)
+                    // Texture Coordinates Transformation Modes:
+                    // 0  Do not Transform texture coordinates
+                    // 1  TexCoord source
+                    // 2  Normal source
+                    // 3  Vertex source
+                    teximage_param |= (uint)(((byte)mat.m_TexGenMode) << 30);
                 }
 
                 // Cmd 29h POLYGON_ATTR - Set Polygon Attributes (W)
@@ -992,7 +1005,7 @@ namespace SM64DSe.ImportExport.Writers.InternalWriters
                 bmd.Write16(curoffset + 0x14, (ushort)((mat.m_TextureRotation * 2048.0f) / Math.PI));
                 bmd.Write16(curoffset + 0x16, 0);
                 bmd.Write32(curoffset + 0x18, (uint)(mat.m_TextureTranslation.X * 4096.0f));
-                bmd.Write32(curoffset + 0x1C, (uint)(mat.m_TextureTranslation.X * 4096.0f));
+                bmd.Write32(curoffset + 0x1C, (uint)(mat.m_TextureTranslation.Y * 4096.0f));
                 bmd.Write32(curoffset + 0x20, teximage_param);
                 bmd.Write32(curoffset + 0x24, polyattr);
                 bmd.Write32(curoffset + 0x28, diffuse_ambient);
@@ -1077,32 +1090,32 @@ namespace SM64DSe.ImportExport.Writers.InternalWriters
         }
 
         private void AddTriangleStripToDisplayList(GXDisplayListPacker dlpacker, ref int lastColourARGB, ref Vector2 tcscale,
-            ref int lastmatrix, ref Vector4 lastvtx, List<ModelBase.FaceDef> faces)
+            ref int lastmatrix, ref Vector4 lastvtx, ref Vector3 lastnrm, List<ModelBase.FaceDef> faces)
         {
             if (faces.Count < 1)
                 return;
 
-            AddTriangleToDisplayList(dlpacker, ref lastColourARGB, ref tcscale, ref lastmatrix, ref lastvtx, faces.ElementAt(0));
+            AddTriangleToDisplayList(dlpacker, ref lastColourARGB, ref tcscale, ref lastmatrix, ref lastvtx, ref lastnrm, faces.ElementAt(0));
 
             bool even = false;
             for (int i = 1; i < faces.Count; i++)
             {
                 if (even)
-                    WriteVertexToDisplayList(dlpacker, ref lastColourARGB, ref tcscale, ref lastmatrix, lastvtx,
-                        faces[i].m_Vertices[2]);
+                    WriteVertexToDisplayList(dlpacker, ref lastColourARGB, ref tcscale, ref lastmatrix, ref lastvtx,
+                        ref lastnrm, faces[i].m_Vertices[2]);
                 else
-                    WriteVertexToDisplayList(dlpacker, ref lastColourARGB, ref tcscale, ref lastmatrix, lastvtx,
-                        faces[i].m_Vertices[0]);
+                    WriteVertexToDisplayList(dlpacker, ref lastColourARGB, ref tcscale, ref lastmatrix, ref lastvtx,
+                        ref lastnrm, faces[i].m_Vertices[0]);
 
                 even = !even;
             }
         }
 
         private void AddQuadrilateralToDisplayList(GXDisplayListPacker dlpacker, ref int lastColourARGB, ref Vector2 tcscale,
-            ref int lastmatrix, ref Vector4 lastvtx, ModelBase.FaceDef face)
+            ref int lastmatrix, ref Vector4 lastvtx, ref Vector3 lastnrm, ModelBase.FaceDef face)
         {
-            WriteVertexToDisplayList(dlpacker, ref lastColourARGB, ref tcscale, ref lastmatrix, lastvtx,
-                face.m_Vertices[0]);
+            WriteVertexToDisplayList(dlpacker, ref lastColourARGB, ref tcscale, ref lastmatrix, ref lastvtx,
+                ref lastnrm, face.m_Vertices[0]);
 
             /*if (m_ZMirror)
             {
@@ -1119,24 +1132,22 @@ namespace SM64DSe.ImportExport.Writers.InternalWriters
             }
             else*/
             {
-                WriteVertexToDisplayList(dlpacker, ref lastColourARGB, ref tcscale, ref lastmatrix, new Vector4(face.m_Vertices[0].m_Position, 0f),
-                    face.m_Vertices[1]);
+                WriteVertexToDisplayList(dlpacker, ref lastColourARGB, ref tcscale, ref lastmatrix, ref lastvtx,
+                    ref lastnrm, face.m_Vertices[1]);
 
-                WriteVertexToDisplayList(dlpacker, ref lastColourARGB, ref tcscale, ref lastmatrix, new Vector4(face.m_Vertices[1].m_Position, 0f),
-                    face.m_Vertices[2]);
+                WriteVertexToDisplayList(dlpacker, ref lastColourARGB, ref tcscale, ref lastmatrix, ref lastvtx,
+                    ref lastnrm, face.m_Vertices[2]);
 
-                WriteVertexToDisplayList(dlpacker, ref lastColourARGB, ref tcscale, ref lastmatrix, new Vector4(face.m_Vertices[2].m_Position, 0f),
-                    face.m_Vertices[3]);
-
-                lastvtx = new Vector4(face.m_Vertices[3].m_Position, 0f);
+                WriteVertexToDisplayList(dlpacker, ref lastColourARGB, ref tcscale, ref lastmatrix, ref lastvtx,
+                    ref lastnrm, face.m_Vertices[3]);
             }
         }
 
         private void AddTriangleToDisplayList(GXDisplayListPacker dlpacker, ref int lastColourARGB, ref Vector2 tcscale, ref int lastmatrix,
-            ref Vector4 lastvtx, ModelBase.FaceDef face)
+            ref Vector4 lastvtx, ref Vector3 lastnrm, ModelBase.FaceDef face)
         {
-            WriteVertexToDisplayList(dlpacker, ref lastColourARGB, ref tcscale, ref lastmatrix, lastvtx,
-                face.m_Vertices[0]);
+            WriteVertexToDisplayList(dlpacker, ref lastColourARGB, ref tcscale, ref lastmatrix, ref lastvtx,
+                ref lastnrm, face.m_Vertices[0]);
 
             /*if (m_ZMirror)
             {
@@ -1150,48 +1161,42 @@ namespace SM64DSe.ImportExport.Writers.InternalWriters
             }
             else*/
             {
-                WriteVertexToDisplayList(dlpacker, ref lastColourARGB, ref tcscale, ref lastmatrix, new Vector4(face.m_Vertices[0].m_Position, 0f),
-                    face.m_Vertices[1]);
+                WriteVertexToDisplayList(dlpacker, ref lastColourARGB, ref tcscale, ref lastmatrix, ref lastvtx,
+                    ref lastnrm, face.m_Vertices[1]);
 
-                WriteVertexToDisplayList(dlpacker, ref lastColourARGB, ref tcscale, ref lastmatrix, new Vector4(face.m_Vertices[1].m_Position, 0f),
-                    face.m_Vertices[2]);
-
-                lastvtx = new Vector4(face.m_Vertices[2].m_Position, 0f);
+                WriteVertexToDisplayList(dlpacker, ref lastColourARGB, ref tcscale, ref lastmatrix, ref lastvtx,
+                    ref lastnrm, face.m_Vertices[2]);
             }
         }
 
         private void AddLineToDisplayList(GXDisplayListPacker dlpacker, ref int lastColourARGB, ref Vector2 tcscale, ref int lastmatrix,
-            ref Vector4 lastvtx, ModelBase.FaceDef face)
+            ref Vector4 lastvtx, ref Vector3 lastnrm, ModelBase.FaceDef face)
         {
-            WriteVertexToDisplayList(dlpacker, ref lastColourARGB, ref tcscale, ref lastmatrix, lastvtx,
-                face.m_Vertices[0]);
+            WriteVertexToDisplayList(dlpacker, ref lastColourARGB, ref tcscale, ref lastmatrix, ref lastvtx,
+                ref lastnrm, face.m_Vertices[0]);
 
-            WriteVertexToDisplayList(dlpacker, ref lastColourARGB, ref tcscale, ref lastmatrix, new Vector4(face.m_Vertices[0].m_Position, 0f),
-                face.m_Vertices[1]);
+            WriteVertexToDisplayList(dlpacker, ref lastColourARGB, ref tcscale, ref lastmatrix, ref lastvtx,
+                ref lastnrm, face.m_Vertices[1]);
 
-            WriteVertexToDisplayList(dlpacker, ref lastColourARGB, ref tcscale, ref lastmatrix, new Vector4(face.m_Vertices[1].m_Position, 0f),
-                face.m_Vertices[1]);
-
-            lastvtx = new Vector4(face.m_Vertices[1].m_Position, 0f);
+            WriteVertexToDisplayList(dlpacker, ref lastColourARGB, ref tcscale, ref lastmatrix, ref lastvtx,
+                ref lastnrm, face.m_Vertices[1]);
         }
 
         private void AddSinglePointToDisplayList(GXDisplayListPacker dlpacker, ref int lastColourARGB, ref Vector2 tcscale,
-            ref int lastmatrix, ref Vector4 lastvtx, ModelBase.FaceDef face)
+            ref int lastmatrix, ref Vector4 lastvtx, ref Vector3 lastnrm, ModelBase.FaceDef face)
         {
-            WriteVertexToDisplayList(dlpacker, ref lastColourARGB, ref tcscale, ref lastmatrix, lastvtx,
-                face.m_Vertices[0]);
+            WriteVertexToDisplayList(dlpacker, ref lastColourARGB, ref tcscale, ref lastmatrix, ref lastvtx,
+                ref lastnrm, face.m_Vertices[0]);
 
-            WriteVertexToDisplayList(dlpacker, ref lastColourARGB, ref tcscale, ref lastmatrix, new Vector4(face.m_Vertices[0].m_Position, 0f),
-                face.m_Vertices[0]);
+            WriteVertexToDisplayList(dlpacker, ref lastColourARGB, ref tcscale, ref lastmatrix, ref lastvtx,
+                ref lastnrm, face.m_Vertices[0]);
 
-            WriteVertexToDisplayList(dlpacker, ref lastColourARGB, ref tcscale, ref lastmatrix, new Vector4(face.m_Vertices[0].m_Position, 0f),
-                face.m_Vertices[0]);
-
-            lastvtx = new Vector4(face.m_Vertices[0].m_Position, 0f);
+            WriteVertexToDisplayList(dlpacker, ref lastColourARGB, ref tcscale, ref lastmatrix, ref lastvtx,
+                ref lastnrm, face.m_Vertices[0]);
         }
 
         private void WriteVertexToDisplayList(GXDisplayListPacker dlpacker, ref int lastColourARGB, ref Vector2 tcscale,
-            ref int lastmatrix, Vector4 lastvtx, ModelBase.VertexDef vertex)
+            ref int lastmatrix, ref Vector4 lastvtx, ref Vector3 lastnrm, ModelBase.VertexDef vertex)
         {
             Vector4 vtx = new Vector4(vertex.m_Position, 0f);
             int matrixID = m_Model.m_BoneTransformsMap.GetByFirst(m_Model.m_BoneTree.GetBoneByIndex(vertex.m_VertexBoneID).m_ID);
@@ -1200,13 +1205,22 @@ namespace SM64DSe.ImportExport.Writers.InternalWriters
                 dlpacker.AddCommand(0x14, (uint)matrixID);// Matrix Restore ID for current vertex
                 lastmatrix = matrixID;
             }
+            if (vertex.m_TextureCoordinate != null)
+            {
+                dlpacker.AddTexCoordCommand(Vector2.Multiply((Vector2)vertex.m_TextureCoordinate, tcscale));
+            }
+            if (vertex.m_Normal != null && (Vector3)vertex.m_Normal != lastnrm)
+            {
+                dlpacker.AddNormalCommand((Vector3)vertex.m_Normal);
+                lastnrm = (Vector3)vertex.m_Normal;
+            }
             if (vertex.m_VertexColour != null && ((Color)vertex.m_VertexColour).ToArgb() != lastColourARGB)
             {
                 dlpacker.AddColorCommand((Color)vertex.m_VertexColour);
                 lastColourARGB = ((Color)vertex.m_VertexColour).ToArgb();
             }
-            if (vertex.m_TextureCoordinate != null) dlpacker.AddTexCoordCommand(Vector2.Multiply((Vector2)vertex.m_TextureCoordinate, tcscale));
             dlpacker.AddVertexCommand(vtx, lastvtx, m_AlwaysWriteFullVertexCmd23h);
+            lastvtx = vtx;
         }
 
     }

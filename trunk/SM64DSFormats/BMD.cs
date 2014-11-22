@@ -370,7 +370,7 @@ namespace SM64DSe
 
             // if (((cmd & 0xF0) == 0x10) && (cmd != 0x14))
             //    throw new Exception(String.Format("MATRIX COMMAND {0:X2}", cmd));
-
+            
             switch (cmd)
             {
                 // nop
@@ -603,7 +603,7 @@ namespace SM64DSe
         {
             m_File = file;
             m_FileName = file.m_Name;
-
+            
             /* if (m_File.m_ID == 741)
                  lolol = true;
              else*/
@@ -785,6 +785,12 @@ namespace SM64DSe
                                     m_File.Read32(mchunkoffset + 0x1C)));*/
                             }
                             break;
+
+                        case 2:
+                            goto case 1;
+
+                        case 3:
+                            goto case 1;
 
                         default:
                             break;
