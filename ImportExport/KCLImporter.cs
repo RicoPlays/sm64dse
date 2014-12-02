@@ -30,6 +30,9 @@ namespace SM64DSe.ImportExport
                 case "dae":
                     importedModel = ConvertDAEToKCL(modelFile, fileName, scale, faceSizeThreshold, matColTypes, save);
                     break;
+                case "imd":
+                    importedModel = ConvertIMDToKCL(modelFile, fileName, scale, faceSizeThreshold, matColTypes, save);
+                    break;
                 default:
                     importedModel = ConvertOBJToKCL(modelFile, fileName, scale, faceSizeThreshold, matColTypes, save);
                     break;
@@ -50,6 +53,9 @@ namespace SM64DSe.ImportExport
                 case "dae":
                     materials = new DAELoader(fileName).GetModelMaterials();
                     break;
+                case "imd":
+                    materials = new NITROIntermediateModelDataLoader(fileName).GetModelMaterials();
+                    break;
                 default:
                     materials = new OBJLoader(fileName).GetModelMaterials();
                     break;
@@ -63,6 +69,19 @@ namespace SM64DSe.ImportExport
             }
 
             return matColTypes;
+        }
+
+        public KCL ConvertIMDToKCL(NitroFile modelFile, string fileName, float scale, float faceSizeThreshold,
+            Dictionary<string, int> matColTypes, bool save = true)
+        {
+            KCL importedModel = new KCL(modelFile);
+
+            if (m_LoadedModel == null)
+                m_LoadedModel = new NITROIntermediateModelDataLoader(fileName).LoadModel();
+
+            importedModel = CallKCLWriter(modelFile, m_LoadedModel, fileName, scale, faceSizeThreshold, matColTypes, save);
+
+            return importedModel;
         }
 
         public KCL ConvertDAEToKCL(NitroFile modelFile, string fileName, float scale, float faceSizeThreshold,

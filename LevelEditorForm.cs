@@ -91,6 +91,7 @@ namespace SM64DSe
                 case 55: // BUTTERFLY
                 case 60: // STAR_CAMERA
                 case 61: // POWER STAR
+                case 62: // SILVER STAR
                 case 63: // STARBASE
                 case 269: // BLK_OKINOKO_TAG
                 case 270: // BLK_SKINOKO_TAG
@@ -1185,6 +1186,8 @@ namespace SM64DSe
 
         private void RemoveObject(LevelObject obj)
         {
+            if (!m_LevelObjects.ContainsKey(obj.m_UniqueID)) return;
+
             RemoveObjectSlot(obj);
             obj.Release();
             m_LevelObjects.Remove(obj.m_UniqueID);
@@ -1354,6 +1357,10 @@ namespace SM64DSe
 
             //GL.Enable(EnableCap.CullFace);
             //GL.CullFace(CullFaceMode.Back);
+
+            m_EntranceID = 0;
+            m_PathNodeID = 0;
+            m_MinimapTileIDNum = 0;
 
 
             LoadLevelData();
@@ -2570,6 +2577,7 @@ namespace SM64DSe
         void UpdatePathsNodeRemoved(PathPointObject removedNode)
         {
             int pathNum = GetPathNodeParentIDFromNodeID(removedNode.m_NodeID);
+            if (pathNum == -1) return;
 
             // Decrease length of current path
             IEnumerable<LevelObject> paths = m_LevelObjects.Values.Where(obj0 => (obj0.m_Type) == 3);

@@ -448,8 +448,7 @@ namespace SM64DSe
         private void btnSelectInputAnimation_Click(object sender, EventArgs e)
         {
             OpenFileDialog ofd = new OpenFileDialog();
-            ofd.Filter = "All Supported Animation Formats|*.dae;*.ica|" + 
-                "COLLADA DAE|*.dae|NITRO Intermediate Character Animation|*.ica";//Filter by .dae and .ica
+            ofd.Filter = Helper.MODEL_ANIMATION_FORMATS_FILTER;
 
             if (ofd.ShowDialog() == DialogResult.OK)
             {
@@ -463,8 +462,7 @@ namespace SM64DSe
         private void btnSelectInputModel_Click(object sender, EventArgs e)
         {
             OpenFileDialog ofd = new OpenFileDialog();
-            ofd.Filter = "All Supported Models|*.dae;*.imd;*.obj|" +
-                "COLLADA DAE|*.dae|NITRO Intermediate Model Data|*.imd|Wavefront OBJ|*.obj";
+            ofd.Filter = Helper.MODEL_FORMATS_FILTER;
 
             if (ofd.ShowDialog() == DialogResult.OK)
             {

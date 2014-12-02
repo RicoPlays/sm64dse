@@ -352,6 +352,22 @@ namespace SM64DSe.ImportExport.Loaders.ExternalLoaders
                             AddTexture(texture, m_Model.m_Materials[curmaterial]);
                             break;
                         }
+
+                    case "PDF":
+                        {
+                            ModelBase.MaterialDef mat = (ModelBase.MaterialDef)m_Model.m_Materials[curmaterial];
+                            switch (parts[1].ToLowerInvariant())
+                            {
+                                case "front":
+                                    mat.m_PolygonDrawingFace = ModelBase.MaterialDef.PolygonDrawingFace.Front; break;
+                                case "back":
+                                    mat.m_PolygonDrawingFace = ModelBase.MaterialDef.PolygonDrawingFace.Back; break;
+                                case "both":
+                                    mat.m_PolygonDrawingFace = ModelBase.MaterialDef.PolygonDrawingFace.FrontAndBack; break;
+                                default: goto case "front";
+                            }
+                        }
+                        break;
                 }
             }
 

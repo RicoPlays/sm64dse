@@ -35,6 +35,10 @@ namespace SM64DSe
         public static uint ACT_SELECTOR_ID_TABLE;
         public static CultureInfo USA = new CultureInfo("en-US");
         public static MD5CryptoServiceProvider m_MD5 = new MD5CryptoServiceProvider();
+        public static readonly string MODEL_FORMATS_FILTER = "All Supported Models|*.dae;*.imd;*.obj|" + 
+                "COLLADA DAE|*.dae|NITRO Intermediate Model Data|*.imd|Wavefront OBJ|*.obj";
+        public static readonly string MODEL_ANIMATION_FORMATS_FILTER = "All Supported Animation Formats|*.dae;*.ica|" +
+                "COLLADA DAE|*.dae|NITRO Intermediate Character Animation|*.ica";
 
         static Helper()
         {
