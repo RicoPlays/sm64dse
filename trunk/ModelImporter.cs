@@ -709,8 +709,9 @@ namespace SM64DSe
         private void btnAssignTypes_Click(object sender, EventArgs e)
         {
             int count = 0;
-            foreach (string mat in m_MatColTypes.Keys)
+            for (int i = 0; i < m_MatColTypes.Count; i++)
             {
+                string mat = m_MatColTypes.Keys.ElementAt(i);
                 m_MatColTypes[mat] = int.Parse(gridColTypes.Rows[count++].Cells[1].Value.ToString());
             }
         }

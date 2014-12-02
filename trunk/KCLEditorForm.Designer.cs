@@ -393,7 +393,7 @@
             this.txtThreshold.Name = "txtThreshold";
             this.txtThreshold.Size = new System.Drawing.Size(119, 20);
             this.txtThreshold.TabIndex = 4;
-            this.txtThreshold.Text = "0.001";
+            this.txtThreshold.Text = "0.0005";
             // 
             // label2
             // 
@@ -428,9 +428,9 @@
             this.label1.AutoSize = true;
             this.label1.Location = new System.Drawing.Point(-3, 7);
             this.label1.Name = "label1";
-            this.label1.Size = new System.Drawing.Size(67, 13);
+            this.label1.Size = new System.Drawing.Size(39, 13);
             this.label1.TabIndex = 0;
-            this.label1.Text = "OBJ or DAE:";
+            this.label1.Text = "Model:";
             // 
             // glModelView
             // 
@@ -443,13 +443,13 @@
             this.glModelView.VSync = false;
             this.glModelView.Load += new System.EventHandler(this.glModelView_Load);
             this.glModelView.Paint += new System.Windows.Forms.PaintEventHandler(this.glModelView_Paint);
+            this.glModelView.KeyDown += new System.Windows.Forms.KeyEventHandler(this.glModelView_KeyDown);
+            this.glModelView.KeyUp += new System.Windows.Forms.KeyEventHandler(this.glModelView_KeyUp);
             this.glModelView.MouseDown += new System.Windows.Forms.MouseEventHandler(this.glModelView_MouseDown);
             this.glModelView.MouseMove += new System.Windows.Forms.MouseEventHandler(this.glModelView_MouseMove);
             this.glModelView.MouseUp += new System.Windows.Forms.MouseEventHandler(this.glModelView_MouseUp);
             this.glModelView.MouseWheel += new System.Windows.Forms.MouseEventHandler(this.glModelView_MouseWheel);
             this.glModelView.Resize += new System.EventHandler(this.glModelView_Resize);
-            this.glModelView.KeyDown += new System.Windows.Forms.KeyEventHandler(this.glModelView_KeyDown);
-            this.glModelView.KeyUp += new System.Windows.Forms.KeyEventHandler(this.glModelView_KeyUp);
             // 
             // toolStrip1
             // 
@@ -488,12 +488,12 @@
             this.toolStripSeparator1.Name = "toolStripSeparator1";
             this.toolStripSeparator1.Size = new System.Drawing.Size(6, 25);
             // 
-            // btnExportToOBJ
+            // btnExportKCLModel
             // 
             this.btnExportKCLModel.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Text;
             this.btnExportKCLModel.ImageTransparentColor = System.Drawing.Color.Magenta;
-            this.btnExportKCLModel.Name = "btnExportToOBJ";
-            this.btnExportKCLModel.Size = new System.Drawing.Size(81, 22);
+            this.btnExportKCLModel.Name = "btnExportKCLModel";
+            this.btnExportKCLModel.Size = new System.Drawing.Size(105, 22);
             this.btnExportKCLModel.Text = "Export KCL Model";
             this.btnExportKCLModel.Click += new System.EventHandler(this.btnExportKCLModel_Click);
             // 

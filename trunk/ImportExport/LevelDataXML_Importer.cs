@@ -30,7 +30,13 @@ namespace SM64DSe.ImportExport
         private static List<LevelObject>[] m_ObjectsToImport;
         private static TextureAnimationArea[] m_TextureAnimationAreasToImport;
 
-        private static int[] sizes = { 16, 16, 6, 6, 14, 8, 8, 8, 8, 12, 14, 2, 2, 0, 4 };
+        private static int[] OBJECT_SIZES = { 16, 16, 6, 6, 14, 8, 8, 8, 8, 12, 14, 2, 2, 0, 4 };
+        private static int[] MISC_TYPES = { 1, 2, 3, 4, 6, 7, 8, 9, 10, 11, 12, 14 };
+        private static int[] STANDARD_SIMPLE_TYPES = { 0, 5 };
+        // The below is needed because unless objects are written with entrance objects last, the view 
+        // will not be correct upon entering the level and cannot be fixed. Split by standard and simple objects 
+        // and miscelaneous objects
+        private static int[] OBJECT_WRITE_TYPE_ORDER = { 0, 5, 2, 3, 4, 6, 7, 8, 9, 10, 11, 12, 13, 14, 1 };
 
         private static int pathCount = 0;
         private static int tileCount = 0;
@@ -443,6 +449,27 @@ namespace SM64DSe.ImportExport
 
             // Split the objects by area, then star, then type
             AreaObjectList[] areaObjectList = SplitObjectsByAreaStarType();
+
+            // 'Misc' objects table
+            // All objects are in area 0
+            uint misc_objects_table = m_DataOffset;
+            m_Overlay.WritePointer(0x64, m_DataOffset);
+
+            for (int i = 0; i < 1; i++)
+            {
+                int num_entries = GetNumObjectListsInArea(areaObjectList[i], MISC_TYPES);
+
+                m_Overlay.Write32(misc_objects_table, (uint)num_entries);
+
+                uint object_tables_entries = misc_objects_table + 0x08;// adddress of the list of object tables
+                m_Overlay.WritePointer(misc_objects_table + 0x04, misc_objects_table + 0x08);
+                m_DataOffset += 8;
+
+                WriteObjectTableHeadersAndDataForArea(areaObjectList[i], object_tables_entries, num_entries, MISC_TYPES);
+            }
+            // End 'Misc' objects table
+
+            m_DataOffset = (uint)((m_DataOffset + 3) & ~3);
  
             // The object tables in the level area data section only contain objects of type 0 (Standard) or 
             // type 5 (Simple). The rest will get written into the 'misc' objects table afterwards
@@ -451,48 +478,40 @@ namespace SM64DSe.ImportExport
             uint object_tables = level_area_data + (uint)(m_NumAreas * 12);
             m_DataOffset = object_tables;
 
-            int[] standard_simple_types = new int[] { 0, 5 };
-
             for (int i = 0; i < m_NumAreas; i++)
             {
                 uint level_area_data_header = level_area_data + (uint)(i * 12);
 
-                int num_entries = GetNumObjectListsInArea(areaObjectList[i], standard_simple_types);
+                int num_entries = GetNumObjectListsInArea(areaObjectList[i], STANDARD_SIMPLE_TYPES);
 
                 uint object_tables_header = m_DataOffset;
 
-                m_Overlay.WritePointer(level_area_data_header, object_tables_header);
+                if (num_entries > 0)
+                {
+                    m_Overlay.WritePointer(level_area_data_header, object_tables_header); // Address of object tables header
+                    m_Overlay.Write32(level_area_data_header + 0x04, 0x00000000); // Texture animation, will be overwritten later
+                    m_Overlay.Write16(level_area_data_header + 0x08, (ushort)(i << 4)); // Minimap tilemap index (1 byte) + 1 byte unknown
+                    m_Overlay.Write16(level_area_data_header + 0x0A, 0x0000); // last 2 bytes of unkown 3 bytes
 
-                m_Overlay.Write32(object_tables_header, (uint)num_entries);
+                    m_Overlay.Write32(object_tables_header, (uint)num_entries);
 
-                uint object_tables_entries = object_tables_header + 0x08;// adddress of the list of object tables
-                m_Overlay.WritePointer(object_tables_header + 0x04, object_tables_header + 0x08);
-                m_DataOffset += 8;
+                    uint object_tables_entries = object_tables_header + 0x08;// adddress of the list of object tables
+                    m_Overlay.WritePointer(object_tables_header + 0x04, object_tables_header + 0x08);
+                    m_DataOffset += 8;
 
-                WriteObjectTableHeadersAndDataForArea(areaObjectList[i], object_tables_entries, num_entries, standard_simple_types);
+                    WriteObjectTableHeadersAndDataForArea(areaObjectList[i], object_tables_entries, num_entries, STANDARD_SIMPLE_TYPES);
+                }
+                else
+                {
+                    m_Overlay.Write32(level_area_data_header + 0x00, 0x00000000); // Address null if no object tables
+                    m_Overlay.Write32(level_area_data_header + 0x04, 0x00000000); // Texture animation, will be overwritten later
+                    m_Overlay.Write16(level_area_data_header + 0x08, (ushort)(i << 4)); // Minimap tilemap index (1 byte) + 1 byte unknown
+                    m_Overlay.Write16(level_area_data_header + 0x0A, 0x0000); // last 2 bytes of unkown 3 bytes
+                }
             }
             // End level area object tables
 
-            // 'Misc' objects table
-            // All objects are in area 0
-            uint misc_objects_table = m_DataOffset;
-            m_Overlay.WritePointer(0x64, m_DataOffset);
-
-            int[] misc_types = new int[] { 1, 2, 3, 4, 6, 7, 8, 9, 10, 11, 12, 14 };
-
-            for (int i = 0; i < 1; i++)
-            {
-                int num_entries = GetNumObjectListsInArea(areaObjectList[i], misc_types);
-
-                m_Overlay.Write32(misc_objects_table, (uint)num_entries);
-
-                uint object_tables_entries = misc_objects_table + 0x08;// adddress of the list of object tables
-                m_Overlay.WritePointer(misc_objects_table + 0x04, misc_objects_table + 0x08);
-                m_DataOffset += 8;
-
-                WriteObjectTableHeadersAndDataForArea(areaObjectList[i], object_tables_entries, num_entries, misc_types);
-            }
-            // End 'Misc' objects table
+            m_DataOffset = (uint)((m_DataOffset + 3) & ~3);
 
             // Now write the texture animations
             WriteTextureAnimations(level_area_data);
@@ -568,9 +587,10 @@ namespace SM64DSe.ImportExport
             // Write the headers for the lists of object tables but don't write the actual objects yet
             uint object_tables_objects = object_tables_entries + (uint)(num_entries * 8);// address of the first list of objects
             uint next_object_tables_objects = object_tables_objects;
+            
             for (int j = 0; j < areaObjectList.m_StarObjectList.Length; j++)
             {
-                for (int k = 0; k < areaObjectList.m_StarObjectList[j].m_TypeObjectList.Length; k++)
+                foreach (int k in OBJECT_WRITE_TYPE_ORDER)
                 {
                     if (!objectTypes.Contains(k))
                         continue;
@@ -580,7 +600,7 @@ namespace SM64DSe.ImportExport
                         int object_type = areaObjectList.m_StarObjectList[j].m_TypeObjectList[k].m_Type;
                         int star = areaObjectList.m_StarObjectList[j].m_TypeObjectList[k].m_Star;
                         byte type_and_star = (byte)((star << 5) | object_type);
-                        int size = sizes[object_type];
+                        int size = OBJECT_SIZES[object_type];
 
                         int num_objects = areaObjectList.m_StarObjectList[j].m_TypeObjectList[k].m_Objects.ElementAt(m).Count;
 
@@ -602,7 +622,7 @@ namespace SM64DSe.ImportExport
             // Now write the actual objects
             for (int j = 0; j < areaObjectList.m_StarObjectList.Length; j++)
             {
-                for (int k = 0; k < areaObjectList.m_StarObjectList[j].m_TypeObjectList.Length; k++)
+                foreach (int k in OBJECT_WRITE_TYPE_ORDER)
                 {
                     if (!objectTypes.Contains(k))
                         continue;
@@ -611,7 +631,7 @@ namespace SM64DSe.ImportExport
                     {
                         int object_type = areaObjectList.m_StarObjectList[j].m_TypeObjectList[k].m_Type;
                         int star = areaObjectList.m_StarObjectList[j].m_TypeObjectList[k].m_Star;
-                        int size = sizes[object_type];
+                        int size = OBJECT_SIZES[object_type];
 
                         for (int n = 0; n < areaObjectList.m_StarObjectList[j].m_TypeObjectList[k].m_Objects.ElementAt(m).Count; n++)
                         {

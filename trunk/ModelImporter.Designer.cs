@@ -316,7 +316,7 @@
             this.lbl02.Name = "lbl02";
             this.lbl02.Size = new System.Drawing.Size(109, 32);
             this.lbl02.TabIndex = 10;
-            this.lbl02.Text = "Enter 0 to keep all faces, default 0.001";
+            this.lbl02.Text = "Enter 0 to keep all faces, default 0.0005";
             // 
             // txtThreshold
             // 
@@ -324,7 +324,7 @@
             this.txtThreshold.Name = "txtThreshold";
             this.txtThreshold.Size = new System.Drawing.Size(86, 20);
             this.txtThreshold.TabIndex = 9;
-            this.txtThreshold.Text = "0.001";
+            this.txtThreshold.Text = "0.0005";
             // 
             // lbl01
             // 
@@ -395,8 +395,7 @@
             // 
             // ofdLoadModel
             // 
-            this.ofdLoadModel.Filter = "All Supported Models|*.dae;*.imd;*.obj|" + 
-                "COLLADA DAE|*.dae|NITRO Intermediate Model Data|*.imd|Wavefront OBJ|*.obj";
+            this.ofdLoadModel.Filter = Helper.MODEL_FORMATS_FILTER;
             this.ofdLoadModel.Title = "Load model file...";
             // 
             // ModelImporter

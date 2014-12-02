@@ -67,6 +67,12 @@ namespace SM64DSe
             bool autorw = !m_ROM.CanRW();
             if (autorw) m_ROM.BeginRW();
 
+            // first, ensure that the size is aligned to 4 byte boundary
+            if (m_Data.Length % 4 != 0)
+            {
+                SetSize((uint)((m_Data.Length + 3) & ~3));
+            }
+
             // reinsert file data
             m_ROM.ReinsertFile(m_FileID, m_Data);
             Update();

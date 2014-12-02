@@ -896,12 +896,13 @@ namespace SM64DSe.ImportExport.Loaders.ExternalLoaders
                                     float[] tmp = GetValueFromFloatArraySource(sources[vertexSource], vertexIndex);
                                     vert.m_Position = new Vector3(tmp[0], tmp[1], tmp[2]);
 
-                                    if (normalOffset != -1)
+                                    /*if (normalOffset != -1)
                                     {
                                         tmp = GetValueFromFloatArraySource(sources[normalSource], pArr[pIndex + (ulong)normalOffset]);
                                         vert.m_Normal = new Vector3(tmp[0], tmp[1], tmp[2]);
+                                        ((Vector3)vert.m_Normal).Normalize();
                                     }
-                                    else
+                                    else*/
                                     {
                                         vert.m_Normal = null;
                                     }

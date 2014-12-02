@@ -527,7 +527,7 @@ namespace SM64DSe
         private void btnOpenModel_Click(object sender, EventArgs e)
         {
             OpenFileDialog ofd = new OpenFileDialog();
-            ofd.Filter = "Supported Models (*.obj, *.dae)|*.obj;*.dae";
+            ofd.Filter = Helper.MODEL_FORMATS_FILTER;
             if (ofd.ShowDialog() == DialogResult.OK)
             {
                 txtModelName.Text = ofd.FileName;
