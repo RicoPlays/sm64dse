@@ -363,8 +363,8 @@
 	<Entry name="Level Boundary">
 		<Value>
 			<Byte>192</Byte>
-			<Byte>63</Byte>
-			<Byte>4</Byte>
+			<Byte>15</Byte>
+			<Byte>3</Byte>
 			<Byte>1</Byte>
 			<Byte>255</Byte>
 			<Byte>0</Byte>
@@ -426,6 +426,18 @@
 			<Byte>15</Byte>
 			<Byte>140</Byte>
 			<Byte>1</Byte>
+			<Byte>255</Byte>
+			<Byte>0</Byte>
+			<Byte>0</Byte>
+			<Byte>0</Byte>
+		</Value>
+	</Entry>
+	<Entry name="Cloud">
+		<Value>
+			<Byte>192</Byte>
+			<Byte>47</Byte>
+			<Byte>4</Byte>
+			<Byte>0</Byte>
 			<Byte>255</Byte>
 			<Byte>0</Byte>
 			<Byte>0</Byte>

@@ -204,18 +204,20 @@ namespace SM64DSe.ImportExport.Loaders.ExternalLoaders
                                     vert.m_TextureCoordinate = new Vector2(m_TexCoords[int.Parse(idxs[1]) - 1]);
                                 else
                                     vert.m_TextureCoordinate = null;
-                                if (idxs.Length >= 3 && !idxs[2].Equals(""))
+                                /*if (idxs.Length >= 3 && !idxs[2].Equals(""))
                                     vert.m_Normal = new Vector3(m_Normals[int.Parse(idxs[2]) - 1]);
-                                else
+                                else*/ // Until it's worked out what causes the issues with normals in OBJ and DAE
                                     vert.m_Normal = null;
                                 // Vertex colours (non-standard "Extended OBJ" Blender plugin only)
                                 if (idxs.Length >= 4 && !idxs[3].Equals(""))
                                 {
-                                    Color tmp =  m_Colours[int.Parse(idxs[3]) - 1];
+                                    Color tmp = m_Colours[int.Parse(idxs[3]) - 1];
                                     vert.m_VertexColour = Color.FromArgb(tmp.A, tmp.R, tmp.G, tmp.B);
                                 }
                                 else
+                                {
                                     vert.m_VertexColour = Color.White;
+                                }
                                 vert.m_VertexBoneID = currentBoneIndex;
 
                                 face.m_Vertices[i] = vert;

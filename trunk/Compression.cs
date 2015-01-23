@@ -53,6 +53,8 @@ namespace SM64DSe
 
                         for (uint j = 0; j < len; j++)
                         {
+                            if (windowOffset >= dest.Length) goto xLen_Loop_Exit;
+
                             dest[xOut++] = dest[windowOffset++];
 
                             xLen--;
@@ -80,7 +82,7 @@ namespace SM64DSe
                     d <<= 1;
                 }
             }
-
+            xLen_Loop_Exit:
             Array.Resize(ref data, dest.Length);
             dest.CopyTo(data, 0);
         }

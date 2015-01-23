@@ -2,11 +2,11 @@
 
 <!--
 	Super Mario 64 DS Object Info Database
-	built on 2014/09/25 12:32:52 for SM64DS Editor
+	built on 2014/12/29 10:41:15 for SM64DS Editor
 	Thanks to Fiachra, Hiccup, jjesss064, Luigi, skawo, StarLand for their contributions!
 -->
 
-<database timestamp='1411662772'>
+<database timestamp='1419867675'>
 
 	<object id='0'>
 		<category>4</category>
@@ -805,7 +805,10 @@ X - Mode
 		<name>Silver Star</name>
 		<internalname>SILVER_STAR</internalname>
 		<actorid>179</actorid>
-		<description>When 5 Silver Stars are collected, makes a Star appear inside a cage. If one or more Silver Stars are dropped, the caged star will disappear until they are collected again.</description>
+		<description>When 5 Silver Stars are collected, makes a Star appear inside a cage. If one or more Silver Stars are dropped, the caged star will disappear until they are collected again.
+
+Parameter 1:
+Star ID, X: should correspond to a Power Star with Parameter 1 set to 6X</description>
 		<bankreq>none</bankreq>
 	</object>
 
@@ -1088,11 +1091,11 @@ Set Parameter 1 to 10 for underwater riding.</description>
 	</object>
 
 	<object id='87'>
-		<category>1</category>
+		<category>4</category>
 		<name></name>
 		<internalname>CT_MECHA02</internalname>
 		<actorid>109</actorid>
-		<description></description>
+		<description>Unused triangular version of CT_MECHA01 from Tick Tock Clock.</description>
 		<bankreq>0=4</bankreq>
 	</object>
 
@@ -1142,29 +1145,29 @@ Set Parameter 1 to 10 for underwater riding.</description>
 	</object>
 
 	<object id='93'>
-		<category>1</category>
+		<category>4</category>
 		<name></name>
 		<internalname>CT_MECHA07</internalname>
 		<actorid>115</actorid>
-		<description></description>
+		<description>Unused rotating triangular platform from Tick Tock clock. Shaped like a segment of a hexagon, rotates about Y (up) axis and has a raised bump at the centre (inner point of triangle). Uses the same shadow as CT_MECHA06.</description>
 		<bankreq>0=4</bankreq>
 	</object>
 
 	<object id='94'>
-		<category>1</category>
+		<category>4</category>
 		<name></name>
 		<internalname>CT_MECHA08A</internalname>
 		<actorid>116</actorid>
-		<description></description>
+		<description>Unused cube-shaped platform from Tick Tock Clock. Moves up and down continuously. No shadow. Shares same behaviour as CT_MECHA08B.</description>
 		<bankreq>0=4</bankreq>
 	</object>
 
 	<object id='95'>
-		<category>1</category>
+		<category>4</category>
 		<name></name>
 		<internalname>CT_MECHA08B</internalname>
 		<actorid>117</actorid>
-		<description></description>
+		<description>Unused cube-shaped platform from Tick Tock Clock. Moves up and down continuously. Shares same behaviour as CT_MECHA08A.</description>
 		<bankreq>0=4</bankreq>
 	</object>
 
@@ -1307,7 +1310,7 @@ Parameter 1 gives the ID (zero-based index) of the path the pole is to follow.</
 
 	<object id='111'>
 		<category>1</category>
-		<name></name>
+		<name>Donut Block (Rainbow Ride)</name>
 		<internalname>RC_TIKUWA</internalname>
 		<actorid>126</actorid>
 		<description>Platform that begins to fall after the player walks on it, from Rainbow Ride.</description>
@@ -2145,7 +2148,7 @@ Set Parameter 1 to 1 to also spit fire at Player.</description>
 
 	<object id='199'>
 		<category>1</category>
-		<name></name>
+		<name>Fragile Bridge (Whomp's Fortres)</name>
 		<internalname>BK_DOWN_B</internalname>
 		<actorid>45</actorid>
 		<description>Falling bridge blocks from Whomp's Fortress.</description>
@@ -2207,7 +2210,7 @@ Note: The collision map for this object should be scaled by 8 - reason unknown.<
 
 	<object id='205'>
 		<category>1</category>
-		<name></name>
+		<name>Rotating Bar (Whomp's Fortress)</name>
 		<internalname>BK_ROTEBAR</internalname>
 		<actorid>51</actorid>
 		<description></description>
@@ -2257,10 +2260,10 @@ FF02 - Move up and down</description>
 
 	<object id='210'>
 		<category>1</category>
-		<name>Falling Bridge Part</name>
+		<name>Fragile Bridge (Big Boo's Haunt)</name>
 		<internalname>TH_DOWN_B</internalname>
 		<actorid>66</actorid>
-		<description>Fragile Bridge (Big Boo's Haunt)</description>
+		<description></description>
 		<bankreq>0=2</bankreq>
 	</object>
 

@@ -45,9 +45,9 @@
             this.label1 = new System.Windows.Forms.Label();
             this.btnAssignTypes = new System.Windows.Forms.Button();
             this.gridColTypes = new System.Windows.Forms.DataGridView();
-            this.groupBox2 = new System.Windows.Forms.GroupBox();
-            this.cbWipeLevel = new System.Windows.Forms.CheckBox();
             this.groupBox1 = new System.Windows.Forms.GroupBox();
+            this.chkStripify = new System.Windows.Forms.CheckBox();
+            this.cbWipeLevel = new System.Windows.Forms.CheckBox();
             this.chkAlwaysWriteFullVertexCmd23h = new System.Windows.Forms.CheckBox();
             this.lbl02 = new System.Windows.Forms.Label();
             this.txtThreshold = new System.Windows.Forms.TextBox();
@@ -58,6 +58,7 @@
             this.tbScale = new System.Windows.Forms.TextBox();
             this.cbZMirror = new System.Windows.Forms.CheckBox();
             this.ofdLoadModel = new System.Windows.Forms.OpenFileDialog();
+            this.chkKeepVertexOrderDuringStripping = new System.Windows.Forms.CheckBox();
             this.tsToolBar.SuspendLayout();
             this.ssStatusBar.SuspendLayout();
             //((System.ComponentModel.ISupportInitialize)(this.spcMainContainer)).BeginInit();
@@ -65,7 +66,6 @@
             this.spcMainContainer.Panel2.SuspendLayout();
             this.spcMainContainer.SuspendLayout();
             //((System.ComponentModel.ISupportInitialize)(this.gridColTypes)).BeginInit();
-            this.groupBox2.SuspendLayout();
             this.groupBox1.SuspendLayout();
             this.SuspendLayout();
             // 
@@ -79,7 +79,7 @@
             this.btnImport});
             this.tsToolBar.Location = new System.Drawing.Point(0, 0);
             this.tsToolBar.Name = "tsToolBar";
-            this.tsToolBar.Size = new System.Drawing.Size(753, 25);
+            this.tsToolBar.Size = new System.Drawing.Size(770, 25);
             this.tsToolBar.TabIndex = 0;
             this.tsToolBar.Text = "loluseless";
             // 
@@ -128,7 +128,7 @@
             this.slStatus});
             this.ssStatusBar.Location = new System.Drawing.Point(0, 490);
             this.ssStatusBar.Name = "ssStatusBar";
-            this.ssStatusBar.Size = new System.Drawing.Size(753, 22);
+            this.ssStatusBar.Size = new System.Drawing.Size(770, 22);
             this.ssStatusBar.TabIndex = 1;
             this.ssStatusBar.Text = "loluseless";
             // 
@@ -146,7 +146,7 @@
             this.glModelView.Location = new System.Drawing.Point(0, 0);
             this.glModelView.Margin = new System.Windows.Forms.Padding(0);
             this.glModelView.Name = "glModelView";
-            this.glModelView.Size = new System.Drawing.Size(493, 465);
+            this.glModelView.Size = new System.Drawing.Size(506, 465);
             this.glModelView.TabIndex = 2;
             this.glModelView.VSync = false;
             this.glModelView.Load += new System.EventHandler(this.glModelView_Load);
@@ -176,14 +176,14 @@
             this.spcMainContainer.Panel1.Controls.Add(this.label1);
             this.spcMainContainer.Panel1.Controls.Add(this.btnAssignTypes);
             this.spcMainContainer.Panel1.Controls.Add(this.gridColTypes);
-            this.spcMainContainer.Panel1.Controls.Add(this.groupBox2);
             this.spcMainContainer.Panel1.Controls.Add(this.groupBox1);
+            this.spcMainContainer.Panel1MinSize = 30;
             // 
             // spcMainContainer.Panel2
             // 
             this.spcMainContainer.Panel2.Controls.Add(this.glModelView);
-            this.spcMainContainer.Size = new System.Drawing.Size(753, 465);
-            this.spcMainContainer.SplitterDistance = 256;
+            this.spcMainContainer.Size = new System.Drawing.Size(770, 465);
+            this.spcMainContainer.SplitterDistance = 260;
             this.spcMainContainer.TabIndex = 3;
             // 
             // txtInGameSizePreview
@@ -192,7 +192,7 @@
                         | System.Windows.Forms.AnchorStyles.Right)));
             this.txtInGameSizePreview.Location = new System.Drawing.Point(153, 442);
             this.txtInGameSizePreview.Name = "txtInGameSizePreview";
-            this.txtInGameSizePreview.Size = new System.Drawing.Size(86, 20);
+            this.txtInGameSizePreview.Size = new System.Drawing.Size(90, 20);
             this.txtInGameSizePreview.TabIndex = 13;
             this.txtInGameSizePreview.TextChanged += new System.EventHandler(this.txtInGameSizePreview_TextChanged);
             // 
@@ -254,32 +254,13 @@
             this.gridColTypes.Size = new System.Drawing.Size(249, 133);
             this.gridColTypes.TabIndex = 8;
             // 
-            // groupBox2
-            // 
-            this.groupBox2.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left)
-                        | System.Windows.Forms.AnchorStyles.Right)));
-            this.groupBox2.Controls.Add(this.cbWipeLevel);
-            this.groupBox2.Location = new System.Drawing.Point(3, 177);
-            this.groupBox2.Name = "groupBox2";
-            this.groupBox2.Size = new System.Drawing.Size(250, 54);
-            this.groupBox2.TabIndex = 7;
-            this.groupBox2.TabStop = false;
-            this.groupBox2.Text = "Level settings";
-            // 
-            // cbWipeLevel
-            // 
-            this.cbWipeLevel.AutoSize = true;
-            this.cbWipeLevel.Location = new System.Drawing.Point(12, 23);
-            this.cbWipeLevel.Name = "cbWipeLevel";
-            this.cbWipeLevel.Size = new System.Drawing.Size(148, 17);
-            this.cbWipeLevel.TabIndex = 0;
-            this.cbWipeLevel.Text = "Wipe level upon importing";
-            this.cbWipeLevel.UseVisualStyleBackColor = true;
-            // 
             // groupBox1
             // 
             this.groupBox1.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left)
                         | System.Windows.Forms.AnchorStyles.Right)));
+            this.groupBox1.Controls.Add(this.chkKeepVertexOrderDuringStripping);
+            this.groupBox1.Controls.Add(this.chkStripify);
+            this.groupBox1.Controls.Add(this.cbWipeLevel);
             this.groupBox1.Controls.Add(this.chkAlwaysWriteFullVertexCmd23h);
             this.groupBox1.Controls.Add(this.lbl02);
             this.groupBox1.Controls.Add(this.txtThreshold);
@@ -291,21 +272,46 @@
             this.groupBox1.Controls.Add(this.cbZMirror);
             this.groupBox1.Location = new System.Drawing.Point(3, 3);
             this.groupBox1.Name = "groupBox1";
-            this.groupBox1.Size = new System.Drawing.Size(250, 168);
+            this.groupBox1.Size = new System.Drawing.Size(254, 228);
             this.groupBox1.TabIndex = 5;
             this.groupBox1.TabStop = false;
             this.groupBox1.Text = "Model settings";
+            // 
+            // chkStripify
+            // 
+            this.chkStripify.AutoSize = true;
+            this.chkStripify.Checked = true;
+            this.chkStripify.CheckState = System.Windows.Forms.CheckState.Checked;
+            this.chkStripify.Location = new System.Drawing.Point(12, 122);
+            this.chkStripify.Name = "chkStripify";
+            this.chkStripify.Size = new System.Drawing.Size(241, 17);
+            this.chkStripify.TabIndex = 12;
+            this.chkStripify.Text = "Convert to Tri Strips (Strongly Recommended)";
+            this.chkStripify.UseVisualStyleBackColor = true;
+            this.chkStripify.CheckedChanged += new System.EventHandler(this.chkStripify_CheckedChanged);
+            // 
+            // cbWipeLevel
+            // 
+            this.cbWipeLevel.AutoSize = true;
+            this.cbWipeLevel.Enabled = false;
+            this.cbWipeLevel.Location = new System.Drawing.Point(12, 205);
+            this.cbWipeLevel.Name = "cbWipeLevel";
+            this.cbWipeLevel.Size = new System.Drawing.Size(148, 17);
+            this.cbWipeLevel.TabIndex = 0;
+            this.cbWipeLevel.Text = "Wipe level upon importing";
+            this.cbWipeLevel.UseVisualStyleBackColor = true;
+            this.cbWipeLevel.Visible = false;
             // 
             // chkAlwaysWriteFullVertexCmd23h
             // 
             this.chkAlwaysWriteFullVertexCmd23h.AutoSize = true;
             this.chkAlwaysWriteFullVertexCmd23h.Checked = true;
             this.chkAlwaysWriteFullVertexCmd23h.CheckState = System.Windows.Forms.CheckState.Checked;
-            this.chkAlwaysWriteFullVertexCmd23h.Location = new System.Drawing.Point(12, 122);
+            this.chkAlwaysWriteFullVertexCmd23h.Location = new System.Drawing.Point(12, 168);
             this.chkAlwaysWriteFullVertexCmd23h.Name = "chkAlwaysWriteFullVertexCmd23h";
-            this.chkAlwaysWriteFullVertexCmd23h.Size = new System.Drawing.Size(207, 17);
+            this.chkAlwaysWriteFullVertexCmd23h.Size = new System.Drawing.Size(219, 17);
             this.chkAlwaysWriteFullVertexCmd23h.TabIndex = 11;
-            this.chkAlwaysWriteFullVertexCmd23h.Text = "Always Cmd 0x23 VTX_16 for Vertices";
+            this.chkAlwaysWriteFullVertexCmd23h.Text = "Always Write Full X,Y,Z Vertex Command";
             this.chkAlwaysWriteFullVertexCmd23h.UseVisualStyleBackColor = true;
             this.chkAlwaysWriteFullVertexCmd23h.CheckedChanged += new System.EventHandler(this.chkAlwaysWriteFullVertexCmd23h_CheckedChanged);
             // 
@@ -360,7 +366,7 @@
             // 
             this.cbSwapYZ.AutoSize = true;
             this.cbSwapYZ.Enabled = false;
-            this.cbSwapYZ.Location = new System.Drawing.Point(142, 145);
+            this.cbSwapYZ.Location = new System.Drawing.Point(142, 191);
             this.cbSwapYZ.Name = "cbSwapYZ";
             this.cbSwapYZ.Size = new System.Drawing.Size(94, 17);
             this.cbSwapYZ.TabIndex = 4;
@@ -375,7 +381,7 @@
                         | System.Windows.Forms.AnchorStyles.Right)));
             this.tbScale.Location = new System.Drawing.Point(52, 23);
             this.tbScale.Name = "tbScale";
-            this.tbScale.Size = new System.Drawing.Size(184, 20);
+            this.tbScale.Size = new System.Drawing.Size(188, 20);
             this.tbScale.TabIndex = 3;
             this.tbScale.Text = "1";
             this.tbScale.TextChanged += new System.EventHandler(this.tbScale_TextChanged);
@@ -384,7 +390,7 @@
             // 
             this.cbZMirror.AutoSize = true;
             this.cbZMirror.Enabled = false;
-            this.cbZMirror.Location = new System.Drawing.Point(12, 145);
+            this.cbZMirror.Location = new System.Drawing.Point(12, 191);
             this.cbZMirror.Name = "cbZMirror";
             this.cbZMirror.Size = new System.Drawing.Size(97, 17);
             this.cbZMirror.TabIndex = 2;
@@ -395,14 +401,24 @@
             // 
             // ofdLoadModel
             // 
-            this.ofdLoadModel.Filter = Helper.MODEL_FORMATS_FILTER;
             this.ofdLoadModel.Title = "Load model file...";
+            // 
+            // chkKeepVertexOrderDuringStripping
+            // 
+            this.chkKeepVertexOrderDuringStripping.AutoSize = true;
+            this.chkKeepVertexOrderDuringStripping.Location = new System.Drawing.Point(29, 145);
+            this.chkKeepVertexOrderDuringStripping.Name = "chkKeepVertexOrderDuringStripping";
+            this.chkKeepVertexOrderDuringStripping.Size = new System.Drawing.Size(220, 17);
+            this.chkKeepVertexOrderDuringStripping.TabIndex = 13;
+            this.chkKeepVertexOrderDuringStripping.Text = "Keep Vertex Order (Keep False if Unsure)";
+            this.chkKeepVertexOrderDuringStripping.UseVisualStyleBackColor = true;
+            this.chkKeepVertexOrderDuringStripping.CheckedChanged += new System.EventHandler(this.chkKeepVertexOrderDuringStripping_CheckedChanged);
             // 
             // ModelImporter
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(753, 512);
+            this.ClientSize = new System.Drawing.Size(770, 512);
             this.Controls.Add(this.spcMainContainer);
             this.Controls.Add(this.ssStatusBar);
             this.Controls.Add(this.tsToolBar);
@@ -421,8 +437,6 @@
             //((System.ComponentModel.ISupportInitialize)(this.spcMainContainer)).EndInit();
             this.spcMainContainer.ResumeLayout(false);
             //((System.ComponentModel.ISupportInitialize)(this.gridColTypes)).EndInit();
-            this.groupBox2.ResumeLayout(false);
-            this.groupBox2.PerformLayout();
             this.groupBox1.ResumeLayout(false);
             this.groupBox1.PerformLayout();
             this.ResumeLayout(false);
@@ -448,7 +462,6 @@
         private System.Windows.Forms.ToolStripStatusLabel slStatus;
         private System.Windows.Forms.CheckBox cbSwapYZ;
         private System.Windows.Forms.GroupBox groupBox1;
-        private System.Windows.Forms.GroupBox groupBox2;
         private System.Windows.Forms.CheckBox cbGenerateCollision;
         private System.Windows.Forms.CheckBox cbWipeLevel;
         private System.Windows.Forms.TextBox txtThreshold;
@@ -461,5 +474,7 @@
         private System.Windows.Forms.TextBox txtInGameSizePreview;
         private System.Windows.Forms.CheckBox chkInGamePreview;
         private System.Windows.Forms.CheckBox chkAlwaysWriteFullVertexCmd23h;
+        private System.Windows.Forms.CheckBox chkStripify;
+        private System.Windows.Forms.CheckBox chkKeepVertexOrderDuringStripping;
     }
 }

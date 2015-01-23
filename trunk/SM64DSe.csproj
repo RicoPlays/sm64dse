@@ -108,12 +108,19 @@
     <Compile Include="ImportExport\Loaders\InternalLoaders\BMDLoader.cs" />
     <Compile Include="ImportExport\Loaders\InternalLoaders\KCLLoader.cs" />
     <Compile Include="ImportExport\ModelBase.cs" />
+    <Compile Include="ImportExport\TriangleStripper.cs" />
     <Compile Include="ImportExport\Writers\AbstractModelWriter.cs" />
     <Compile Include="ImportExport\Writers\ExternalWriters\DAEWriter.cs" />
     <Compile Include="ImportExport\Writers\ExternalWriters\OBJWriter.cs" />
     <Compile Include="ImportExport\Writers\InternalWriters\BCAWriter.cs" />
     <Compile Include="ImportExport\Writers\InternalWriters\BMDWriter.cs" />
     <Compile Include="ImportExport\Writers\InternalWriters\KCLWriter.cs" />
+    <Compile Include="ImportImage4BPP.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="ImportImage4BPP.Designer.cs">
+      <DependentUpon>ImportImage4BPP.cs</DependentUpon>
+    </Compile>
     <Compile Include="SM64DSFormats\BMD.cs" />
     <Compile Include="CLPS_Form.cs">
       <SubType>Form</SubType>
@@ -225,6 +232,9 @@
     </EmbeddedResource>
     <EmbeddedResource Include="CLPS_Form.resx">
       <DependentUpon>CLPS_Form.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="ImportImage4BPP.resx">
+      <DependentUpon>ImportImage4BPP.cs</DependentUpon>
     </EmbeddedResource>
     <EmbeddedResource Include="KCLEditorForm.resx">
       <DependentUpon>KCLEditorForm.cs</DependentUpon>

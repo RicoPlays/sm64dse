@@ -9,7 +9,7 @@ It is 24 bytes long and laid out as such:
 Offset	Size	Desc.
 0x00	2	Number of bones to be handled (should match the number of bones in the BMD)
 0x02	2	Number of animation frames(1)
-0x04	4	Unknown, either 0 or 1
+0x04	4	Whether the animation loops, 0 - false, 1 - true
 0x08	4	Offset to scale values section
 0x0C	4	Offset to rotation values section
 0x10	4	Offset to translation values section

@@ -694,9 +694,6 @@ namespace SM64DSe
         private void ModelImporter_Load(object sender, EventArgs e)
         {
             m_LevelSettings = ((LevelEditorForm)Owner).m_LevelSettings;
-
-            // hide unimplemented shit :)
-            groupBox2.Visible = false;
         }
 
         private void cbSwapYZ_CheckedChanged(object sender, EventArgs e)
@@ -759,6 +756,21 @@ namespace SM64DSe
         private void chkAlwaysWriteFullVertexCmd23h_CheckedChanged(object sender, EventArgs e)
         {
             m_ExtraOptions.m_AlwaysWriteFullVertexCmd23h = chkAlwaysWriteFullVertexCmd23h.Checked;
+        }
+
+        private void chkStripify_CheckedChanged(object sender, EventArgs e)
+        {
+            m_ExtraOptions.m_ConvertToTriangleStrips = chkStripify.Checked;
+
+            if (chkStripify.Checked)
+                chkKeepVertexOrderDuringStripping.Enabled = true;
+            else
+                chkKeepVertexOrderDuringStripping.Enabled = false;
+        }
+
+        private void chkKeepVertexOrderDuringStripping_CheckedChanged(object sender, EventArgs e)
+        {
+            m_ExtraOptions.m_KeepVertexOrderDuringStripping = chkKeepVertexOrderDuringStripping.Checked;
         }
     }
 }

@@ -440,6 +440,17 @@ namespace SM64DSe.ImportExport
 
                 return true;
             }
+
+            public override int GetHashCode()
+            {
+                int hash = 13;
+                hash = (hash * 7) + m_Position.GetHashCode();
+                hash = (hash * 7) + ((m_TextureCoordinate != null) ? m_TextureCoordinate.GetHashCode() : -1);
+                hash = (hash * 7) + ((m_Normal != null) ? m_TextureCoordinate.GetHashCode() : -1);
+                hash = (hash * 7) + m_VertexColour.GetHashCode();
+                hash = (hash * 7) + m_VertexBoneID * 397;
+                return hash;
+            }
         }
 
         public static readonly VertexDef EMPTY_VERTEX = new VertexDef(Vector3.Zero, null, null, Color.White, 0);
