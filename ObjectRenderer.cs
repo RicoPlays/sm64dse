@@ -214,8 +214,9 @@ namespace SM64DSe
                 case 178: ret = new NormalBMDRenderer("data/special_obj/km1_deru/km1_deru.bmd", 0.008f); break;
                 //case 179: ret = new NormalBMDRenderer("data/special_obj/ki_fune/ki_fune_down_a.bmd", 0.008f); break;
                 case 180: ret = new NormalBMDRenderer("data/special_obj/ki_fune/ki_fune_up.bmd", 0.008f); break;
-                //case 181: ret = new NormalBMDRenderer("data/special_obj/ki_hasira/ki_hasira.bmd", 0.008f); break;
-                // 182 -- KI_HASIRA_DAI -- TODO
+                case 181: ret = new DoubleRenderer("data/special_obj/ki_hasira/ki_hasira_dai.bmd", 
+                    "data/special_obj/ki_hasira/ki_hasira.bmd", Vector3.Zero, new Vector3(0f, 12.5f, 0f), 0.008f); break;
+                case 182: ret = new NormalBMDRenderer("data/special_obj/ki_hasira/ki_hasira_dai.bmd", 0.008f); break;
                 case 183: ret = new NormalBMDRenderer("data/special_obj/ki_ita/ki_ita.bmd", 0.008f); break;
                 case 184: ret = new NormalBMDRenderer("data/special_obj/ki_iwa/ki_iwa.bmd", 0.008f); break;
                 case 185: ret = new NormalBMDRenderer("data/special_obj/ks_mizu/ks_mizu.bmd", 0.008f); break;
@@ -942,15 +943,21 @@ namespace SM64DSe
     class DoubleRenderer : ObjectRenderer
     {
         protected NormalBMDRenderer m_PrimaryRenderer, m_SecondaryRenderer;
+        Vector3 m_OffsetFirst, m_OffsetSecond;
         float scale;
 
-        public DoubleRenderer(String first, String second, float scale)
+        public DoubleRenderer(String first, String second, Vector3 offsetFirst, Vector3 offsetSecond, float scale)
         {
             m_PrimaryRenderer = new NormalBMDRenderer(first, 1f);
             m_SecondaryRenderer = new NormalBMDRenderer(second, 1f);
+            m_OffsetFirst = offsetFirst;
+            m_OffsetSecond = offsetSecond;
             this.scale = scale;
             this.m_Filename = first + ";" + second;
         }
+
+        public DoubleRenderer(String first, String second, float scale) :
+            this(first, second, Vector3.Zero, Vector3.Zero, scale) { }
 
         public override void Release()
         {
@@ -966,7 +973,9 @@ namespace SM64DSe
         public override void Render(RenderMode mode)
         {
             GL.Scale(scale, scale, scale);
+            GL.Translate(m_OffsetFirst.X, m_OffsetFirst.Y, m_OffsetFirst.Z);
             m_PrimaryRenderer.Render(mode);
+            GL.Translate(m_OffsetSecond.X, m_OffsetSecond.Y, m_OffsetSecond.Z);
             m_SecondaryRenderer.Render(mode);
         }
     }

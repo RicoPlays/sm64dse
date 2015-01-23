@@ -80,7 +80,7 @@ namespace SM64DSe.ImportExport.Writers.InternalWriters
 
             bca.Write16(0x00, (ushort)numAnimations);// Number of bones to be handled (should match the number of bones in the BMD)
             bca.Write16(0x02, (ushort)numFrames);// Number of animation frames
-            bca.Write32(0x04, 0);// Unknown, either 0 or 1
+            bca.Write32(0x04, 1);// Whether the animation loops, 0 - false, 1 - true
             bca.Write32(0x08, scaleValuesOffset);// Offset to scale values section
             bca.Write32(0x0C, rotationValuesOffset);// Offset to rotation values section
             bca.Write32(0x10, translationValuesOffset);// Offset to translation values section

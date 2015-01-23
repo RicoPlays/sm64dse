@@ -200,16 +200,22 @@ namespace SM64DSe.ImportExport
 
         public struct BMDExtraImportOptions
         {
+            public bool m_ConvertToTriangleStrips;
+            public bool m_KeepVertexOrderDuringStripping;
             public bool m_AlwaysWriteFullVertexCmd23h;
             //public bool m_SwapYZ;
             //public bool m_ZMirror;
 
-            public BMDExtraImportOptions(bool alwaysWriteFullVertexCmd23h)
+            public BMDExtraImportOptions(bool convertToTriangleStrips, 
+                                         bool keepVertexOrderDuringStripping,
+                                         bool alwaysWriteFullVertexCmd23h)
             {
+                m_ConvertToTriangleStrips = convertToTriangleStrips;
+                m_KeepVertexOrderDuringStripping = keepVertexOrderDuringStripping;
                 m_AlwaysWriteFullVertexCmd23h = alwaysWriteFullVertexCmd23h;
             }
 
-            public static BMDExtraImportOptions DEFAULT = new BMDExtraImportOptions(true);
+            public static BMDExtraImportOptions DEFAULT = new BMDExtraImportOptions(true, false, true);
         }
 
     }

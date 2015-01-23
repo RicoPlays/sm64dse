@@ -537,6 +537,8 @@ namespace SM64DSe.ImportExport.Writers.InternalWriters
 
         public NitroFile m_ModelFile;
 
+        protected bool m_ConvertToTriangleStrips = true;
+        protected bool m_KeepVertexOrderDuringStripping = false;
         protected bool m_AlwaysWriteFullVertexCmd23h = true;
 
         protected bool m_ZMirror = false;
@@ -549,7 +551,14 @@ namespace SM64DSe.ImportExport.Writers.InternalWriters
             base(model, modelFile.m_Name)
         {
             m_ModelFile = modelFile;
+            m_ConvertToTriangleStrips = extraOptions.m_ConvertToTriangleStrips;
+            m_KeepVertexOrderDuringStripping = extraOptions.m_KeepVertexOrderDuringStripping;
             m_AlwaysWriteFullVertexCmd23h = extraOptions.m_AlwaysWriteFullVertexCmd23h;
+
+            if (m_ConvertToTriangleStrips)
+            {
+                Stripify();
+            }
         }
 
         public override void WriteModel(bool save = true)
@@ -1087,6 +1096,44 @@ namespace SM64DSe.ImportExport.Writers.InternalWriters
 
             if (save)
                 bmd.SaveChanges();
+        }
+
+        protected void Stripify()
+        {
+            foreach (ModelBase.BoneDef bone in m_Model.m_BoneTree)
+            {
+                foreach (ModelBase.GeometryDef geometry in bone.m_Geometries.Values)
+                {
+                    foreach (ModelBase.PolyListDef polyList in geometry.m_PolyLists.Values)
+                    {
+                        List<int> removeFLs = new List<int>();
+                        List<ModelBase.FaceListDef> replacedWithTStrips = new List<ModelBase.FaceListDef>();
+                        for (int fl = 0; fl < polyList.m_FaceLists.Count; fl++)
+                        {
+                            ModelBase.FaceListDef faceList = polyList.m_FaceLists[fl];
+                            if (faceList.m_Type != ModelBase.PolyListType.QuadrilateralStrip &&
+                                faceList.m_Type != ModelBase.PolyListType.TriangleStrip)
+                            {
+                                try
+                                {
+                                    TriangleStripper tStripper = new TriangleStripper(faceList);
+                                    List<ModelBase.FaceListDef> tStrips = tStripper.Stripify(m_KeepVertexOrderDuringStripping);
+                                    removeFLs.Add(fl);
+                                    replacedWithTStrips.AddRange(tStrips);
+                                }
+                                catch (ArgumentException notTriangles) { continue; }
+                            }
+                        }
+
+                        for (int i = removeFLs.Count - 1; i >= 0; i--)
+                        {
+                            polyList.m_FaceLists.RemoveAt(i);
+                        }
+
+                        polyList.m_FaceLists.AddRange(replacedWithTStrips);
+                    }
+                }
+            }
         }
 
         private void AddTriangleStripToDisplayList(GXDisplayListPacker dlpacker, ref int lastColourARGB, ref Vector2 tcscale,

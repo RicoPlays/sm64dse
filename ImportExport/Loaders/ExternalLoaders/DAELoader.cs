@@ -8,7 +8,21 @@
  * Animation support is currently limited to models whose transformations are defined using separate scale, rotation and 
  * translation components. Models whose transformations are defined using a transformation matrix are only supported for 
  * joints with a depth of 2 (root and its child nodes only).
- */ 
+ * 
+ * The following SM64DSe-specific <extra> tags are supported within an <effect> element:
+ *	<extra>
+ *		<technique profile="SM64DSe">
+ *			<lights>1 0 0 0</lights>
+ *			<environment_mapping>1</environment_mapping>
+ *			<double_sided>0</double_sided>
+ *			<tex_tiling>repeat flip</tex_tiling>
+ *			<tex_scale>1.000000 1.000000</tex_scale>
+ *			<tex_rotate>0.000000</tex_rotate>
+ *			<tex_translate>0.000000 0.000000</tex_translate>
+ *		</technique>
+ *	</extra>
+ * For accepted values, see IMD loader.
+ */
 
 using System;
 using System.Collections.Generic;
@@ -190,26 +204,82 @@ namespace SM64DSe.ImportExport.Loaders.ExternalLoaders
 
                 if (profileCommon.extra != null)
                 {
-                    foreach (extra ext in profileCommon.extra)
-                    {
-                        if (ext.technique == null) continue;
-                        foreach (technique tnq in ext.technique)
-                        {
-                            if (tnq.Any == null) continue;
-                            foreach (XmlElement elem in tnq.Any)
-                            {
-                                if (elem.LocalName.ToLowerInvariant().Equals("double_sided"))
-                                {
-                                    if (elem.InnerText.Equals("1"))
-                                        matDef.m_PolygonDrawingFace = ModelBase.MaterialDef.PolygonDrawingFace.FrontAndBack;
-                                    break;
-                                }
-                            }
-                        }
-                    }
+                    ReadEffectExtra(matDef, profileCommon.extra);
                 }
 
                 break;
+            }
+
+            if (matEffect.extra != null)
+            {
+                ReadEffectExtra(matDef, matEffect.extra);
+            }
+        }
+
+        private static void ReadEffectExtra(ModelBase.MaterialDef matDef, extra[] extras)
+        {
+            foreach (extra ext in extras)
+            {
+                if (ext.technique == null) continue;
+                foreach (technique tnq in ext.technique)
+                {
+                    if (tnq.Any == null) continue;
+                    foreach (XmlElement elem in tnq.Any)
+                    {
+                        if (elem.LocalName.ToLowerInvariant().Equals("lights"))
+                        {
+                            bool[] lights = new bool[4];
+                            byte[] vals = Array.ConvertAll(
+                                elem.InnerText.Split(new string[] { " " }, StringSplitOptions.RemoveEmptyEntries), Convert.ToByte);
+                            for (int i = 0; i < 4; i++)
+                                lights[i] = (vals[i] == 1) ? true : false;
+
+                            matDef.m_Lights = lights;
+                        }
+                        else if (elem.LocalName.ToLowerInvariant().Equals("environment_mapping"))
+                        {
+                            if (elem.InnerText.Equals("1"))
+                                matDef.m_TexGenMode = ModelBase.TexGenMode.Normal;
+                        }
+                        else if (elem.LocalName.ToLowerInvariant().Equals("double_sided"))
+                        {
+                            if (elem.InnerText.Equals("1"))
+                                matDef.m_PolygonDrawingFace = ModelBase.MaterialDef.PolygonDrawingFace.FrontAndBack;
+                        }
+                        else if (elem.LocalName.ToLowerInvariant().Equals("tex_tiling"))
+                        {
+                            string[] tmpSplit = elem.InnerText.Split(new string[] { " " }, StringSplitOptions.RemoveEmptyEntries);
+                            for (int i = 0; i < 2; i++)
+                            {
+                                switch (tmpSplit[i])
+                                {
+                                    case "clamp": matDef.m_TexTiling[i] = ModelBase.MaterialDef.TexTiling.Clamp; break;
+                                    case "repeat": matDef.m_TexTiling[i] = ModelBase.MaterialDef.TexTiling.Repeat; break;
+                                    case "flip": matDef.m_TexTiling[i] = ModelBase.MaterialDef.TexTiling.Flip; break;
+                                    default: goto case "repeat";
+                                }
+                            }
+                        }
+                        else if (elem.LocalName.ToLowerInvariant().Equals("tex_scale"))
+                        {
+                            float[] tex_scale = Array.ConvertAll(
+                                elem.InnerText.Split(new string[] { " " }, StringSplitOptions.RemoveEmptyEntries),
+                                Convert.ToSingle);
+                            matDef.m_TextureScale = new Vector2(tex_scale[0], tex_scale[1]);
+                        }
+                        else if (elem.LocalName.ToLowerInvariant().Equals("tex_rotation"))
+                        {
+                            matDef.m_TextureRotation = float.Parse(elem.InnerText, Helper.USA);
+                        }
+                        else if (elem.LocalName.ToLowerInvariant().Equals("tex_translation"))
+                        {
+                            float[] tex_translation = Array.ConvertAll(
+                                elem.InnerText.Split(new string[] { " " }, StringSplitOptions.RemoveEmptyEntries),
+                                Convert.ToSingle);
+                            matDef.m_TextureTranslation = new Vector2(tex_translation[0], tex_translation[1]);
+                        }
+                    }
+                }
             }
         }
 
@@ -910,7 +980,18 @@ namespace SM64DSe.ImportExport.Loaders.ExternalLoaders
                                     if (texCoordOffset != -1 && m_Model.m_Materials[material].m_TextureDefID != null)
                                     {
                                         tmp = GetValueFromFloatArraySource(sources[texCoordSource], pArr[pIndex + (ulong)texCoordOffset]);
-                                        vert.m_TextureCoordinate = new Vector2(tmp[0], tmp[1]);
+                                        if (m_Model.m_Materials[material].m_TexGenMode != ModelBase.TexGenMode.Normal)
+                                        {
+                                            vert.m_TextureCoordinate = new Vector2(tmp[0], tmp[1]);
+                                        }
+                                        else
+                                        {
+                                            vert.m_Normal = new Vector3(
+                                                tmp[0] * m_Model.m_Textures[m_Model.m_Materials[material].m_TextureDefID].GetWidth(),
+                                                tmp[1] * m_Model.m_Textures[m_Model.m_Materials[material].m_TextureDefID].GetHeight(), 
+                                                0.0f);
+                                            vert.m_TextureCoordinate = null;
+                                        }
                                     }
                                     else
                                     {
